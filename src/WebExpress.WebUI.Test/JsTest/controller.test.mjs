@@ -130,6 +130,78 @@ test("an intentional detach keeps the instance until the element is finally remo
     assert.equal(wx.Controller.instanceMap.has(element), false);
 });
 
+test("a stale insertion record does not strip the mark from a held element", () => {
+    const { wx, document, createElement } = loadWebUi();
+    registerProbe(wx, "wx-probe");
+
+    const host = createElement("div");
+    const element = createElement("div");
+    element.classList.add("wx-probe");
+    host.appendChild(element);
+    document.body.appendChild(host);
+    wx.Controller.createInstances(host);
+    const instance = wx.Controller.instanceMap.get(element);
+
+    // the shape a parsed page produces: the batch still carries the insertion of
+    // the element, and by the time it is processed the control that was built
+    // from the same batch has taken the element out again to hold on to it
+    instance._detachElement(element);
+    wx.Controller.handleMutations([childListMutation({ added: [element] })]);
+    assert.equal(element._wxDetached, true, "an insertion that no longer holds leaves the mark alone");
+
+    wx.Controller.handleMutations([childListMutation({ removed: [element] })]);
+    assert.equal(instance.destroyed, 0, "so the element the control holds survives the batch");
+    assert.equal(wx.Controller.instanceMap.has(element), true);
+});
+
+test("a detached element parked inside a removed container keeps its instance", () => {
+    const { wx, document, createElement } = loadWebUi();
+    registerProbe(wx, "wx-probe");
+
+    const host = createElement("div");
+    const element = createElement("div");
+    element.classList.add("wx-probe");
+    host.appendChild(element);
+    document.body.appendChild(host);
+    wx.Controller.createInstances(host);
+    const instance = wx.Controller.instanceMap.get(element);
+
+    // the shape the smart edit produces: the held element is flagged, then put
+    // into a container that the control empties again when the edit ends. the
+    // container is what the observer reports as removed, so a teardown that
+    // walked into it unconditionally destroyed the element the control still holds
+    instance._detachElement(element);
+    const container = createElement("form");
+    container.appendChild(element);
+    host.appendChild(container);
+    wx.Controller.handleMutations([childListMutation({ added: [container] })]);
+
+    host.removeChild(container);
+    wx.Controller.handleMutations([childListMutation({ removed: [container] })]);
+
+    assert.equal(instance.destroyed, 0, "the element the control still holds is not destroyed");
+    assert.equal(wx.Controller.instanceMap.has(element), true, "and its instance stays reachable");
+});
+
+test("a plain descendant of a removed container is still destroyed", () => {
+    const { wx, document, createElement } = loadWebUi();
+    registerProbe(wx, "wx-probe");
+
+    const container = createElement("div");
+    const element = createElement("div");
+    element.classList.add("wx-probe");
+    container.appendChild(element);
+    document.body.appendChild(container);
+    wx.Controller.createInstances(container);
+    const instance = wx.Controller.instanceMap.get(element);
+
+    document.body.removeChild(container);
+    wx.Controller.handleMutations([childListMutation({ removed: [container] })]);
+
+    assert.equal(instance.destroyed, 1, "an ordinary descendant still gets its teardown");
+    assert.equal(wx.Controller.instanceMap.has(element), false);
+});
+
 test("element cleanups registered by binds run on removal", () => {
     const { wx, createElement } = loadWebUi();
 

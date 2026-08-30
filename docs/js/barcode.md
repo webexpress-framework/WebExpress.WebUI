@@ -122,7 +122,7 @@ The preview is what makes the pairing worth having. A barcode is not human reada
 
 The text field itself carries the `name`, so the value reaches a form submit without a hidden field of its own.
 
-**In place** - wrap the input in a `SmartEditCtrl` and the read view becomes the symbol, swapping to the field on double click or through the pencil:
+**In place** - wrap the input in a `SmartEditCtrl` and the read view becomes the symbol, swapping to the field on double click or through the pen:
 
 ```html
 <div class="wx-smart-edit" data-object-name="article" data-form-action="/api/v1/articles/7" data-form-method="PUT">

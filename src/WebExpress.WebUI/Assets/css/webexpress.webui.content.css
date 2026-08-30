@@ -1,0 +1,105 @@
+/*
+   Reading view of editor content. The editor paints its own working surface
+   (frames, headers, handles); what is left after the conversion is a plain
+   document, so the rules below only give that document reading typography.
+*/
+
+.wx-content {
+    color: var(--wx-body-color);
+    line-height: 1.6;
+    overflow-wrap: break-word;
+}
+
+.wx-content > *:first-child {
+    margin-top: 0;
+}
+
+.wx-content > *:last-child {
+    margin-bottom: 0;
+}
+
+.wx-content p {
+    margin-bottom: 0.75rem;
+}
+
+.wx-content h1,
+.wx-content h2,
+.wx-content h3,
+.wx-content h4,
+.wx-content h5,
+.wx-content h6 {
+    margin-top: 1.25rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.25;
+}
+
+.wx-content ul,
+.wx-content ol {
+    margin-bottom: 0.75rem;
+    padding-left: 1.5rem;
+}
+
+.wx-content blockquote {
+    margin: 0 0 0.75rem;
+    padding: 0.25rem 0 0.25rem 1rem;
+    border-left: 3px solid var(--wx-border-color);
+    color: var(--wx-secondary-color);
+}
+
+.wx-content pre {
+    padding: 0.75rem;
+    border-radius: 4px;
+    background-color: var(--wx-secondary-bg);
+    overflow-x: auto;
+}
+
+.wx-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.wx-content hr {
+    margin: 1rem 0;
+}
+
+/* the table keeps the column widths the author sized, so it may exceed the
+   surrounding column and has to scroll rather than push the page wider */
+.wx-content-table {
+    width: 100%;
+    margin-bottom: 0.75rem;
+}
+
+/* a block add-on: what it renders, without the frame that let it be moved and
+   configured */
+.wx-content-addon {
+    margin-bottom: 0.75rem;
+}
+
+.wx-content-inline {
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 2px;
+}
+
+/*
+   The editor stylesheet hides instruction texts everywhere outside the editor
+   content, so a reading view that was asked to keep them has to bring them back
+   - otherwise the node survives the conversion and is still invisible. They keep
+   the look they have in the editor, because they are still a note to the author.
+*/
+.wx-content .wx-editor-instruction {
+    display: inline-block;
+    background-color: var(--wx-warning-bg-subtle, #fff3cd);
+    color: var(--wx-warning-text-emphasis, #664d03);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin: 0 4px;
+    font-size: 0.85em;
+    border: 1px solid var(--wx-warning-border-subtle, #ffe69c);
+}
+
+/* the stand-in for an unset value, shown only when the host named one */
+.wx-content-placeholder {
+    color: var(--wx-secondary-color);
+    font-style: italic;
+}

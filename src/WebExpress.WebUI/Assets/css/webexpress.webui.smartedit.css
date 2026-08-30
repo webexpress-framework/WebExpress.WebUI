@@ -13,7 +13,7 @@
 .wx-smart-edit:hover {
 }
 
-/* pencil icon for inline editing */
+/* the edit affordance; the class keeps the historic name other modules style */
 .wx-smart-edit .pencil {
     position: absolute;
     right: 1em;

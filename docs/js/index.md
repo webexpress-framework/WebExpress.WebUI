@@ -19,6 +19,7 @@ This section documents the JavaScript UI controllers and components of `WebExpre
 - [Chart](chart.md)
 - [Code](code.md)
 - [Color](color.md)
+- [Content](content.md)
 - [Date](date.md)
 - [Dropdown](dropdown.md)
 - [Editor](editor.md)

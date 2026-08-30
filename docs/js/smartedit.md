@@ -2,7 +2,7 @@
 
 # SmartEditCtrl
 
-The `SmartEditCtrl` is a versatile control for in-line editing of values directly within HTML elements. It extends the functionality of conventional display elements with the ability to edit these values comfortably and without changing the editing context. When hovering over a target element with the mouse, a pencil icon appears to the right of the content, which serves as an edit button. A click on the pencil opens an editor form at that exact position, allowing the values to be edited. The input can either be accepted and saved or canceled. The choice of editor is flexible and can be customized, allowing for the use of simple text fields or specialized components like a code editor.
+The `SmartEditCtrl` is a versatile control for in-line editing of values directly within HTML elements. It extends the functionality of conventional display elements with the ability to edit these values comfortably and without changing the editing context. When hovering over a target element with the mouse, a pen icon appears to the right of the content, which serves as an edit button. A click on the pen opens an editor form at that exact position, allowing the values to be edited. The input can either be accepted and saved or canceled. The choice of editor is flexible and can be customized, allowing for the use of simple text fields or specialized components like a code editor.
 
 ```
    ┌──────────────────────────────────────────┐
@@ -22,16 +22,16 @@ Configuration is done declaratively via `data-*` attributes on the HTML element.
 
 ### Empty Values
 
-An empty value would leave an empty read view: nothing to hover, nothing to click, and therefore no way to reach the editor — on exactly the values that most need one. The read view falls back to the placeholder instead, shown muted (`wx-smart-edit-placeholder`), which both names the field and gives the pencil an area to appear in. A control whose editor carries no placeholder and whose host declares none keeps the empty read view it always had.
+An empty value would leave an empty read view: nothing to hover, nothing to click, and therefore no way to reach the editor — on exactly the values that most need one. The read view falls back to the placeholder instead, shown muted (`wx-smart-edit-placeholder`), which both names the field and gives the pen an area to appear in. A control whose editor carries no placeholder and whose host declares none keeps the empty read view it always had.
 
-Note that the pencil is pinned to the right edge of the control's own box (`position: absolute; right: 1em`). A host that lets the box shrink to the width of its text therefore gets the pencil inside the sentence rather than at the end of the column; give the box the width of the space it should own.
+Note that the pen is pinned to the right edge of the control's own box (`position: absolute; right: 1em`). A host that lets the box shrink to the width of its text therefore gets the pen inside the sentence rather than at the end of the column; give the box the width of the space it should own.
 
 ### Functionality
 
 The control operates autonomously and manages the entire editing workflow:
 
-- **Dynamic DOM Manipulation**: Upon initialization, the target element is equipped with mouse events, so the pencil icon is shown on mouseover and removed on mouseout. A double-click also initiates editing.
-- **Editor Integration**: After clicking the pencil, the original display content is temporarily replaced by a form containing the editor and control buttons (Save, Cancel). The editor component is the first child element of the `wx-webui-smart-edit` container, allowing for flexible integration of different editor types.
+- **Dynamic DOM Manipulation**: Upon initialization, the target element is equipped with mouse events, so the pen icon is shown on mouseover and removed on mouseout. A double-click also initiates editing.
+- **Editor Integration**: After clicking the pen, the original display content is temporarily replaced by a form containing the editor and control buttons (Save, Cancel). The editor component is the first child element of the `wx-webui-smart-edit` container, allowing for flexible integration of different editor types.
 - **State Management and Events**: During editing, the element is protected by the internal reference `_activeEdit`, ensuring that only one edit can be active at a time. After editing is complete—whether by saving or canceling—the original display is restored, and corresponding events are dispatched.
 - **Application Integration**: Changes are communicated to the application via a `fetch` request to the configured endpoint. The control dispatches the following global custom events on the `document`:
     - `webexpress.webui.Event.START_INLINE_EDIT_EVENT`: Fired when editing begins.
@@ -105,5 +105,9 @@ To use the control, wrap your editor element within a container and assign it th
     </div>
 </div>
 ```
+
+## Read view of an editor
+
+When the editor is a WYSIWYG [editor](editor.md), the read view is not the raw stored value - that value is the editor's working surface, with add-on frames, table column resizers and the guard paragraphs around non-editable blocks. SmartEdit builds a [ContentCtrl](content.md) for it instead, which converts the value into the document it describes. The SmartEdit placeholder is passed through, so an unset value still names the field and still offers the area the pen appears over.
 
 This control provides an efficient, user-friendly inline editing experience in web applications.

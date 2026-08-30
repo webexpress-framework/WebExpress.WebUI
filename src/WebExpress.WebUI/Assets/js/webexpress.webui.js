@@ -207,7 +207,17 @@ webexpress.webui.Controller = new class {
             // handle added nodes
             for (const node of mutation.addedNodes) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
-                    delete node._wxDetached;
+                    // a record describes the dom as it was, not as it is: while the
+                    // page is parsed, the batch still carries the insertion of an
+                    // element that a control has since detached to hold on to (the
+                    // smart edit takes its editor out of the host it was parsed
+                    // into). clearing the mark on that stale record would strip the
+                    // protection from an element a control still owns, and the next
+                    // batch would destroy it. only a node that is connected now was
+                    // really re-attached.
+                    if (node.isConnected) {
+                        delete node._wxDetached;
+                    }
                     this.createInstances(node);
                     // quickfilter
                     node.querySelectorAll?.("[data-wx-primary-action='filter']").forEach(el => {
@@ -283,7 +293,11 @@ webexpress.webui.Controller = new class {
      * which gives every subscription, timer and in-flight request a
      * deterministic teardown. An element that is still connected at the time
      * the mutation batch is processed was moved rather than removed, for
-     * example through a temporary detach, and is left untouched.
+     * example through a temporary detach, and is left untouched. The same
+     * applies to an intentionally detached element nested in the removed
+     * subtree: a control that parks such an element inside a container it later
+     * clears (the smart edit puts its editor into a form and empties the host
+     * again when the edit ends) still holds it and will re-attach it.
      * @param {Element} element - The DOM element whose instances should be removed.
      */
     removeInstances(element) {
@@ -315,9 +329,19 @@ webexpress.webui.Controller = new class {
             }
         };
 
+        // walked by hand rather than through querySelectorAll, because a
+        // detached branch has to be skipped as a whole: its content belongs to
+        // the control that holds it, not to the subtree being torn down
+        const destroySubtree = (el) => {
+            if (el._wxDetached) {
+                return;
+            }
+            destroyInstance(el);
+            Array.from(el.children).forEach(destroySubtree);
+        };
+
         destroyInstance(element);
-        // destroy instances for all descendants
-        element.querySelectorAll('*').forEach(destroyInstance);
+        Array.from(element.children).forEach(destroySubtree);
     }
 
     /**

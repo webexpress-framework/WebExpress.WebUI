@@ -1,7 +1,7 @@
 /**
  * SmartEditCtrl allows inline editing of the content of a wrapper element.
- * On mouseover, a pencil icon appears next to the content.
- * When the pencil is clicked, an editor form is displayed to change the value.
+ * On mouseover, a pen icon appears next to the content.
+ * When the pen is clicked, an editor form is displayed to change the value.
  * The following events are triggered:
  * - webexpress.webui.Event.START_INLINE_EDIT_EVENT: triggered when editing starts.
  * - webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT: triggered when a value is saved.
@@ -77,7 +77,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Shows the pencil icon on hover.
+     * Shows the edit icon on hover.
      * @param {HTMLElement} element target element
      */
     _showEditIcon(element) {
@@ -86,7 +86,10 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         }
         const pencil = document.createElement("button");
         const icon = document.createElement("i");
-        icon.className = this._iconClass("pencil");
+        // "pen" is the inline edit affordance everywhere else in the framework
+        // (dashboard, kanban, sidebar, graph editor). the button keeps its
+        // "pencil" class, which other modules style and test against
+        icon.className = this._iconClass("pen");
         icon.title = this._i18n("webexpress.webui:edit", "Edit");
         pencil.classList.add("pencil");
         pencil.appendChild(icon);
@@ -98,7 +101,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Hides the pencil icon.
+     * Hides the edit icon.
      * @param {HTMLElement} element target element
      */
     _hideEditIcon(element) {
@@ -505,9 +508,16 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             light.value = value;
             return container;
         } else if (this._isCtrl(ctrl, "EditorCtrl")) {
-            const span = document.createElement("span");
-            span.innerHTML = value ?? "";
-            return span;
+            // the editor stores its working surface - add-on frames, table column
+            // resizers, the guard paragraphs around non-editables - so the raw value
+            // is not what a reader should see; the content control converts it
+            const container = document.createElement("div");
+            if (this._placeholder) {
+                container.setAttribute("data-placeholder", this._placeholder);
+            }
+            const content = new webexpress.webui.ContentCtrl(container);
+            content.value = value ?? "";
+            return container;
         } else if (this._editor.tagName === "SELECT") {
             const ids = Array.isArray(value) ? value : String(value || "").split(";");
             const labels = ids.map((id) => {
@@ -525,7 +535,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Builds the plain text read view, falling back to the placeholder when the
      * value is empty, so an unset value still names the field and still offers
-     * the area the pencil appears over.
+     * the area the pen appears over.
      * @param {string|any} value value to display
      * @returns {HTMLElement} read-only view node
      */

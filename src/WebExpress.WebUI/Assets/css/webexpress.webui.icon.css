@@ -2090,6 +2090,11 @@
     mask-image: url("../icons/control-color.svg");
 }
 
+.wx-icon-light-control-content {
+    -webkit-mask-image: url("../icons/control-content.svg");
+    mask-image: url("../icons/control-content.svg");
+}
+
 .wx-icon-light-control-dashboard {
     -webkit-mask-image: url("../icons/control-dashboard.svg");
     mask-image: url("../icons/control-dashboard.svg");

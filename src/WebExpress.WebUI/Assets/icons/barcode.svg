@@ -3,10 +3,10 @@
  <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
   <path d="m2.6 4.4v12.2"/>
   <path d="m5 4.4v12.2"/>
-  <path d="m7.4 4.4v12.2"/>
+  <path d="m7.4 7.0669v9.6631" stroke-width="1.1125"/>
   <path d="m10.5 4.4v12.2"/>
   <path d="m13 4.4v12.2"/>
-  <path d="m15.6 4.4v12.2"/>
+  <path d="m15.6 6.9266v9.7966" stroke-width="1.1201"/>
   <path d="m18.4 4.4v12.2"/>
  </g>
 </svg>

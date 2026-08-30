@@ -569,8 +569,10 @@ webexpress.webui.TableTemplates.register("editor", (val, table, row, cell, name,
         webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
         new webexpress.webui.SmartEditCtrl(container);
     } else {
-        // read-only
-        container.innerHTML = val;
+        // the stored value is the editor's working surface, so the cell shows the
+        // reading view of it instead of the add-on frames and guard paragraphs
+        const ctrl = new webexpress.webui.ContentCtrl(container);
+        ctrl.value = val;
     }
 
     return container;

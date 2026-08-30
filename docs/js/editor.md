@@ -71,6 +71,16 @@ The toolbar provides a format painter that transfers the inline formatting of on
 
 The editor provides a tool to insert instruction texts (Anweisungstexte) for authors via a toolbar button. Clicking the button opens a prompt asking for the text. The entered text is inserted into the editor as a highly visible, distinct block. This block is read-only (`contenteditable="false"`) to prevent accidental editing of the structure. Outside the editor context, the instruction text is hidden via CSS, making it completely invisible on the published page.
 
+## Reading view
+
+The value the editor stores is its whole working surface, not a document: add-on frames keep the header that names and configures them, tables keep their column resizers, and non-editable blocks are fenced by the empty paragraphs the caret needs. To publish that value, hand it to the [content control](content.md), which strips the editing scaffolding and renders the document itself. It is the same view SmartEdit and the `editor` cell template show when the editor is not active.
+
+```javascript
+editorElement.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, (e) => {
+    preview.value = e.detail.value;   // preview is a ContentCtrl
+});
+```
+
 ## Mentions API
 
 When `data-mention-uri` is set, pressing `@` opens a search dropdown that calls the configured endpoint.
