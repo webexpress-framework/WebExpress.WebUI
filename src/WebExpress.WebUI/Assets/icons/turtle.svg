@@ -1,14 +1,22 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
- <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
-  <path d="M2.8 13.4A7.7 7.7 0 0 1 18.2 13.4"/>
-  <path d="M2.8 13.4L18.2 13.4"/>
-  <path d="M6.4 12.8C6.8 10.2 8.2 8.4 10.5 7.6"/>
-  <path d="M14.6 12.8C14.2 10.2 12.8 8.4 10.5 7.6"/>
-  <path d="M18.2 13.4C19.8 12.8 20.2 11 19 9.8C17.8 8.6 15.8 9.4 15.6 11"/>
-  <path d="M4.4 13.4L3.2 16.8"/>
-  <path d="M8.4 13.4L7.8 17"/>
-  <path d="M13 13.4L13.6 17"/>
-  <path d="M18.2 10.8h.01"/>
+ <g transform="matrix(.81689 0 0 .81689 2.5294 2.4967)" stroke="#000" stroke-width="1.5302">
+  <circle cx="7.3024" cy="3.4394" r=".014798"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+   <path d="m7.2554 3.4394 0.054569-1.066c0.5225-2.3653 2.1856-2.3385 2.3219-2.338 0.37375 0.0011525 1.8865 0.18055 2.3907 2.5408l0.07722 0.93377" style="paint-order:stroke fill markers"/>
+   <path d="m2.364 8.8011s-0.45648-0.48237-0.62645-1.131c-0.13766-0.52532-0.022655-1.1921 0.16356-1.5443 0.17639-0.33363 0.61123-0.8855 1.1079-1.0584 0.67502-0.23498 1.4244-0.028922 1.4244-0.028922" style="paint-order:stroke fill markers"/>
+   <path d="m15.059 5.1918s0.65504-0.10944 1.2881 0.11166c0.51269 0.17906 1.0017 0.6467 1.1899 0.99781 0.17833 0.3326 0.39344 1.0015 0.25961 1.51-0.18189 0.69122-0.77121 1.1979-0.77121 1.1979" style="paint-order:stroke fill markers"/>
+   <path d="m16.721 12.589s0.43315 0.50342 0.57224 1.1594c0.11265 0.53125-0.03378 1.1918-0.23644 1.5348-0.19198 0.32491-0.65244 0.85559-1.1567 1.0048-0.68538 0.20278-1.4242-0.0385-1.4242-0.0385" style="paint-order:stroke fill markers"/>
+   <path d="m4.761 16.199s-0.64048 0.17559-1.2928 0.02013c-0.52826-0.12591-1.0623-0.54131-1.2854-0.87142-0.21128-0.31271-0.4934-0.95617-0.41208-1.4758 0.11053-0.70615 0.64518-1.2703 0.64518-1.2703" style="paint-order:stroke fill markers"/>
+   <path d="m8.2901 17.455 1.4355 2.1043 1.1043-2.0808" style="paint-order:stroke fill markers"/>
+   <circle cx="9.6305" cy="10.377" r="5.1159" style="paint-order:stroke fill markers"/>
+   <path d="m4.6215 10.518 3.0571-0.09407" style="paint-order:stroke fill markers"/>
+   <path d="m7.2318 6.1437 1.2464 2.0929" style="paint-order:stroke fill markers"/>
+   <path d="m12.358 6.2613-1.2464 2.1165" style="paint-order:stroke fill markers"/>
+   <path d="m14.475 10.541-2.5633 0.04703" style="paint-order:stroke fill markers"/>
+   <path d="m11.912 14.61-1.2699-2.2105" style="paint-order:stroke fill markers"/>
+   <path d="m6.9967 14.68 1.5991-2.2105" style="paint-order:stroke fill markers"/>
+   <path d="m7.5611 10.424 1.0582 1.9048h2.187l1.1288-1.7872-1.0112-1.8108-2.2811-0.023516z" style="paint-order:stroke fill markers"/>
+  </g>
  </g>
 </svg>
