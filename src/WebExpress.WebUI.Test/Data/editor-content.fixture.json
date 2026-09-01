@@ -1,0 +1,67 @@
+{
+  "//": "The rules for reading the working surface of the editor as a document exist twice: on the client in webexpress.webui.content.js (ContentFormat) and on the server in WebControl/EditorContent.cs. They work on different trees and produce different output, so they cannot share code - they share these cases instead. Both UnitTestEditorContent.cs and content.scaffolding.test.mjs read this file, so a rule added on one side and forgotten on the other fails on the other side.",
+  "cases": [
+    {
+      "name": "an instruction text addresses the author, not the reader",
+      "html": "<p>The date is fixed <span class=\"wx-editor-instruction\" contenteditable=\"false\">ask legal first</span> and cannot move.</p>",
+      "keeps": ["The date is fixed", "cannot move"],
+      "drops": ["ask legal first"]
+    },
+    {
+      "name": "a block add-on keeps what it renders and loses its frame",
+      "html": "<div class=\"wx-addon-frame card\" contenteditable=\"false\" data-addon-id=\"warning-box\"><div class=\"card-header\"><span class=\"wx-addon-drag-handle\">GRIP</span><span>Warning Widget</span><span class=\"wx-addon-settings-btn\">COG</span></div><div class=\"card-body wx-addon-body-widget\"><div class=\"alert\">The interface changes.</div></div></div>",
+      "keeps": ["The interface changes."],
+      "drops": ["Warning Widget", "GRIP", "COG"]
+    },
+    {
+      "name": "an inline add-on keeps its content and loses the drag frame",
+      "html": "<p>a <span class=\"wx-addon-inline-frame\" contenteditable=\"false\" draggable=\"true\" data-addon-id=\"badge-primary\"><span class=\"badge\">New</span></span> b</p>",
+      "keeps": ["New", "a", "b"],
+      "drops": []
+    },
+    {
+      "name": "a framed table keeps its cells and loses the resizers and the frame label",
+      "html": "<div class=\"wx-addon-frame card\" contenteditable=\"false\" data-type=\"table\"><div class=\"card-header\"><span>Table</span></div><div class=\"card-body wx-addon-body-container\"><table class=\"table wx-native-table\" contenteditable=\"true\"><thead><tr><th>Version<span class=\"wx-col-resizer\" contenteditable=\"false\">RESIZE</span></th><th>Change</th></tr></thead><tbody><tr><td>2.0.0</td><td>arrived</td></tr></tbody></table></div></div>",
+      "keeps": ["Version", "Change", "2.0.0", "arrived"],
+      "drops": ["RESIZE"]
+    },
+    {
+      "name": "the placeholder hint of an empty block is not content",
+      "html": "<p><span class=\"wx-editor-placeholder\">Type here...</span></p><p>real text</p>",
+      "keeps": ["real text"],
+      "drops": ["Type here..."]
+    },
+    {
+      "name": "a caret marker left behind is not content",
+      "html": "<p>before<span data-wx-caret>MARKER</span>after</p>",
+      "keeps": ["before", "after"],
+      "drops": ["MARKER"]
+    },
+    {
+      "name": "a drop marker left behind is not content",
+      "html": "<p>text<span class=\"wx-drop-marker\">DROP</span></p>",
+      "keeps": ["text"],
+      "drops": ["DROP"]
+    },
+    {
+      "name": "the toolbar and status bar of a whole editor host are not content",
+      "html": "<div class=\"wx-editor-toolbar\">TOOLBAR</div><p>body</p><div class=\"wx-editor-status\">STATUS</div>",
+      "keeps": ["body"],
+      "drops": ["TOOLBAR", "STATUS"]
+    },
+    {
+      "name": "an authored blank line between two paragraphs is content",
+      "html": "<p>one</p><p><br></p><p>two</p>",
+      "keeps": ["one", "two"],
+      "drops": [],
+      "paragraphs": 3
+    },
+    {
+      "name": "the guard paragraphs around an add-on are not content",
+      "html": "<p><br></p><div class=\"wx-addon-frame card\" contenteditable=\"false\"><div class=\"card-body wx-addon-body-widget\"><div class=\"alert\">boxed</div></div></div><p><br></p>",
+      "keeps": ["boxed"],
+      "drops": [],
+      "paragraphs": 0
+    }
+  ]
+}

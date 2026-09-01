@@ -2,9 +2,18 @@
 
 # ContentCtrl
 
-The `ContentCtrl` is the reading view of content that was authored with the [editor](editor.md). It is display only: it never edits, never submits and never dispatches an edit lifecycle event.
+The `ContentCtrl` is the reading view of stored text. It is display only: it never edits, never submits and never dispatches an edit lifecycle event.
 
-The editor does not store a document — it stores its whole **working surface**. An add-on is persisted inside the card frame that names it, moves it and opens its settings; a table is persisted framed and with the column resizers in its header cells; every block that must not be typed into carries `contenteditable="false"` and is fenced by the empty paragraphs the caret needs to get past it. Publishing that value as it stands shows the reader the scaffolding instead of the document.
+Its server-side counterpart `ControlContent` always takes the value the [editor](editor.md) stores, and `Format` decides what the reader is shown of it:
+
+| Format | What is shown | Where it happens |
+|--------|---------------|------------------|
+| `TypeFormatContent.RichText` (default) | the document | this control, on the client |
+| `TypeFormatContent.Markdown` | the Markdown source of that same document | the server, through `EditorContent` and the Markdown renderer; presented as source by `ControlCode` |
+
+The Markdown view is for handing a value on in a portable form - into a README, an export, a ticket. It never reaches `ContentCtrl`: the control renders a code block instead.
+
+For rich text, the editor does not store a document — it stores its whole **working surface**. An add-on is persisted inside the card frame that names it, moves it and opens its settings; a table is persisted framed and with the column resizers in its header cells; every block that must not be typed into carries `contenteditable="false"` and is fenced by the empty paragraphs the caret needs to get past it. Publishing that value as it stands shows the reader the scaffolding instead of the document.
 
 `ContentCtrl` removes the scaffolding and leaves the document, which lets one stored value serve both the author and the reader instead of forcing a second, hand-maintained representation.
 
@@ -87,11 +96,37 @@ if (!webexpress.webui.ContentFormat.isEmpty(fragment)) {
 ## Server-side counterpart
 
 ```csharp
+// the document
 new ControlContent()
 {
     Content = _ => article.Description,
     Placeholder = _ => "No description yet"
 }
+
+// the same value, as markdown source
+new ControlContent()
+{
+    Content = _ => article.Description,
+    Format = _ => TypeFormatContent.Markdown
+}
 ```
 
-`ControlContent` encodes the value and emits the host element; the conversion happens on the client. It is display only and never contributes a value to a form — the editing side is `ControlFormItemInputText` with `Format = _ => TypeEditTextFormat.Wysiwyg`.
+| Property | Description |
+|----------|-------------|
+| `Content` | The value in the raw format the editor stores it in. |
+| `Format` | `RichText` (default) shows the document, `Markdown` shows its source. |
+| `Placeholder` | Stands in for a value that is not set. Without it an empty value renders nothing. |
+| `Instruction` | Keeps the author's instruction texts. The Markdown source never carries them. |
+
+## Reading a stored value on the server
+
+Away from a browser - converting a stored value to Markdown, indexing it, mailing it - there is no client to build the reading view. `EditorContent` applies the same rules on the server:
+
+```csharp
+var markdown = EditorContent.ConvertToMarkdown(article.Description);
+var nodes = EditorContent.ReadDocument(article.Description);
+```
+
+The two implementations are held together by a shared fixture rather than by shared code: `Data/editor-content.fixture.json` is read by the C# tests and by `content.scaffolding.test.mjs`, so a rule added on one side and forgotten on the other fails on the other side. See the [Markdown guide](../md-guide.md) for the conversion itself.
+
+`ControlContent` encodes the markup and emits the host element; the reading-view conversion happens on the client. It is display only and never contributes a value to a form — the editing side is `ControlFormItemInputText` with `Format = _ => TypeEditTextFormat.Wysiwyg`.

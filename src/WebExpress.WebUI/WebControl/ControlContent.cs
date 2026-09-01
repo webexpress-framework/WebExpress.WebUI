@@ -7,14 +7,25 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents the reading view of content that was authored with the editor
+    /// Represents the reading view of stored text, in either of the two formats a value is
+    /// authored in.
+    /// <para>
+    /// <see cref="TypeFormatContent.RichText"/> is what the editor
     /// (<see cref="ControlFormItemInputText"/> in the <see cref="TypeEditTextFormat.Wysiwyg"/>
-    /// format). The editor stores its whole working surface rather than a document: add-ons
-    /// keep the frame that names, moves and configures them, tables keep their column
-    /// resizers, and blocks that must not be typed into are fenced by the empty paragraphs
-    /// the caret needs. This control hands that value to the client, which strips the
-    /// editing scaffolding and renders the document itself, so one stored value serves both
-    /// the author and the reader instead of a second, hand-maintained representation.
+    /// format) stores: its whole working surface rather than a document, where add-ons keep
+    /// the frame that names, moves and configures them, tables keep their column resizers,
+    /// and blocks that must not be typed into are fenced by the empty paragraphs the caret
+    /// needs. This control hands that value to the client, which strips the editing
+    /// scaffolding and renders the document itself, so one stored value serves both the
+    /// author and the reader instead of a second, hand-maintained representation.
+    /// </para>
+    /// <para>
+    /// <see cref="TypeFormatContent.Markdown"/> shows the same stored value as its Markdown
+    /// source instead. <see cref="EditorContent"/> removes the scaffolding on the server and
+    /// writes the document that is left as Markdown, and the source is presented the way any
+    /// other source is, through <see cref="ControlCode"/>. This is the view for handing a
+    /// value on in a portable form - copying it into a README, an export, a ticket.
+    /// </para>
     /// <para>
     /// It is display only and never contributes a value to a form. It is the read side of
     /// <see cref="ControlSmartEdit"/> and of <see cref="ControlTableTemplateEditor"/>, which
@@ -24,9 +35,15 @@ namespace WebExpress.WebUI.WebControl
     public class ControlContent : Control
     {
         /// <summary>
-        /// Gets or sets the content in the raw format the editor stores.
+        /// Gets or sets the content in the raw format the editor stores it in.
         /// </summary>
         public Func<IRenderControlContext, string> Content { get; set; }
+
+        /// <summary>
+        /// Gets or sets what the reader is shown: the document itself, or its Markdown
+        /// source. Both start from the same stored value.
+        /// </summary>
+        public Func<IRenderControlContext, TypeFormatContent> Format { get; set; }
 
         /// <summary>
         /// Gets or sets the text that stands in for content that is not set. Without it an
@@ -38,7 +55,8 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a value indicating whether the instruction texts survive into the
         /// reading view. They address whoever edits the document, so they are dropped by
-        /// default; a proof-reading view is the case for keeping them.
+        /// default; a proof-reading view is the case for keeping them. The Markdown source
+        /// never carries them, because a portable document is not the place for them.
         /// </summary>
         public Func<IRenderControlContext, bool> Instruction { get; set; }
 
@@ -62,6 +80,19 @@ namespace WebExpress.WebUI.WebControl
             var content = Content?.Invoke(renderContext) ?? "";
             var placeholder = Placeholder?.Invoke(renderContext);
             var instruction = Instruction?.Invoke(renderContext) ?? false;
+            var format = Format?.Invoke(renderContext) ?? TypeFormatContent.RichText;
+
+            if (format == TypeFormatContent.Markdown && !string.IsNullOrEmpty(content))
+            {
+                // the reader is shown the source, not the rendered document, so the control
+                // that already presents source - with its highlighting and its copy button -
+                // presents this one too
+                return new ControlCode(Id)
+                {
+                    Code = _ => EditorContent.ConvertToMarkdown(content),
+                    Language = _ => TypeLanguage.Markdown
+                }.Render(renderContext, visualTree);
+            }
 
             // the value is transported encoded so the browser never lays out the editing
             // markup - live contenteditable islands, add-on headers, drag handles - in the

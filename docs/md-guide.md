@@ -212,14 +212,61 @@ The parser supports bidirectional conversion between Markdown and its internal A
 - **Markdown → AST:** `MarkdownParser.Parse(markdownText)` parses Markdown text into a `MarkdownDocument` AST.
 - **AST → HTML:** `document.ConvertToHtml(renderContext)` converts the AST to an HTML tree.
 - **AST → Markdown:** `document.ConvertToMarkdown()` converts the AST back to valid Markdown text.
+- **HTML → AST:** `nodes.ConvertToDocument()` maps a parsed HTML tree onto the AST.
+- **HTML → Markdown:** `nodes.ConvertToMarkdown()` does both steps at once.
 
 This enables a complete round-trip: Markdown can be parsed, transformed, and then serialized back to Markdown while preserving all structural elements including plugin syntax.
 
+### HTML to Markdown
 
+The way back from HTML is `MarkdownRendererHtmlToMarkdown`. The HTML itself is read by `HtmlParser`, which maps every known tag to its own node class; the renderer matches on those classes and builds the AST, so all decisions about escaping, list indentation, numbering and table alignment stay in the Markdown renderer that already makes them.
 
+```csharp
+// read the html, then render the nodes as markdown
+var markdown = new HtmlParser().Parse(html).ConvertToMarkdown();
 
+// or in one step
+var markdown = MarkdownRendererHtmlToMarkdown.ConvertHtmlToMarkdown(html);
 
+// the ast is available too, for a caller that wants to transform before serializing
+var document = new HtmlParser().Parse(html).ConvertToDocument();
+```
 
+What is mapped:
 
+| HTML | Markdown |
+|------|----------|
+| `h1` ... `h6` | `#` ... `######` |
+| `p` | paragraph - one holding nothing but `<br>` is dropped |
+| `hr` | `---` |
+| `blockquote` | `>` |
+| `ul` / `ol` / `li` | list, a list nested in an item is indented |
+| `table`, `tr`, `th`, `td` | table - a table without a header row is given its first row as one |
+| `pre` / `code` | fenced block, language taken from a `language-x` class |
+| `strong`, `b` | `**bold**` |
+| `em`, `i` | `*italic*` |
+| `u` | `_underline_` |
+| `s`, `del` | `~~strikethrough~~` |
+| `mark` | `==marked==` |
+| `code` | `` `code` `` |
+| `a`, `img` | `[text](url)`, `![alt](url)` |
+| `br` | hard line break |
+| anything else | transparent: the wrapper is dropped, the content is kept |
 
+Markup Markdown has no notation for - a coloured span, an inline style - loses the wrapper and keeps its text. That is deliberate: the point of converting to Markdown is a portable document, and carrying the markup along as raw HTML would only defer the question.
 
+The renderer knows nothing about the editor. The value the WYSIWYG editor stores is a working surface, not a document: it carries add-on frames with their labels and drag handles, and instruction texts addressed to the author. All of that is ordinary markup to this renderer, so a stored editor value is read by `EditorContent` first:
+
+```csharp
+// a stored editor value as a portable document
+var markdown = EditorContent.ConvertToMarkdown(article.Description);
+
+// or the document nodes, to render or index them
+var nodes = EditorContent.ReadDocument(article.Description);
+```
+
+`EditorContent` applies the same rules the client applies in `ContentFormat`: it drops the instruction texts, placeholder hints, drop and caret markers, column resizers, drag handles and settings buttons, unwraps add-on frames to what the add-on renders, and removes the empty guard paragraphs around a non-editable block while keeping a blank line the author typed.
+
+The two implementations cannot share code - one walks a DOM in the browser and builds a fragment, the other walks an `IHtmlNode` tree on the server and builds Markdown - so they share their cases instead: `Data/editor-content.fixture.json` is read by `UnitTestEditorContent.cs` and by `content.scaffolding.test.mjs`. A rule added on one side and forgotten on the other fails on the other side.
+
+Two limits are worth knowing. An attribute written with an empty value (`data-wx-caret=""`) does not survive parsing, because the HTML element model treats an empty value as unset; only the valueless form is visible on the server. And `EditorContent` returns nodes rather than markup, because serializing a parsed tree back is lossy: `HtmlElementTableTable` renders from its own `Rows` collection and not from the children a parser gives it, so a parsed table would come back empty.

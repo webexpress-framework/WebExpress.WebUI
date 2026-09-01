@@ -49,6 +49,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<EmbeddedResource Include="Data\editor-content.fixture.json" />
 		<EmbeddedResource Include="Data\ComplexExample1.md" />
 		<EmbeddedResource Include="Data\ComplexExample2.md" />
 		<EmbeddedResource Include="Data\ComplexExample3.md" />

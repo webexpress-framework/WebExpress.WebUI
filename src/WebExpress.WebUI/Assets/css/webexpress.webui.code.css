@@ -97,7 +97,6 @@
         display: block;
         position: relative;
         white-space: pre;
-        padding-left: 2.5rem;
         color: inherit;
     }
 
@@ -106,9 +105,16 @@
     counter-reset: line;
 }
 
+    /*
+       The indent is the gutter the numbers are placed into, so only the numbered
+       variant carries it. Applied to both, it pushed every unnumbered block in by
+       the width of a gutter nothing occupies - on top of the padding the code area
+       already has - so the block no longer lined up with the text around it.
+    */
     .wx-code .wx-code-line-numbers > span {
         counter-increment: line;
         height: 1.1em;
+        padding-left: 2.5rem;
     }
 
         .wx-code .wx-code-line-numbers > span::before {

@@ -17,7 +17,7 @@ webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
 
         // extract code from innerHTML and normalize line endings
         let rawCode = (element?.innerHTML ?? "").trim().replace(/\r\n/g, "\n");
-        this._code = isBase64 && rawCode ? atob(rawCode) : rawCode;
+        this._code = isBase64 && rawCode ? this._decode(rawCode) : rawCode;
 
         // clean up and add styling class
         element.innerHTML = "";
@@ -36,6 +36,19 @@ webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
 
         // apply syntax highlighting and fill content
         this._highlightSyntax(language, lineNumbers);
+    }
+
+    /**
+     * Decodes the transported source. The server encodes utf-8 bytes, while atob answers one
+     * character per byte, so the bytes have to be decoded as utf-8 again - without that step
+     * every umlaut, dash and quotation mark in the source arrives as mojibake.
+     * @param {string} encoded - The base64 payload.
+     * @returns {string} The source.
+     */
+    _decode(encoded) {
+        const bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
+
+        return new TextDecoder().decode(bytes);
     }
 
     /**
