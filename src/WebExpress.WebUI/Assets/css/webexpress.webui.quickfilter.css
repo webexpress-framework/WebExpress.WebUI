@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Styles for the QuickFilter control.
  * Uses only adaptive Bootstrap color variables (body, secondary, tertiary
  * tokens) for theme compatibility; --bs-light and --bs-dark are static and
@@ -8,7 +8,7 @@
 .wx-quickfilter {
     display: block;
     width: 100%;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .wx-quickfilter > div {

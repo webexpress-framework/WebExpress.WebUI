@@ -1,4 +1,4 @@
-/* root container */
+﻿/* root container */
 .wx-view {
     display: flex;
     flex-direction: column;
@@ -53,7 +53,7 @@
 
 /* flexible header area for external controls */
 .wx-view-header {
-    padding: 0.5rem 0.75rem;
+    padding: 0.25rem 0.75rem;
     flex: 0 0 auto;
     width: 100%;
     box-sizing: border-box;
@@ -122,7 +122,7 @@
 }
 
 .wx-view-footer {
-    padding: 0.5rem 0.75rem;
+    padding: 0.25rem 0.75rem;
     flex: 0 0 auto;
     width: 100%;
     box-sizing: border-box;

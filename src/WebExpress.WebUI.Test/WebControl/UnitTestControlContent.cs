@@ -65,16 +65,16 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests that the markdown format shows the source of the stored value rather than
-        /// the document: the scaffolding is removed and what is left is written as markdown,
-        /// presented through the code control.
+        /// Tests that markdown content is parsed on the server, by the same parser that
+        /// backs the text control, rather than shipped to the client as it stands.
         /// </summary>
         [Theory]
-        [InlineData("<h2>Title</h2>", "## Title")]
-        [InlineData("<p>A <b>bold</b> word.</p>", "A **bold** word.")]
-        [InlineData("<ul><li>one</li><li>two</li></ul>", "- one")]
-        [InlineData("<p>a <a href=\"http://x.test\">link</a></p>", "[link](http://x.test)")]
-        public void MarkdownFormat(string editorValue, string expected)
+        [InlineData("**bold**", "<strong>bold</strong>")]
+        [InlineData("*italic*", "<i>italic</i>")]
+        [InlineData("# Heading", "<h1")]
+        [InlineData("- a list item", "<li>")]
+        [InlineData("[text](http://example.com)", "href=\"http://example.com\"")]
+        public void MarkdownFormat(string markdown, string expected)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -82,7 +82,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlContent()
             {
-                Content = _ => editorValue,
+                Content = _ => markdown,
                 Format = _ => TypeFormatContent.Markdown
             };
 
@@ -94,11 +94,13 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
-        /// Tests that the markdown format is presented as source, through the same control
-        /// that presents any other source.
+        /// Tests that both formats are delivered the same way - as the reading view - so the
+        /// client keeps a single implementation and the markdown never reaches it unparsed.
         /// </summary>
-        [Fact]
-        public void MarkdownFormatIsSource()
+        [Theory]
+        [InlineData(TypeFormatContent.RichText)]
+        [InlineData(TypeFormatContent.Markdown)]
+        public void FormatIsReadingView(TypeFormatContent format)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -106,47 +108,16 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlContent("id")
             {
-                Content = _ => "<p>text</p>",
-                Format = _ => TypeFormatContent.Markdown
+                Content = _ => "text",
+                Format = _ => format
             };
 
             // act
             var html = control.Render(context, visualTree).ToString();
 
             // validation
-            Assert.Contains("wx-webui-code", html);
-            Assert.Contains("data-language=\"markdown\"", html);
+            Assert.Contains("wx-webui-content", html);
             Assert.Contains("id=\"id\"", html);
-            Assert.DoesNotContain("wx-webui-content", html);
-        }
-
-        /// <summary>
-        /// Tests that the scaffolding of the editor never reaches the markdown source, which
-        /// is the whole reason the conversion sits in the control rather than in the caller.
-        /// </summary>
-        [Fact]
-        public void MarkdownFormatDropsScaffolding()
-        {
-            // arrange
-            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
-            var context = UnitTestControlFixture.CreateRenderContextMock();
-            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
-            var control = new ControlContent()
-            {
-                Content = _ => "<p>Note <span class=\"wx-editor-instruction\">ask legal</span> here.</p>"
-                    + "<div class=\"wx-addon-frame card\" contenteditable=\"false\">"
-                    + "<div class=\"card-header\"><span>Warning Widget</span></div>"
-                    + "<div class=\"card-body wx-addon-body-widget\"><div class=\"alert\">Careful.</div></div></div>",
-                Format = _ => TypeFormatContent.Markdown
-            };
-
-            // act
-            var markdown = Decode(control.Render(context, visualTree).ToString());
-
-            // validation
-            Assert.Contains("Careful.", markdown);
-            Assert.DoesNotContain("ask legal", markdown);
-            Assert.DoesNotContain("Warning Widget", markdown);
         }
 
         /// <summary>
@@ -170,13 +141,40 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree).ToString();
 
             // validation
-            Assert.Contains("wx-webui-content", html);
             Assert.Equal("<p>Hello <b>World</b></p>", Decode(html));
         }
 
         /// <summary>
-        /// Tests that an empty value stays with the reading view in either format, so the
-        /// placeholder is shown rather than an empty source block.
+        /// Tests that a value the editor stored can be brought into the markdown format and
+        /// renders the same document, which is the round trip the two formats share.
+        /// </summary>
+        [Fact]
+        public void MarkdownFormatFromEditorValue()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var editorValue = "<h2>Title</h2><p>A <b>bold</b> word.</p>"
+                + "<p>Note <span class=\"wx-editor-instruction\">ask legal</span> here.</p>";
+            var control = new ControlContent()
+            {
+                Content = _ => EditorContent.ConvertToMarkdown(editorValue),
+                Format = _ => TypeFormatContent.Markdown
+            };
+
+            // act
+            var markup = Decode(control.Render(context, visualTree).ToString());
+
+            // validation
+            Assert.Contains("<h2>Title</h2>", markup);
+            Assert.Contains("<strong>bold</strong>", markup);
+            Assert.DoesNotContain("ask legal", markup);
+        }
+
+        /// <summary>
+        /// Tests that an empty value stays empty in either format, so nothing is parsed and
+        /// the client shows the placeholder rather than an empty document.
         /// </summary>
         [Theory]
         [InlineData(TypeFormatContent.RichText)]

@@ -1,4 +1,4 @@
-@keyframes tree-rotate {
+﻿@keyframes tree-rotate {
     0% {
         transform: rotate(0deg);
     }
@@ -19,15 +19,7 @@
         margin-left: 0.2em;
     }
 
-.wx-tree-indicator-dot {
-    content: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+DQo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDEzNSAxOTAiPg0KCTxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJPCFbQ0RBVEFbDQoJCS5zdDEge2ZpbGw6IzdmN2Y3ZjtzdHJva2U6bm9uZTt9DQoJXV0+DQoJPC9zdHlsZT4NCiAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzMCwtNTgpIj4NCiAgICAgICAgPHBhdGggZD0iTTAgMTUzLjk2IEEzNy45MzU5IDM3LjkzNTkgMCAwIDEgNzUuODcgMTUzLjk2IEEzNy45MzU5IDM3LjkzNTkgMCAxIDEgMCAxNTMuOTYgWiIgY2xhc3M9InN0MSIvPg0KICAgPC9nPg0KPC9zdmc+DQo=');
-    height: 1em;
-}
 
-.wx-tree-indicator-angle {
-    content: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+DQo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIJdmlld0JveD0iMCAwIDEzNSAxOTAiPg0KCTxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJPCFbQ0RBVEFbDQoJCS5zdDEge2ZpbGw6IzdmN2Y3ZjtzdHJva2U6bm9uZTt9DQoJXV0+DQoJPC9zdHlsZT4NCgkJPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgsLTE4KSI+DQoJCQk8cGF0aCBkPSJNMS42NiAxNzMuMiBMMTguNyAxOTAuMjMgQTUuNjY5MjkgNS42NjkyOSAtMTgwIDAgMCAyNi43MiAxOTAuMjMgTDk4Ljg3IDExOC4wOCBBNS42NjkyOSA1LjY2OTI5IC0xODAgMCAwIDk4Ljg3DQoJCQkJCQkgMTEwLjA2IEwyNi43MiAzNy45IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMTguNyAzNy45IEwxLjY2IDU0Ljk0IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMS42NiA2Mi45Ng0KCQkJCQkJIEw0OC43NiAxMTAuMDYgQTUuNjY5MjkgNS42NjkyOSAwIDAgMSA0OC43NiAxMTguMDggTDEuNjYgMTY1LjE4IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMS42NiAxNzMuMiBaIg0KCQkJCQljbGFzcz0ic3QxIi8+DQoJCTwvZz4NCjwvc3ZnPg==');
-    height: 0.8rem;
-}
 
 .wx-tree-expand {
     transform: rotate(90deg);
@@ -104,4 +96,73 @@
     border-bottom: 2px dashed var(--wx-success);
     z-index: 1000;
     pointer-events: none; /* prevent interaction with the indicator */
+}
+
+/* The indicator glyphs are painted rather than embedded, so they follow the text
+   colour of whatever they sit in and therefore work in both themes; an embedded
+   image carries its own fill and stays the same grey on a dark surface. */
+:root {
+    --wx-tree-angle-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 135 190'%3E%3Cg transform='translate(18,-18)'%3E%3Cpath d='M1.66 173.2 L18.7 190.23 A5.66929 5.66929 -180 0 0 26.72 190.23 L98.87 118.08 A5.66929 5.66929 -180 0 0 98.87 110.06 L26.72 37.9 A5.66929 5.66929 -180 0 0 18.7 37.9 L1.66 54.94 A5.66929 5.66929 -180 0 0 1.66 62.96 L48.76 110.06 A5.66929 5.66929 0 0 1 48.76 118.08 L1.66 165.18 A5.66929 5.66929 -180 0 0 1.66 173.2 Z' fill='%23000'/%3E%3C/g%3E%3C/svg%3E");
+    --wx-tree-dot-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 135 190'%3E%3Cg transform='translate(30,-58)'%3E%3Cpath d='M0 153.96 A37.9359 37.9359 0 0 1 75.87 153.96 A37.9359 37.9359 0 1 1 0 153.96 Z' fill='%23000'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.wx-tree-indicator-dot {
+    display: inline-block;
+    width: 1em;
+    height: 1em;
+    background-color: currentColor;
+    -webkit-mask: var(--wx-tree-dot-mask) no-repeat center / contain;
+    mask: var(--wx-tree-dot-mask) no-repeat center / contain;
+    opacity: 0.6;
+}
+
+.wx-tree-indicator-angle {
+    display: inline-block;
+    width: 0.8rem;
+    height: 0.8rem;
+    background-color: currentColor;
+    -webkit-mask: var(--wx-tree-angle-mask) no-repeat center / contain;
+    mask: var(--wx-tree-angle-mask) no-repeat center / contain;
+    transition: transform .15s ease;
+    opacity: 0.6;
+}
+
+/* --- guide columns ---------------------------------------------------------
+   One column per nesting level in front of a tree row. A level whose branch
+   continues past the row draws a through line; the column of the row itself
+   draws the elbow that joins it to its parent. The lines bleed over the row
+   padding by --wx-tree-guide-bleed, which each control sets to its own vertical
+   cell padding so the segments of consecutive rows meet instead of leaving a
+   gap. Colours come from the theme tokens, so both themes are covered. */
+.wx-tree-guide {
+    position: relative;
+    display: inline-block;
+    box-sizing: border-box;
+    width: 1.2rem;
+    flex: 0 0 auto;
+    align-self: stretch;
+}
+
+.wx-tree-guide-through::before,
+.wx-tree-guide-elbow::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: calc(-1 * var(--wx-tree-guide-bleed, 0px));
+    bottom: calc(-1 * var(--wx-tree-guide-bleed, 0px));
+    border-left: 1px solid var(--wx-border-color);
+}
+
+/* the last child of a branch: the line stops at the elbow instead of going on */
+.wx-tree-guide-elbow:not(.wx-tree-guide-through)::before {
+    bottom: 50%;
+}
+
+.wx-tree-guide-elbow::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    right: 0;
+    top: 50%;
+    border-top: 1px solid var(--wx-border-color);
 }

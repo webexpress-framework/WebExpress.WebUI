@@ -1340,6 +1340,40 @@ webexpress.webui.Actions = new class {
 };
 
 /**
+ * Builds the guide column of a tree row: one entry per nesting level, telling
+ * whether the branch of that level continues below this row.
+ * @remarks
+ * The controls that draw a tree (table, list) render a flat sequence of rows, so
+ * a row has to know the shape of the whole path above it in order to draw the
+ * connecting lines: a vertical line is only drawn in an ancestor's column while
+ * that ancestor still has a sibling to come, otherwise the branch has ended and
+ * the column stays blank. The last entry belongs to the row itself and decides
+ * whether its elbow is a tee or a corner.
+ *
+ * The walk goes upwards through the parent chain, which every tree node of both
+ * controls carries, so no control has to keep a second index of the hierarchy.
+ * @param {object} node - The tree node, carrying `parent` and `children`.
+ * @returns {Array<boolean>} One flag per level, outermost first. Empty at the root.
+ */
+webexpress.webui.treeGuides = function (node) {
+    const guides = [];
+    let current = node;
+    let hops = 0;
+
+    // the hop limit is a guard against a parent chain that loops back on itself,
+    // which a malformed payload can produce and which would otherwise hang the render
+    while (current && current.parent && hops++ < 512) {
+        const siblings = current.parent.children || [];
+        const index = siblings.indexOf(current);
+
+        guides.unshift(index >= 0 && index < siblings.length - 1);
+        current = current.parent;
+    }
+
+    return guides;
+};
+
+/**
  * Registry for bind plugins.
  * Allows bindings to be extended freely from external files.
  * Each bind is identified by a name (e.g. "filter", "darkmode") and provides

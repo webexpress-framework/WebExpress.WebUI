@@ -1,4 +1,4 @@
-.wx-tab {
+﻿.wx-tab {
 
 }
 
@@ -14,10 +14,22 @@
     width: 100%;
 }
 
+/* the tab bar is a list and would otherwise carry the margin of a list in
+   running text, which is more than a control needs to its own content. the
+   container is named as well, because the prose rule is the more specific one */
+.wx-tab-container ul.wx-tab-nav {
+    margin-bottom: 0.375rem;
+}
+
 /* styling for the content area to match bootstrap border radiuses */
 .wx-tab-content {
     background-color: var(--wx-body-bg);
     border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+    /* the markup applies a p-3 utility; the vertical half of it is halved at the
+       top and dropped at the bottom, where it only pushed the pager off the edge
+       of the region */
+    padding-top: 0.5rem;
+    padding-bottom: 0;
 }
 
 /* ensure pointer cursor for dynamically generated tab links */

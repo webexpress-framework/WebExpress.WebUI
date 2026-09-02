@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Controller for interactive tab navigation: parsing markup, rendering tabs,
  * and handling tab selection state without destroying existing dom nodes.
  * Events:
@@ -60,7 +60,10 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         // create content wrapper
         this._contentElement = document.createElement("div");
         
-        let contentClass = "tab-content wx-tab-content p-3";
+        // horizontal padding only: the vertical one belongs to the stylesheet, where it
+        // can be tuned per edge. as a p-3 utility it carried !important and no rule
+        // could reach it
+        let contentClass = "tab-content wx-tab-content px-3";
         if (layout === "default" || layout === "tab") {
             contentClass += " border border-top-0";
         }

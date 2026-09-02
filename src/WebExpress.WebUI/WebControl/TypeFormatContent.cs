@@ -1,20 +1,19 @@
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies what a <see cref="ControlContent"/> shows of the value it was given. Both
-    /// start from the same stored value - the working surface of the editor - and differ only
-    /// in what the reader gets to see.
+    /// Specifies how the stored value of a <see cref="ControlContent"/> is written, and
+    /// therefore what has to happen before it can be read.
     /// </summary>
     public enum TypeFormatContent
     {
         /// <summary>
-        /// The document itself, with the scaffolding that makes the value editable removed.
+        /// The value is the working surface the editor stores: markup interleaved with the
+        /// scaffolding that makes it editable.
         /// </summary>
         RichText,
 
         /// <summary>
-        /// The Markdown source of that document, presented the way any other source is. For
-        /// handing the value on in a portable form.
+        /// The value is Markdown, as a plain text field or an external document delivers it.
         /// </summary>
         Markdown
     }

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * German translation for WebExpress
  */
 webexpress.webui.I18N.register("de", "webexpress.webui", {
@@ -103,6 +103,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "list.delete.confirm": "Dieses Element löschen?",
     "list.sort.title": "Sortieren",
     "list.handle.title": "Verschieben",
+    "list.tree.toggle": "Auf- oder zuklappen",
 
     "barcode": "Strichcode",
     "barcode.invalid": "Der Wert kann nicht kodiert werden.",

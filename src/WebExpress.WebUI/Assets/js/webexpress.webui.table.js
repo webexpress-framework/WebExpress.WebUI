@@ -1348,7 +1348,29 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     // ------------------------------------------------------------------ tree
 
     /**
+     * Builds one guide column of a tree row.
+     * @param {boolean} continues - Whether the branch of this level goes on below the row.
+     * @param {boolean} own - Whether the column belongs to the row itself, which carries
+     *     the elbow that joins the row to its parent.
+     * @returns {HTMLElement} The guide element.
+     */
+    _createTreeGuide(continues, own) {
+        const guide = document.createElement("span");
+
+        guide.className = "wx-tree-guide"
+            + (continues ? " wx-tree-guide-through" : "")
+            + (own ? " wx-tree-guide-elbow" : "");
+
+        return guide;
+    }
+
+    /**
      * Inject tree toggle control into the first data column.
+     * @remarks
+     * The indentation is drawn as one guide column per level rather than as a single
+     * blank spacer: an ancestor whose branch continues carries a through line, and the
+     * column of the row itself carries the elbow that joins it to its parent. At depth
+     * two and beyond, indentation alone no longer says which parent a row belongs to.
      * @param {HTMLElement} tr - Row element.
      * @param {Object} row - Row data.
      * @param {number} depth - Hierarchy depth.
@@ -1364,10 +1386,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const wrapper = document.createElement("span");
         wrapper.className = "wx-tree";
 
-        const indent = document.createElement("span");
-        indent.className = "wx-tree-indent";
-        indent.style.width = `${depth * 1.2}rem`;
-        wrapper.appendChild(indent);
+        const guides = webexpress.webui.treeGuides(row);
+
+        for (let level = 0; level < guides.length; level++) {
+            wrapper.appendChild(this._createTreeGuide(guides[level], level === guides.length - 1));
+        }
 
         if (row.children?.length) {
             const btn = document.createElement("button");

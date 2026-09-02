@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.WebMarkdown;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -20,11 +21,13 @@ namespace WebExpress.WebUI.WebControl
     /// author and the reader instead of a second, hand-maintained representation.
     /// </para>
     /// <para>
-    /// <see cref="TypeFormatContent.Markdown"/> shows the same stored value as its Markdown
-    /// source instead. <see cref="EditorContent"/> removes the scaffolding on the server and
-    /// writes the document that is left as Markdown, and the source is presented the way any
-    /// other source is, through <see cref="ControlCode"/>. This is the view for handing a
-    /// value on in a portable form - copying it into a README, an export, a ticket.
+    /// <see cref="TypeFormatContent.Markdown"/> is for a value that is kept as plain text -
+    /// a description field, an imported document, a README. It is parsed on the server by
+    /// the same <see cref="WebMarkdown.MarkdownParser"/> that backs
+    /// <see cref="ControlText"/>, so both controls render the same document from the same
+    /// source, and the reading view stays a single client-side implementation. A value
+    /// authored in the editor can be brought into this format with
+    /// <see cref="EditorContent.ConvertToMarkdown"/>.
     /// </para>
     /// <para>
     /// It is display only and never contributes a value to a form. It is the read side of
@@ -35,13 +38,15 @@ namespace WebExpress.WebUI.WebControl
     public class ControlContent : Control
     {
         /// <summary>
-        /// Gets or sets the content in the raw format the editor stores it in.
+        /// Gets or sets the content in the raw format it is stored in. What that format is,
+        /// is decided by <see cref="Format"/>.
         /// </summary>
         public Func<IRenderControlContext, string> Content { get; set; }
 
         /// <summary>
-        /// Gets or sets what the reader is shown: the document itself, or its Markdown
-        /// source. Both start from the same stored value.
+        /// Gets or sets how the content is written. Markdown is turned into markup by the
+        /// same parser <see cref="ControlText"/> uses, so both controls read the same
+        /// document from the same source.
         /// </summary>
         public Func<IRenderControlContext, TypeFormatContent> Format { get; set; }
 
@@ -55,8 +60,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a value indicating whether the instruction texts survive into the
         /// reading view. They address whoever edits the document, so they are dropped by
-        /// default; a proof-reading view is the case for keeping them. The Markdown source
-        /// never carries them, because a portable document is not the place for them.
+        /// default; a proof-reading view is the case for keeping them. Markdown has none.
         /// </summary>
         public Func<IRenderControlContext, bool> Instruction { get; set; }
 
@@ -82,22 +86,17 @@ namespace WebExpress.WebUI.WebControl
             var instruction = Instruction?.Invoke(renderContext) ?? false;
             var format = Format?.Invoke(renderContext) ?? TypeFormatContent.RichText;
 
-            if (format == TypeFormatContent.Markdown && !string.IsNullOrEmpty(content))
-            {
-                // the reader is shown the source, not the rendered document, so the control
-                // that already presents source - with its highlighting and its copy button -
-                // presents this one too
-                return new ControlCode(Id)
-                {
-                    Code = _ => EditorContent.ConvertToMarkdown(content),
-                    Language = _ => TypeLanguage.Markdown
-                }.Render(renderContext, visualTree);
-            }
+            // markdown becomes markup here rather than on the client, because the framework
+            // already parses it on the server for ControlText - a second, client-side
+            // implementation would be a subset of it and would drift away from it
+            var markup = format == TypeFormatContent.Markdown && !string.IsNullOrEmpty(content)
+                ? MarkdownParser.Parse(content).ConvertToHtml(renderContext)?.ToString() ?? ""
+                : content;
 
             // the value is transported encoded so the browser never lays out the editing
             // markup - live contenteditable islands, add-on headers, drag handles - in the
             // moment before the reading view replaces it
-            var encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(content));
+            var encoded = Convert.ToBase64String(Encoding.UTF8.GetBytes(markup));
 
             var html = new HtmlElementTextContentDiv(new HtmlText(encoded))
             {

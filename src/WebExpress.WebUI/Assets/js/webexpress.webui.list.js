@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Flat list control.
  * The following events are triggered:
  *  - webexpress.webui.Event.ROW_REORDER_EVENT          // emitted after reorder with new/previous order
@@ -249,7 +249,8 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
      * @param {boolean} [dispatch=true] Whether to dispatch the selection event.
      */
     selectItem(itemId, dispatch = true) {
-        const item = this._items.find(it => it.id === itemId);
+        // a nested item is selectable like any other, so the lookup descends
+        const item = this._flatItems().find(it => it.id === itemId);
         if (item) {
             this._handleSelectionChange(item, null, dispatch);
         } else {
@@ -338,10 +339,12 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             return false;
         }
         const idx = this._items.findIndex(it => it.id === itemId);
-        if (idx === -1) {
-            return false;
+        if (idx !== -1) {
+            return this._deleteItemByIndex(idx);
         }
-        return this._deleteItemByIndex(idx);
+
+        // the id may name an item nested beneath another one
+        return this._deleteNestedItem(this._flatItems().find(it => it.id === itemId));
     }
 
     /**
@@ -586,11 +589,57 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Returns every item of the list, nested ones included, in display order.
+     * @remarks
+     * `_items` holds the roots, so a lookup by id has to descend - otherwise an
+     * item that sits beneath another is unreachable for selection or deletion.
+     * @returns {Array<Object>} The items.
+     */
+    _flatItems() {
+        const result = [];
+        const walk = (items) => {
+            for (const item of items) {
+                result.push(item);
+                if (item.children && item.children.length) {
+                    walk(item.children);
+                }
+            }
+        };
+
+        walk(this._items);
+
+        return result;
+    }
+
+    /**
+     * Returns the items that are on screen: the roots and the descendants of
+     * every expanded node, in display order.
+     * @returns {Array<Object>} The visible items.
+     */
+    _visibleItems() {
+        const result = [];
+        const walk = (items) => {
+            for (const item of items) {
+                result.push(item);
+                if (item.children && item.children.length && item.expanded) {
+                    walk(item.children);
+                }
+            }
+        };
+
+        walk(this._items);
+
+        return result;
+    }
+
+    /**
      * Builds a single item from raw data.
      * @param {Object|string} data Raw.
+     * @param {Object|null} parent The item this one is nested beneath, if any.
+     * @param {number} depth The nesting level, zero at the root.
      * @returns {Object} Item.
      */
-    _buildItem(data) {
+    _buildItem(data, parent = null, depth = 0) {
         if (typeof data === "string") {
             return {
                 id: null,
@@ -607,10 +656,15 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 itemType: "default",
                 disabled: false,
                 options: null,
+                children: [],
+                expanded: true,
+                parent: parent,
+                depth: depth,
                 _anchorLi: null
             };
         }
-        return {
+
+        const item = {
             id: data.id || null,
             class: data.class || null,
             style: data.style || null,
@@ -631,12 +685,25 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             title: data.title || null,
             tooltip: data.tooltip || null,
             options: Array.isArray(data.options) ? data.options : null,
+            // a node that owns children is drawn with an expander and its children
+            // indented beneath it; the default is open, which is what an item that
+            // says nothing about it means
+            children: [],
+            expanded: typeof data.expanded === "boolean" ? data.expanded : true,
+            parent: parent,
+            depth: depth,
             _anchorLi: null,
             // action attributes
             primaryAction: data.primaryAction,
             secondaryAction: data.secondaryAction,
             bind: data.bind,
         };
+
+        if (Array.isArray(data.children)) {
+            item.children = data.children.map(child => this._buildItem(child, item, depth + 1));
+        }
+
+        return item;
     }
 
     /**
@@ -774,13 +841,101 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Renders list items into the UL.
+     * Builds one guide column of a tree row.
+     * @param {boolean} continues - Whether the branch of this level goes on below the row.
+     * @param {boolean} own - Whether the column belongs to the row itself, which carries
+     *     the elbow that joins the row to its parent.
+     * @returns {HTMLElement} The guide element.
+     */
+    _createTreeGuide(continues, own) {
+        const guide = document.createElement("span");
+
+        guide.className = "wx-tree-guide"
+            + (continues ? " wx-tree-guide-through" : "")
+            + (own ? " wx-tree-guide-elbow" : "");
+
+        return guide;
+    }
+
+    /**
+     * Builds the tree affordance of a row: one guide column per nesting level and,
+     * for a node that owns children, the expander that opens and closes it.
+     * @remarks
+     * It is prepended to the list item rather than placed inside the content,
+     * because a link row wraps its content in an anchor and a button may not
+     * live inside one. A leaf gets an invisible placeholder of the same width,
+     * so the text of siblings stays aligned whether or not they have children.
+     *
+     * The indentation is drawn as connecting lines rather than as blank space: an
+     * ancestor whose branch continues carries a through line and the level of the
+     * row itself carries the elbow, so at depth two and beyond it stays readable
+     * which parent a row belongs to.
+     * @param {Object} it The item the row shows.
+     * @returns {HTMLElement|null} The wrapper, or null for a flat list.
+     */
+    _buildTreeToggle(it) {
+        const nested = it.children && it.children.length;
+
+        // a list without any nesting is left exactly as it was: no wrapper, no
+        // indent, no placeholder column
+        if (!nested && !it.depth && !this._hasNesting) {
+            return null;
+        }
+
+        const wrapper = document.createElement("span");
+        wrapper.className = "wx-list-tree";
+
+        const guides = webexpress.webui.treeGuides(it);
+
+        for (let level = 0; level < guides.length; level++) {
+            wrapper.appendChild(this._createTreeGuide(guides[level], level === guides.length - 1));
+        }
+
+        if (nested) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "wx-list-tree-toggle";
+            btn.setAttribute("aria-expanded", String(!!it.expanded));
+            btn.setAttribute("aria-label", this._i18n("webexpress.webui:list.tree.toggle", "Expand or collapse"));
+
+            const icon = document.createElement("span");
+            icon.className = "wx-tree-indicator-angle" + (it.expanded ? " wx-tree-expand" : "");
+            btn.appendChild(icon);
+
+            btn.addEventListener("click", (e) => {
+                // the row itself carries the selection action, so the toggle must not
+                // reach it - opening a node is not selecting it
+                e.preventDefault();
+                e.stopPropagation();
+                it.expanded = !it.expanded;
+                this.render();
+            });
+
+            wrapper.appendChild(btn);
+        } else {
+            const placeholder = document.createElement("span");
+            placeholder.className = "wx-list-tree-toggle-placeholder";
+            wrapper.appendChild(placeholder);
+        }
+
+        return wrapper;
+    }
+
+    /**
+     * Renders list items into the UL. A list whose items own children is drawn
+     * as a tree: only the descendants of expanded nodes are rendered, indented
+     * by their depth.
      */
     _renderItems() {
 
         this._list.innerHTML = "";
 
-        for (const it of this._items) {
+        // whether any row of the list has children decides whether every row
+        // reserves the expander column, so the text of a flat list is not
+        // indented for a tree it does not have
+        this._hasNesting = this._items.some(it => it.children && it.children.length);
+
+        for (const it of this._visibleItems()) {
             const li = document.createElement("li");
 
             if (this._layout && this._layout !== "list-unstyled") {
@@ -827,6 +982,13 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
 
             li._dataItemRef = it;
             it._anchorLi = li;
+
+            // the indent and the expander sit leftmost, so the nesting is read
+            // before anything else on the row
+            const tree = this._buildTreeToggle(it);
+            if (tree) {
+                li.appendChild(tree);
+            }
 
             if (this._movableItem) {
                 const handle = document.createElement("span");
@@ -994,12 +1156,42 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Removes an item that is nested beneath another one, together with
+     * everything below it.
+     * @remarks
+     * A nested item does not live in the root array, so the index based delete
+     * cannot reach it; it is spliced out of its parent's children instead.
+     * @param {Object} item The item to remove.
+     * @returns {boolean} True if it was removed.
+     */
+    _deleteNestedItem(item) {
+        const siblings = item && item.parent ? item.parent.children : null;
+        const index = siblings ? siblings.indexOf(item) : -1;
+
+        if (index === -1) {
+            return false;
+        }
+
+        siblings.splice(index, 1);
+
+        if (this._selectedItem === item) {
+            this._handleSelectionChange(null, null, true);
+        }
+
+        this._schedulePersist();
+        this.render();
+
+        return true;
+    }
+
+    /**
      * Internal delete helper to remove an item instance.
      * @param {Object} item The item to delete.
      */
     _deleteItemInternal(item) {
         const idx = this._items.indexOf(item);
         if (idx === -1) {
+            this._deleteNestedItem(item);
             return;
         }
         this._deleteItemByIndex(idx);
