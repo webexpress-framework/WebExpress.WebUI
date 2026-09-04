@@ -180,6 +180,8 @@ namespace WebExpress.WebUI.WebControl
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
             var disabled = Disabled?.Invoke(renderContext) ?? false;
             var required = Required?.Invoke(renderContext) ?? false;
+            var minLength = MinLength?.Invoke(renderContext);
+            var maxLength = MaxLength?.Invoke(renderContext);
 
             if (disabled)
             {
@@ -193,14 +195,14 @@ namespace WebExpress.WebUI.WebControl
                 return validationResults;
             }
 
-            if (!string.IsNullOrWhiteSpace(MinLength?.ToString()) && Convert.ToInt32(MinLength) > value?.Length)
+            if (value is not null && minLength > value.Length)
             {
-                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.min"), MinLength)));
+                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.min"), minLength)));
             }
 
-            if (!string.IsNullOrWhiteSpace(MaxLength?.ToString()) && Convert.ToInt32(MaxLength) < value?.Length)
+            if (value is not null && maxLength < value.Length)
             {
-                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.max"), MaxLength)));
+                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.max"), maxLength)));
             }
 
             return validationResults;
