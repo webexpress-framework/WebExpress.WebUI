@@ -9,6 +9,11 @@
  *   - on birth:   the new cell inherits a blended color from its three living parents (HSL average)
  *   - on death:   the cell color is discarded
  *   - on reset:   all living cells receive new random palette colors
+ *
+ * The colors a cell carries are the palette's own. What reaches the canvas is that color read
+ * for the theme the page is in: the same hue, at a lightness that keeps it legible against the
+ * background it is drawn on. The canvas itself stays transparent, so the background is always
+ * the page's.
  */
 webexpress.webui.GameOfLifeCtrl = class extends webexpress.webui.Ctrl {
     _canvas = null;
@@ -20,6 +25,22 @@ webexpress.webui.GameOfLifeCtrl = class extends webexpress.webui.Ctrl {
     _animationFrameId = null;
     _isDrawing = false;
     _customColor = null;
+    _themeObserver = null;
+
+    /**
+     * The color a cell falls back to when neither the palette nor a configured color applies.
+     */
+    static DEFAULT_COLOR = "#9ec5fe";
+
+    /**
+     * The lightness band a color is read into, per theme. A drawing on a dark ground needs its
+     * colors above the ground and one on a light ground needs them below it, so the band is the
+     * whole of what the theme changes - the hue a cell inherited from its parents is kept.
+     */
+    static BANDS = {
+        light: { min: 30, max: 55 },
+        dark: { min: 55, max: 80 }
+    };
 
     // palette used when no explicit color is configured
     _palette = [
@@ -51,9 +72,17 @@ webexpress.webui.GameOfLifeCtrl = class extends webexpress.webui.Ctrl {
         this._cols = Math.floor(this._canvas.width / this._cellSize);
         this._rows = Math.floor(this._canvas.height / this._cellSize);
 
-        // clean up dom and append canvas
+        // clean up dom and append canvas. The registry takes the class the control was
+        // recognised by off the element once it has mounted, so the styling hook is a name of
+        // its own - without it the board loses its ground the moment it comes alive.
+        element.classList.add("wx-gameoflife");
         element.textContent = "";
         element.appendChild(this._canvas);
+
+        // colors are read for the theme at draw time and the reading is memoised, so a theme
+        // switch only has to empty the cache - the cells keep the colors they inherited
+        this._tinted = new Map();
+        this._watchTheme();
 
         // initialize the grid with random life
         this._initGrid();
@@ -71,6 +100,73 @@ webexpress.webui.GameOfLifeCtrl = class extends webexpress.webui.Ctrl {
      */
     _randomPaletteColor() {
         return this._palette[Math.floor(Math.random() * this._palette.length)];
+    }
+
+    /**
+     * Reads a color for the theme the page is in.
+     *
+     * Only the lightness is moved, into the band the theme leaves room for; hue and saturation
+     * are what the cell inherited and say which colony it belongs to, so they are kept. A color
+     * already inside the band is returned untouched.
+     *
+     * @param {string} hex - The color the cell carries.
+     * @returns {string} The color to draw it in.
+     */
+    _tint(hex) {
+        if (this._tinted.has(hex)) {
+            return this._tinted.get(hex);
+        }
+
+        const band = webexpress.webui.GameOfLifeCtrl.BANDS[this._theme()];
+        const hsl = this._hexToHsl(hex);
+        const lightness = Math.min(band.max, Math.max(band.min, hsl.l));
+        const tinted = lightness === hsl.l ? hex : this._hslToHex(hsl.h, hsl.s, lightness);
+
+        this._tinted.set(hex, tinted);
+
+        return tinted;
+    }
+
+    /**
+     * Reports which theme the page is in.
+     * @returns {string} Either "dark" or "light".
+     */
+    _theme() {
+        return document.documentElement?.getAttribute("data-bs-theme") === "dark" ? "dark" : "light";
+    }
+
+    /**
+     * Follows a theme switch.
+     *
+     * The theme is changed on the document element while the page is open - the framework has a
+     * picker for it - so the colors cannot be read once at construction. The cache is emptied
+     * instead, and the next frame draws the same cells against the new ground.
+     */
+    _watchTheme() {
+        if (typeof MutationObserver !== "function" || !document.documentElement) {
+            return;
+        }
+
+        this._themeObserver = new MutationObserver(() => this._tinted.clear());
+        this._themeObserver.observe(document.documentElement, {
+            attributes: true,
+            attributeFilter: ["data-bs-theme"]
+        });
+    }
+
+    /**
+     * Stops the animation and the theme watch.
+     */
+    destroy() {
+        if (this._animationFrameId) {
+            cancelAnimationFrame(this._animationFrameId);
+            this._animationFrameId = null;
+        }
+
+        this._themeObserver?.disconnect();
+        this._themeObserver = null;
+
+        this._element.classList.remove("wx-gameoflife");
     }
 
     /**
@@ -352,8 +448,10 @@ webexpress.webui.GameOfLifeCtrl = class extends webexpress.webui.Ctrl {
                 const cell = this._grid[i][j];
 
                 if (cell.alive) {
-                    // use the cell's own color; fall back to custom or default
-                    this._ctx.fillStyle = cell.color || this._customColor || "#9ec5fe";
+                    // the cell's own color, or the configured one, read for the current theme
+                    this._ctx.fillStyle = this._tint(
+                        cell.color || this._customColor || webexpress.webui.GameOfLifeCtrl.DEFAULT_COLOR
+                    );
                     this._ctx.fillRect(
                         i * this._cellSize,
                         j * this._cellSize,

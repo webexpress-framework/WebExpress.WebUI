@@ -101,6 +101,11 @@
     vertical-align: -0.375em;
 }
 
+.wx-icon-light-access-point {
+    -webkit-mask-image: url("../icons/access-point.svg");
+    mask-image: url("../icons/access-point.svg");
+}
+
 .wx-icon-light-add-column-above {
     -webkit-mask-image: url("../icons/add-column-above.svg");
     mask-image: url("../icons/add-column-above.svg");
@@ -481,6 +486,11 @@
     mask-image: url("../icons/construction.svg");
 }
 
+.wx-icon-light-container {
+    -webkit-mask-image: url("../icons/container.svg");
+    mask-image: url("../icons/container.svg");
+}
+
 .wx-icon-light-continuous {
     -webkit-mask-image: url("../icons/continuous.svg");
     mask-image: url("../icons/continuous.svg");
@@ -549,6 +559,11 @@
 .wx-icon-light-diamond {
     -webkit-mask-image: url("../icons/diamond.svg");
     mask-image: url("../icons/diamond.svg");
+}
+
+.wx-icon-light-directory-service {
+    -webkit-mask-image: url("../icons/directory-service.svg");
+    mask-image: url("../icons/directory-service.svg");
 }
 
 .wx-icon-light-dividers {
@@ -649,6 +664,11 @@
 .wx-icon-light-filter {
     -webkit-mask-image: url("../icons/filter.svg");
     mask-image: url("../icons/filter.svg");
+}
+
+.wx-icon-light-firewall {
+    -webkit-mask-image: url("../icons/firewall.svg");
+    mask-image: url("../icons/firewall.svg");
 }
 
 .wx-icon-light-flag {
@@ -881,6 +901,11 @@
     mask-image: url("../icons/list.svg");
 }
 
+.wx-icon-light-load-balancer {
+    -webkit-mask-image: url("../icons/load-balancer.svg");
+    mask-image: url("../icons/load-balancer.svg");
+}
+
 .wx-icon-light-lock {
     -webkit-mask-image: url("../icons/lock.svg");
     mask-image: url("../icons/lock.svg");
@@ -904,6 +929,11 @@
 .wx-icon-light-magpie {
     -webkit-mask-image: url("../icons/magpie.svg");
     mask-image: url("../icons/magpie.svg");
+}
+
+.wx-icon-light-mainframe {
+    -webkit-mask-image: url("../icons/mainframe.svg");
+    mask-image: url("../icons/mainframe.svg");
 }
 
 .wx-icon-light-media-disruption {
@@ -1039,6 +1069,11 @@
 .wx-icon-light-paste {
     -webkit-mask-image: url("../icons/paste.svg");
     mask-image: url("../icons/paste.svg");
+}
+
+.wx-icon-light-patch-panel {
+    -webkit-mask-image: url("../icons/patch-panel.svg");
+    mask-image: url("../icons/patch-panel.svg");
 }
 
 .wx-icon-light-path {
@@ -1196,6 +1231,11 @@
     mask-image: url("../icons/rotate-right.svg");
 }
 
+.wx-icon-light-router {
+    -webkit-mask-image: url("../icons/router.svg");
+    mask-image: url("../icons/router.svg");
+}
+
 .wx-icon-light-rss {
     -webkit-mask-image: url("../icons/rss.svg");
     mask-image: url("../icons/rss.svg");
@@ -1234,6 +1274,11 @@
 .wx-icon-light-server {
     -webkit-mask-image: url("../icons/server.svg");
     mask-image: url("../icons/server.svg");
+}
+
+.wx-icon-light-server-rack {
+    -webkit-mask-image: url("../icons/server-rack.svg");
+    mask-image: url("../icons/server-rack.svg");
 }
 
 .wx-icon-light-service-desk {
@@ -1314,6 +1359,11 @@
 .wx-icon-light-svg {
     -webkit-mask-image: url("../icons/svg.svg");
     mask-image: url("../icons/svg.svg");
+}
+
+.wx-icon-light-switch {
+    -webkit-mask-image: url("../icons/switch.svg");
+    mask-image: url("../icons/switch.svg");
 }
 
 .wx-icon-light-system {
@@ -1454,6 +1504,11 @@
 .wx-icon-light-user-shield {
     -webkit-mask-image: url("../icons/user-shield.svg");
     mask-image: url("../icons/user-shield.svg");
+}
+
+.wx-icon-light-virtual-machine {
+    -webkit-mask-image: url("../icons/virtual-machine.svg");
+    mask-image: url("../icons/virtual-machine.svg");
 }
 
 .wx-icon-light-virus {

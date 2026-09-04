@@ -326,6 +326,16 @@ pre {
     z-index: 2;
 }
 
+/* The Game of Life draws on a transparent canvas, so what it is read against is the ground of
+   its own element. That ground is the theme's: the light value is the one the board was drawn on
+   before, and the dark one is the recessed surface of the dark theme. Both names are styled
+   because the element carries the authored one until the controller has mounted and swapped it
+   for the one it keeps. */
+.wx-webui-gameoflife,
+.wx-gameoflife {
+    background-color: var(--wx-tertiary-bg);
+}
+
 .wx-link {
     color: rgba(var(--wx-link-color-rgb), var(--bs-link-opacity, 1));
     text-decoration: none;
