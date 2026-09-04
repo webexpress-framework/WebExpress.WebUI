@@ -106,6 +106,58 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that the fill mode reaches the rich-text surface, and only it: the other
+        /// formats size themselves from the row count, so an editor attribute on them would
+        /// promise a behaviour their markup cannot have.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeEditTextFormat.Wysiwyg, true, @"<div class=""wx-webui-editor form-control"" data-fill=""true""></div>")]
+        [InlineData(TypeEditTextFormat.Wysiwyg, false, @"<div class=""wx-webui-editor form-control""></div>")]
+        [InlineData(TypeEditTextFormat.Multiline, true, @"<textarea class=""form-control"" rows=""8""></textarea>")]
+        [InlineData(TypeEditTextFormat.Default, true, @"<input type=""text"" class=""form-control"">")]
+        public void Fill(TypeEditTextFormat format, bool fill, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputText(null)
+            {
+                Format = _ => format,
+                Fill = _ => fill
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that an undeclared fill resolver leaves the editor markup untouched, so a
+        /// control written before the mode existed renders exactly as it did.
+        /// </summary>
+        [Fact]
+        public void FillNotDeclared()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputText(null)
+            {
+                Format = _ => TypeEditTextFormat.Wysiwyg
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-editor form-control""></div>", html);
+        }
+
+        /// <summary>
         /// Tests the description property of the form text control.
         /// </summary>
         [Theory]

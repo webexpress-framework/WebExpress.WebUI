@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
- <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
-  <path d="m3.6 18.4v-4a2 2 0 0 1 2-2h10.8"/>
-  <path d="m12.8 5.6 3.6 3.6-3.6 3.6"/>
-  <path d="m16.4 12.4v-3.2"/>
+ <g transform="matrix(1.186 0 0 -1.186 -2.296 19.094)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <path d="m8.4852 9.1237 3.6 3.6 3.6-3.6"/>
+  <circle transform="matrix(.84317 0 0 -.84317 1.9359 16.099)" cx="10.5" cy="10.5" r="8.8891" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25" style="paint-order:stroke fill markers"/>
+  <path transform="matrix(.84317 0 0 -.84317 1.9359 16.099)" d="m5.5746 11.227 0.023516 1.0881c0.13069 2.4546 1.4543 4.35 3.2678 4.3499 1.8133-1.38e-4 3.1361-1.8958 3.2668-4.3499v-7.2835" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25" style="paint-order:stroke fill markers"/>
  </g>
 </svg>

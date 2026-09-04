@@ -1,8 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
- <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
-  <path d="m2.6 6.4 7.9-3.8 7.9 3.8v9l-7.9 3.8-7.9-3.8z"/>
+ <g transform="matrix(.84162 0 0 .84162 1.7445 2.918)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <path d="m2.6333 6.5663 7.8667-3.9663 7.9 3.8m0 4.6746v4.3254l-7.9 3.8-7.9-3.8 0.033257-3.9909"/>
   <path d="m2.6 6.4 7.9 3.8 7.9-3.8"/>
   <path d="m10.5 10.2v9"/>
+  <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+   <path d="m10.668 2.3086 2.015-3.2412 7.7913 3.7115-2.1165 3.4334" style="paint-order:stroke fill markers"/>
+   <path d="m10.125 2.0589-2.015-3.2412-7.7913 3.7115 2.1165 3.4334" style="paint-order:stroke fill markers"/>
+   <path d="m10.227 10.59-2.015 3.2412-7.7913-3.7115 2.1165-3.4334" style="paint-order:stroke fill markers"/>
+   <path d="m10.681 10.482 2.015 3.2412 7.7913-3.7115-2.1165-3.4334" style="paint-order:stroke fill markers"/>
+  </g>
  </g>
 </svg>

@@ -16,7 +16,40 @@ The editor is initialized directly in the HTML. The initial content is taken fro
 | `data-image-upload-uri` | The URI endpoint for image uploads.                                                                  | `data-image-upload-uri="/api/upload"`
 | `data-image-base-uri`   | The base URI for resolving image paths.                                                              | `data-image-base-uri="/images/"`
 | `data-mention-uri`      | REST endpoint for the `@`-mention search. The presence of this attribute enables the mention picker. | `data-mention-uri="/api/users/search"`
+| `data-fill`             | Set to `"true"` to let the writing area take the height its dialog or page has left over.            | `data-fill="true"`
 | Text Content            | The initial HTML content of the editor.                                                              | `<div class="wx-webui-editor">Initial <b>text</b>.</div>`
+
+## Filling the Available Height
+
+An editor sized for a form among many fields is a box of a few rows. An editor that *is* the
+form — an article, a page, a post — should instead take everything the surface has left over,
+because on such a form every pixel that is not the writing area is overhead.
+
+`data-fill="true"` switches the editor to that mode. The writing area then grows to the
+available height and loses its resize handle, which could only make an already maximal surface
+smaller by accident.
+
+The height is a viewport calculation rather than a share of the parent, because a form does not
+offer one: inside a modal the form element is laid out as `display: contents`, so a percentage
+resolves to `auto` the whole way down. What stands above and below the surface is the host's to
+know, so the amount subtracted is the custom property `--wx-editor-fill-offset`. Its default,
+`20rem`, is the chrome of a full-screen dialog — its header, a title field, the editor toolbar
+and the footer bar the submit button sits on.
+
+```html
+<div class="wx-webui-editor" name="Body" data-fill="true"
+     style="--wx-editor-fill-offset: 16rem;">
+</div>
+```
+
+A host that *can* offer a definite height makes the calculation unnecessary. `ModalFormCtrl`
+does exactly that: a dialog whose served form carries a filling element gets the class
+`wx-modal-fill` on its body, which stops the body scrolling and passes its height down, and the
+writing area then ends where the dialog ends rather than where the arithmetic said. Any
+container that makes the chain down to the editor a growing flex column has the same effect.
+
+On the server the mode is declared through `ControlFormItemInputText.Fill`; it applies to the
+`Wysiwyg` format only, since the other formats size themselves from `Rows`.
 
 ## Inline Triggers
 

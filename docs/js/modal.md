@@ -237,7 +237,7 @@ The `ModalFormCtrl` is a specialized component that combines the functionality o
    ┌──────────────────────────────────────────────────┐
    │                                                  │
    │  ┌────────────────────────────────────────────┐  │
-   │  │ [Form Title]                           [x] │  │
+   │  │ [Form Header]                          [x] │  │
    │  ├────────────────────────────────────────────┤  │
    │  │  ┌──────────────────────────────────────┐  │  │
    │  │  │ [Validation Errors Alert]            │  │  │
@@ -247,7 +247,7 @@ The `ModalFormCtrl` is a specialized component that combines the functionality o
    │  │  │                                      │  │  │
    │  │  └──────────────────────────────────────┘  │  │
    │  ├────────────────────────────────────────────┤  │
-   │  │     [Submit Button] [Reset Button] [Close] │  │
+   │  │ [Form Footer]  [Submit] [Reset]    [Close] │  │
    │  └────────────────────────────────────────────┘  │
    │                                                  │
    └──────────────────────────────────────────────────┘
@@ -260,7 +260,21 @@ The component builds upon `ModalPageCtrl` and extends its functionality to provi
 - **Asynchronous Form Submission**: The `ModalFormCtrl` intercepts the form's `submit` event. Instead of reloading the page, it serializes the form data and sends it via a `fetch` request to the URL defined in the form's `action` attribute.
 - **Dynamic Content Updates**: After submission, the component expects an HTML response from the server. This response is parsed, and the new form state contained within it is extracted and used to update the modal's content.
 - **Intelligent DOM Restructuring**: During initialization and each update, the component restructures the DOM. It wraps the entire modal dialog in a `<form>` element. Buttons of type `submit` or `reset` contained in the server-provided HTML are automatically moved to the modal's footer.
+- **Form Header**: A `<header>` element that the server renders as a direct child of the form becomes the dialog's title, replacing the served page's `<title>`. A form header names what is being edited, which is what a title bar is for; and because the header stays inside the form, an input placed in it — the edited record's own name, say — is loaded and submitted with every other field. Without a form header the page title is used, as before.
+- **Form Footer**: A `<footer>` element that the server renders as a direct child of the form is moved onto the dialog's footer bar, ahead of the submit buttons, and takes the free space to their left. This is where a form states what comments on the decision the buttons take — a save state, a hint, a validation summary — so it belongs on that bar rather than at the end of the scrolling body. It is laid out as a row, so a form can put a state on the left and a secondary control on the right of its own box. Content declared through the form footer sections therefore reads the same whether the form is rendered as a page or opened as a modal.
+- **Reserved Body**: When the served form contains an element marked `data-fill="true"` — a filling `EditorCtrl`, for instance — the modal body is given the class `wx-modal-fill`: it stops scrolling and passes its height down through every element between it and the filling one. The writing area then ends exactly where the dialog does, instead of the editor having to guess at the chrome around it.
 - **Programmatic Error Display**: A dedicated method, `showValidationErrors`, allows for the programmatic display of a list of validation errors. This method generates a summary warning (Bootstrap Alert) at the top of the modal body.
+
+### What the controller does with each part of the form
+
+| Part of the served form                     | Where it ends up
+|---------------------------------------------|---------------------------------------------------------
+| Hidden metadata islands (`[hidden]` children)| Stay direct children of the `<form>`, so the injected form still hydrates from them
+| `<header>` (direct child)                    | The dialog's title bar, in place of the page title
+| `<footer>` (direct child)                    | The dialog's footer bar, left of the buttons
+| `button[type=submit]` / `button[type=reset]` | The dialog's footer bar, before the generated close button
+| Everything else visible                      | The modal body
+| CSS classes on the `<form>`                  | Only those beginning with `wx` are kept; the rest belong to the page layout the form was served in
 
 ## Programmatic Control
 

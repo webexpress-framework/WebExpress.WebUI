@@ -7,3 +7,57 @@
     margin: 0 !important;
     padding: 0 !important;
 }
+
+
+/* A form header titles the dialog, so it takes the whole title bar rather than sitting as a
+   word inside it. The bar is a flex row (title, fullscreen toggle, close), and the title is
+   the part that grows. */
+.modal-header > .modal-title > header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+}
+
+/* The footer the form declared is a bar of its own inside the dialog's bar: it takes the free
+   space to the left of the actions, so what it says reads as a comment on them rather than as
+   another one of them. It is laid out as a row so a form can put a state on the left and a
+   secondary control on the right of its own box. */
+.modal-footer > footer {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex: 1 1 auto;
+    margin-right: auto;
+    min-width: 0;
+    text-align: start;
+}
+
+/* A body reserved for a filling element stops scrolling and passes its height down instead.
+   The body and every element between it and the filling one become a growing flex column -
+   which is what `:has()` selects, without this rule having to know how the form nests its
+   groups - so a writing surface ends exactly where the dialog does. */
+.modal-body.wx-modal-fill {
+    overflow: hidden;
+}
+
+.modal-body.wx-modal-fill,
+.modal-body.wx-modal-fill :has([data-fill="true"]) {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* only that path grows. a sibling beside it - the emptied button panel, a prolog container -
+   keeps its own height, or the free space would be shared out between them and the surface
+   would end up with a fraction of the dialog. */
+.modal-body.wx-modal-fill > *,
+.modal-body.wx-modal-fill :has([data-fill="true"]) > * {
+    flex: 0 0 auto;
+}
+
+.modal-body.wx-modal-fill :has([data-fill="true"]),
+.modal-body.wx-modal-fill [data-fill="true"] {
+    flex: 1 1 auto;
+    min-height: 0;
+}

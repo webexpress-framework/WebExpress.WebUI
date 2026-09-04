@@ -5,6 +5,14 @@
  * - webexpress.webui.Event.MODAL_HIDE_EVENT
  */
 webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
+
+    /**
+     * What counts as a dialog when deciding which one a section belongs to. Both names are
+     * matched because a dialog carries the authored one until its own controller has mounted
+     * and swapped it for the rendered one.
+     */
+    static DIALOG_SELECTOR = ".wx-webui-modal, .modal";
+
     _closeLabel = null;
     _size = null;
     _autoShow = null;
@@ -44,23 +52,22 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this._titleH1.className = "modal-title fs-5 flex-grow-1";
         this._footerDiv.className = "modal-footer";
 
-        // extract and append children from .wx-modal-header
-        const headers = this._element.querySelectorAll(".wx-modal-header");
-        headers.forEach(header => {
-            this._titleH1.appendChild(this._detachElement(header));
-        });
+        this.liftTitle(this._element);
 
         // extract and append all .wx-modal-content elements directly to body div
         const contents = this._element.querySelectorAll(".wx-modal-content");
+
+        // a body reserved for a filling element stops scrolling and passes its height down, so a
+        // writing surface ends exactly where the dialog does instead of guessing at the chrome
+        // around it. Asked before the content is moved, while it is still whole.
+        const fills = [...contents].some(content => content.querySelector("[data-fill=\"true\"]"));
+
         contents.forEach(content => {
             this._bodyDiv.appendChild(this._detachElement(content));
         });
 
-        // extract and append all .wx-modal-footer elements
-        const footers = this._element.querySelectorAll(".wx-modal-footer");
-        footers.forEach(footer => {
-            this._footerDiv.appendChild(this._detachElement(footer));
-        });
+        this._bodyDiv.classList.toggle("wx-modal-fill", fills);
+        this.liftFooter(this._element);
 
         // create header content
         this._headerDiv.appendChild(this._titleH1);
@@ -115,6 +122,73 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         if (this._autoShow) {
             this.show();
         }
+    }
+
+    /**
+     * Moves the title sections a subtree declares onto the dialog's own title bar.
+     *
+     * What a dialog is made of is decided here, in the base, rather than in one of the
+     * controllers built on it: every dialog has a title bar and a footer bar, so every dialog
+     * has to be able to take the sections an author wrote for them. A subclass that assembles
+     * its dialog from somewhere else - a page it fetched, say - passes that root in instead of
+     * repeating the rule.
+     *
+     * @param {HTMLElement} root - The element whose sections are lifted.
+     * @returns {number} How many sections were found, so a caller can fall back to a title of
+     * its own when the subtree declared none.
+     */
+    liftTitle(root) {
+        return this._lift(root, ".wx-modal-header", "header", this._titleH1);
+    }
+
+    /**
+     * Moves the footer sections a subtree declares onto the dialog's own footer bar.
+     *
+     * The footer is where a form puts what belongs beside its buttons - a save state, a hint, a
+     * validation summary - so it is lifted onto the bar those buttons end up on rather than
+     * dropped into the body, where it would comment on a decision taken somewhere else.
+     *
+     * @param {HTMLElement} root - The element whose sections are lifted.
+     * @returns {number} How many sections were found.
+     */
+    liftFooter(root) {
+        return this._lift(root, ".wx-modal-footer", "footer", this._footerDiv);
+    }
+
+    /**
+     * Moves the sections of one bar out of a subtree and onto that bar.
+     *
+     * A section is recognised either by the class a control authored it with or by the element
+     * an author wrote by hand. The class is looked up anywhere below the root, which is how the
+     * dialog controls have always emitted it; the element only among the root's own children,
+     * because a &lt;footer&gt; deeper down belongs to the content and is not the dialog's.
+     *
+     * A section that belongs to a dialog nested inside the root is left where it is. A form can
+     * carry a whole dialog of its own - the document editor is one - and taking its title bar
+     * away to build this one would dismantle it.
+     *
+     * @param {HTMLElement} root - The element whose sections are lifted.
+     * @param {string} className - The class a control marks the section with.
+     * @param {string} tagName - The element an author writes the section as.
+     * @param {HTMLElement} bar - The bar the sections are moved onto.
+     * @returns {number} How many sections were moved.
+     */
+    _lift(root, className, tagName, bar) {
+        if (!root) {
+            return 0;
+        }
+
+        const owner = root.closest(webexpress.webui.ModalCtrl.DIALOG_SELECTOR);
+        const sections = [
+            ...root.querySelectorAll(className),
+            ...root.querySelectorAll(":scope > " + tagName)
+        ].filter(section => section.closest(webexpress.webui.ModalCtrl.DIALOG_SELECTOR) === owner);
+
+        for (const section of sections) {
+            bar.appendChild(this._detachElement(section));
+        }
+
+        return sections.length;
     }
 
     /**

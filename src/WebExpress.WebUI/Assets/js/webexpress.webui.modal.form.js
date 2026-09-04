@@ -30,8 +30,6 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
         const doc = parser.parseFromString(response, "text/html");
         const form = doc.querySelector(this._selector);
 
-        this._titleH1.textContent = doc.title?.trim();
-
         if (form) {
             // remove previous submit handler to avoid duplicate bindings
             if (this._submitHandler && this._form) {
@@ -83,14 +81,39 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
 
             this._form.addEventListener("submit", this._submitHandler);
 
-            // extract all visible content except <footer> and the metadata islands
-            const formContent = [...form.children].filter(el => !el.matches("footer") && !el.hasAttribute("hidden"));
+            // the bars are emptied before the served form's sections are lifted onto them, so
+            // nothing of the previously shown form is left behind them
+            this._footerDiv.innerHTML = "";
+            this._titleH1.innerHTML = "";
+
+            // a form header names what is being edited, which is what the dialog's title bar is
+            // for, and a form footer holds what belongs beside its buttons. Both are lifted by
+            // the base dialog, which owns what a dialog is made of; because they stay inside the
+            // form, an input in the header (the edited record's own name, say) is still loaded
+            // and submitted with the rest.
+            const titled = this.liftTitle(form);
+            this.liftFooter(form);
+
+            // extract all visible content except the metadata islands; the sections are already
+            // gone from the form's children by now
+            const formContent = [...form.children].filter(el => !el.hasAttribute("hidden"));
+
+            // a form whose body is one filling element gets the whole body reserved for it: the
+            // body stops scrolling and passes its height down, so a writing surface ends exactly
+            // where the dialog does instead of guessing at the chrome around it. asked here,
+            // while the form still holds its content - the emptying below detaches it.
+            const fills = !!form.querySelector("[data-fill=\"true\"]");
 
             form.innerHTML = "";
-            this._footerDiv.innerHTML = "";
+
+            if (!titled) {
+                this._titleH1.textContent = doc.title?.trim() ?? "";
+            }
 
             buttons.forEach(btn => this._footerDiv.appendChild(btn));
             this._footerDiv.appendChild(this._cancelButton);
+
+            this._bodyDiv.classList.toggle("wx-modal-fill", fills);
 
             // fill modal body with form content
             this._bodyDiv.innerHTML = "";
@@ -117,6 +140,8 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
 
             return;
         }
+
+        this._titleH1.textContent = doc.title?.trim() ?? "";
 
         // fallback: try to find a wx-content-main
         const contentMain = doc.querySelector("#wx-content-main");

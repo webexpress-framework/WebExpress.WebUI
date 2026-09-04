@@ -33,8 +33,14 @@
     line-height: 1.25;
 }
 
-.wx-content ul,
-.wx-content ol {
+/* The indent is for a list somebody wrote, not for one a control built. A menu, a listbox or a
+   tab strip is a list in markup only - it carries a role of its own and lays its own entries
+   out - and the prose indent pushes every one of its entries in by a marker width that nothing
+   occupies. It reaches them because an element in the selector outweighs the single class the
+   controls reset their list with, so the exclusion has to be written here rather than fought
+   from the other side. */
+.wx-content ul:not([role]):not(.dropdown-menu),
+.wx-content ol:not([role]):not(.dropdown-menu) {
     margin-bottom: 0.75rem;
     padding-left: 1.5rem;
 }

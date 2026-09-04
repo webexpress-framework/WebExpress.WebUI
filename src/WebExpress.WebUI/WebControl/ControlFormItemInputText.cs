@@ -48,6 +48,26 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, uint?> Rows { get; set; } = _ => 8;
 
         /// <summary>
+        /// Gets or sets whether the rich-text surface takes the height its dialog or page has
+        /// left over instead of the fixed box a field among many fields gets.
+        /// </summary>
+        /// <remarks>
+        /// This is for the form whose text <i>is</i> the work - an article, a page, a post -
+        /// where everything that is not the writing area is overhead. It applies to
+        /// <see cref="TypeEditTextFormat.Wysiwyg"/> only; the other formats size themselves
+        /// from <see cref="Rows"/>.
+        /// <para>
+        /// The height is a viewport calculation rather than a share of the parent, because a
+        /// form has no height to share: inside a modal the form element is laid out as
+        /// <c>display: contents</c>, so a percentage resolves to auto the whole way down. How
+        /// much stands above and below the surface is the caller's to know, so the amount is
+        /// subtracted through the <c>--wx-editor-fill-offset</c> custom property, which
+        /// defaults to the chrome of a full-screen dialog.
+        /// </para>
+        /// </remarks>
+        public Func<IRenderControlContext, bool> Fill { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public ControlFormItemInputText()
@@ -91,6 +111,7 @@ namespace WebExpress.WebUI.WebControl
             var placeholder = Placeholder?.Invoke(renderContext);
             var pattern = Pattern?.Invoke(renderContext);
             var rows = Rows?.Invoke(renderContext);
+            var fill = Fill?.Invoke(renderContext) ?? false;
             var minLength = MinLength?.Invoke(renderContext);
             var maxLength = MaxLength?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
@@ -124,7 +145,9 @@ namespace WebExpress.WebUI.WebControl
                     Class = Css.Concatenate("wx-webui-editor", classes),
                     Style = GetStyles(renderContext),
                     Role = role,
-                }.AddUserAttribute("name", name),
+                }
+                    .AddUserAttribute("name", name)
+                    .AddUserAttribute("data-fill", fill ? "true" : null),
                 _ => new HtmlElementFieldInput()
                 {
                     Id = Id,

@@ -29,6 +29,27 @@
 }
 
 /*
+ * A button that carries an icon centres it against its label instead of hanging it from the
+ * baseline.
+ *
+ * The -0.125em above is the classic baseline nudge, and it only lands correctly for a glyph
+ * that fills its em box. These drawings do not: the mask is contained, so the ink sits inset
+ * and the icon reads as riding high next to the text. A link already avoids that by centring
+ * its content (.wx-link is an inline-flex row), and a button is the same kind of box - so it
+ * gets the same treatment rather than a second, hand-tuned offset that would have to be
+ * re-tuned for every drawing.
+ *
+ * Only buttons that actually carry an icon are switched, so a plain text button keeps the
+ * inline-block layout the framework's button variants are built on.
+ */
+.btn:has(> .wx-icon-light),
+.btn:has(> .wx-icon-img) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/*
  * Image icon emitted by webexpress.webui.Icon.create for an image spec. It is
  * sized to the surrounding text like a font glyph so an image can stand in for
  * a drawn icon anywhere a control places one.
@@ -1113,6 +1134,11 @@
 .wx-icon-light-puzzle {
     -webkit-mask-image: url("../icons/puzzle.svg");
     mask-image: url("../icons/puzzle.svg");
+}
+
+.wx-icon-light-pyramid {
+    -webkit-mask-image: url("../icons/pyramid.svg");
+    mask-image: url("../icons/pyramid.svg");
 }
 
 .wx-icon-light-qs {
@@ -3420,9 +3446,14 @@
     mask-image: url("../icons/spinner.svg");
 }
 
-.wx-icon-light-star-half-alt {
-    -webkit-mask-image: url("../icons/star-half-alt.svg");
-    mask-image: url("../icons/star-half-alt.svg");
+.wx-icon-light-star-half {
+    -webkit-mask-image: url("../icons/star-half.svg");
+    mask-image: url("../icons/star-half.svg");
+}
+
+.wx-icon-light-star-stroke {
+    -webkit-mask-image: url("../icons/star-stroke.svg");
+    mask-image: url("../icons/star-stroke.svg");
 }
 
 .wx-icon-light-star-half-stroke {

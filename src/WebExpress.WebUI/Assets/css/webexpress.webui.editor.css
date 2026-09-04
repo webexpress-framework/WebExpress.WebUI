@@ -1011,3 +1011,42 @@
     outline-offset: 2px;
     border-radius: 3px;
 }
+/* A filling editor is the writing surface of a form whose text is the work - an article, a
+   page, a post - rather than one field among many. It takes the height its dialog or page has
+   left over.
+
+   That height is expressed against the viewport because no ancestor offers one: a form inside
+   a modal is laid out as `display: contents`, so a percentage resolves to auto the whole way
+   down. What stands above and below the surface differs per host, so the amount subtracted is
+   a custom property; the default is the chrome of a full-screen dialog (its header, the title
+   field, the editor toolbar and the footer bar the submit button sits on). */
+.wx-editor[data-fill="true"] {
+    display: flex;
+    flex-direction: column;
+}
+
+.wx-editor[data-fill="true"] > .wx-editor-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.wx-editor[data-fill="true"] .wx-editor-content {
+    flex: 1 1 auto;
+    height: calc(100vh - var(--wx-editor-fill-offset, 20rem));
+    min-height: 12rem;
+
+    /* the surface is already as tall as it can be; a drag handle on it could only make it
+       smaller by accident */
+    resize: none;
+}
+
+/* Where a host reserved a definite height for the editor - a dialog body carrying
+   `wx-modal-fill`, or any container that made the chain down to the editor a flex column -
+   the guess is not needed: the writing area takes exactly what is left and ends where its
+   host ends. */
+.wx-modal-fill .wx-editor[data-fill="true"] .wx-editor-content {
+    height: auto;
+    min-height: 0;
+}
