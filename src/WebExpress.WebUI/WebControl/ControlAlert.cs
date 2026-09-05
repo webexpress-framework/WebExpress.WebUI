@@ -1,4 +1,5 @@
 ﻿using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -64,8 +65,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var h = Head?.Invoke(renderContext);
-            var text = Text?.Invoke(renderContext);
+            var h = I18N.Translate(renderContext, Head?.Invoke(renderContext));
+            var text = I18N.Translate(renderContext, Text?.Invoke(renderContext));
             var dismissibility = Dismissibility?.Invoke(renderContext);
 
             var head = new HtmlElementTextSemanticsStrong

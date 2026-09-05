@@ -1,4 +1,5 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+﻿using System.Globalization;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -116,6 +117,32 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that headline and text resolve their keys against the culture the page is
+        /// requested in. The mock server is configured en while the mock request asks for
+        /// German, so a half that leaves the key unresolved shows the raw key instead.
+        /// </summary>
+        [Fact]
+        public void HeadAndTextFollowTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de"));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlAlert()
+            {
+                Dismissibility = _ => TypeDismissibilityAlert.None,
+                Head = _ => "webexpress.webui:form.submit.label",
+                Text = _ => "webexpress.webui:form.cancel.label"
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""alert"" role=""alert""><strong>Speichern&nbsp; </strong>Abbrechen</div>", html);
         }
     }
 }
