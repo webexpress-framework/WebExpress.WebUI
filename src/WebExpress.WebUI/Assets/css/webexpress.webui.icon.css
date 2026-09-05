@@ -8630,3 +8630,67 @@
     -webkit-mask-image: url("../icons/z.svg");
     mask-image: url("../icons/z.svg");
 }
+
+/*
+ * Music icons: instruments, playback hardware and notation.
+ */
+
+.wx-icon-light-music-note {
+    -webkit-mask-image: url("../icons/music-note.svg");
+    mask-image: url("../icons/music-note.svg");
+}
+
+.wx-icon-light-list-music {
+    -webkit-mask-image: url("../icons/list-music.svg");
+    mask-image: url("../icons/list-music.svg");
+}
+
+.wx-icon-light-piano {
+    -webkit-mask-image: url("../icons/piano.svg");
+    mask-image: url("../icons/piano.svg");
+}
+
+.wx-icon-light-metronome {
+    -webkit-mask-image: url("../icons/metronome.svg");
+    mask-image: url("../icons/metronome.svg");
+}
+
+.wx-icon-light-tuning-fork {
+    -webkit-mask-image: url("../icons/tuning-fork.svg");
+    mask-image: url("../icons/tuning-fork.svg");
+}
+
+.wx-icon-light-speaker {
+    -webkit-mask-image: url("../icons/speaker.svg");
+    mask-image: url("../icons/speaker.svg");
+}
+
+.wx-icon-light-cassette-tape {
+    -webkit-mask-image: url("../icons/cassette-tape.svg");
+    mask-image: url("../icons/cassette-tape.svg");
+}
+
+.wx-icon-light-turntable {
+    -webkit-mask-image: url("../icons/turntable.svg");
+    mask-image: url("../icons/turntable.svg");
+}
+
+.wx-icon-light-waveform {
+    -webkit-mask-image: url("../icons/waveform.svg");
+    mask-image: url("../icons/waveform.svg");
+}
+
+.wx-icon-light-sheet-music {
+    -webkit-mask-image: url("../icons/sheet-music.svg");
+    mask-image: url("../icons/sheet-music.svg");
+}
+
+.wx-icon-light-tambourine {
+    -webkit-mask-image: url("../icons/tambourine.svg");
+    mask-image: url("../icons/tambourine.svg");
+}
+
+.wx-icon-light-amplifier {
+    -webkit-mask-image: url("../icons/amplifier.svg");
+    mask-image: url("../icons/amplifier.svg");
+}
