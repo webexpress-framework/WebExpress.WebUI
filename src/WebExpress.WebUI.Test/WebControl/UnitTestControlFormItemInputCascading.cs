@@ -189,6 +189,30 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that the placeholder resolves against the culture the page is requested in,
+        /// the same way the item labels beside it already do.
+        /// </summary>
+        [Fact]
+        public void PlaceholderFollowsTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de")), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputCascading(null)
+            {
+                Placeholder = _ => "webexpress.webui:form.submit.label"
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-input-cascading"" placeholder=""Speichern""></div>", html);
+        }
+
+        /// <summary>
         /// Tests the selected property of the form cascading control item.
         /// </summary>
         [Theory]

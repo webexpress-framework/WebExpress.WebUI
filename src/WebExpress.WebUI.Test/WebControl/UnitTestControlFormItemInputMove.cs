@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebIcon;
+﻿using System.Globalization;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -224,6 +225,56 @@ namespace WebExpress.WebUI.Test.WebControl
 
             Assert.NotEmpty(control.Options);
             AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-input-move"" data-header-selected=""Selected options"" data-header-available=""Available options""><div class=""wx-webui-move-option"">label</div></div>", html);
+        }
+
+        /// <summary>
+        /// Tests that the two column headers resolve against the culture the page is requested
+        /// in. The mock server is configured en while the mock request asks for German, so a
+        /// text resolved against the server default answers in the wrong language.
+        /// </summary>
+        [Fact]
+        public void HeadersFollowTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de")), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputMove(null)
+            {
+                SelectedHeader = _ => "webexpress.webui:form.move.selected",
+                AvailableHeader = _ => "webexpress.webui:form.move.available"
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-input-move"" data-header-selected=""Ausgewählte Optionen"" data-header-available=""Verfügbare Optionen""></div>", html);
+        }
+
+        /// <summary>
+        /// Tests that the text of a move option resolves against the culture the page is
+        /// requested in, so the two columns read in the same language as their headers.
+        /// </summary>
+        [Fact]
+        public void OptionTextFollowsTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de")), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputMove(null, new ControlFormItemInputMoveItem()
+            {
+                Text = _ => "webexpress.webui:form.submit.label"
+            });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"*<div class=""wx-webui-move-option"">Speichern</div>*", html);
         }
     }
 }

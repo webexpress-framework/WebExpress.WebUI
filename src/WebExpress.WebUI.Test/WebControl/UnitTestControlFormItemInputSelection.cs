@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebIcon;
+﻿using System.Globalization;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -337,6 +338,56 @@ namespace WebExpress.WebUI.Test.WebControl
             // validation
             Assert.NotEmpty(control.Options);
             AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label=""label""></div></div>", html);
+        }
+
+        /// <summary>
+        /// Tests that the placeholder resolves against the culture the page is requested in.
+        /// The mock server is configured en while the mock request asks for German, so a text
+        /// resolved against the server default answers in the wrong language while the label
+        /// and the help text next to it on the same page stay German.
+        /// </summary>
+        [Fact]
+        public void PlaceholderFollowsTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de")), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputSelection(null)
+            {
+                Placeholder = _ => "webexpress.webui:form.submit.label"
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-input-selection"" placeholder=""Speichern""></div>", html);
+        }
+
+        /// <summary>
+        /// Tests that the label of a selection item resolves against the culture the page is
+        /// requested in, so the options read in the same language as the field around them.
+        /// </summary>
+        [Fact]
+        public void ItemLabelFollowsTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de")), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputSelection(null, new ControlFormItemInputSelectionItem(null)
+            {
+                Text = _ => "webexpress.webui:form.submit.label"
+            });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label=""Speichern""></div></div>", html);
         }
     }
 }

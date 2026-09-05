@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var html = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(Text?.Invoke(renderContext))))
+            var html = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text?.Invoke(renderContext))))
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-move-option"),

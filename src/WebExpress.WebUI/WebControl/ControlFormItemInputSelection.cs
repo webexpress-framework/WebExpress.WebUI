@@ -123,7 +123,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
-                .AddUserAttribute("placeholder", I18N.Translate(Placeholder?.Invoke(renderContext)))
+                .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder?.Invoke(renderContext)))
                 .AddUserAttribute("data-multiselection", MultiSelect?.Invoke(renderContext) == true ? "true" : null)
                 .AddUserAttribute("data-sticky-selection", StickySelection?.Invoke(renderContext) == true ? "true" : null)
                 .AddUserAttribute("data-value", value)

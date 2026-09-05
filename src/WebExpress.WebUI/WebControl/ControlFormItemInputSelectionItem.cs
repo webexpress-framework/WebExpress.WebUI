@@ -83,7 +83,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-selection-item"),
             }
-                .AddUserAttribute("data-label", I18N.Translate(Text?.Invoke(renderContext)))
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, Text?.Invoke(renderContext)))
                 .AddUserAttribute("data-icon", Icon?.Invoke(renderContext) is Icon ? (Icon?.Invoke(renderContext) as Icon).Class : null)
                 .AddUserAttribute("data-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) is ImageIcon imageIcon ? imageIcon.Uri?.ToString() : null))
                 .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorSelection.Default) != TypeColorSelection.Default

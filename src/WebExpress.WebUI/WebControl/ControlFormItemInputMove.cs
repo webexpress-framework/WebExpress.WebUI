@@ -117,12 +117,12 @@ namespace WebExpress.WebUI.WebControl
 
             if (!string.IsNullOrEmpty(SelectedHeader?.Invoke(renderContext)))
             {
-                html.AddUserAttribute("data-header-selected", I18N.Translate(SelectedHeader?.Invoke(renderContext)));
+                html.AddUserAttribute("data-header-selected", I18N.Translate(renderContext, SelectedHeader?.Invoke(renderContext)));
             }
 
             if (!string.IsNullOrEmpty(AvailableHeader?.Invoke(renderContext)))
             {
-                html.AddUserAttribute("data-header-available", I18N.Translate(AvailableHeader?.Invoke(renderContext)));
+                html.AddUserAttribute("data-header-available", I18N.Translate(renderContext, AvailableHeader?.Invoke(renderContext)));
             }
 
             if (!string.IsNullOrWhiteSpace(value))
