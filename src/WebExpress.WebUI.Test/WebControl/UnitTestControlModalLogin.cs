@@ -17,8 +17,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// id from the dialog, so a page addressing the dialog can address its login.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modal-login"" data-close-label=""Close""><div class=""wx-modal-header"">Login</div><div class=""wx-modal-content""><div class=""wx-webui-login""></div></div><div class=""wx-modal-footer""></div></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-modal-login"" data-close-label=""Close""><div class=""wx-modal-header"">Login</div><div class=""wx-modal-content""><div id=""id_login"" class=""wx-webui-login""></div></div><div class=""wx-modal-footer""></div></div>")]
+        [InlineData(null, @"<dialog class=""wx-webui-modal-login"" data-close-label=""Close""><div class=""wx-modal-header"">Login</div><div class=""wx-modal-content""><div class=""wx-webui-login""></div></div><div class=""wx-modal-footer""></div></dialog>")]
+        [InlineData("id", @"<dialog id=""id"" class=""wx-webui-modal-login"" data-close-label=""Close""><div class=""wx-modal-header"">Login</div><div class=""wx-modal-content""><div id=""id_login"" class=""wx-webui-login""></div></div><div class=""wx-modal-footer""></div></dialog>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -39,9 +39,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// and takes an i18n key.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modal-login"" *><div class=""wx-modal-header"">Login</div>*</div>")]
-        [InlineData("abc", @"<div class=""wx-webui-modal-login"" *><div class=""wx-modal-header"">abc</div>*</div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-modal-login"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</div>")]
+        [InlineData(null, @"<dialog class=""wx-webui-modal-login"" *><div class=""wx-modal-header"">Login</div>*</dialog>")]
+        [InlineData("abc", @"<dialog class=""wx-webui-modal-login"" *><div class=""wx-modal-header"">abc</div>*</dialog>")]
+        [InlineData("webexpress.webui:plugin.name", @"<dialog class=""wx-webui-modal-login"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</dialog>")]
         public void Header(string header, string expected)
         {
             // arrange
@@ -66,8 +66,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests that the username reaches the framed login as its prefill.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modal-login"" *><div class=""wx-modal-content""><div class=""wx-webui-login""></div></div>*</div>")]
-        [InlineData("abc", @"<div class=""wx-webui-modal-login"" *><div class=""wx-modal-content""><div class=""wx-webui-login"" data-username=""abc""></div></div>*</div>")]
+        [InlineData(null, @"<dialog class=""wx-webui-modal-login"" *><div class=""wx-modal-content""><div class=""wx-webui-login""></div></div>*</dialog>")]
+        [InlineData("abc", @"<dialog class=""wx-webui-modal-login"" *><div class=""wx-modal-content""><div class=""wx-webui-login"" data-username=""abc""></div></div>*</dialog>")]
         public void Username(string username, string expected)
         {
             // arrange
@@ -90,9 +90,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the size property of the login dialog.
         /// </summary>
         [Theory]
-        [InlineData(TypeModalSize.Default, @"<div class=""wx-webui-modal-login"" data-close-label=""Close"">*</div>")]
-        [InlineData(TypeModalSize.Small, @"<div class=""wx-webui-modal-login"" data-size=""modal-sm"" *>*</div>")]
-        [InlineData(TypeModalSize.Large, @"<div class=""wx-webui-modal-login"" data-size=""modal-lg"" *>*</div>")]
+        [InlineData(TypeModalSize.Default, @"<dialog class=""wx-webui-modal-login"" data-close-label=""Close"">*</dialog>")]
+        [InlineData(TypeModalSize.Small, @"<dialog class=""wx-webui-modal-login"" data-size=""modal-sm"" *>*</dialog>")]
+        [InlineData(TypeModalSize.Large, @"<dialog class=""wx-webui-modal-login"" data-size=""modal-lg"" *>*</dialog>")]
         public void Size(TypeModalSize size, string expected)
         {
             // arrange
@@ -116,9 +116,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// scrolling is opted out of rather than into, matching the base dialog.
         /// </summary>
         [Theory]
-        [InlineData(false, true, @"<div class=""wx-webui-modal-login"" data-close-label=""Close"">*</div>")]
-        [InlineData(true, true, @"<div class=""wx-webui-modal-login"" data-close-label=""Close"" data-auto-show=""true"">*</div>")]
-        [InlineData(false, false, @"<div class=""wx-webui-modal-login"" data-close-label=""Close"" data-scrollable=""false"">*</div>")]
+        [InlineData(false, true, @"<dialog class=""wx-webui-modal-login"" data-close-label=""Close"">*</dialog>")]
+        [InlineData(true, true, @"<dialog class=""wx-webui-modal-login"" data-close-label=""Close"" data-auto-show=""true"">*</dialog>")]
+        [InlineData(false, false, @"<dialog class=""wx-webui-modal-login"" data-close-label=""Close"" data-scrollable=""false"">*</dialog>")]
         public void AutoShowAndScrollable(bool autoShow, bool scrollable, string expected)
         {
             // arrange
@@ -156,7 +156,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(
-                @"<div id=""o1"" class=""wx-webui-modal-login"" data-close-label=""Close""><div class=""wx-modal-header"">Login</div><div class=""wx-modal-content""><div id=""o1_login"" class=""wx-webui-login""></div><div>Forgot your password?</div></div><div class=""wx-modal-footer""></div></div>",
+                @"<dialog id=""o1"" class=""wx-webui-modal-login"" data-close-label=""Close""><div class=""wx-modal-header"">Login</div><div class=""wx-modal-content""><div id=""o1_login"" class=""wx-webui-login""></div><div>Forgot your password?</div></div><div class=""wx-modal-footer""></div></dialog>",
                 html);
         }
     }

@@ -380,7 +380,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
      */
     _createModal: function(key, title) {
         const id = "wx-msp-" + key + "-" + Date.now();
-        const el = document.createElement("div");
+        const el = document.createElement("dialog");
         el.id = id;
         el.setAttribute("data-size", "modal-lg");
         el.setAttribute("data-key", key);

@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
+using WebExpress.WebUI.WebIcon;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Represents a single collapsible section of a <see cref="ControlAccordion"/>:
-    /// a header button that toggles the body via the Bootstrap collapse data API.
+    /// a native summary that toggles its details body without script.
     /// </summary>
     public class ControlAccordionItem : Control
     {
@@ -31,7 +32,7 @@ namespace WebExpress.WebUI.WebControl
 
         /// <summary>
         /// Initializes a new instance of the class. A stable id is generated when
-        /// none is supplied, because the collapse needs an id to be toggled.
+        /// none is supplied, so the section can be addressed independently.
         /// </summary>
         /// <param name="id">The id of the control.</param>
         /// <param name="content">The content shown in the body of the section.</param>
@@ -78,42 +79,27 @@ namespace WebExpress.WebUI.WebControl
             var header = Header?.Invoke(renderContext);
             var expanded = Expanded?.Invoke(renderContext) ?? false;
 
-            var button = new HtmlElementFieldButton(new HtmlText(header))
+            var summary = new HtmlElementInteractiveSummary
+            (
+                new HtmlText(header),
+                new HtmlElementTextSemanticsI() { Class = Css.Concatenate(new IconAngleDown().Class, "wx-accordion-caret") }
+            )
             {
-                Type = "button",
-                Class = Css.Concatenate("accordion-button", expanded ? "" : "collapsed")
-            }
-                .AddUserAttribute("data-bs-toggle", "collapse")
-                .AddUserAttribute("data-bs-target", "#" + Id)
-                .AddUserAttribute("aria-expanded", expanded ? "true" : "false")
-                .AddUserAttribute("aria-controls", Id);
-
-            var headerDiv = new HtmlElementTextContentDiv(button)
-            {
-                Class = "accordion-header"
+                Class = "accordion-button"
             };
-
-            var bodyDiv = new HtmlElementTextContentDiv([.. Content.Select(x => x.Render(renderContext, visualTree))])
+            var body = new HtmlElementTextContentDiv([.. Content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Class = "accordion-body"
             };
-
-            var collapseDiv = new HtmlElementTextContentDiv(bodyDiv)
+            var html = new HtmlElementInteractiveDetails(summary, body)
             {
                 Id = Id,
-                Class = Css.Concatenate("accordion-collapse collapse", expanded ? "show" : "")
-            };
-
-            if (!string.IsNullOrWhiteSpace(parentId))
-            {
-                collapseDiv.AddUserAttribute("data-bs-parent", "#" + parentId);
-            }
-
-            return new HtmlElementTextContentDiv(headerDiv, collapseDiv)
-            {
                 Class = Css.Concatenate("accordion-item", GetClasses(renderContext)),
                 Style = GetStyles(renderContext)
             };
+            if (expanded) { html.AddUserAttribute("open"); }
+            if (!string.IsNullOrWhiteSpace(parentId)) { html.AddUserAttribute("name", parentId); }
+            return html;
         }
     }
 }

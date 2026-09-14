@@ -292,7 +292,7 @@ test("a full last row needs no completion", () => {
 
 test("the surface follows the body palette, and the dark theme follows it too", () => {
     const light = cssRule(".wx-group");
-    const dark = cssRule('[data-bs-theme="dark"] .wx-group');
+    const dark = fs.readFileSync(CSS_PATH, "utf8").match(/@scope \(\[data-wx-theme="dark"\]\) to \(\[data-wx-theme="light"\]\)\s*\{\s*:scope \.wx-group\s*\{([^}]+)/)?.[1];
 
     assert.ok(light, "the group has a rule");
     assert.match(light, /--wx-group-bg:\s*var\(--wx-body-bg/, "the surface is a token, not a literal");

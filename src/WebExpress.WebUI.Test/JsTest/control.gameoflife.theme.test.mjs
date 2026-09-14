@@ -29,7 +29,7 @@ const FILE = "webexpress.webui.gameoflife.js";
 function mount(theme) {
     const rt = loadWebUi({ browser: true, extraFiles: [FILE] });
 
-    rt.document.documentElement.setAttribute("data-bs-theme", theme);
+    rt.document.documentElement.setAttribute("data-wx-theme", theme);
 
     const host = rt.createElement("div");
     host.classList.add("wx-webui-gameoflife");
@@ -85,7 +85,7 @@ test("switching the theme while the page is open reaches the cells", () => {
     const { rt, ctrl } = mount("light");
     const onLight = ctrl._tint("#8ecae6");
 
-    rt.document.documentElement.setAttribute("data-bs-theme", "dark");
+    rt.document.documentElement.setAttribute("data-wx-theme", "dark");
 
     // the observer is asynchronous in a browser; the cache emptying is what it does
     ctrl._tinted.clear();

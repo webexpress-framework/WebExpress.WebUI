@@ -374,8 +374,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeTheme.None, @"<div class=""wx-webui-card border""></div>")]
-        [InlineData(TypeTheme.Light, @"<div class=""wx-webui-card border"" data-bs-theme=""light""></div>")]
-        [InlineData(TypeTheme.Dark, @"<div class=""wx-webui-card border"" data-bs-theme=""dark""></div>")]
+        [InlineData(TypeTheme.Light, @"<div class=""wx-webui-card border"" data-wx-theme=""light""></div>")]
+        [InlineData(TypeTheme.Dark, @"<div class=""wx-webui-card border"" data-wx-theme=""dark""></div>")]
         public void Theme(TypeTheme theme, string expected)
         {
             // arrange

@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
@@ -100,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeDismissibilityAlert.None, @"<div class=""alert"" role=""alert""></div>")]
-        [InlineData(TypeDismissibilityAlert.Dismissible, @"<div class=""alert alert-dismissible"" role=""alert""><button class=""btn wx-button-close"" data-bs-dismiss=""alert"" aria-label=""close""><i class=""wx-icon-light wx-icon-light-xmark""></i></button></div>")]
+        [InlineData(TypeDismissibilityAlert.Dismissible, @"<div class=""alert alert-dismissible"" role=""alert""><button class=""btn wx-button-close"" type=""button"" data-wx-dismiss=""alert"" aria-label=""close""><i class=""wx-icon-light wx-icon-light-xmark""></i></button></div>")]
         public void Dismissibility(TypeDismissibilityAlert dismissibility, string expected)
         {
             // arrange

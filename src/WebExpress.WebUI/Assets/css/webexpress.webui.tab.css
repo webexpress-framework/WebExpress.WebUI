@@ -1,4 +1,4 @@
-﻿.wx-tab {
+.wx-tab {
 
 }
 
@@ -26,10 +26,10 @@
     margin-bottom: 0;
 }
 
-/* styling for the content area to match bootstrap border radiuses */
+/* styling for the content area to match WebExpress border radiuses */
 .wx-tab-content {
     background-color: var(--wx-body-bg);
-    border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+    border-radius: 0 0 var(--wx-border-radius) var(--wx-border-radius);
     /* the markup applies a p-3 utility; the vertical half of it is halved at the
        top and dropped at the bottom, where it only pushed the pager off the edge
        of the region */
@@ -53,8 +53,10 @@
     color: var(--wx-secondary-color);
 }
 
-/* dark theme adjustments if necessary, mostly handled by standard bootstrap variables */
-[data-bs-theme="dark"] .wx-tab-content {
+/* dark theme adjustments if necessary, mostly handled by standard WebExpress variables */
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-tab-content {
     background-color: var(--wx-dark);
     border-color: var(--wx-border-color);
+}
 }

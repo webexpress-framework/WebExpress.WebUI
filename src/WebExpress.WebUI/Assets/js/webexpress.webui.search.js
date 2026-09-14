@@ -6,7 +6,7 @@
  * - webexpress.webui.Event.DROPDOWN_SHOW_EVENT
  * - webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT
  */
-webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
+webexpress.webui.SearchCtrl = class extends webexpress.webui.MenuCtrl {
     // holds the current search value
     _value = "";
 
@@ -20,7 +20,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
         // extract configuration from DOM attributes and children
         const name = element.getAttribute("name");
         const placeholder = element.getAttribute("placeholder") || null;
-        const icon = element.dataset.icon || "search";
+        const icon = element.dataset.icon || this._iconClass("search");
         const suggestions = this._extractSuggestions(element);
         const footerElem = element.querySelector(".wx-search-footer");
         const footer = footerElem ? footerElem.innerHTML : null;
@@ -51,8 +51,8 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
         element.appendChild(this._searchBox);
         element.appendChild(this._suggestionMenu);
 
-        // set up popper for the suggestion menu
-        this._initializePopper(this._searchBox, this._suggestionMenu);
+        // set up the native popover for the suggestion menu
+        this._initializeMenu(this._searchBox, this._suggestionMenu, this._searchInput);
     }
 
     /**
@@ -81,13 +81,6 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
      */
     _createSearchBox() {
         const searchBox = document.createElement("div");
-        // close suggestion menu if clicked outside
-        document.addEventListener("click", (e) => {
-            if (!searchBox.contains(e.target) && !this._suggestionMenu.contains(e.target)) {
-                this._suggestionMenu.style.display = "none";
-                this._triggerDropdownHidden();
-            }
-        });
         return searchBox;
     }
 
@@ -136,7 +129,10 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
      * @returns {HTMLElement} The clear button element.
      */
     _createSearchClearButton() {
-        const searchClear = document.createElement("span");
+        const searchClear = document.createElement("button");
+        searchClear.type = "button";
+        searchClear.className = "wx-search-clear";
+        searchClear.setAttribute("aria-label", this._i18n("webexpress.webui:selection.filter.clear"));
         const icon = document.createElement("i");
         icon.className = this._iconClass("xmark");
         searchClear.appendChild(icon);
@@ -159,7 +155,7 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
     _createSuggestionMenu(suggestions, footer) {
         const suggestionMenu = document.createElement("div");
         suggestionMenu.className = "dropdown-menu";
-        suggestionMenu.style.display = "none";
+
 
         const suggestionBox = document.createElement("ul");
         suggestionMenu.appendChild(suggestionBox);
@@ -174,10 +170,17 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
             suggestionMenu.appendChild(footerElem);
         }
 
-        // open on focus
+        // pointer activation opens after native light dismissal has finished
+        this._searchInput.addEventListener("pointerdown", () => { this._pointerFocus = true; });
         this._searchInput.addEventListener("focus", () => {
+            if (!this._pointerFocus) { this._refreshSuggestions(); }
+        });
+        this._searchInput.addEventListener("click", () => {
+            this._pointerFocus = false;
             this._refreshSuggestions();
         });
+        this._searchInput.addEventListener("blur", () => { this._pointerFocus = false; });
+        this._searchInput.addEventListener("pointercancel", () => { this._pointerFocus = false; });
 
         return suggestionMenu;
     }
@@ -244,9 +247,8 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
             suggestionItem.addEventListener("click", (event) => {
                 event.preventDefault();
                 this.value = suggestion.label;
-                this._suggestionMenu.style.display = "none";
-                this._triggerDropdownHidden();
-                this._searchInput.focus();
+                this._searchInput.focus({ preventScroll: true });
+                webexpress.webui.NativeMenu.hide(this._suggestionMenu);
             });
             return suggestionItem;
         };
@@ -271,29 +273,15 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.PopperCtrl {
             });
 
         if (suggestionBox.children.length > 0) {
-            this._suggestionMenu.style.display = "flex";
-            // the menu is only measurable once it is visible and filled
-            this._repositionMenu(this._suggestionMenu);
-            this._triggerDropdownShow();
+            webexpress.webui.NativeMenu.show(this._suggestionMenu);
+
         } else {
-            this._suggestionMenu.style.display = "none";
-            this._triggerDropdownHidden();
+            webexpress.webui.NativeMenu.hide(this._suggestionMenu);
+
         }
     }
 
-    /**
-     * Triggers the DROPDOWN_SHOW_EVENT.
-     */
-    _triggerDropdownShow() {
-        this._dispatch(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {});
-    }
 
-    /**
-     * Triggers the DROPDOWN_HIDDEN_EVENT.
-     */
-    _triggerDropdownHidden() {
-        this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
-    }
 
     /**
      * Gets the current value of the search input.

@@ -311,7 +311,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
         button.type = "button";
-        button.setAttribute("data-bs-toggle", "dropdown");
+
         const buttonText = document.createElement("span");
         buttonText.className = "wx-editor-format-label";
         buttonText.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.paragraph");
@@ -349,6 +349,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         });
         container.appendChild(button);
         container.appendChild(menu);
+        webexpress.webui.NativeMenu.bind(button, menu);
         return container;
     },
 
@@ -378,7 +379,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         btn.className = "wx-editor-btn dropdown-toggle";
         btn.type = "button";
         btn.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("text-height")}"></i>`;
-        btn.setAttribute("data-bs-toggle", "dropdown");
+
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu";
@@ -413,6 +414,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         });
         container.appendChild(btn);
         container.appendChild(menu);
+        webexpress.webui.NativeMenu.bind(btn, menu);
         return container;
     },
 
@@ -446,7 +448,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         const toggleBtn = document.createElement("button");
         toggleBtn.className = "wx-editor-btn dropdown-toggle dropdown-toggle-split";
         toggleBtn.type = "button";
-        toggleBtn.setAttribute("data-bs-toggle", "dropdown");
+        toggleBtn.title = actionBtn.title;
+
 
         const menu = document.createElement("div");
         menu.className = "dropdown-menu";
@@ -459,10 +462,12 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
             b.className = "dropdown-item p-2";
             b.type = "button";
             b.style.backgroundColor = c;
+            b.title = c;
             b.addEventListener("click", () => {
                 lastColor = c;
                 icon.style.borderBottomColor = c;
                 editor.execCommand("foreColor", c);
+                webexpress.webui.NativeMenu.hide(menu);
             });
             li.appendChild(b);
             picker.appendChild(li);
@@ -473,6 +478,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         container.appendChild(actionBtn);
         container.appendChild(toggleBtn);
         container.appendChild(menu);
+        webexpress.webui.NativeMenu.bind(toggleBtn, menu);
         return container;
     },
 
@@ -506,7 +512,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         const toggleBtn = document.createElement("button");
         toggleBtn.className = "wx-editor-btn dropdown-toggle dropdown-toggle-split";
         toggleBtn.type = "button";
-        toggleBtn.setAttribute("data-bs-toggle", "dropdown");
+        toggleBtn.title = actionBtn.title;
+
 
         const menu = document.createElement("div");
         menu.className = "dropdown-menu";
@@ -542,6 +549,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
                     icon.style.borderBottomColor = c.val;
                 }
                 editor.execCommand("hiliteColor", c.val);
+                webexpress.webui.NativeMenu.hide(menu);
             });
             li.appendChild(b);
             picker.appendChild(li);
@@ -552,6 +560,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         container.appendChild(actionBtn);
         container.appendChild(toggleBtn);
         container.appendChild(menu);
+        webexpress.webui.NativeMenu.bind(toggleBtn, menu);
         return container;
     },
 

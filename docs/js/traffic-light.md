@@ -1,4 +1,4 @@
-﻿![WebExpress](https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png)
+![WebExpress](https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png)
 
 # TrafficLightCtrl
 
@@ -42,7 +42,7 @@ Initialization is handled declaratively through `data-` attributes on the host e
 | `data-allow-off`   | input           | (Optional) `false` prevents clearing back to `off`; defaults to `true`.
 
 - **Size**: The lamps are scaled through a single `--wx-tl-size` custom property. The default is intentionally compact; the `ControlTrafficLight.Size` property (and its WebApp / template counterparts) emit one of the modifier classes `.wx-traffic-light-xs`, `.wx-traffic-light-sm`, `.wx-traffic-light-lg` or `.wx-traffic-light-xl`.
-- **Theme**: The housing is bright in light mode and switches to the classic dark casing under `[data-bs-theme="dark"]`, so the control follows the page theme automatically.
+- **Theme**: The housing is bright in light mode and switches to the classic dark casing under `[data-wx-theme="dark"]`, so the control follows the page theme automatically.
 - **CSS Classes**: Both controls add the class `.wx-traffic-light` to the host element; the horizontal layout adds `.wx-traffic-light-horizontal`.
 - **Accessibility**: The read-only control exposes `role="img"`, `aria-readonly="true"` and a generated `aria-label`. The input control exposes the lamps as a `radiogroup` with `aria-checked` state and roving `tabindex`.
 

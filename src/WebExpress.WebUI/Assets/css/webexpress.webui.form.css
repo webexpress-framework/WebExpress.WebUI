@@ -3,8 +3,10 @@
     background-color: var(--wx-light);
 }
 
-[data-bs-theme="dark"] .wx-form {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-form {
     background-color: var(--wx-body-bg);
+}
 }
 
 .wx-form-label {
@@ -140,14 +142,12 @@
     margin-top: 0.5em;
 }
 
-[data-bs-theme="dark"] .wx-form .form-control {
-    background-color: black;
-}
+
 
 .wx-validation-alert {
     border-left: 4px solid var(--wx-danger);
     background-color: var(--wx-danger-bg-subtle);
-    color: var(--bs-danger-text);
+    color: var(--wx-danger-text-emphasis);
     padding: 0.75rem 1rem;
     border-radius: 0.375rem;
     font-size: 0.95rem;
@@ -163,3 +163,6 @@
 .wx-login-plain form > .mb-3:last-child {
     margin-bottom: 0;
 }
+
+.wx-login { background: var(--wx-tertiary-bg); color: var(--wx-body-color); }
+.wx-login > .card { background: var(--wx-body-bg); color: var(--wx-body-color); }

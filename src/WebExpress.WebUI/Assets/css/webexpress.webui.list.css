@@ -1,11 +1,11 @@
-﻿.wx-list {
+.wx-list {
     color: var(--wx-body-color);
     background-color: var(--wx-body-bg);
     display: block;
     margin: 0;
     padding: 0;
     border: 1px solid var(--wx-border-color);
-    border-radius: var(--bs-border-radius, 10px);
+    border-radius: var(--wx-border-radius, 10px);
     height: 100%;
 }
 
@@ -19,11 +19,11 @@
     -webkit-user-select: none;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    background-color: var(--bs-table-head-bg, var(--wx-tertiary-bg));
+    background-color: var(--wx-table-head-bg, var(--wx-tertiary-bg));
     position: relative;
     user-select: none;
     border-bottom: none;
-    color: var(--bs-table-head-color, var(--wx-secondary-color));
+    color: var(--wx-table-head-color, var(--wx-secondary-color));
     transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
@@ -58,8 +58,8 @@
 
 .wx-list-sort-btn:focus-visible {
     outline: 0;
-    box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) var(--bs-focus-ring-color, rgba(var(--wx-primary-rgb), 0.25));
-    border-radius: var(--bs-border-radius-sm);
+    box-shadow: 0 0 0 var(--wx-focus-ring-width, 0.25rem) var(--wx-focus-ring-color, rgba(var(--wx-primary-rgb), 0.25));
+    border-radius: var(--wx-border-radius-sm);
 }
 
 .wx-list-sort-indicator {
@@ -85,7 +85,7 @@
     align-items: flex-start;
     gap: 0.5rem;
     padding: 0.375rem 0.5rem;
-    border-bottom: var(--bs-border-width) solid var(--wx-border-color);
+    border-bottom: var(--wx-border-width) solid var(--wx-border-color);
     background-color: transparent;
     transition: background-color 120ms ease-in;
 }
@@ -96,7 +96,7 @@
 }
 
 .wx-list-item:hover {
-    /* use bootstrap subtle background for hover */
+    /* use WebExpress subtle background for hover */
     background-color: var(--wx-tertiary-bg);
 }
 
@@ -122,7 +122,7 @@
     line-height: 1;
     opacity: 0.85;
     padding: 0.125rem 0.25rem;
-    border-radius: var(--bs-border-radius-sm);
+    border-radius: var(--wx-border-radius-sm);
     color: var(--wx-secondary-color);
 }
 
@@ -133,8 +133,8 @@
 
 .wx-list-drag-handle:focus-visible {
     outline: 0;
-    /* use bootstrap focus ring */
-    box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) var(--bs-focus-ring-color, rgba(var(--wx-primary-rgb), 0.25));
+    /* use WebExpress focus ring */
+    box-shadow: 0 0 0 var(--wx-focus-ring-width, 0.25rem) var(--wx-focus-ring-color, rgba(var(--wx-primary-rgb), 0.25));
     background-color: rgba(var(--wx-primary-rgb), 0.08);
 }
 
@@ -157,7 +157,7 @@
     word-break: break-word;
 }
 
-/* compact inline-edit input uses bootstrap control sizing */
+/* compact inline-edit input uses WebExpress control sizing */
 .wx-list-content .form-control {
     padding: 0.25rem 0.5rem;
     height: calc(1.5em + 0.5rem + 2px);
@@ -184,9 +184,9 @@
 .wx-list-drag-placeholder {
     list-style: none;
     margin: 0.125rem 0;
-    border: calc(var(--bs-border-width) + 1px) dashed var(--wx-border-color);
+    border: calc(var(--wx-border-width) + 1px) dashed var(--wx-border-color);
     background-color: rgba(var(--wx-primary-rgb), 0.075);
-    border-radius: var(--bs-border-radius);
+    border-radius: var(--wx-border-radius);
     min-height: 2.25rem; /* safety when js height is not set */
     pointer-events: none; /* do not intercept pointer while dragging */
 }
@@ -198,9 +198,9 @@
 
 /* optional delete button (pairs with .btn.btn-link.text-danger) */
 .wx-list-delete {
-    /* keep bootstrap's link-danger color and only tweak interactions */
+    /* keep WebExpress's link-danger color and only tweak interactions */
     padding: 0.125rem 0.25rem;
-    border-radius: var(--bs-border-radius-sm);
+    border-radius: var(--wx-border-radius-sm);
 }
 
     .wx-list-delete:hover {
@@ -210,7 +210,7 @@
 
     .wx-list-delete:focus-visible {
         outline: 0;
-        box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) rgba(var(--wx-danger-rgb), 0.35);
+        box-shadow: 0 0 0 var(--wx-focus-ring-width, 0.25rem) rgba(var(--wx-danger-rgb), 0.35);
     }
 
 /* reserve trailing space when rows without controls should align with rows that have controls */
@@ -219,7 +219,7 @@
     flex: 0 0 auto;
 }
 
-/* change flash animation using bootstrap warning color */
+/* change flash animation using WebExpress warning color */
 @keyframes wx-row-flash {
     0% {
         background-color: rgba(var(--wx-warning-rgb), 0.85);
@@ -305,7 +305,7 @@
 }
 
 .wx-list-bg-transparent {
-    background-color: var(--bs-transparent);
+    background-color: transparent;
 }
 
 /* link / button item types */

@@ -3,7 +3,6 @@
  * Provides a categorized dropdown picker with search for common emojis.
  */
 webexpress.webui.EditorPlugins.register("emojis", 2000, {
-    _dropdown: null,
     _emojis: {
         "Faces": ["😀", "😃", "😄", "😁", "😆", "😅", "😂", "🤣", "😊", "😇", "🙂", "🙃", "😉", "😌", "😍", "😘", "😗", "😙", "😋", "😛", "😝", "😜", "🤓", "😎", "😒", "😞", "😔", "😢", "😭", "😤", "😠", "😡", "🤬", "😈", "👿", "💀", "☠️", "😱", "😨", "😰", "😥", "😓", "🤗", "🤔", "🤭", "🤫", "🤥", "😶", "😐", "😑", "😬", "🙄", "😯", "😦", "😧", "😮", "😲", "🥱", "😴", "🤤", "😪", "😵", "🤯", "🥴", "😷", "🤒", "🤕", "🤢", "🤮", "🥵", "🥶", "🥳", "🤩", "😸", "😹", "😺", "😻", "😼", "😽", "🙀", "😿", "😾"],
         "Hands": ["👋", "🤚", "🖐", "🖖", "👌", "✌️", "🤞", "🤘", "🤙", "👈", "👉", "👆", "🖕", "👇", "☝️", "👍", "👎", "👊", "🤛", "🤜", "👏", "👐", "🤝", "🙏", "💪", "🦶", "🦵", "✍️", "🤳", "💅"],
@@ -79,15 +78,16 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
         btn.type = "button";
         btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.insert.emoji");
         btn.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("smile")}"></i>`;
-        btn.setAttribute("data-bs-toggle", "dropdown");
+
         btn.setAttribute("aria-expanded", "false");
 
         // create dropdown content
-        this._dropdown = this._createDropdown(editor);
+        const dropdown = this._createDropdown(editor);
 
         group.appendChild(btn);
-        group.appendChild(this._dropdown);
+        group.appendChild(dropdown);
 
+        webexpress.webui.NativeMenu.bind(btn, dropdown);
         return group;
     },
 

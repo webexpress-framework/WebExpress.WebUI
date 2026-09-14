@@ -56,7 +56,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
 
         // helper to enable/disable the modal submit button
         const setSubmitEnabled = (enabled) => {
-            const modalRoot = container.closest(".modal") || container.closest(".modal-content") || document;
+            const modalRoot = container.closest(".modal") || container.closest("dialog") || document;
             const submitBtn = modalRoot.querySelector(".submit-btn");
             if (submitBtn) {
                 submitBtn.disabled = !enabled;
@@ -106,7 +106,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
             });
             tile.addEventListener("dblclick", () => {
                 state.selectedId = addon.id;
-                const modalRoot = container.closest(".modal") || container.closest(".modal-content") || document;
+                const modalRoot = container.closest(".modal") || container.closest("dialog") || document;
                 const submitBtn = modalRoot.querySelector(".submit-btn");
                 if (submitBtn && !submitBtn.disabled) {
                     submitBtn.click();
@@ -199,7 +199,7 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         // wire the submit button (avoid duplicate bindings)
         const host = state.grid || state.searchInput;
         if (host) {
-            const modalRoot = host.closest(".modal") || host.closest(".modal-content") || document;
+            const modalRoot = host.closest(".modal") || host.closest("dialog") || document;
             const submitBtn = modalRoot.querySelector(".submit-btn");
             if (submitBtn) {
                 submitBtn.disabled = true;
@@ -266,11 +266,8 @@ webexpress.webui.DialogPanels.register("editor-addon", {
         } else {
             const host = state.grid || state.searchInput;
             const modalWrapper = host ? host.closest(".modal") : null;
-            if (modalWrapper && typeof bootstrap !== "undefined") {
-                const bsModal = bootstrap.Modal.getInstance(modalWrapper);
-                if (bsModal) {
-                    bsModal.hide();
-                }
+            if (modalWrapper?.open) {
+                modalWrapper.close();
             }
         }
 

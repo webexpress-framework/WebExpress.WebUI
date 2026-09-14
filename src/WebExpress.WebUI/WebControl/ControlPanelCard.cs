@@ -112,9 +112,9 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-card", GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
-                Role = role,
-                DataTheme = theme.ToValue()
+                Role = role
             }
+                .AddUserAttribute("data-wx-theme", theme.ToValue())
                 .AddUserAttribute("data-header", I18N.Translate(renderContext, header))
                 .AddUserAttribute("data-header-icon-css", (headerIcon as Icon)?.Class)
                 .AddUserAttribute("data-header-icon-image", (headerIcon as ImageIcon)?.Uri?.ToString())

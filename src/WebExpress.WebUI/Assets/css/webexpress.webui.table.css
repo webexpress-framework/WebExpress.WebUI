@@ -1,4 +1,4 @@
-﻿/* --- Base Grid Layout --- */
+/* --- Base Grid Layout --- */
 .wx-table {
     display: flex;
     flex-direction: column;
@@ -7,24 +7,24 @@
     margin-bottom: 0;
     isolation: isolate;
 
-    /* Forms.html-style card wrapper. The Bootstrap variant classes (.table-*)
-       still override --bs-table-* tokens so themed tables keep working. */
+    /* Forms.html-style card wrapper. The WebExpress variant classes (.table-*)
+       still override --wx-table-* tokens so themed tables keep working. */
     background-color: var(--wx-body-bg);
     border: 1px solid var(--wx-border-color);
-    border-radius: var(--bs-border-radius, 10px);
+    border-radius: var(--wx-border-radius, 10px);
 
     --wx-grid-template: none;
-    --bs-table-bg: transparent;
-    --bs-table-accent-bg: transparent;
-    --bs-table-striped-color: var(--wx-body-color);
-    --bs-table-striped-bg: rgba(0, 0, 0, 0.05);
-    --bs-table-active-color: var(--wx-body-color);
-    --bs-table-active-bg: var(--wx-primary-bg-subtle, rgba(var(--wx-primary-rgb), 0.08));
-    --bs-table-hover-color: var(--wx-body-color);
-    --bs-table-hover-bg: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.04));
-    --bs-table-head-bg: var(--wx-tertiary-bg, var(--wx-secondary-bg, #f5f7fa));
-    --bs-table-head-color: var(--wx-secondary-color);
-    --bs-table-border-color: var(--wx-border-color);
+    --wx-table-bg: transparent;
+    --wx-table-accent-bg: transparent;
+    --wx-table-striped-color: var(--wx-body-color);
+    --wx-table-striped-bg: rgba(0, 0, 0, 0.05);
+    --wx-table-active-color: var(--wx-body-color);
+    --wx-table-active-bg: var(--wx-primary-bg-subtle, rgba(var(--wx-primary-rgb), 0.08));
+    --wx-table-hover-color: var(--wx-body-color);
+    --wx-table-hover-bg: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.04));
+    --wx-table-head-bg: var(--wx-tertiary-bg, var(--wx-secondary-bg, #f5f7fa));
+    --wx-table-head-color: var(--wx-secondary-color);
+    --wx-table-border-color: var(--wx-border-color);
 }
 
 /* --- Fill mode ---
@@ -91,8 +91,8 @@
     display: block;
     width: 100%;
     min-width: fit-content;
-    background-color: var(--bs-table-head-bg, var(--wx-body-bg));
-    box-shadow: 0 1px 0 var(--bs-table-border-color, var(--wx-border-color));
+    background-color: var(--wx-table-head-bg, var(--wx-body-bg));
+    box-shadow: 0 1px 0 var(--wx-table-border-color, var(--wx-border-color));
     flex-shrink: 0;
 }
 
@@ -104,7 +104,7 @@
 }
 
 .wx-table-footer-group {
-    border-top: 2px solid var(--bs-table-border-color, var(--wx-border-color));
+    border-top: 2px solid var(--wx-table-border-color, var(--wx-border-color));
     background-color: var(--wx-body-bg);
     min-width: fit-content;
     flex-shrink: 0;
@@ -119,7 +119,7 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    border-bottom: 1px solid var(--bs-table-border-color, var(--wx-border-color));
+    border-bottom: 1px solid var(--wx-table-border-color, var(--wx-border-color));
     display: flex;
     align-items: center;
     min-width: 0;
@@ -135,11 +135,11 @@
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    background-color: var(--bs-table-head-bg, var(--wx-tertiary-bg));
+    background-color: var(--wx-table-head-bg, var(--wx-tertiary-bg));
     position: relative;
     user-select: none;
     border-bottom: none;
-    color: var(--bs-table-head-color, var(--wx-secondary-color));
+    color: var(--wx-table-head-color, var(--wx-secondary-color));
     transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
@@ -151,107 +151,107 @@
 
 /* --- Variant Theme Management --- */
 .wx-table.table-primary {
-    --bs-table-color: #000;
-    --bs-table-bg: #cfe2ff;
-    --bs-table-border-color: #bacbe6;
-    --bs-table-striped-bg: #c5d7f2;
-    --bs-table-striped-color: #000;
-    --bs-table-active-bg: #bacbe6;
-    --bs-table-active-color: #000;
-    --bs-table-hover-bg: #bfd1ec;
-    --bs-table-hover-color: #000;
+    --wx-table-color: #000;
+    --wx-table-bg: #cfe2ff;
+    --wx-table-border-color: #bacbe6;
+    --wx-table-striped-bg: #c5d7f2;
+    --wx-table-striped-color: #000;
+    --wx-table-active-bg: #bacbe6;
+    --wx-table-active-color: #000;
+    --wx-table-hover-bg: #bfd1ec;
+    --wx-table-hover-color: #000;
 }
 .wx-table.table-secondary {
-    --bs-table-color: #000;
-    --bs-table-bg: #e2e3e5;
-    --bs-table-border-color: #cbccce;
-    --bs-table-striped-bg: #d7d8da;
-    --bs-table-striped-color: #000;
-    --bs-table-active-bg: #cbccce;
-    --bs-table-active-color: #000;
-    --bs-table-hover-bg: #d3d6d8;
-    --bs-table-hover-color: #000;
+    --wx-table-color: #000;
+    --wx-table-bg: #e2e3e5;
+    --wx-table-border-color: #cbccce;
+    --wx-table-striped-bg: #d7d8da;
+    --wx-table-striped-color: #000;
+    --wx-table-active-bg: #cbccce;
+    --wx-table-active-color: #000;
+    --wx-table-hover-bg: #d3d6d8;
+    --wx-table-hover-color: #000;
 }
 .wx-table.table-success {
-    --bs-table-color: #000;
-    --bs-table-bg: #d1e7dd;
-    --bs-table-border-color: #bcd0c7;
-    --bs-table-striped-bg: #c7dbd2;
-    --bs-table-striped-color: #000;
-    --bs-table-active-bg: #bcd0c7;
-    --bs-table-active-color: #000;
-    --bs-table-hover-bg: #c1d6cc;
-    --bs-table-hover-color: #000;
+    --wx-table-color: #000;
+    --wx-table-bg: #d1e7dd;
+    --wx-table-border-color: #bcd0c7;
+    --wx-table-striped-bg: #c7dbd2;
+    --wx-table-striped-color: #000;
+    --wx-table-active-bg: #bcd0c7;
+    --wx-table-active-color: #000;
+    --wx-table-hover-bg: #c1d6cc;
+    --wx-table-hover-color: #000;
 }
 .wx-table.table-info {
-    --bs-table-color: #000;
-    --bs-table-bg: #cff4fc;
-    --bs-table-border-color: #badce3;
-    --bs-table-striped-bg: #c5e8ef;
-    --bs-table-striped-color: #000;
-    --bs-table-active-bg: #badce3;
-    --bs-table-active-color: #000;
-    --bs-table-hover-bg: #bfe2e9;
-    --bs-table-hover-color: #000;
+    --wx-table-color: #000;
+    --wx-table-bg: #cff4fc;
+    --wx-table-border-color: #badce3;
+    --wx-table-striped-bg: #c5e8ef;
+    --wx-table-striped-color: #000;
+    --wx-table-active-bg: #badce3;
+    --wx-table-active-color: #000;
+    --wx-table-hover-bg: #bfe2e9;
+    --wx-table-hover-color: #000;
 }
 .wx-table.table-warning {
-    --bs-table-color: #000;
-    --bs-table-bg: #fff3cd;
-    --bs-table-border-color: #e6dbb9;
-    --bs-table-striped-bg: #f2e7c3;
-    --bs-table-striped-color: #000;
-    --bs-table-active-bg: #e6dbb9;
-    --bs-table-active-color: #000;
-    --bs-table-hover-bg: #ece1be;
-    --bs-table-hover-color: #000;
+    --wx-table-color: #000;
+    --wx-table-bg: #fff3cd;
+    --wx-table-border-color: #e6dbb9;
+    --wx-table-striped-bg: #f2e7c3;
+    --wx-table-striped-color: #000;
+    --wx-table-active-bg: #e6dbb9;
+    --wx-table-active-color: #000;
+    --wx-table-hover-bg: #ece1be;
+    --wx-table-hover-color: #000;
 }
 .wx-table.table-danger {
-    --bs-table-color: #000;
-    --bs-table-bg: #f8d7da;
-    --bs-table-border-color: #dfc2c4;
-    --bs-table-striped-bg: #eccccf;
-    --bs-table-striped-color: #000;
-    --bs-table-active-bg: #dfc2c4;
-    --bs-table-active-color: #000;
-    --bs-table-hover-bg: #e5c7ca;
-    --bs-table-hover-color: #000;
+    --wx-table-color: #000;
+    --wx-table-bg: #f8d7da;
+    --wx-table-border-color: #dfc2c4;
+    --wx-table-striped-bg: #eccccf;
+    --wx-table-striped-color: #000;
+    --wx-table-active-bg: #dfc2c4;
+    --wx-table-active-color: #000;
+    --wx-table-hover-bg: #e5c7ca;
+    --wx-table-hover-color: #000;
 }
 .wx-table.table-light {
-    --bs-table-color: #000;
-    --bs-table-bg: #f8f9fa;
-    --bs-table-border-color: #dfe0e1;
-    --bs-table-striped-bg: #ecedee;
-    --bs-table-striped-color: #000;
-    --bs-table-active-bg: #dfe0e1;
-    --bs-table-active-color: #000;
-    --bs-table-hover-bg: #e5e6e7;
-    --bs-table-hover-color: #000;
+    --wx-table-color: #000;
+    --wx-table-bg: #f8f9fa;
+    --wx-table-border-color: #dfe0e1;
+    --wx-table-striped-bg: #ecedee;
+    --wx-table-striped-color: #000;
+    --wx-table-active-bg: #dfe0e1;
+    --wx-table-active-color: #000;
+    --wx-table-hover-bg: #e5e6e7;
+    --wx-table-hover-color: #000;
 }
 .wx-table.table-dark {
-    --bs-table-color: #fff;
-    --bs-table-bg: #212529;
-    --bs-table-border-color: #373b3e;
-    --bs-table-striped-bg: #2c3034;
-    --bs-table-striped-color: #fff;
-    --bs-table-active-bg: #373b3e;
-    --bs-table-active-color: #fff;
-    --bs-table-hover-bg: #323539;
-    --bs-table-hover-color: #fff;
+    --wx-table-color: #fff;
+    --wx-table-bg: #212529;
+    --wx-table-border-color: #373b3e;
+    --wx-table-striped-bg: #2c3034;
+    --wx-table-striped-color: #fff;
+    --wx-table-active-bg: #373b3e;
+    --wx-table-active-color: #fff;
+    --wx-table-hover-bg: #323539;
+    --wx-table-hover-color: #fff;
 }
 
 .wx-table[class*="table-"] .wx-table-header-group,
 .wx-table[class*="table-"] .wx-table-header-group .wx-col-header,
 .wx-table[class*="table-"] .wx-table-header-group .wx-grid-header-cell {
-    background-color: var(--bs-table-bg);
+    background-color: var(--wx-table-bg);
     color: var(--wx-table-color);
-    border-color: var(--bs-table-border-color);
+    border-color: var(--wx-table-border-color);
 }
 
 /* --- Header Hover Effect --- */
 .wx-col-header:hover,
 .wx-grid-header-cell:hover {
-    background-color: var(--bs-table-hover-bg);
-    color: var(--bs-table-hover-color);
+    background-color: var(--wx-table-hover-bg);
+    color: var(--wx-table-hover-color);
     cursor: pointer;
 }
 
@@ -437,13 +437,13 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--wx-link-hover
 /* --- Striping and Hover States --- */
 .wx-table.table-striped .wx-table-body-group .wx-table-row:nth-child(odd),
 .wx-table.table-striped .wx-table-body-group .wx-grid-row:nth-child(odd) {
-    background-color: var(--bs-table-striped-bg);
-    color: var(--bs-table-striped-color);
+    background-color: var(--wx-table-striped-bg);
+    color: var(--wx-table-striped-color);
 }
 .wx-table-row:hover,
 .wx-grid-row:hover {
-    background-color: var(--bs-table-hover-bg);
-    color: var(--bs-table-hover-color);
+    background-color: var(--wx-table-hover-bg);
+    color: var(--wx-table-hover-color);
     z-index: 1;
 }
 .wx-table-row.active,
@@ -452,8 +452,8 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--wx-link-hover
 .wx-grid-row.active,
 .wx-grid-row.wx-row-active,
 .wx-grid-row:active {
-    background-color: var(--bs-table-active-bg);
-    color: var(--bs-table-active-color);
+    background-color: var(--wx-table-active-bg);
+    color: var(--wx-table-active-color);
 }
 .wx-table-row:where(.active, [data-wx-primary-action]),
 .wx-grid-row:where(.active, [data-wx-primary-action]) {
@@ -486,13 +486,13 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--wx-link-hover
 
 /* --- Border Handling --- */
 .wx-table.table-bordered {
-    border: 1px solid var(--bs-table-border-color);
+    border: 1px solid var(--wx-table-border-color);
 }
 .wx-table.table-bordered .wx-table-cell,
 .wx-table.table-bordered .wx-grid-cell,
 .wx-table.table-bordered .wx-col-header,
 .wx-table.table-bordered .wx-grid-header-cell {
-    border-right: 1px solid var(--bs-table-border-color);
+    border-right: 1px solid var(--wx-table-border-color);
 }
 
 /* Letztes Element in Zeilen und Headern (Entfernen des rechten Randes) */
@@ -511,7 +511,7 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--wx-link-hover
 .wx-table[dir="rtl"].table-bordered .wx-col-header,
 .wx-table[dir="rtl"].table-bordered .wx-grid-header-cell {
     border-right: none;
-    border-left: 1px solid var(--bs-table-border-color);
+    border-left: 1px solid var(--wx-table-border-color);
 }
 .wx-table[dir="rtl"].table-bordered .wx-table-row .wx-table-cell:last-child,
 .wx-table[dir="rtl"].table-bordered .wx-table-row .wx-grid-cell:last-child,

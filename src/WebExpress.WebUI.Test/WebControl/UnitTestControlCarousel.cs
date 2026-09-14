@@ -1,4 +1,4 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the carousel control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div id=""carousel"" class=""carousel slide"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData("id", @"<div id=""id"" class=""carousel slide"" data-bs-ride=""carousel""><div class=""carousel-indicators"">*</div>")]
+        [InlineData(null, @"<div id=""carousel"" class=""wx-webui-carousel carousel"">*</div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-carousel carousel""><div class=""carousel-indicators"">*</div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -37,17 +37,17 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text color property of the carousel control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorText.Default, @"<div id=""carousel"" class=""carousel slide"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorText.Primary, @"<div id=""carousel"" class=""carousel slide text-primary"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorText.Secondary, @"<div id=""carousel"" class=""carousel slide text-secondary"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorText.Info, @"<div id=""carousel"" class=""carousel slide text-info"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorText.Success, @"<div id=""carousel"" class=""carousel slide text-success"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorText.Warning, @"<div id=""carousel"" class=""carousel slide text-warning"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorText.Danger, @"<div id=""carousel"" class=""carousel slide text-danger"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorText.Light, @"<div id=""carousel"" class=""carousel slide text-light"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorText.Highlight, @"<div id=""carousel"" class=""carousel slide text-highlight"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorText.Dark, @"<div id=""carousel"" class=""carousel slide text-dark"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorText.Muted, @"<div id=""carousel"" class=""carousel slide text-muted"" data-bs-ride=""carousel"">*</div>")]
+        [InlineData(TypeColorText.Default, @"<div id=""carousel"" class=""wx-webui-carousel carousel"">*</div>")]
+        [InlineData(TypeColorText.Primary, @"<div id=""carousel"" class=""wx-webui-carousel carousel text-primary"">*</div>")]
+        [InlineData(TypeColorText.Secondary, @"<div id=""carousel"" class=""wx-webui-carousel carousel text-secondary"">*</div>")]
+        [InlineData(TypeColorText.Info, @"<div id=""carousel"" class=""wx-webui-carousel carousel text-info"">*</div>")]
+        [InlineData(TypeColorText.Success, @"<div id=""carousel"" class=""wx-webui-carousel carousel text-success"">*</div>")]
+        [InlineData(TypeColorText.Warning, @"<div id=""carousel"" class=""wx-webui-carousel carousel text-warning"">*</div>")]
+        [InlineData(TypeColorText.Danger, @"<div id=""carousel"" class=""wx-webui-carousel carousel text-danger"">*</div>")]
+        [InlineData(TypeColorText.Light, @"<div id=""carousel"" class=""wx-webui-carousel carousel text-light"">*</div>")]
+        [InlineData(TypeColorText.Highlight, @"<div id=""carousel"" class=""wx-webui-carousel carousel text-highlight"">*</div>")]
+        [InlineData(TypeColorText.Dark, @"<div id=""carousel"" class=""wx-webui-carousel carousel text-dark"">*</div>")]
+        [InlineData(TypeColorText.Muted, @"<div id=""carousel"" class=""wx-webui-carousel carousel text-muted"">*</div>")]
         public void TextColor(TypeColorText color, string expected)
         {
             // arrange
@@ -70,15 +70,15 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the background color property of the carousel control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorBackground.Default, @"<div id=""carousel"" class=""carousel slide"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorBackground.Primary, @"<div id=""carousel"" class=""carousel slide bg-primary"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorBackground.Secondary, @"<div id=""carousel"" class=""carousel slide bg-secondary"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorBackground.Warning, @"<div id=""carousel"" class=""carousel slide bg-warning"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorBackground.Danger, @"<div id=""carousel"" class=""carousel slide bg-danger"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorBackground.Dark, @"<div id=""carousel"" class=""carousel slide bg-dark"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorBackground.Light, @"<div id=""carousel"" class=""carousel slide bg-light"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorBackground.Highlight, @"<div id=""carousel"" class=""carousel slide bg-highlight"" data-bs-ride=""carousel"">*</div>")]
-        [InlineData(TypeColorBackground.Transparent, @"<div id=""carousel"" class=""carousel slide bg-transparent"" data-bs-ride=""carousel"">*</div>")]
+        [InlineData(TypeColorBackground.Default, @"<div id=""carousel"" class=""wx-webui-carousel carousel"">*</div>")]
+        [InlineData(TypeColorBackground.Primary, @"<div id=""carousel"" class=""wx-webui-carousel carousel bg-primary"">*</div>")]
+        [InlineData(TypeColorBackground.Secondary, @"<div id=""carousel"" class=""wx-webui-carousel carousel bg-secondary"">*</div>")]
+        [InlineData(TypeColorBackground.Warning, @"<div id=""carousel"" class=""wx-webui-carousel carousel bg-warning"">*</div>")]
+        [InlineData(TypeColorBackground.Danger, @"<div id=""carousel"" class=""wx-webui-carousel carousel bg-danger"">*</div>")]
+        [InlineData(TypeColorBackground.Dark, @"<div id=""carousel"" class=""wx-webui-carousel carousel bg-dark"">*</div>")]
+        [InlineData(TypeColorBackground.Light, @"<div id=""carousel"" class=""wx-webui-carousel carousel bg-light"">*</div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div id=""carousel"" class=""wx-webui-carousel carousel bg-highlight"">*</div>")]
+        [InlineData(TypeColorBackground.Transparent, @"<div id=""carousel"" class=""wx-webui-carousel carousel bg-transparent"">*</div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
             // arrange
@@ -101,9 +101,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the add function of the carousel control.
         /// </summary>
         [Theory]
-        [InlineData(typeof(ControlText), @"<div id=""carousel"" class=""carousel slide"" data-bs-ride=""carousel"">*<div></div>*</div>")]
-        [InlineData(typeof(ControlLink), @"<div id=""carousel"" class=""carousel slide"" data-bs-ride=""carousel"">*<a class=""wx-link""></a>*</div>")]
-        [InlineData(typeof(ControlImage), @"<div id=""carousel"" class=""carousel slide"" data-bs-ride=""carousel"">*<img>*</div>")]
+        [InlineData(typeof(ControlText), @"<div id=""carousel"" class=""wx-webui-carousel carousel"">*<div></div>*</div>")]
+        [InlineData(typeof(ControlLink), @"<div id=""carousel"" class=""wx-webui-carousel carousel"">*<a class=""wx-link""></a>*</div>")]
+        [InlineData(typeof(ControlImage), @"<div id=""carousel"" class=""wx-webui-carousel carousel"">*<img>*</div>")]
         public void Add(Type child, string expected)
         {
             // arrange

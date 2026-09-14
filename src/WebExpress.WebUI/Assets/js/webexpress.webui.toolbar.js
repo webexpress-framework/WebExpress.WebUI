@@ -404,7 +404,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             const instance = webexpress.webui.Controller.getInstanceByElement(element);
             if (instance) {
                 this._more = element;
-                instance.icon = "more";
+                instance.icon = this._iconClass("more");
                 instance.menuCSS = "wx-toolbar-more-menu";
             } else {
                 this._more = this._createMoreDropdownWithController();
@@ -547,6 +547,14 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
      * @returns {HTMLElement} The rendered element.
      */
     _renderItem(item) {
+        if ((item.type === "button" || item.type === "modal-button") &&
+            item.element.tagName === "DIV" && !webexpress.webui.Controller.getInstanceByElement(item.element)) {
+            const button = document.createElement("button");
+            for (const attribute of item.element.attributes) { button.setAttribute(attribute.name, attribute.value); }
+            button.type = "button";
+            button.disabled = item.disabled;
+            item.element = button;
+        }
         if (item.type === "separator") {
             const el = document.createElement("div");
             el.className = "wx-toolbar-separator";
@@ -817,7 +825,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
 
         if (!modalInstance) {
             const id = "wx-toolbar-msp-" + key + "-" + Date.now();
-            const el = document.createElement("div");
+            const el = document.createElement("dialog");
             el.id = id;
             el.setAttribute("aria-labelledby", id + "-label");
             el.setAttribute("aria-hidden", "true");
@@ -891,7 +899,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         dropdownContainer.className = "wx-toolbar-more";
         const dropdownCtrl = new webexpress.webui.DropdownCtrl(dropdownContainer);
         dropdownCtrl.label = null;
-        dropdownCtrl.icon = "more";
+        dropdownCtrl.icon = this._iconClass("more");
         dropdownCtrl.menuCSS = "wx-toolbar-more-menu";
         dropdownCtrl.buttonCss = "btn";
         dropdownCtrl.items = items;

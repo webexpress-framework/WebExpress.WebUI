@@ -6,7 +6,7 @@
  * - webexpress.webui.Event.DROPDOWN_SHOW_EVENT: Fired when the calendar popup is opened
  * - webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT: Fired when the calendar popup is closed
  */
-webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
+webexpress.webui.InputDateCtrl = class extends webexpress.webui.MenuCtrl {
     _holidays = [];
     _dateFormat = null;
 
@@ -48,7 +48,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
 
         element.appendChild(this._dropdown);
         element.appendChild(this._dropdownmenu);
-        this._initializePopper(this._dropdown, this._dropdownmenu);
+        this._initializeMenu(this._dropdown, this._dropdownmenu, this._dropdown.querySelector("button"));
 
         this.value = this._rangeMode ? { start: this._rangeStart, end: this._rangeEnd } : this._viewDate;
     }
@@ -88,46 +88,34 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         this._input.autocomplete = "off";
         this._input.value = "";
 
+        this._input.addEventListener("click", () => this._showCalendarPopup());
         this._input.addEventListener("input", () => this._onInputLive());
+        this._input.addEventListener("change", () => this._onInputChange());
         this._input.addEventListener("keydown", (e) => {
-            if (e.key === "Enter") { this._onInputChange(); }
-        });
-
-        this._input.addEventListener("blur", () => {
-            // close only if not inside popup
-            setTimeout(() => {
-                if (!this._dropdownmenu.matches(":hover")) {
-                    this._dropdownmenu.style.display = "none";
-                    this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
-                }
-            }, 100);
+            if (e.key === "ArrowDown" || e.key === "ArrowUp") {
+                e.preventDefault();
+                this._showCalendarPopup();
+                this._dropdownmenu.querySelector(".wx-calendar-day.selected, .wx-calendar-day:not(:disabled), button")?.focus({ preventScroll: true });
+            } else if (e.key === "Enter") {
+                e.preventDefault();
+                this._onInputChange();
+                this._showCalendarPopup();
+            }
         });
 
         dropdown.appendChild(this._input);
 
-        const icon = document.createElement("span");
-        icon.className = `wx-date-calendar-icon ${this._iconClass("calendar")}`;
-        icon.setAttribute("aria-hidden", "true");
+        const icon = document.createElement("button");
+        icon.type = "button";
+        icon.setAttribute("aria-label", this._placeholder || this._i18n("webexpress.webui:calendar", "Calendar"));
+        icon.className = "wx-date-calendar-icon";
+        const drawing = document.createElement("i");
+        drawing.className = this._iconClass("calendar");
+        icon.appendChild(drawing);
         icon.style.marginLeft = "0.5em";
         // the icon is the fixed part of the field; the text gives way, not it
         icon.style.flex = "0 0 auto";
         dropdown.appendChild(icon);
-
-        icon.addEventListener("click", (e) => {
-            this._showCalendarPopup();
-        });
-
-        dropdown.addEventListener("click", (e) => {
-            this._showCalendarPopup();
-        });
-
-        // hide popup on outside click
-        document.addEventListener("mousedown", (e) => {
-            if (!dropdown.contains(e.target) && !this._dropdownmenu.contains(e.target)) {
-                this._dropdownmenu.style.display = "none";
-                this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
-            }
-        });
 
         return dropdown;
     }
@@ -136,60 +124,39 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
      * Shows the calendar popup and dispatches event.
      */
     _showCalendarPopup() {
-        if (typeof this._dropdownmenu.show === "function") {
-            // wenn PopperMenu.show existiert, benutzen (richtiger Popper.js-Ablauf)
-            this._dropdownmenu.show();
-        } else {
-            // fallback, falls nicht initialisiert
-            this._dropdownmenu.style.display = "flex";
-        }
-        this._dispatch(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {});
-        this._input.focus();
+        if (this._input.disabled || this._input.readOnly) { return; }
+        webexpress.webui.NativeMenu.show(this._dropdownmenu);
     }
 
     /**
      * Handles live validation and popup sync for manual text input.
      */
+    _readManualInput() {
+        const text = this._input.value.trim();
+        if (!text) { return { valid: true, value: null }; }
+        const parts = this._rangeMode ? text.split(/\s+[-–]\s+/) : [text];
+        const dates = parts.map(part => this._parseDate(part.trim(), this._dateFormat));
+        if (parts.length > 2 || dates.some(date => !date)) { return { valid: false }; }
+        return { valid: true, value: this._rangeMode ? { start: dates[0], end: dates[1] || dates[0] } : dates[0], viewDate: dates[0] };
+    }
+
     _onInputLive() {
-        const inputValue = this._input.value.trim();
-        if (!inputValue) {
-            this._input.setCustomValidity("");
-            this._input.classList.remove("is-invalid");
-            return;
-        }
-        const parsed = this._parseDate(inputValue, this._dateFormat);
-        if (parsed && !isNaN(parsed.getTime()) && this._formatDateString(parsed, this._dateFormat) === inputValue) {
-            this._input.setCustomValidity("");
-            this._input.classList.remove("is-invalid");
-            this._viewDate = new Date(parsed);
-            this._calendarContainer.innerHTML = "";
-            this._calendarContainer.appendChild(this._renderCalendar());
-        } else {
-            this._input.setCustomValidity("invalid");
-            this._input.classList.add("is-invalid");
-        }
+        const parsed = this._readManualInput();
+        this._input.setCustomValidity(parsed.valid ? "" : this._i18n("webexpress.webui:calendar.invalid_date"));
+        this._input.classList.toggle("is-invalid", !parsed.valid);
+        this._dropdown.classList.toggle("is-invalid", !parsed.valid);
+        if (parsed.valid && parsed.viewDate) { this._viewDate = parsed.viewDate; this.render(); }
     }
 
     /**
-     * Commits input value; updates selected date if valid.
+     * Commits complete manual dates and ranges while retaining invalid text for correction.
      */
     _onInputChange() {
-        const inputValue = this._input.value.trim();
-        if (!inputValue) {
-            this.value = null;
-            this._input.setCustomValidity("");
-            this._input.classList.remove("is-invalid");
-            return;
-        }
-        const parsed = this._parseDate(inputValue, this._dateFormat);
-        if (parsed && !isNaN(parsed.getTime()) && this._formatDateString(parsed, this._dateFormat) === inputValue) {
-            this.value = parsed;
-            this._input.setCustomValidity("");
-            this._input.classList.remove("is-invalid");
-        } else {
-            this._input.setCustomValidity("invalid");
-            this._input.classList.add("is-invalid");
-        }
+        const parsed = this._readManualInput();
+        this._input.setCustomValidity(parsed.valid ? "" : this._i18n("webexpress.webui:calendar.invalid_date"));
+        this._input.classList.toggle("is-invalid", !parsed.valid);
+        this._dropdown.classList.toggle("is-invalid", !parsed.valid);
+        if (parsed.valid) { this.value = parsed.value; }
     }
 
     /**
@@ -209,7 +176,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         // room for the 25em calendar plus the padding of the menu; below that
         // the calendar gives way rather than spilling out
         dropdownMenu.style.maxWidth = "min(92vw, 28rem)";
-        dropdownMenu.style.display = "none";
+
 
         // header with navigation
         const header = document.createElement("div");
@@ -247,8 +214,8 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
                 this.value = new Date(now.getFullYear(), now.getMonth(), now.getDate());
             }
             setTimeout(() => {
-                this._dropdownmenu.style.display = "none";
-                this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
+                webexpress.webui.NativeMenu.hide(this._dropdownmenu);
+
             }, 0);
         });
         dropdownMenu.appendChild(todayBtn);
@@ -285,6 +252,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
 
         // normalization for range and single mode
         if (input == null) {
+            changed = !!(this._selectedDate || this._rangeStart || this._rangeEnd);
             if (this._rangeMode) {
                 this._rangeStart = null;
                 this._rangeEnd = null;
@@ -373,6 +341,10 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
         if (this._input && this._input.value !== newSerialized) {
             this._input.value = newSerialized;
         }
+
+        this._input.setCustomValidity("");
+        this._input.classList.remove("is-invalid");
+        this._dropdown.classList.remove("is-invalid");
 
         // update view date if available
         if (this._rangeMode) {
@@ -473,49 +445,39 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
      * @returns {Date|null}
      */
     _parseDate(value, format) {
-        const normalizedFormat = format.toLowerCase();
+        const tokens = [];
+        const escaped = format.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const pattern = escaped.replace(/dddd|mmmm|yyyy|dd|mm|d|m/gi, token => {
+            const name = token.toLowerCase();
+            tokens.push(name);
+            return name === "yyyy" ? "(\\d{4})" : name === "mmmm" || name === "dddd" ? "(.+?)" : "(\\d{1,2})";
+        });
+        const match = value.match(new RegExp("^" + pattern + "$", "iu"));
+        if (!match) { return null; }
         let year, month, day;
-        if (normalizedFormat === "yyyy-mm-dd") {
-            const m = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-            if (m) { year = parseInt(m[1]); month = parseInt(m[2]) - 1; day = parseInt(m[3]); }
-        } else if (normalizedFormat === "dd.mm.yyyy") {
-            const m = value.match(/^(\d{2})\.(\d{2})\.(\d{4})$/);
-            if (m) { day = parseInt(m[1]); month = parseInt(m[2]) - 1; year = parseInt(m[3]); }
-        } else if (normalizedFormat === "mm/dd/yyyy") {
-            const m = value.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
-            if (m) { month = parseInt(m[1]) - 1; day = parseInt(m[2]); year = parseInt(m[3]); }
-        } else if (normalizedFormat === "m/d/yyyy") {
-            const m = value.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-            if (m) { month = parseInt(m[1]) - 1; day = parseInt(m[2]); year = parseInt(m[3]); }
-        } else if (normalizedFormat === "mmmm dd, yyyy") {
-            const m = value.match(/^([a-zA-Z]+) (\d{2}), (\d{4})$/);
-            if (m) { month = this._parseMonth(m[1]); day = parseInt(m[2]); year = parseInt(m[3]); }
-        } else if (normalizedFormat === "dddd, mmmm dd, yyyy") {
-            const m = value.match(/^[a-zA-Z]+, ([a-zA-Z]+) (\d{2}), (\d{4})$/);
-            if (m) { month = this._parseMonth(m[1]); day = parseInt(m[2]); year = parseInt(m[3]); }
-        }
-        if (year && month >= 0 && day) {
-            const d = new Date(year, month, day);
-            if (d.getFullYear() === year && d.getMonth() === month && d.getDate() === day) {
-                return d;
-            }
-            return null;
-        }
-        return null;
+        tokens.forEach((token, index) => {
+            const text = match[index + 1];
+            if (token === "yyyy") { year = Number(text); }
+            else if (token === "mmmm") { month = this._parseMonth(text); }
+            else if (token === "m" || token === "mm") { month = Number(text) - 1; }
+            else if (token === "d" || token === "dd") { day = Number(text); }
+        });
+        if (!Number.isInteger(year) || !Number.isInteger(month) || !Number.isInteger(day)) { return null; }
+        const date = new Date(0);
+        date.setHours(0, 0, 0, 0);
+        date.setFullYear(year, month, day);
+        return date.getFullYear() === year && date.getMonth() === month && date.getDate() === day ? date : null;
     }
 
     /**
-     * Parses a textual month.
-     * @param {string} monthStr
-     * @returns {number|null}
+     * Accepts localized month names in the same format the calendar displays.
      */
     _parseMonth(monthStr) {
-        const months = [
-            "january", "february", "march", "april", "may", "june",
-            "july", "august", "september", "october", "november", "december"
-        ];
-        const index = months.indexOf(monthStr.toLowerCase());
-        return index !== -1 ? index : null;
+        for (let month = 0; month < 12; month++) {
+            const key = this._getMonthKey(month);
+            if ([key, this._i18n("webexpress.webui:calendar." + key)].some(name => name.toLowerCase() === monthStr.toLowerCase())) { return month; }
+        }
+        return null;
     }
 
     /**
@@ -642,8 +604,8 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
                                 this.value = { start: this._rangeStart, end: currentDate };
                             }
                             setTimeout(() => {
-                                this._dropdownmenu.style.display = "none";
-                                this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
+                                webexpress.webui.NativeMenu.hide(this._dropdownmenu);
+
                                 this._input.blur();
                             }, 0);
                         } else {
@@ -654,8 +616,8 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.PopperCtrl {
                     } else {
                         this.value = currentDate;
                         setTimeout(() => {
-                            this._dropdownmenu.style.display = "none";
-                            this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
+                            webexpress.webui.NativeMenu.hide(this._dropdownmenu);
+
                             this._input.blur();
                         }, 0);
                     }

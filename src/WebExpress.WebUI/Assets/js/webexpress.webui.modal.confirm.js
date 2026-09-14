@@ -10,7 +10,6 @@ webexpress.webui.ModalConfirm = class extends webexpress.webui.ModalCtrl {
     _action = null;
     _pending = false;
     _open = false;
-    _opening = false;
     _destroyed = false;
     _returnFocus = null;
     _fallbackFocus = null;
@@ -19,12 +18,11 @@ webexpress.webui.ModalConfirm = class extends webexpress.webui.ModalCtrl {
      * Owns a reusable dialog outside the caller's DOM so it can overlay tab content.
      */
     constructor() {
-        super(document.createElement("div"));
+        super(document.createElement("dialog"));
 
         const id = "wx-confirm-" + (++webexpress.webui.ModalConfirm._nextId);
         this._titleH1.id = id + "-title";
         this._bodyDiv.id = id + "-body";
-        this._element.setAttribute("tabindex", "-1");
         this._element.setAttribute("aria-labelledby", this._titleH1.id);
         this._element.setAttribute("aria-describedby", this._bodyDiv.id);
 
@@ -35,12 +33,8 @@ webexpress.webui.ModalConfirm = class extends webexpress.webui.ModalCtrl {
         this._errorElement.className = "text-danger mt-3 mb-0";
         this._errorElement.setAttribute("role", "alert");
 
-        this._element.addEventListener("show.bs.modal", () => {
+        this._element.addEventListener(webexpress.webui.Event.MODAL_SHOW_EVENT, () => {
             this._open = true;
-            this._opening = true;
-        });
-        this._element.addEventListener("shown.bs.modal", () => {
-            this._opening = false;
             if (this._destroyed) {
                 super.hide();
             } else {
@@ -48,13 +42,7 @@ webexpress.webui.ModalConfirm = class extends webexpress.webui.ModalCtrl {
                 this._cancelButton.focus({ preventScroll: true });
             }
         });
-        this._element.addEventListener("hide.bs.modal", (event) => {
-            // a request already sent cannot be cancelled by dismissing its dialog
-            if (this._pending && !this._destroyed) {
-                event.preventDefault();
-            }
-        });
-        this._element.addEventListener("hidden.bs.modal", () => {
+        this._element.addEventListener("close", () => {
             this._open = false;
             this._action = null;
             if (this._destroyed) {
@@ -105,7 +93,7 @@ webexpress.webui.ModalConfirm = class extends webexpress.webui.ModalCtrl {
      * Keeps one action in flight and reports failure without dismissing its context.
      */
     async _execute() {
-        if (this._pending || this._destroyed || this._opening || !this._open || typeof this._action !== "function") {
+        if (this._pending || this._destroyed || !this._open || typeof this._action !== "function") {
             return;
         }
 
@@ -154,7 +142,16 @@ webexpress.webui.ModalConfirm = class extends webexpress.webui.ModalCtrl {
     }
 
     /**
-     * Waits for Bootstrap to release its backdrop before removing the owned dialog.
+     * Retains the confirmation while its action is in flight.
+     */
+    hide() {
+        if (!this._pending || this._destroyed) {
+            super.hide();
+        }
+    }
+
+    /**
+     * Releases the top layer before removing the owned dialog.
      */
     destroy() {
         if (this._destroyed) {
@@ -165,9 +162,7 @@ webexpress.webui.ModalConfirm = class extends webexpress.webui.ModalCtrl {
         this._returnFocus = null;
         this._fallbackFocus = null;
         if (this._open) {
-            if (!this._opening) {
-                super.hide();
-            }
+            super.hide();
         } else {
             this._dispose();
         }
@@ -175,12 +170,9 @@ webexpress.webui.ModalConfirm = class extends webexpress.webui.ModalCtrl {
     }
 
     /**
-     * Releases both Bootstrap's instance and the DOM owned by this controller.
+     * Releases the DOM owned by this controller.
      */
     _dispose() {
-        if (typeof bootstrap !== "undefined") {
-            bootstrap.Modal.getInstance(this._element)?.dispose();
-        }
         this._confirmButton.onclick = null;
         this._element.remove();
     }

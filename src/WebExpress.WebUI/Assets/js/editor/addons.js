@@ -517,7 +517,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
      */
     _createModal: function(key, title) {
         const id = "wx-msp-" + key + "-" + Date.now();
-        const el = document.createElement("div");
+        const el = document.createElement("dialog");
         el.id = id;
         el.setAttribute("data-size", "modal-xl");
         el.setAttribute("data-key", key);
@@ -693,7 +693,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
             return;
         }
 
-        this._propModal = document.createElement("div");
+        this._propModal = document.createElement("dialog");
         this._propModal.className = "wx-prop-modal";
         this._propModal.setAttribute("data-close-label", "Cancel");
         this._propModal.setAttribute("data-size", "modal-lg");

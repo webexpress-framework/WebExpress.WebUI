@@ -108,8 +108,10 @@
     transition: stroke-width 0.1s ease, filter 0.1s ease;
 }
 
-[data-bs-theme="dark"] .wx-graph-node-rect {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-graph-node-rect {
     stroke: var(--wx-light);
+}
 }
 
 .wx-graph-node-rect:hover {
@@ -131,8 +133,10 @@
     transition: stroke-width 0.1s ease, filter 0.1s ease;
 }
 
-[data-bs-theme="dark"] .wx-graph-node-circle {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-graph-node-circle {
     stroke: var(--wx-light);
+}
 }
 
 .wx-graph-node-circle:hover {

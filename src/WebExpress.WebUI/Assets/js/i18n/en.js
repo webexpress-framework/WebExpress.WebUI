@@ -1,7 +1,11 @@
-﻿/**
+/**
  * English translations for WebExpress
  */
 webexpress.webui.I18N.register("en", "webexpress.webui", {
+    "editor.color": "Color",
+    "calendar": "Calendar",
+    "carousel.previous": "Previous slide",
+    "carousel.next": "Next slide",
     "edit": "Edit",
     "copy": "Copy",
     "remove": "Remove",
@@ -24,6 +28,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
 
     "calendar.select_date": "Select date",
     "calendar.select_range": "Select range",
+    "calendar.invalid_date": "Enter a valid date or a complete date range.",
     "calendar.clear_range": "Clear selection",
     "calendar.calendar_week": "CW",
     "calendar.january": "January",
@@ -112,6 +117,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "masterdetail.back": "Back to the list",
     "masterdetail.close": "Hide the detail view",
 
+    "overflow.more": "More tools",
     "overflow.submenu": "Submenu",
 
     "sidebar.toggle": "Toggle sidebar",

@@ -9,7 +9,7 @@
     white-space: nowrap;
 }
 
-/* Dropdown (Popper-target) */
+/* Dropdown (anchor target) */
 .wx-overflow-menu {
     display: none;
     flex-direction: column;
@@ -51,7 +51,7 @@
  * They are visually muted and do not respond to user interaction.
  */
 .wx-overflow-menu-item:disabled {
-    color: var(--bs-secundary);
+    color: var(--wx-secondary);
     pointer-events: none;
 }
 
@@ -92,16 +92,22 @@
     border-top: 1px solid var(--wx-border-color);
 }
 
-[data-bs-theme="dark"] .wx-overflow-more .btn:hover {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-overflow-more .btn:hover {
     background: var(--wx-gray-800);
 }
-
-[data-bs-theme="dark"] .wx-overflow-more .btn:focus {
-    background: var(--wx-gray-800);
 }
 
-[data-bs-theme="dark"] .wx-overflow-menu-item:hover {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-overflow-more .btn:focus {
+    background: var(--wx-gray-800);
+}
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-overflow-menu-item:hover {
     background-color: var(--wx-primary);
+}
 }
 
 /*
@@ -141,3 +147,15 @@
 .wx-toolpanel:focus-within .dropdown {
     display: block;
 }
+.wx-overflow-menu-item > :is(.btn, .wx-button, .wx-toolbar-button, .dropdown-item),
+.wx-overflow-submenu > button {
+    display: inline-flex; align-items: center; gap: 0.5em;
+    padding: 0; margin: 0; border: 0; text-align: start;
+}
+.wx-overflow-submenu > button { width: 100%; justify-content: space-between; }
+.wx-overflow-submenu > button > span { display: inline-flex; align-items: center; gap: 0.5em; }
+.wx-overflow-menu-item > .wx-overflow-fallback-label { margin: 0; }
+
+.wx-overflow-menu-item .wx-toolbar-button-label { display: inline !important; }
+.wx-overflow-submenu-trigger { flex: 1; }
+.wx-overflow-submenu-trigger > i:last-child { margin-inline-start: auto; flex-shrink: 0; }

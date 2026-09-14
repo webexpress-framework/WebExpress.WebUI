@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -6,10 +6,10 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// A modal page dynamically retrieves and displays content from another page within 
-    /// a modal dialog. This allows users to interact with external or additional information 
-    /// without navigating away from the current view. Modal pages are ideal for loading details, 
-    /// or dynamic content, providing a seamless and focused user experience while maintaining 
+    /// A modal page dynamically retrieves and displays content from another page within
+    /// a modal dialog. This allows users to interact with external or additional information
+    /// without navigating away from the current view. Modal pages are ideal for loading details,
+    /// or dynamic content, providing a seamless and focused user experience while maintaining
     /// the main application's context.
     /// </summary>
     public class ControlModalRemoteForm : ControlModalRemotePage
@@ -61,7 +61,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-modal-footer"
             };
 
-            var html = new HtmlElementTextContentDiv(header, content, footer)
+            var html = new HtmlElementInteractiveDialog(header, content, footer)
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-modal-form", GetClasses(renderContext))

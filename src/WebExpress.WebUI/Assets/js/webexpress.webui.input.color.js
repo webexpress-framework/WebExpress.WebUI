@@ -1,5 +1,5 @@
 /**
- * A color selection control extending the base PopperCtrl class.
+ * A color selection control extending the base MenuCtrl class.
  * Shows only a color preview in collapsed state.
  * Provides a uniform grid of predefined colors and a custom selector in the dropdown.
  *
@@ -8,7 +8,7 @@
  * - webexpress.webui.Event.DROPDOWN_SHOW_EVENT
  * - webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT
  */
-webexpress.webui.InputColorCtrl = class extends webexpress.webui.PopperCtrl {
+webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
     _value = "#000000";
     _disabled = false;
 
@@ -72,8 +72,8 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.PopperCtrl {
         element.appendChild(dropdown);
         element.appendChild(dropdownMenu);
 
-        // attach popper.js positioning for the dropdown menu
-        this._initializePopper(dropdown, dropdownMenu);
+        // attach native popover behavior for the dropdown menu
+        this._initializeMenu(dropdown, dropdownMenu);
 
         this.render();
     }
@@ -106,7 +106,10 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.PopperCtrl {
      * @returns {HTMLDivElement} The dropdown element.
      */
     _createDropdown() {
-        const dropdown = document.createElement("div");
+        const dropdown = document.createElement("button");
+        dropdown.type = "button";
+        dropdown.disabled = this._disabled;
+        dropdown.setAttribute("aria-label", this._i18n("webexpress.webui:editor.color", "Color"));
         dropdown.classList.add("form-control", "wx-color-trigger");
 
         // add disabled class for visual feedback
@@ -115,7 +118,7 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.PopperCtrl {
         }
 
         // preview box - takes available space
-        const colorPreview = document.createElement("div");
+        const colorPreview = document.createElement("span");
         colorPreview.className = "wx-color-preview-box";
         this._colorPreview = colorPreview;
 
@@ -125,27 +128,6 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.PopperCtrl {
 
         dropdown.appendChild(colorPreview);
         dropdown.appendChild(expandIcon);
-
-        // toggle the dropdown menu on click
-        dropdown.addEventListener("click", (e) => {
-            // block interaction if disabled
-            if (this._disabled) {
-                return;
-            }
-
-            if (this._dropdownmenu.style.display === "flex") {
-                this._hideDropdown();
-            } else {
-                this._showDropdown();
-            }
-        });
-
-        // hide the dropdown menu when clicking outside
-        document.addEventListener("click", (e) => {
-            if (!dropdown.contains(e.target) && !this._dropdownmenu.contains(e.target)) {
-                this._hideDropdown();
-            }
-        });
 
         return dropdown;
     }
@@ -161,9 +143,8 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.PopperCtrl {
             return;
         }
 
-        this._dropdownmenu.style.display = "flex";
-        this._dropdownmenu.dispatchEvent(new Event("show"));
-        this._dispatch(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {});
+        webexpress.webui.NativeMenu.show(this._dropdownmenu);
+
     }
 
     /**
@@ -172,9 +153,8 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.PopperCtrl {
      * and dispatches the framework-specific DROPDOWN_HIDDEN_EVENT.
      */
     _hideDropdown() {
-        this._dropdownmenu.style.display = "none";
-        this._dropdownmenu.dispatchEvent(new Event("hide"));
-        this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
+        webexpress.webui.NativeMenu.hide(this._dropdownmenu);
+
     }
 
     /**

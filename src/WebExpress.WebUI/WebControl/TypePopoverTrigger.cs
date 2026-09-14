@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
     public static class TypePopoverTriggerExtensions
     {
         /// <summary>
-        /// Converts the trigger to the value of the data-bs-trigger attribute.
+        /// Converts the trigger to the value of the data-wx-trigger attribute.
         /// </summary>
         /// <param name="trigger">The trigger.</param>
         /// <returns>The data attribute value corresponding to the trigger.</returns>

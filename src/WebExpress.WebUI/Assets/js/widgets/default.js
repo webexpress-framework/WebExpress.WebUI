@@ -177,7 +177,7 @@ webexpress.webui.DashboardWidgets.register("widget_progress", {
         barInner.style.width = value + "%";
         barInner.textContent = value + "%";
 
-        // optionally adjust bootstrap color
+        // optionally adjust WebExpress color
         if (params.color) {
             barInner.classList.add("bg-" + params.color);
         }

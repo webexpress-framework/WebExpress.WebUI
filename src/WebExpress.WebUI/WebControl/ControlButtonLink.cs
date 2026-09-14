@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -87,7 +87,6 @@ namespace WebExpress.WebUI.WebControl
 
             if (!string.IsNullOrWhiteSpace(Tooltip?.Invoke(renderContext)))
             {
-                html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
             primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);

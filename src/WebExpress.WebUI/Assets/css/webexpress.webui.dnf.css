@@ -28,8 +28,8 @@
     flex-direction: row;
     align-items: center;
     gap: 0.3em;
-    border: var(--bs-border-width) solid var(--wx-border-color);
-    border-radius: var(--bs-border-radius);
+    border: var(--wx-border-width) solid var(--wx-border-color);
+    border-radius: var(--wx-border-radius);
     padding: 0.2em 0.4em 0.2em 0.2em;
 }
 
@@ -121,7 +121,7 @@
 .wx-dnf-separator::after {
     content: "";
     flex: 1;
-    height: var(--bs-border-width);
+    height: var(--wx-border-width);
     background-color: var(--wx-border-color);
 }
 

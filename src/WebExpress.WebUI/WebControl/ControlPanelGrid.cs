@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     /// Represents a grid control panel with 12 cells per row.
     /// </summary>
     /// <remarks>
-    /// This class is a specialized version of the <see cref="ControlPanel"/> that arranges 
+    /// This class is a specialized version of the <see cref="ControlPanel"/> that arranges
     /// its child controls in a grid layout with 12 cells per row.
     /// </remarks>
     public class ControlPanelGrid : ControlPanel
@@ -37,9 +37,9 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = GetClasses(renderContext),
                 Style = GetStyles(renderContext),
-                Role = role,
-                DataTheme = Theme?.Invoke(renderContext).ToValue()
+                Role = role
             };
+            html.AddUserAttribute("data-wx-theme", Theme?.Invoke(renderContext).ToValue());
 
             html.Add(new HtmlElementTextContentDiv
             (

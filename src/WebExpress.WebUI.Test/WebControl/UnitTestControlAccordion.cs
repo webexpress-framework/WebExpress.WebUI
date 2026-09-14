@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div id=""acc"" class=""accordion""><div class=""accordion-item"">*</div></div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<div id=""acc"" class=""accordion""><details id=""it1"" class=""accordion-item"" name=""acc"">*</details></div>", html);
         }
 
         /// <summary>
@@ -93,7 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""accordion-item""><div class=""accordion-header""><button type=""button"" class=""accordion-button collapsed"" data-bs-toggle=""collapse"" data-bs-target=""#it1"" aria-expanded=""false"" aria-controls=""it1"">Header</button></div><div id=""it1"" class=""accordion-collapse collapse""><div class=""accordion-body""></div></div></div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<details id=""it1"" class=""accordion-item""><summary class=""accordion-button"">Header  <i class=""wx-icon-light wx-icon-light-angle-down wx-accordion-caret""></i></summary><div class=""accordion-body""></div></details>", html);
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""accordion-item""><div class=""accordion-header""><button type=""button"" class=""accordion-button"" data-bs-toggle=""collapse"" data-bs-target=""#it1"" aria-expanded=""true"" aria-controls=""it1"">Header</button></div><div id=""it1"" class=""accordion-collapse collapse show""><div class=""accordion-body""></div></div></div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<details id=""it1"" class=""accordion-item"" open><summary class=""accordion-button"">Header  <i class=""wx-icon-light wx-icon-light-angle-down wx-accordion-caret""></i></summary><div class=""accordion-body""></div></details>", html);
         }
     }
 }

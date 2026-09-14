@@ -916,8 +916,8 @@ webexpress.webui.ScheduleCtrl = class extends webexpress.webui.Ctrl {
      * stepping through the periods.
      *
      * It is built once and re-attached on every render rather than rebuilt: the
-     * date control installs a popper, and recreating it per render would strand
-     * one on every navigation.
+     * date control owns a popover and listeners, and recreating it per render would strand
+     * them on every navigation.
      * @returns {HTMLElement} The mini calendar.
      */
     _renderMiniCalendar() {

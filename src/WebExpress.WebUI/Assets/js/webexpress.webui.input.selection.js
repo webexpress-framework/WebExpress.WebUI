@@ -6,7 +6,7 @@
  * - webexpress.webui.Event.DROPDOWN_SHOW_EVENT
  * - webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT
  */
-webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl {
+webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
     _values = [];
     _items = [];
     _filterInput = null;
@@ -70,8 +70,11 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         element.appendChild(dropdown);
         element.appendChild(dropdownMenu);
 
-        // attach popper.js positioning for the dropdown menu
-        this._initializePopper(dropdown, dropdownMenu);
+        // attach native popover behavior for the dropdown menu
+        this._initializeMenu(dropdown, dropdownMenu, dropdown.querySelector("button"));
+        dropdownMenu.addEventListener("toggle", (event) => {
+            if (event.newState === "open") { this._filterInput.focus({ preventScroll: true }); }
+        });
 
         // follow the field this selection depends on, if it names one. this has to happen
         // after the value was applied: the initial value may itself be one the dependency
@@ -113,35 +116,17 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         // to lists that leave their role implicit
         selection.setAttribute("role", "list");
 
-        const expandIcon = document.createElement("a");
-        expandIcon.className = this._iconClass("angle-down");
-        expandIcon.href = "javascript:void(0);";
+        const expandIcon = document.createElement("button");
+        expandIcon.type = "button";
+        expandIcon.setAttribute("aria-label", this._placeholder);
+        expandIcon.className = "wx-selection-trigger";
+        const drawing = document.createElement("i");
+        drawing.className = this._iconClass("angle-down");
+        expandIcon.appendChild(drawing);
 
         dropdown.appendChild(selection);
         dropdown.appendChild(expandIcon);
         this._selection = selection;
-
-        // toggle the dropdown menu on click
-        dropdown.addEventListener("click", (e) => {
-            if (this._dropdownmenu.style.display === "flex") {
-                this._dropdownmenu.dispatchEvent(new Event("hide"));
-                this._dropdownmenu.style.display = "none";
-            } else {
-                this._dropdownmenu.style.display = "flex";
-                this._dropdownmenu.dispatchEvent(new Event("show"));
-                if (this._filterInput) {
-                    this._filterInput.focus({ preventScroll: true });
-                }
-            }
-        });
-
-        // hide the dropdown menu when clicking outside
-        document.addEventListener("click", (e) => {
-            if (!dropdown.contains(e.target) && !this._dropdownmenu.contains(e.target)) {
-                this._dropdownmenu.dispatchEvent(new Event("hide"));
-                this._dropdownmenu.style.display = "none";
-            }
-        });
 
         return dropdown;
     }
@@ -181,8 +166,9 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
 
                 // close the dropdown after selection (optional logic for single select)
                 if (!this._multiselect) {
-                    this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
-                    this._dropdownmenu.style.display = "none";
+
+                    webexpress.webui.NativeMenu.hide(this._dropdownmenu);
+                    this._dropdown.querySelector(".wx-selection-trigger").focus({ preventScroll: true });
                 }
             }
         });
@@ -201,12 +187,21 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         const filterContainer = document.createElement("div");
         const filterInput = document.createElement("input");
         filterInput.type = "text";
+        filterInput.addEventListener("keydown", event => {
+            if (event.key !== "ArrowDown" && event.key !== "ArrowUp") { return; }
+            const options = [...this._dropdownoptions.querySelectorAll("button")];
+            const option = event.key === "ArrowUp" ? options.at(-1) : options[0];
+            if (option) { event.preventDefault(); option.focus({ preventScroll: true }); }
+        });
         filterInput.setAttribute("aria-label", this._i18n("webexpress.webui:selection.filter", "Filter"));
 
-        const clearButton = document.createElement("a");
-        clearButton.className = this._iconClass("xmark");
+        const clearButton = document.createElement("button");
+        clearButton.type = "button";
+        clearButton.className = "wx-selection-clear";
+        const clearIcon = document.createElement("i");
+        clearIcon.className = this._iconClass("xmark");
+        clearButton.appendChild(clearIcon);
         clearButton.setAttribute("aria-label", this._i18n("webexpress.webui:selection.filter.clear", "Clear Filter"));
-        clearButton.setAttribute("role", "button");
         clearButton.style.cursor = "pointer";
 
         filterContainer.appendChild(filterInput);
@@ -483,6 +478,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 }
 
                 const contentWrapper = document.createElement(item.disabled ? "span" : "button");
+                if (!item.disabled) { contentWrapper.type = "button"; }
                 if (item.disabled) {
                     contentWrapper.setAttribute("disabled", "disabled");
                 }
@@ -519,6 +515,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                     li.className = item.color;
                 }
 
+                li.classList.add("wx-chip");
                 const span = document.createElement("span");
                 const isStickyActive = this._stickySelection && this._values.length > 0;
 

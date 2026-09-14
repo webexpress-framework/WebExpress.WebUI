@@ -54,7 +54,7 @@ function loadModalForm() {
  * Builds a host modal element that carries the control's marker class.
  */
 function buildHost(rt) {
-    const host = rt.createElement("div");
+    const host = rt.createElement("dialog");
     host.classList.add("wx-webui-modal-form");
     host.id = "myFormEdit";
     rt.document.body.appendChild(host);

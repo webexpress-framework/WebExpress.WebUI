@@ -1,5 +1,5 @@
 /**
- * Sidebar controller for responsive sidebars using WX-prefixed classes and Popper.js for overlays.
+ * Sidebar controller for responsive sidebars using WX-prefixed classes and CSS anchors for overlays.
  * Element types: .wx-sidebar-link, .wx-sidebar-separator, .wx-sidebar-header, .wx-sidebar-panel, .wx-sidebar-icon.
  * Compact mode is controlled via data-mode: "hide" or "overlay".
  *
@@ -14,7 +14,7 @@
  * - webexpress.webui.Event.BREAKPOINT_CHANGE_EVENT
  * - webexpress.webui.Event.ICON_EDIT_EVENT
  */
-webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
+webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
     _items = [];
     _resizeObserver = null;
     _hoverExpanded = false;
@@ -1002,11 +1002,12 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             content.appendChild(item.content);
         }
         overlayPanel.appendChild(content);
-        document.body.appendChild(overlayPanel);
+        this._element.appendChild(overlayPanel);
 
-        // initialize popper if available
-        if (typeof this._initializePopper === "function") {
-            this._initializePopper(triggerEl, overlayPanel);
+        // retain the sidebar as the theme and dialog owner of the top-layer panel
+        if (typeof this._initializeMenu === "function") {
+            this._initializeMenu(triggerEl, overlayPanel);
+            webexpress.webui.NativeMenu.show(overlayPanel);
         }
 
         // avoid passing DOM element to payload to prevent potential circular reference issues
@@ -1021,9 +1022,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                 }
             }
 
-            overlayPanel.style.display = "none";
-            document.removeEventListener("mousedown", handleClickOutside);
-            document.removeEventListener("keydown", handleEsc);
+            webexpress.webui.NativeMenu.hide(overlayPanel);
 
             if (overlayPanel.parentElement) {
                 overlayPanel.parentElement.removeChild(overlayPanel);
@@ -1031,27 +1030,9 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             this._dispatch(webexpress.webui.Event.HIDE_EVENT, { overlayActive: false });
         };
 
-        // handle click outside
-        const handleClickOutside = (event) => {
-            if (!overlayPanel.contains(event.target) && !triggerEl.contains(event.target)) {
-                closeOverlay();
-            }
-        };
-
-        // handle esc
-        const handleEsc = (event) => {
-            if (event.key === "Escape") {
-                closeOverlay();
-            }
-        };
-
-        // prevent clicks inside overlay from closing it
-        overlayPanel.addEventListener("mousedown", (e) => {
-            e.stopPropagation();
+        overlayPanel.addEventListener("toggle", (event) => {
+            if (event.newState === "closed") { closeOverlay(); }
         });
-
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("keydown", handleEsc);
     }
 
     /**

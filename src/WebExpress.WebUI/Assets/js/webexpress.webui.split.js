@@ -896,11 +896,11 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         }
         return false;
     }
-    
+
     /**
      * Hides a node without removing it from the DOM. Staying connected is
      * important so that getComputedStyle() can still correctly detect
-     * class‑based hiding (e.g., Bootstrap’s .d-none) on the child elements.
+     * class‑based hiding (e.g., WebExpress’s .d-none) on the child elements.
      */
     _hideNode(node) {
         if (node) node.style.display = "none";

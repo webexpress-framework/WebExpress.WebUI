@@ -6,21 +6,16 @@
  */
 webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
 
-    /**
-     * What counts as a dialog when deciding which one a section belongs to. Both names are
-     * matched because a dialog carries the authored one until its own controller has mounted
-     * and swapped it for the rendered one.
-     */
-    static DIALOG_SELECTOR = ".wx-webui-modal, .modal";
+    static DIALOG_SELECTOR = "dialog";
+    static _nextId = 0;
 
     _closeLabel = null;
     _size = null;
     _autoShow = null;
-    _dialogDiv = document.createElement("div");
-    _headerDiv = document.createElement("div");
+    _headerDiv = document.createElement("header");
     _titleH1 = document.createElement("h1");
     _bodyDiv = document.createElement("div");
-    _footerDiv = document.createElement("div");
+    _footerDiv = document.createElement("footer");
     _cancelButton = document.createElement("button");
     _fullscreenButton = document.createElement("button");
     _fullscreenMode = "true"; // "true" (css) or "native" or ""
@@ -44,7 +39,9 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         element.removeAttribute("data-size");
         element.removeAttribute("data-auto-show");
         element.removeAttribute("data-scrollable");
-        element.classList.add("modal", "fade");
+        element.id ||= "wx-dialog-" + (++webexpress.webui.ModalCtrl._nextId);
+        element.classList.add("modal");
+        element.classList.toggle("wx-dialog-scrollable", this._scrollable);
 
         // create modal elements
         this._bodyDiv.className = "modal-body";
@@ -55,7 +52,8 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this.liftTitle(this._element);
 
         // extract and append all .wx-modal-content elements directly to body div
-        const contents = this._element.querySelectorAll(".wx-modal-content");
+        const contents = [...this._element.querySelectorAll(".wx-modal-content")]
+            .filter(content => content.closest("dialog") === this._element);
 
         // a body reserved for a filling element stops scrolling and passes its height down, so a
         // writing surface ends exactly where the dialog does instead of guessing at the chrome
@@ -106,27 +104,20 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         });
         this._footerDiv.appendChild(this._cancelButton);
 
-        // create modal content structure
-        this._dialogDiv.className = `modal-dialog${this._scrollable ? " modal-dialog-scrollable" : ""} ${this._size}`;
-
-        const modalContentDiv = document.createElement("div");
-        modalContentDiv.className = "modal-content";
-        modalContentDiv.appendChild(this._headerDiv);
-        modalContentDiv.appendChild(this._bodyDiv);
-        modalContentDiv.appendChild(this._footerDiv);
-
-        this._dialogDiv.appendChild(modalContentDiv);
-        this._element.appendChild(this._dialogDiv);
-
-        // bootstrap can dismiss through Escape without calling the controller's hide method
-        this._element.addEventListener("hidden.bs.modal", () => {
-            this._element.removeAttribute("style");
+        this._element.append(this._headerDiv, this._bodyDiv, this._footerDiv);
+        this._titleH1.id = this._element.id + "-title";
+        this._element.setAttribute("aria-labelledby", this._titleH1.id);
+        this._element.addEventListener("cancel", (event) => {
+            event.preventDefault();
+            this.hide();
+        });
+        this._element.addEventListener("close", () => {
             this._dispatch(webexpress.webui.Event.MODAL_HIDE_EVENT, {});
         });
 
         // auto-show if specified
         if (this._autoShow) {
-            this.show();
+            queueMicrotask(() => this.show());
         }
     }
 
@@ -208,13 +199,13 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
                 webexpress.webui.Controller.toggleNativeFullscreen(this._element);
             } else {
                 // fallback to css if controller not available
-                this._dialogDiv.classList.toggle("modal-fullscreen");
+                this._element.classList.toggle("modal-fullscreen");
             }
             return;
         }
 
         // default: css/light fullscreen toggle
-        const isFullscreen = this._dialogDiv.classList.toggle("modal-fullscreen");
+        const isFullscreen = this._element.classList.toggle("modal-fullscreen");
         const icon = this._fullscreenButton ? this._fullscreenButton.querySelector("i") : null;
 
         if (isFullscreen) {
@@ -222,14 +213,14 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
                 icon.className = this._iconClass("compress");
             }
             this._fullscreenButton.setAttribute("aria-pressed", "true");
-            this._dialogDiv.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl");
+            this._element.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl");
         } else {
             if (icon) {
                 icon.className = this._iconClass("expand");
             }
             this._fullscreenButton.setAttribute("aria-pressed", "false");
             if (this._size) {
-                this._dialogDiv.classList.add(this._size);
+                this._element.classList.add(this._size);
             }
         }
     }
@@ -238,12 +229,9 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
      * Updates the modal content with fetched data from the URI.
      */
     update() {
-        if (!this._element.hasChildNodes()) {
-            this._element.appendChild(this._dialogDiv);
-        }
 
         // remove all known size classes except fullscreen if it was toggled manually
-        this._dialogDiv.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl", "modal-fullscreen");
+        this._element.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl", "modal-fullscreen");
 
         // reset icon state
         const icon = this._fullscreenButton.querySelector("i");
@@ -254,37 +242,34 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
 
         if (this._size) {
             // apply modal size class
-            this._dialogDiv.classList.add(this._size);
+            this._element.classList.add(this._size);
         }
     }
 
     /**
-     * Displays the modal by retrieving or creating its Bootstrap instance.
+     * Enters the browser top layer so focus and background inertness follow the dialog.
      * Ensures the modal is properly initialized before showing it.
      */
     show() {
         // ensure modal content is refreshed
         this.update();
 
-        const modalInstance = bootstrap.Modal.getInstance(this._element) || new bootstrap.Modal(this._element, {
-            backdrop: "static",
-            keyboard: true,
-        });
-        modalInstance.show();
+        if (this._element.open) {
+            return;
+        }
+        this._element.showModal();
 
         // trigger event for showing the modal
         this._dispatch(webexpress.webui.Event.MODAL_SHOW_EVENT, {});
     }
 
     /**
-     * Hides the modal by retrieving its Bootstrap instance.
+     * Releases the browser top layer and restores focus to the invoking control.
      * If an instance exists, it triggers the hide action.
      */
     hide() {
-        const modalInstance = bootstrap.Modal.getInstance(this._element);
-
-        if (modalInstance) {
-            modalInstance.hide();
+        if (this._element.open) {
+            this._element.close();
         }
     }
 

@@ -125,8 +125,8 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Creates and returns a button with the given Bootstrap classes and label.
-     * @param {string} btnClass - The Bootstrap button class.
+     * Creates and returns a button with the given WebExpress classes and label.
+     * @param {string} btnClass - The WebExpress button class.
      * @param {string} label - The button label.
      * @returns {HTMLButtonElement}
      */

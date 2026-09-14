@@ -106,11 +106,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         document.addEventListener(webexpress.webui.Event.CHANGE_FILTER_EVENT, () => {
             this.render();
         });
-        document.addEventListener("click", () => {
-            this._openMenuId = null;
-            this._element.querySelectorAll(".wx-quickfilter-dropdown-menu.show, .wx-quickfilter-menu.show")
-                .forEach((menu) => menu.classList.remove("show"));
-        });
+
     }
 
     /**
@@ -268,7 +264,8 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
             return element;
         }
 
-        const toggle = document.createElement("span");
+        const toggle = document.createElement("button");
+        toggle.type = "button";
         toggle.className = "wx-quickfilter-menu-toggle";
         toggle.setAttribute("role", "button");
         toggle.setAttribute("tabindex", "0");
@@ -286,29 +283,13 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         }
         menu.appendChild(this._menuItem("trash", "webexpress.webui:remove", "Remove", () => this._confirmDeleteFilter(config)));
 
-        // the toggle sits inside the chip, whose click toggles the filter; the
-        // menu must not do that, so every interaction stops here
-        toggle.addEventListener("click", (e) => {
-            e.stopPropagation();
-            e.preventDefault();
-            const willOpen = !menu.classList.contains("show");
-            this._element.querySelectorAll(".wx-quickfilter-menu.show")
-                .forEach((m) => m.classList.remove("show"));
-            menu.classList.toggle("show", willOpen);
-        });
-        toggle.addEventListener("keydown", (e) => {
-            if (e.key === "Enter" || e.key === " ") {
-                e.preventDefault();
-                toggle.click();
-            }
-        });
-
         const wrapper = document.createElement("span");
         wrapper.className = "wx-quickfilter-chip-wrap";
 
-        element.appendChild(toggle);
         wrapper.appendChild(element);
+        wrapper.appendChild(toggle);
         wrapper.appendChild(menu);
+        webexpress.webui.NativeMenu.bind(toggle, menu);
 
         return wrapper;
     }
@@ -330,7 +311,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         item.addEventListener("click", (e) => {
             e.stopPropagation();
             e.preventDefault();
-            item.closest(".wx-quickfilter-menu")?.classList.remove("show");
+            webexpress.webui.NativeMenu.hide(item.closest(".wx-quickfilter-menu"));
             action();
         });
         return item;
@@ -609,7 +590,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
         }
         const label = document.createElement("span");
         toggle.appendChild(label);
-        const caret = webexpress.webui.Icon.create("caret-down", "wx-quickfilter-dropdown-caret");
+        const caret = webexpress.webui.Icon.create("angle-down", "wx-quickfilter-dropdown-caret");
         toggle.appendChild(caret);
 
         const menu = document.createElement("div");
@@ -691,7 +672,7 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
                     // keep a multi-select open across the re-render, close a single one
                     this._openMenuId = multi ? menuId : null;
                     if (!multi) {
-                        menu.classList.remove("show");
+                        webexpress.webui.NativeMenu.hide(menu);
                     }
                     this._registry.toggle(option.id);
                 });
@@ -734,24 +715,16 @@ webexpress.webui.QuickFilterCtrl = class extends webexpress.webui.Ctrl {
 
         populate();
 
-        toggle.addEventListener("click", (e) => {
-            e.stopPropagation();
-            const willOpen = !menu.classList.contains("show");
-            this._element.querySelectorAll(".wx-quickfilter-dropdown-menu.show")
-                .forEach((m) => m.classList.remove("show"));
-            menu.classList.toggle("show", willOpen);
-            this._openMenuId = willOpen ? menuId : null;
-            if (willOpen) {
-                const input = menu.querySelector(".wx-quickfilter-dropdown-search input");
-                if (input) {
-                    setTimeout(() => input.focus(), 0);
-                }
-            }
+        webexpress.webui.NativeMenu.bind(toggle, menu);
+        if (multi) { menu.setAttribute("data-wx-keep-open", ""); }
+        menu.addEventListener("toggle", () => {
+            if (!menu.isConnected) { return; }
+            const open = menu.matches(":popover-open");
+            this._openMenuId = open ? menuId : null;
+            if (open) { menu.querySelector("input")?.focus({ preventScroll: true }); }
         });
-
-        // re-open the menu that was open before the re-render
         if (menuId && this._openMenuId === menuId) {
-            menu.classList.add("show");
+            queueMicrotask(() => webexpress.webui.NativeMenu.show(menu));
         }
 
         wrap.appendChild(toggle);

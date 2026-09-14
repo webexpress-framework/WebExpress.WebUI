@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -75,14 +75,15 @@ namespace WebExpress.WebUI.WebControl
         {
             var role = Role?.Invoke(renderContext);
 
-            return new HtmlElementTextContentDiv([.. Content.Select(x => x.Render(renderContext, visualTree))])
+            var html = new HtmlElementTextContentDiv([.. Content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
                 Class = Css.Concatenate("", GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
-                Role = role,
-                DataTheme = Theme?.Invoke(renderContext).ToValue()
+                Role = role
             };
+            html.AddUserAttribute("data-wx-theme", Theme?.Invoke(renderContext).ToValue());
+            return html;
         }
     }
 }

@@ -94,13 +94,14 @@ test("the date control renders the month grid through the icon set", () => {
     );
 });
 
-test("the date input keeps its own class beside the icon", () => {
-    const classes = classesOf(build("webexpress.webui.input.date.js", "InputDateCtrl"), ".wx-date-calendar-icon");
-    assert.equal(
-        classes,
-        "wx-date-calendar-icon wx-icon-light wx-icon-light-calendar",
-        "the layout class stays, the icon classes are added beside it"
-    );
+test("the calendar drawing belongs inside a native invoker button", () => {
+    const host = build("webexpress.webui.input.date.js", "InputDateCtrl");
+    const button = host.querySelector(".wx-date-calendar-icon");
+    assert.equal(button.tagName, "BUTTON");
+    assert.equal(button.type, "button", "opening a calendar must not submit its containing form");
+    assert.equal(button.getAttribute("popovertarget"), host.querySelector("[popover]").id);
+    assert.equal(button.querySelector("i").className, "wx-icon-light wx-icon-light-calendar",
+        "the button background must not replace the icon's mask fill");
 });
 
 test("the calendar toolbar renders all three of its buttons", () => {

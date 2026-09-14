@@ -45,8 +45,8 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         public virtual Func<IRenderControlContext, TypeTheme> Theme
         {
-            get => (Func<IRenderControlContext, TypeTheme>)GetPropertyObjectValue("data-bs-theme");
-            set => SetProperty(value, null, null, "data-bs-theme");
+            get => (Func<IRenderControlContext, TypeTheme>)GetPropertyObjectValue("data-wx-theme");
+            set => SetProperty(value, null, null, "data-wx-theme");
         }
 
         /// <summary>
@@ -167,14 +167,15 @@ namespace WebExpress.WebUI.WebControl
             var role = Role?.Invoke(renderContext);
             var theme = Theme?.Invoke(renderContext) ?? TypeTheme.None;
 
-            return new HtmlElementTextContentDiv([.. content.Select(x => x?.Render(renderContext, visualTree))])
+            var html = new HtmlElementTextContentDiv([.. content.Select(x => x?.Render(renderContext, visualTree))])
             {
                 Id = Id,
                 Class = GetClasses(renderContext),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Role = role,
-                DataTheme = theme.ToValue()
+                Role = role
             };
+            html.AddUserAttribute("data-wx-theme", theme.ToValue());
+            return html;
         }
     }
 }

@@ -215,8 +215,6 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         const button = document.createElement("button");
         button.className = "btn";
         button.type = "button";
-        button.setAttribute("data-bs-toggle", "dropdown");
-        button.setAttribute("aria-expanded", "false");
         if (this._buttonCss) button.classList.add(...this._buttonCss.split(" "));
         if (this._buttonColor) button.classList.add(this._buttonColor);
         if (this._active) button.setAttribute("active", "true");
@@ -258,14 +256,10 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
 
         // handle visibility change event
         // fires CHANGE_VISIBILITY_EVENT when the menu is shown or hidden
-        button.addEventListener("show.bs.dropdown", () => {
+        webexpress.webui.NativeMenu.bind(button, ul);
+        ul.addEventListener("beforetoggle", (event) => {
             this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
-                visible: true
-            });
-        });
-        button.addEventListener("hide.bs.dropdown", () => {
-            this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
-                visible: false
+                visible: event.newState === "open"
             });
         });
     }

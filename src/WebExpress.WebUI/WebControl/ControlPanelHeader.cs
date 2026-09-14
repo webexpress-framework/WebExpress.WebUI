@@ -1,11 +1,11 @@
-﻿using System.Linq;
+using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a header control panel that can contain multiple child controls and manage 
+    /// Represents a header control panel that can contain multiple child controls and manage
     /// their layout and rendering.
     /// </summary>
     public class ControlPanelHeader : ControlPanel
@@ -48,14 +48,15 @@ namespace WebExpress.WebUI.WebControl
         {
             var role = Role?.Invoke(renderContext);
 
-            return new HtmlElementSectionHeader([.. Content.Select(x => x.Render(renderContext, visualTree))])
+            var html = new HtmlElementSectionHeader([.. Content.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
                 Class = GetClasses(renderContext),
                 Style = GetStyles(renderContext),
-                Role = role,
-                DataTheme = Theme?.Invoke(renderContext).ToValue()
+                Role = role
             };
+            html.AddUserAttribute("data-wx-theme", Theme?.Invoke(renderContext).ToValue());
+            return html;
         }
     }
 }

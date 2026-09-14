@@ -4,7 +4,7 @@
  * A card separates by drawing a box; a section separates by typography and whitespace. There
  * is deliberately no background, no border and no radius on the section itself - the only line
  * it draws is the vertical guide down the left of its body, which ties the content back to its
- * label without enclosing it. All colours come from the bootstrap CSS variables that ship with
+ * label without enclosing it. All colours come from the WebExpress CSS variables that ship with
  * WebExpress.WebUI, so a section follows the light / dark switch without extra rules.
  */
 
@@ -93,22 +93,11 @@ img.wx-section-icon {
     object-fit: contain;
 }
 
-/* a chevron drawn from two borders: it inherits the header colour, so it dims and brightens
-   with the label instead of needing its own palette */
 .wx-section-chevron {
-    flex: none;
-    width: 0.42rem;
-    height: 0.42rem;
-    margin-right: 0.1rem;
-    border-right: 1.5px solid currentColor;
-    border-bottom: 1.5px solid currentColor;
-    transform: translateY(-0.12em) rotate(45deg);
+    flex: none; width: 0.8rem; height: 0.8rem; margin-right: 0.1rem;
     transition: transform var(--wx-section-duration) ease;
 }
-
-.wx-section-collapsed > .wx-section-header > .wx-section-chevron {
-    transform: translateX(-0.06em) rotate(-45deg);
-}
+.wx-section-collapsed > .wx-section-header > .wx-section-chevron { transform: rotate(-90deg); }
 
 /* ------------------------------------------------------------------ body */
 

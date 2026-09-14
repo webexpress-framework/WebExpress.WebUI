@@ -1,7 +1,7 @@
 /*
  * Estimate input control. The estimate is chosen from a row of chips, one per
  * scale value; the active chip carries the current estimate. Colors use the
- * bootstrap custom properties with hex fallbacks so the control stays legible
+ * WebExpress custom properties with hex fallbacks so the control stays legible
  * across themes even when the variables are undefined.
  */
 .wx-estimate-container {
@@ -42,7 +42,9 @@
     box-shadow: 0 0 0 2px var(--wx-body-bg, #fff), 0 0 0 4px var(--wx-primary, #0d6efd);
 }
 
-[data-bs-theme="dark"] .wx-estimate-chip {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-estimate-chip {
     background: var(--wx-tertiary-bg, #2b3035);
     color: var(--wx-body-color, #dee2e6);
+}
 }

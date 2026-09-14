@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Controller for interactive tab navigation: parsing markup, rendering tabs,
  * and handling tab selection state without destroying existing dom nodes.
  * Events:
@@ -14,7 +14,7 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
     _navElement = null;
     _contentElement = null;
     _toolbarLi = null;
-    
+
     // controllers
     _toolbarCtrl = null;
 
@@ -44,7 +44,7 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
 
         // create navigation wrapper
         this._navElement = document.createElement("ul");
-        
+
         let navClass = "nav wx-tab-nav";
         if (layout === "underline") {
             navClass += " nav-underline";
@@ -53,13 +53,13 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         } else {
             navClass += " nav-tabs";
         }
-        
+
         this._navElement.className = navClass;
         this._navElement.setAttribute("role", "tablist");
 
         // create content wrapper
         this._contentElement = document.createElement("div");
-        
+
         // horizontal padding only: the vertical one belongs to the stylesheet, where it
         // can be tuned per edge. as a p-3 utility it carried !important and no rule
         // could reach it
@@ -96,7 +96,7 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
             const navItem = this._buildTabHeader(tabData);
             this._navElement.appendChild(navItem);
 
-            // transform pane class list to match bootstrap tabs
+            // transform pane class list to match WebExpress tabs
             pane.classList.remove("wx-tab-view");
             pane.classList.add("tab-pane", "fade");
             pane.setAttribute("role", "tabpanel");

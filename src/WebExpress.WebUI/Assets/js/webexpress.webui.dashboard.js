@@ -1286,7 +1286,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
 
         if (canRemove) {
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("trash"),
+                this._iconClass("xmark"),
                 this._i18n("webexpress.webui:remove", "Remove"),
                 null,
                 () => this._removeWidget(colIdx, widgetData.instanceId)

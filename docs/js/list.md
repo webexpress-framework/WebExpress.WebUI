@@ -36,7 +36,7 @@ The initialization and behaviour of the `ListCtrl` are controlled via `data-` at
 | Attribute                   | Description |
 |-----------------------------|-------------|
 | `id`                        | Unique identifier for the item. Required for persistence and programmatic selection. |
-| `data-color`                | A Bootstrap or custom CSS class added to the `<li>` element (e.g. `"text-danger"`). |
+| `data-color`                | A WebExpress or custom CSS class added to the `<li>` element (e.g. `"text-danger"`). |
 | `data-editable`             | Set to `"true"` to make the item content inline-editable via `SmartEditCtrl`. |
 | `data-image`                | URL of an image to show in the item content area. |
 | `data-icon`                 | Name of an icon to prepend (e.g. `"star"`). |

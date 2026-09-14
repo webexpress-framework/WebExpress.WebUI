@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -16,8 +16,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the split button control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""btn-group""><button class=""btn""></button><button class=""btn dropdown-toggle dropdown-toggle-split"" data-toggle=""dropdown"" data-bs-toggle=""dropdown"" aria-expanded=""false""><span class=""caret""></span></button><ul class=""dropdown-menu""></ul></div>")]
-        [InlineData("id", @"<div id=""id"" class=""btn-group""><button id=""id_btn"" class=""btn""></button><button id=""id_toggle"" class=""btn dropdown-toggle dropdown-toggle-split"" data-toggle=""dropdown"" data-bs-toggle=""dropdown"" aria-expanded=""false""><span class=""caret""></span></button><ul class=""dropdown-menu""></ul></div>")]
+        [InlineData(null, @"<div class=""btn-group""><button class=""btn""></button><button class=""btn dropdown-toggle dropdown-toggle-split"" popovertarget=""*"" type=""button"" style=""anchor-name:*""><i class=""wx-icon-light wx-icon-light-angle-down wx-dropdown-caret""></i></button><ul class=""dropdown-menu wx-native-menu"" id=""*"" popover=""auto"" style=""position-anchor:*""></ul></div>")]
+        [InlineData("id", @"<div id=""id"" class=""btn-group""><button id=""id_btn"" class=""btn""></button><button id=""id_toggle"" class=""btn dropdown-toggle dropdown-toggle-split"" popovertarget=""*"" type=""button"" style=""anchor-name:*""><i class=""wx-icon-light wx-icon-light-angle-down wx-dropdown-caret""></i></button><ul class=""dropdown-menu wx-native-menu"" id=""*"" popover=""auto"" style=""position-anchor:*""></ul></div>")]
         public void Id(string id, string expected)
         {
             // arrange

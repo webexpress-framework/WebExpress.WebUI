@@ -259,6 +259,8 @@ A flex column host drives the region: it grows into the free space and shrinks w
 }
 ```
 
+That chain ends at the region. What the region loads into its detail frame is not on it: a detail page that carries a filling control of its own - a dashboard, a board - does not turn the split into a column, because the shell's rule stops at the first filling region and never matches anything inside one. Inside the frame, such a control sizes itself the way it would on a host that hands nothing down.
+
 A host that hands nothing down leaves the region at `--wx-master-detail-height` (default `70vh`), **never at its content height**. That matters more than it looks: the two columns are scrollports, and a scrollport only exists while its container is bounded. A region sized by its content has no scrollports at all - both columns grow to their full length, and the pane around them starts scrolling instead, which is the one behaviour the mode exists to prevent. The fallback therefore comes from the environment as well.
 
 Either way the region never grows past a host that does have a definite height: `max-height: 100%` caps it.

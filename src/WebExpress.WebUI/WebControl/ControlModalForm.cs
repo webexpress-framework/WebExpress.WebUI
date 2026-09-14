@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
@@ -57,7 +57,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlFormContext, RequestMethod> Method { get => _form.Method; set => _form.Method = value; }
 
         /// <summary>
-        /// Gets or sets the confirmation control that is displayed 
+        /// Gets or sets the confirmation control that is displayed
         /// instead of the form after the form has been successfully submitted.
         /// </summary>
         public Func<IRenderControlFormContext, IControl> Conformation { get => _form.Conformation; set => _form.Conformation = value; }
@@ -131,24 +131,24 @@ namespace WebExpress.WebUI.WebControl
             return this;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Adds one or more form items to the content of the form.
-        /// </summary> 
-        /// <param name="items">The form items to add to the form.</param> 
+        /// </summary>
+        /// <param name="items">The form items to add to the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        /// <remarks> 
-        /// This method allows adding one or multiple form items to the <see cref="ControlFormItem"/> collection of 
-        /// the form. It is useful for dynamically constructing the user interface by appending 
-        /// various controls to the form's content. 
-        /// 
-        /// Example usage: 
-        /// <code> 
-        /// var form = new ControlForm(); 
+        /// <remarks>
+        /// This method allows adding one or multiple form items to the <see cref="ControlFormItem"/> collection of
+        /// the form. It is useful for dynamically constructing the user interface by appending
+        /// various controls to the form's content.
+        ///
+        /// Example usage:
+        /// <code>
+        /// var form = new ControlForm();
         /// var button1 = new ControlButton { Text = "Save" };
         /// var button2 = new ControlButton { Text = "Cancel" };
         /// form.Add(button1, button2);
-        /// </code> 
-        /// 
+        /// </code>
+        ///
         /// This method accepts any control that implements the <see cref="ControlFormItem"/> interface.
         /// </remarks>
         public virtual IControlForm Add(params IControlFormItem[] items)
@@ -158,24 +158,24 @@ namespace WebExpress.WebUI.WebControl
             return this;
         }
 
-        /// <summary> 
+        /// <summary>
         /// Adds one or more form items to the content of the form.
-        /// </summary> 
-        /// <param name="items">The form items to add to the form.</param> 
+        /// </summary>
+        /// <param name="items">The form items to add to the form.</param>
         /// <returns>The current instance for method chaining.</returns>
-        /// <remarks> 
-        /// This method allows adding one or multiple form items to the <see cref="ControlFormItem"/> collection of 
-        /// the form. It is useful for dynamically constructing the user interface by appending 
-        /// various controls to the form's content. 
-        /// 
-        /// Example usage: 
-        /// <code> 
-        /// var form = new ControlForm(); 
+        /// <remarks>
+        /// This method allows adding one or multiple form items to the <see cref="ControlFormItem"/> collection of
+        /// the form. It is useful for dynamically constructing the user interface by appending
+        /// various controls to the form's content.
+        ///
+        /// Example usage:
+        /// <code>
+        /// var form = new ControlForm();
         /// var button1 = new ControlButton { Text = "Save" };
         /// var button2 = new ControlButton { Text = "Cancel" };
         /// form.Add(button1, button2);
-        /// </code> 
-        /// 
+        /// </code>
+        ///
         /// This method accepts any control that implements the <see cref="ControlFormItem"/> interface.
         /// </remarks>
         public virtual IControlForm Add(IEnumerable<IControlFormItem> items)
@@ -326,12 +326,11 @@ namespace WebExpress.WebUI.WebControl
             {
                 Class = "wx-modal-footer"
             };
-            var modal = new HtmlElementTextContentDiv(header, content, footer)
+            var modal = new HtmlElementInteractiveDialog(header, content, footer)
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-modal", classes),
-                Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Role = "dialog"
+                Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x)))
             }
                 .AddUserAttribute("data-size", (Size?.Invoke(renderContext) ?? TypeModalSize.Default).ToClass())
                 .AddUserAttribute("data-close-label", I18N.Translate(renderContext, CloseLabel?.Invoke(renderContext)));

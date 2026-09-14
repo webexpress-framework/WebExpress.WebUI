@@ -217,9 +217,11 @@
     transition: background 0.15s, color 0.15s;
 }
 
-[data-bs-theme="dark"] .wx-kanban-column-header {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-column-header {
     color: var(--wx-heading-color, #e7eaf0);
     border-bottom-color: var(--wx-border-color, #495057);
+}
 }
 
 /* the surface of a swimlane. it used to come from the expandable container the lane was built
@@ -230,13 +232,13 @@
 
     background-color: var(--wx-body-bg);
     color: var(--wx-body-color);
-    border-radius: var(--bs-border-radius, 0.25rem);
+    border-radius: var(--wx-border-radius, 0.25rem);
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.025);
     padding: 0.75rem 1rem;
     transition: background 0.15s, box-shadow 0.15s;
 }
 
-/* the swimlane header label. it carries the primary tint the bootstrap
+/* the swimlane header label. it carries the primary tint the WebExpress
    text-primary utility used to supply, but without the !important that would
    beat the inline accent color a colored lane sets */
 .wx-kanban-swimlane-header {
@@ -255,9 +257,11 @@
     transition: color 0.15s, border-bottom 0.15s;
 }
 
-[data-bs-theme="dark"] .wx-kanban-swimlane-title {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-swimlane-title {
     color: var(--wx-primary, #6ea8fe);
     border-bottom: 1px solid rgba(255,255,255,0.05);
+}
 }
 
 /* Column dropzone cell */
@@ -275,10 +279,12 @@
     height: 100%;
 }
 
-[data-bs-theme="dark"] .wx-kanban-cell {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-cell {
     background: var(--wx-gray-900, #393b40);
     /* keep the resting border transparent (as in light mode); the dashed
        border is only shown on drag-hover via .wx-drag-over-empty below */
+}
 }
 
 /* Visual feedback when hovering over an empty dropzone */
@@ -287,9 +293,11 @@
     border-color: rgba(13, 110, 253, 0.4);
 }
 
-[data-bs-theme="dark"] .wx-kanban-cell.wx-drag-over-empty {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-cell.wx-drag-over-empty {
     background-color: rgba(13, 110, 253, 0.12);
     border-color: rgba(90, 170, 255, 0.30);
+}
 }
 
 /* Kanban Cards */
@@ -307,10 +315,12 @@
     color: var(--wx-body-color, #333);
 }
 
-[data-bs-theme="dark"] .wx-kanban-card {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-card {
     background: var(--wx-gray-800, #23272b);
     color: var(--wx-gray-100, #f8f9fa);
     box-shadow: 0 2px 10px rgba(0,0,0,0.21);
+}
 }
 
 /* cursor pointer for cards with actions */
@@ -327,8 +337,10 @@
     box-shadow: inset 0 0 0 2px var(--wx-primary, #0d6efd), 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-[data-bs-theme="dark"] .wx-kanban-card.wx-kanban-card-active {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-card.wx-kanban-card-active {
     box-shadow: inset 0 0 0 2px var(--wx-primary, #0d6efd), 0 2px 10px rgba(0, 0, 0, 0.21);
+}
 }
 
 /* a selectable board marks its cards as clickable; the grab cursor stays on the
@@ -344,6 +356,9 @@
 }
 
 .wx-kanban-card .card-header {
+    padding: 0;
+    border: 0;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -358,8 +373,10 @@
     align-items: center;
 }
 
-[data-bs-theme="dark"] .wx-kanban-card .card-header .card-icon {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-card .card-header .card-icon {
     color: var(--wx-gray-400, #bdc8d6);
+}
 }
 
 .wx-kanban-card .card-header .card-image {
@@ -369,6 +386,8 @@
 }
 
 .wx-kanban-card .card-header .card-title {
+    min-width: 0;
+    overflow-wrap: anywhere;
     font-size: 1rem;
     font-weight: 600;
     margin: 0;
@@ -377,8 +396,10 @@
     background: transparent;
 }
 
-[data-bs-theme="dark"] .wx-kanban-card .card-header .card-title {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-card .card-header .card-title {
     color: var(--wx-heading-color, #fff);
+}
 }
 
 /* assignee avatar, same look as the scrum backlog rows: an initials badge or,
@@ -405,8 +426,10 @@
     background: transparent;
 }
 
-[data-bs-theme="dark"] .wx-kanban-card .card-text {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-card .card-text {
     color: var(--wx-gray-300, #abb4be);
+}
 }
 
 /* optional footer: application-defined chips (priority, story points, …) */
@@ -434,9 +457,11 @@
     color: var(--wx-secondary-color, #6c757d);
 }
 
-[data-bs-theme="dark"] .wx-kanban-card .card-footer-chip {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-card .card-footer-chip {
     background: var(--wx-gray-700, #33373d);
     color: var(--wx-gray-300, #abb4be);
+}
 }
 
 .wx-kanban-card .card-footer-chip .wx-icon-img {

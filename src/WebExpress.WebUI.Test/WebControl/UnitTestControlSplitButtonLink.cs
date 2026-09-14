@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -16,8 +16,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the split button link control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""btn-group""><a class=""btn""></a><span class=""btn dropdown-toggle dropdown-toggle-split"" data-bs-toggle=""dropdown"" aria-expanded=""false""><span class=""caret""></span></span><ul class=""dropdown-menu""></ul></div>")]
-        [InlineData("id", @"<div id=""id"" class=""btn-group""><a id=""id_btn"" class=""btn""></a><span id=""id_btn"" class=""btn dropdown-toggle dropdown-toggle-split"" data-bs-toggle=""dropdown"" aria-expanded=""false""><span class=""caret""></span></span><ul class=""dropdown-menu""></ul></div>")]
+        [InlineData(null, @"<div class=""btn-group""><a class=""btn""></a><button class=""btn dropdown-toggle dropdown-toggle-split"" popovertarget=""*"" type=""button"" style=""anchor-name:*""><i class=""wx-icon-light wx-icon-light-angle-down wx-dropdown-caret""></i></button><ul class=""dropdown-menu wx-native-menu"" id=""*"" popover=""auto"" style=""position-anchor:*""></ul></div>")]
+        [InlineData("id", @"<div id=""id"" class=""btn-group""><a id=""id_btn"" class=""btn""></a><button id=""id_toggle"" class=""btn dropdown-toggle dropdown-toggle-split"" popovertarget=""*"" type=""button"" style=""anchor-name:*""><i class=""wx-icon-light wx-icon-light-angle-down wx-dropdown-caret""></i></button><ul class=""dropdown-menu wx-native-menu"" id=""*"" popover=""auto"" style=""position-anchor:*""></ul></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -62,8 +62,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeSizeButton.Default, @"<div class=""btn-group""><a class=""btn""></a>*</div>")]
-        [InlineData(TypeSizeButton.Small, @"<div class=""btn-group""><a class=""btn btn-sm""></a><span class=""btn * btn-sm"" *</div>")]
-        [InlineData(TypeSizeButton.Large, @"<div class=""btn-group""><a class=""btn btn-lg""></a><span class=""btn * btn-lg"" *</div>")]
+        [InlineData(TypeSizeButton.Small, @"<div class=""btn-group""><a class=""btn btn-sm""></a><button class=""btn * btn-sm"" *</div>")]
+        [InlineData(TypeSizeButton.Large, @"<div class=""btn-group""><a class=""btn btn-lg""></a><button class=""btn * btn-lg"" *</div>")]
         public void Size(TypeSizeButton size, string expected)
         {
             // arrange
@@ -86,12 +86,12 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeColorButton.Default, @"<div class=""btn-group""><a class=""btn""></a>*</div>")]
-        [InlineData(TypeColorButton.Primary, @"<div class=""btn-group""><a class=""btn btn-primary""></a><span class=""btn * btn-primary"" *")]
-        [InlineData(TypeColorButton.Secondary, @"<div class=""btn-group""><a class=""btn btn-secondary""></a><span class=""btn * btn-secondary"" *")]
-        [InlineData(TypeColorButton.Warning, @"<div class=""btn-group""><a class=""btn btn-warning""></a><span class=""btn * btn-warning"" *")]
-        [InlineData(TypeColorButton.Danger, @"<div class=""btn-group""><a class=""btn btn-danger""></a><span class=""btn * btn-danger"" *")]
-        [InlineData(TypeColorButton.Dark, @"<div class=""btn-group""><a class=""btn btn-dark""></a><span class=""btn * btn-dark"" *")]
-        [InlineData(TypeColorButton.Highlight, @"<div class=""btn-group""><a class=""btn btn-highlight""></a><span class=""btn * btn-highlight"" *")]
+        [InlineData(TypeColorButton.Primary, @"<div class=""btn-group""><a class=""btn btn-primary""></a><button class=""btn * btn-primary"" *")]
+        [InlineData(TypeColorButton.Secondary, @"<div class=""btn-group""><a class=""btn btn-secondary""></a><button class=""btn * btn-secondary"" *")]
+        [InlineData(TypeColorButton.Warning, @"<div class=""btn-group""><a class=""btn btn-warning""></a><button class=""btn * btn-warning"" *")]
+        [InlineData(TypeColorButton.Danger, @"<div class=""btn-group""><a class=""btn btn-danger""></a><button class=""btn * btn-danger"" *")]
+        [InlineData(TypeColorButton.Dark, @"<div class=""btn-group""><a class=""btn btn-dark""></a><button class=""btn * btn-dark"" *")]
+        [InlineData(TypeColorButton.Highlight, @"<div class=""btn-group""><a class=""btn btn-highlight""></a><button class=""btn * btn-highlight"" *")]
         public void BackgroundColor(TypeColorButton color, string expected)
         {
             // arrange
@@ -115,11 +115,11 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(false, TypeColorButton.Default, @"<div class=""btn-group""><a class=""btn""></a>*</div>")]
         [InlineData(true, TypeColorButton.Default, @"<div class=""btn-group""><a class=""btn""></a>*</div>")]
-        [InlineData(true, TypeColorButton.Primary, @"<div class=""btn-group""><a class=""btn btn-outline-primary""></a><span class=""btn * btn-outline-primary"" *")]
-        [InlineData(true, TypeColorButton.Secondary, @"<div class=""btn-group""><a class=""btn btn-outline-secondary""></a><span class=""btn * btn-outline-secondary"" *")]
-        [InlineData(true, TypeColorButton.Warning, @"<div class=""btn-group""><a class=""btn btn-outline-warning""></a><span class=""btn * btn-outline-warning"" *")]
-        [InlineData(true, TypeColorButton.Danger, @"<div class=""btn-group""><a class=""btn btn-outline-danger""></a><span class=""btn * btn-outline-danger"" *")]
-        [InlineData(true, TypeColorButton.Dark, @"<div class=""btn-group""><a class=""btn btn-outline-dark""></a><span class=""btn * btn-outline-dark"" *")]
+        [InlineData(true, TypeColorButton.Primary, @"<div class=""btn-group""><a class=""btn btn-outline-primary""></a><button class=""btn * btn-outline-primary"" *")]
+        [InlineData(true, TypeColorButton.Secondary, @"<div class=""btn-group""><a class=""btn btn-outline-secondary""></a><button class=""btn * btn-outline-secondary"" *")]
+        [InlineData(true, TypeColorButton.Warning, @"<div class=""btn-group""><a class=""btn btn-outline-warning""></a><button class=""btn * btn-outline-warning"" *")]
+        [InlineData(true, TypeColorButton.Danger, @"<div class=""btn-group""><a class=""btn btn-outline-danger""></a><button class=""btn * btn-outline-danger"" *")]
+        [InlineData(true, TypeColorButton.Dark, @"<div class=""btn-group""><a class=""btn btn-outline-dark""></a><button class=""btn * btn-outline-dark"" *")]
         public void Outline(bool outline, TypeColorButton color, string expected)
         {
             // arrange

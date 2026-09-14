@@ -57,7 +57,7 @@ test("the popup is sized by the calendar rather than by the field it hangs under
 test("the popup starts hidden", () => {
     const { host } = build();
 
-    assert.equal(host.querySelectorAll(".dropdown-menu")[0].style.display, "none");
+    assert.equal(host.querySelectorAll(".dropdown-menu")[0].matches(":popover-open"), false);
 });
 
 test("a narrow host does not change what the control emits", () => {

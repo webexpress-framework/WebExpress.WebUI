@@ -47,7 +47,7 @@ function walk(dir, acc = []) {
 function collectUsedKeys(assetsDir) {
     const used = new Map();
     for (const file of walk(assetsDir)) {
-        if (/[\\/]i18n[\\/]/.test(file) || /(bootstrap|popper)\.min\.js$|[\\/]chart\.js$/.test(file)) {
+        if (/[\\/]i18n[\\/]/.test(file) || /[\\/]chart\.js$/.test(file)) {
             continue;
         }
         const src = fs.readFileSync(file, "utf8");

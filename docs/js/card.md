@@ -2,7 +2,7 @@
 
 # CardCtrl
 
-The `CardCtrl` renders a card panel with an optional header, headline, footer and matching header / footer icons. Styling lives in `webexpress.webui.panel.card.css`; the card markup intentionally stays in the `wx-*` namespace so it does not pull in Bootstrap's `.card` rules.
+The `CardCtrl` renders a card panel with an optional header, headline, footer and matching header / footer icons. Styling lives in `webexpress.webui.panel.card.css`; the card markup intentionally stays in the `wx-*` namespace so card surfaces can be themed independently.
 
 ```
    ┌──────────────────────────────────┐
@@ -43,10 +43,10 @@ The component is initialised declaratively from `data-` attributes on the host e
 
 - **Image or CSS icons**: `HeaderIcon` / `FooterIcon` accept any `IIcon`. `ImageIcon` is serialised into `data-*-icon-image`; CSS-based icons (e.g. `IconHome`) are serialised into `data-*-icon-css`. The controller renders the corresponding `<i>` or `<img>` element.
 - **Independent header / footer colours**: `HeaderBackgroundColor`, `HeaderTextColor`, `FooterBackgroundColor`, `FooterTextColor` style each row separately from the card body. System colours (e.g. `TypeColorBackground.Primary`) translate to CSS classes like `bg-primary` / `text-light`; free-form values (e.g. `"gold"`, `"#abcdef"`) translate to inline styles. The two ends can use entirely different palettes.
-- **JS-driven structure**: The `wx-card-header`, `wx-card-body`, `wx-card-title`, `wx-card-text` and `wx-card-footer` elements are constructed by the controller and styled by `webexpress.webui.panel.card.css`. The C# host stays minimal and Bootstrap-free.
+- **JS-driven structure**: The `wx-card-header`, `wx-card-body`, `wx-card-title`, `wx-card-text` and `wx-card-footer` elements are constructed by the controller and styled by `webexpress.webui.panel.card.css`. The C# host stays minimal and independent of external UI libraries.
 - **Lifecycle-safe updates**: Every public setter triggers `render()`, which rebuilds the card from the current configuration. Header / footer rows are omitted entirely when neither an icon nor a label is set.
 - **Child preservation**: The original child nodes of the host are lifted out before the first render and re-attached inside `wx-card-text`, so server-side controls embedded inside the card stay alive across re-renders.
-- **Themable**: All paddings, radii, background and border colours are driven by CSS custom properties on `.wx-card` (`--wx-card-spacer-y`, `--wx-card-cap-bg`, `--wx-card-border-color`, …) and resolve against the active Bootstrap variables, so light/dark theming and `.border` / text-colour utilities work out of the box.
+- **Themable**: All paddings, radii, background and border colours are driven by CSS custom properties on `.wx-card` (`--wx-card-spacer-y`, `--wx-card-cap-bg`, `--wx-card-border-color`, …) and resolve against the active WebExpress variables, so light/dark theming and `.border` / text-colour utilities work out of the box.
 
 ### Programmatic Control
 

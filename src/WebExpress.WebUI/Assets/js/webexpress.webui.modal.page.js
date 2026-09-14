@@ -21,7 +21,7 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         element.removeAttribute("data-selector");
 
         // load content dynamically after the modal is shown
-        this._element.addEventListener("shown.bs.modal", () => {
+        this._element.addEventListener(webexpress.webui.Event.MODAL_SHOW_EVENT, () => {
             // trigger event when data is requested
             this._dispatch(webexpress.webui.Event.DATA_REQUESTED_EVENT, {});
 
@@ -69,11 +69,10 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         }
 
         // clear the dom element and append the dialog structure
-        this._element.innerHTML = "";
-        this._element.appendChild(this._dialogDiv);
+        this._element.replaceChildren(this._headerDiv, this._bodyDiv, this._footerDiv);
 
         // bind click event to close the modal when dismiss button is clicked
-        const dismissButtons = this._dialogDiv.querySelectorAll("[data-wx-dismiss='modal']");
+        const dismissButtons = this._element.querySelectorAll("[data-wx-dismiss='modal']");
         for (let i = 0; i < dismissButtons.length; i++) {
             dismissButtons[i].addEventListener("click", () => {
                 this.hide();
@@ -82,7 +81,7 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
     }
 
     /**
-     * Displays the modal by retrieving or creating its Bootstrap instance.
+     * Displays the modal by retrieving or creating its WebExpress instance.
      * Ensures the modal is properly initialized before showing it.
      */
     show() {
@@ -101,10 +100,9 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         this._bodyDiv.innerHTML = "";
         this._bodyDiv.appendChild(placeholder);
 
-        this._element.innerHTML = "";
-        this._element.appendChild(this._dialogDiv);
+        this._element.replaceChildren(this._headerDiv, this._bodyDiv, this._footerDiv);
 
-        const dismissButtons = this._dialogDiv.querySelectorAll("[data-wx-dismiss='modal']");
+        const dismissButtons = this._element.querySelectorAll("[data-wx-dismiss='modal']");
         for (let i = 0; i < dismissButtons.length; i++) {
             dismissButtons[i].addEventListener("click", () => {
                 this.hide();
@@ -112,20 +110,14 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         }
 
         // remove all known size classes
-        this._dialogDiv.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl", "modal-fullscreen");
+        this._element.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl", "modal-fullscreen");
 
         if (this._size) {
             // apply modal size class
-            this._dialogDiv.classList.add(this._size);
+            this._element.classList.add(this._size);
         }
 
-        const modalInstance = bootstrap.Modal.getOrCreateInstance(this._element);
-
-        // opens the modal
-        modalInstance.show();
-
-        // trigger custom event for showing the modal
-        this._dispatch(webexpress.webui.Event.MODAL_SHOW_EVENT, {});
+        super.show();
     }
 
     /**

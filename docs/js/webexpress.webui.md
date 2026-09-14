@@ -21,7 +21,7 @@ The file `webexpress.webui.js` is the core of the WebExpress.WebUI JavaScript fr
 |`webexpress.webui.TableTemplates`   |Singleton |Registry for table cell renderer templates.
 |`webexpress.webui.IconSet`          |Singleton |Resolves an icon reference - a symbolic name, a class string or a legacy FontAwesome class - to the CSS classes of the active icon set.
 |`webexpress.webui.Ctrl`             |Class     |Abstract base class for all UI controls.
-|`webexpress.webui.PopperCtrl`       |Class     |Base class for controls that use Popper.js for dropdown positioning.
+|`webexpress.webui.MenuCtrl`         |Class     |Base class for controls with native anchored popover menus.
 |`webexpress.webui.Event`            |Class     |Utility class that defines all event name constants.
 
 ## Controller
@@ -679,17 +679,19 @@ webexpress.webui.MyCtrl = class extends webexpress.webui.Ctrl {
 webexpress.webui.Controller.registerClass("wx-webui-myctrl", webexpress.webui.MyCtrl);
 ```
 
-## PopperCtrl
+## NativeMenu and MenuCtrl
 
-The `PopperCtrl` class extends `Ctrl` and provides base functionality for controls that use [Popper.js](https://popper.js.org/) for positioning dropdown menus.
+`NativeMenu.bind(anchor, menu, invoker = anchor)` assigns a unique CSS anchor, adds
+`popover="auto"` to the menu and connects a button with `popovertarget`. The browser
+handles the top layer, light dismissal, Escape and focus restoration. CSS owns all
+placement through `anchor-name`, `position-anchor`, `position-area` and
+`position-try-fallbacks: flip-block`.
 
-### Methods
+`NativeMenu.show(menu)` and `NativeMenu.hide(menu)` serve keyboard navigation,
+typeahead and selection commits using the native Popover API. They never measure
+or move the menu. `MenuCtrl._initializeMenu(anchor, menu, invoker)` also publishes
+`DROPDOWN_SHOW_EVENT` and `DROPDOWN_HIDDEN_EVENT` for native lifecycle changes.
 
-|Method                                       |Description
-|---------------------------------------------|--------------------------------------------------------------
-|`_initializePopper(container, dropdownmenu)` |Initializes Popper.js for a dropdown menu. Sets up click-outside and ESC-key handlers.
-
-The initialized dropdown menu receives `show()` and `hide()` methods for programmatic control. Events `DROPDOWN_SHOW_EVENT` and `DROPDOWN_HIDDEN_EVENT` are dispatched accordingly.
 
 ## Event
 

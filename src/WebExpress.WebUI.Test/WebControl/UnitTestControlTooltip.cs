@@ -15,8 +15,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// label and the data attributes the client reads.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""wx-webui-tooltip"" tabindex=""0"" data-bs-toggle=""tooltip"" data-bs-placement=""top"" data-bs-title=""More info"">Help</span>")]
-        [InlineData("id", @"<span id=""id"" class=""wx-webui-tooltip"" tabindex=""0"" data-bs-toggle=""tooltip"" data-bs-placement=""top"" data-bs-title=""More info"">Help</span>")]
+        [InlineData(null, @"<span class=""wx-webui-tooltip"" tabindex=""0"" data-wx-toggle=""tooltip"" data-wx-placement=""top"" data-wx-title=""More info"">Help</span>")]
+        [InlineData("id", @"<span id=""id"" class=""wx-webui-tooltip"" tabindex=""0"" data-wx-toggle=""tooltip"" data-wx-placement=""top"" data-wx-title=""More info"">Help</span>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -59,7 +59,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders($@"<span class=""wx-webui-tooltip"" tabindex=""0"" data-bs-toggle=""tooltip"" data-bs-placement=""{expectedValue}"" data-bs-title=""More info"">Help</span>", html);
+            AssertExtensions.EqualWithPlaceholders($@"<span class=""wx-webui-tooltip"" tabindex=""0"" data-wx-toggle=""tooltip"" data-wx-placement=""{expectedValue}"" data-wx-title=""More info"">Help</span>", html);
         }
     }
 }

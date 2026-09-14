@@ -31,7 +31,7 @@ webexpress.webui.ModalLoginCtrl = class extends webexpress.webui.ModalCtrl {
 
         // the credentials are what the dialog opens for, so the caret is already in the
         // field to type into once the dialog stands
-        this._element.addEventListener("shown.bs.modal", () => {
+        this._element.addEventListener(webexpress.webui.Event.MODAL_SHOW_EVENT, () => {
             if (this._login) {
                 this._login.focus();
             }

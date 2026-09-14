@@ -344,7 +344,6 @@ namespace WebExpress.WebUI.WebControl
 
             if (!string.IsNullOrWhiteSpace(title))
             {
-                html.AddUserAttribute("data-toggle", "tooltip");
                 html.AddUserAttribute("title", title);
             }
 

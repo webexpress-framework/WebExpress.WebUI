@@ -10,8 +10,8 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents an offcanvas drawer that slides in from an edge of the viewport.
     /// The panel only emits its own markup; it is opened by any element carrying
-    /// <c>data-bs-toggle="offcanvas"</c> and <c>data-bs-target="#{id}"</c>, wired
-    /// by the Bootstrap data API, and closed by its built-in close button.
+    /// <c>data-wx-toggle="offcanvas"</c> and <c>data-wx-target="#{id}"</c>, wired
+    /// by the WebExpress data API, and closed by its built-in close button.
     /// </summary>
     public class ControlOffcanvas : Control
     {
@@ -83,10 +83,11 @@ namespace WebExpress.WebUI.WebControl
 
             var close = new HtmlElementFieldButton()
             {
-                Class = "btn wx-button-close"
+                Class = "btn wx-button-close",
+                Type = "button"
             }
                 .Add(new HtmlElementTextSemanticsI() { Class = new IconXmark().Class })
-                .AddUserAttribute("data-bs-dismiss", "offcanvas")
+                .AddUserAttribute("data-wx-dismiss", "offcanvas")
                 .AddUserAttribute("aria-label", "close");
 
             var header = new HtmlElementTextContentDiv
@@ -103,16 +104,16 @@ namespace WebExpress.WebUI.WebControl
                 Class = "offcanvas-body"
             };
 
-            return new HtmlElementTextContentDiv(header, body)
+            return new HtmlElementInteractiveDialog(header, body)
             {
                 Id = Id,
                 Class = Css.Concatenate("offcanvas", placement.ToClass(), GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
                 Role = Role?.Invoke(renderContext)
             }
-                .AddUserAttribute("tabindex", "-1")
-                .AddUserAttribute("data-bs-scroll", scroll ? "true" : null)
-                .AddUserAttribute("data-bs-backdrop", backdrop ? null : "false");
+                .AddUserAttribute("closedby", backdrop ? "any" : "closerequest")
+                .AddUserAttribute("data-wx-scroll", scroll ? "true" : null)
+                .AddUserAttribute("data-wx-backdrop", backdrop ? null : "false");
         }
     }
 }

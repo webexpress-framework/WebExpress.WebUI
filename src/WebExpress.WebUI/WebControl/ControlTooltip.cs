@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     /// Represents a trigger that shows a small tooltip with a short text on hover
     /// or focus. The trigger label is the control's text or child content; the
     /// tooltip is wired by the client-side <c>webexpress.webui.TooltipCtrl</c>,
-    /// because Bootstrap does not auto-initialize tooltips.
+    /// because WebExpress does not auto-initialize tooltips.
     /// </summary>
     public class ControlTooltip : Control
     {
@@ -80,9 +80,9 @@ namespace WebExpress.WebUI.WebControl
             };
 
             html.AddUserAttribute("tabindex", "0");
-            html.AddUserAttribute("data-bs-toggle", "tooltip");
-            html.AddUserAttribute("data-bs-placement", placement.ToValue());
-            html.AddUserAttribute("data-bs-title", title);
+            html.AddUserAttribute("data-wx-toggle", "tooltip");
+            html.AddUserAttribute("data-wx-placement", placement.ToValue());
+            html.AddUserAttribute("data-wx-title", title);
 
             if (!string.IsNullOrWhiteSpace(text))
             {

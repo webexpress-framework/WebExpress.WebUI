@@ -203,7 +203,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
         toggle.setAttribute("aria-expanded", expanded ? "false" : "true");
 
         if (icon) {
-            icon.className = this._iconClass(expanded ? "chevron-right" : "chevron-down");
+            icon.className = this._iconClass(expanded ? "chevron-right" : "angle-down");
         }
 
         for (const row of rows) {

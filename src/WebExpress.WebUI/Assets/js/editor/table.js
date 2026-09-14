@@ -676,7 +676,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
         button.type = "button";
-        button.setAttribute("data-bs-toggle", "dropdown");
+
         button.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("table")}"></i>`;
 
         const menu = document.createElement("div");
@@ -790,6 +790,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                 resetGrid();
             }, 0);
         });
+        webexpress.webui.NativeMenu.bind(button, menu);
         return container;
     },
 

@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -34,7 +34,7 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementScriptingCanvas()
             {
                 Id = Id,
-                Class = Css.Concatenate("", GetClasses(renderContext)),
+                Class = Css.Concatenate("wx-canvas", GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
                 Role = role
             };

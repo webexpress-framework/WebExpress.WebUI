@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
@@ -144,9 +144,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<a class=""wx-link""></a>")]
-        [InlineData("a", @"<a class=""wx-link"" title=""a"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("b", @"<a class=""wx-link"" title=""b"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("a<br/>b", @"<a class=""wx-link"" title=""a<br/>b"" data-bs-toggle=""tooltip""></a>")]
+        [InlineData("a", @"<a class=""wx-link"" title=""a""></a>")]
+        [InlineData("b", @"<a class=""wx-link"" title=""b""></a>")]
+        [InlineData("a<br/>b", @"<a class=""wx-link"" title=""a<br/>b""></a>")]
         public void Tooltip(string tooltip, string expected)
         {
             // arrange

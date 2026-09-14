@@ -1,8 +1,8 @@
-﻿/**
+/**
  * Styles for the QuickFilter control.
- * Uses only adaptive Bootstrap color variables (body, secondary, tertiary
- * tokens) for theme compatibility; --bs-light and --bs-dark are static and
- * would not follow data-bs-theme="dark".
+ * Uses only adaptive WebExpress color variables (body, secondary, tertiary
+ * tokens) for theme compatibility; --wx-light and --wx-dark are static and
+ * would not follow data-wx-theme="dark".
  */
 
 .wx-quickfilter {
@@ -36,11 +36,11 @@
 }
 
 /* a colored chip (btn-primary, btn-danger, ...) draws its accent from the
-   bootstrap button props its color class defines, keeping the outline-to-
+   WebExpress button props its color class defines, keeping the outline-to-
    filled chip behavior in that hue */
 .wx-quickfilter-btn-chip:is(.btn-primary, .btn-secondary, .btn-success, .btn-info, .btn-warning, .btn-danger, .btn-light, .btn-dark, .btn-highlight) {
-    --wx-quickfilter-accent: var(--bs-btn-bg);
-    --wx-quickfilter-contrast: var(--bs-btn-color);
+    --wx-quickfilter-accent: var(--wx-btn-bg);
+    --wx-quickfilter-contrast: var(--wx-btn-color);
 }
 
 /* chip button active state */
@@ -288,10 +288,6 @@
    inactive chip and the contrast of an active one - neither is readable on the
    menu surface, so it resets to the body color */
 .wx-quickfilter-menu {
-    position: absolute;
-    top: 100%;
-    right: 0;
-    z-index: 1000;
     margin-top: 0.25rem;
     padding: 0.25rem 0;
     border-radius: 0.5rem;
@@ -300,6 +296,5 @@
     font-weight: 400;
 }
 
-.wx-quickfilter-menu.show {
-    display: block;
-}
+
+.wx-quickfilter-menu-toggle { border: 0; background: transparent; color: inherit; }

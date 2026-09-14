@@ -64,7 +64,7 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        // create dialog container using bootstrap card classes
+        // create dialog container using WebExpress card classes
         const dialog = document.createElement("div");
         dialog.className = "card shadow-sm mx-auto";
         dialog.style.maxWidth = "400px";

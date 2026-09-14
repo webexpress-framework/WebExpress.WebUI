@@ -31,8 +31,10 @@
   --wx-sla-color: var(--wx-secondary-color, #6c757d);
 }
 
-[data-bs-theme="dark"] .wx-sla {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-sla {
   --wx-sla-track: #343a40;
+}
 }
 
 .wx-sla-header {
@@ -145,13 +147,17 @@
   cursor: default;
 }
 
-[data-bs-theme="dark"] .wx-sla-action {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-sla-action {
   border-color: #495057;
   color: var(--wx-body-color, #dee2e6);
 }
+}
 
-[data-bs-theme="dark"] .wx-sla-action:hover:not(:disabled) {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-sla-action:hover:not(:disabled) {
   background: #343a40;
+}
 }
 
 /* below the width of a narrow dashboard column the header and the footer read
@@ -231,7 +237,9 @@
   border-top: 1px solid var(--wx-border-color, #dee2e6);
 }
 
-[data-bs-theme="dark"] .wx-sla-group-items > .wx-sla + .wx-sla {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-sla-group-items > .wx-sla + .wx-sla {
   border-top-color: #343a40;
+}
 }
 

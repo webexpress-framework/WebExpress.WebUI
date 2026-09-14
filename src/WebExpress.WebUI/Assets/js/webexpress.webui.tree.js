@@ -364,7 +364,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             let indicator;
             if (this._showIndicator && node.children && node.children.length > 0) {
                 indicator = document.createElement("i");
-                indicator.className = "wx-tree-indicator-angle";
+                indicator.className = "wx-tree-indicator-angle " + this._iconClass("angle-down");
                 indicator.addEventListener("click", () => {
                     this._toggleNode(node, ul, icon, img, indicator);
                 });

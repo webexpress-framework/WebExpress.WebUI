@@ -278,7 +278,7 @@ webexpress.webui.SectionCtrl = class extends webexpress.webui.Ctrl {
             row.addEventListener("click", () => this.toggle());
 
             const chevron = document.createElement("span");
-            chevron.className = "wx-section-chevron";
+            chevron.className = "wx-section-chevron " + this._iconClass("angle-down");
             chevron.setAttribute("aria-hidden", "true");
             row.appendChild(chevron);
         }

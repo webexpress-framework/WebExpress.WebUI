@@ -4,7 +4,7 @@
 
 The `SearchCtrl` is a sophisticated search field component that extends beyond the functionality of a standard input field. It provides an integrated dropdown list with predefined search suggestions, a favorites feature, a search icon, and a button to quickly clear the field. The control is designed to offer users an intuitive and guided search experience by displaying relevant suggestions and prioritizing frequently used search queries for quick access.
 
-The positioning of the dropdown menu is managed by the `PopperCtrl` base class to ensure correct alignment below the search field.
+The `MenuCtrl` base class binds the native popover to its search field. CSS Anchor Positioning aligns it and flips it above the field when needed.
 
 ```
    ┌──────────────────────────────────────────┐

@@ -188,11 +188,8 @@ webexpress.webui.DialogPanels.register("editor-link", {
             modal.ctrl.hide();
         } else {
             const modalWrapper = urlInput.closest(".modal");
-            if (modalWrapper && typeof bootstrap !== "undefined") {
-                const bsModal = bootstrap.Modal.getInstance(modalWrapper);
-                if (bsModal) {
-                    bsModal.hide();
-                }
+            if (modalWrapper?.open) {
+                modalWrapper.close();
             }
         }
     }

@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id and the default placement of the offcanvas control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div id=""*"" class=""offcanvas offcanvas-start"" tabindex=""-1""><div class=""offcanvas-header""><span class=""offcanvas-title""></span>*</div><div class=""offcanvas-body""></div></div>")]
-        [InlineData("id", @"<div id=""id"" class=""offcanvas offcanvas-start"" tabindex=""-1""><div class=""offcanvas-header""><span class=""offcanvas-title""></span>*</div><div class=""offcanvas-body""></div></div>")]
+        [InlineData(null, @"<dialog id=""*"" class=""offcanvas offcanvas-start"" closedby=""any""><div class=""offcanvas-header""><span class=""offcanvas-title""></span>*</div><div class=""offcanvas-body""></div></dialog>")]
+        [InlineData("id", @"<dialog id=""id"" class=""offcanvas offcanvas-start"" closedby=""any""><div class=""offcanvas-header""><span class=""offcanvas-title""></span>*</div><div class=""offcanvas-body""></div></dialog>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -48,7 +48,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div id=""oc"" class=""offcanvas offcanvas-start"" tabindex=""-1""><div class=""offcanvas-header""><span class=""offcanvas-title"">Filter</span>*</div><div class=""offcanvas-body""></div></div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<dialog id=""oc"" class=""offcanvas offcanvas-start"" closedby=""any""><div class=""offcanvas-header""><span class=""offcanvas-title"">Filter</span>*</div><div class=""offcanvas-body""></div></dialog>", html);
         }
 
         /// <summary>
@@ -73,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders($@"<div id=""oc"" class=""{expectedClass}"" tabindex=""-1""><div class=""offcanvas-header""><span class=""offcanvas-title""></span>*</div><div class=""offcanvas-body""></div></div>", html);
+            AssertExtensions.EqualWithPlaceholders($@"<dialog id=""oc"" class=""{expectedClass}"" closedby=""any""><div class=""offcanvas-header""><span class=""offcanvas-title""></span>*</div><div class=""offcanvas-body""></div></dialog>", html);
         }
 
         /// <summary>
@@ -95,7 +95,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div id=""oc"" class=""offcanvas offcanvas-start"" tabindex=""-1"" data-bs-scroll=""true"" data-bs-backdrop=""false""><div class=""offcanvas-header""><span class=""offcanvas-title""></span>*</div><div class=""offcanvas-body""></div></div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<dialog id=""oc"" class=""offcanvas offcanvas-start"" closedby=""closerequest"" data-wx-scroll=""true"" data-wx-backdrop=""false""><div class=""offcanvas-header""><span class=""offcanvas-title""></span>*</div><div class=""offcanvas-body""></div></dialog>", html);
         }
     }
 }

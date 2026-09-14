@@ -1,25 +1,5 @@
-/* =====================================================================
-   WebExpress unified color model
-   ---------------------------------------------------------------------
-   The --wx-* custom properties below are the single source of truth for
-   every color in the framework. They hold real values (never references
-   to Bootstrap), so the palette is self-contained and can be swapped
-   wholesale by a theme without reaching into Bootstrap internals.
-
-   Two layers make the model apply to every control:
-     1. Semantic tokens (this :root block) define the light palette; the
-        [data-bs-theme="dark"] block below overrides them for dark mode.
-     2. The Bootstrap bridge remaps each --bs-* color variable onto its
-        matching --wx-* token. Because this file loads after
-        bootstrap.min.css and :root shares Bootstrap's specificity, these
-        assignments win by source order — so the many controls that already
-        consume --bs-* semantic variables adopt the wx palette unchanged.
-
-   To re-skin the framework, redefine the --wx-* tokens in a theme
-   stylesheet (e.g. webexpress.webapp.theme.css, which loads last); the
-   change cascades through the bridge to every control and every theme.
-   ===================================================================== */
-:root {
+/* WebExpress semantic theme tokens are shared by all controls. */
+:root, [data-wx-theme="light"] {
     /* neutrals — surfaces and text */
     --wx-body-bg: #fff;
     --wx-body-bg-rgb: 255, 255, 255;
@@ -88,6 +68,8 @@
     --wx-danger-text-emphasis: #58151c;
     --wx-light-bg-subtle: #fcfcfd;
     --wx-light-border-subtle: #e9ecef;
+    --wx-light-text-emphasis: #495057;
+    --wx-dark-text-emphasis: #495057;
     --wx-dark-bg-subtle: #ced4da;
     --wx-dark-border-subtle: #adb5bd;
 
@@ -117,87 +99,10 @@
     /* unified dropdown shadow: subtle elevation against light surfaces */
     --wx-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 
-    /* ---- Bootstrap bridge ---------------------------------------------
-       Feed Bootstrap's semantic variables from the wx palette so existing
-       controls inherit the model. Values resolve per element, so the dark
-       overrides in the block below flow through without repeating here. */
-    --bs-body-bg: var(--wx-body-bg);
-    --bs-body-bg-rgb: var(--wx-body-bg-rgb);
-    --bs-body-color: var(--wx-body-color);
-    --bs-body-color-rgb: var(--wx-body-color-rgb);
-    --bs-secondary-bg: var(--wx-secondary-bg);
-    --bs-tertiary-bg: var(--wx-tertiary-bg);
-    --bs-secondary-color: var(--wx-secondary-color);
-    --bs-secondary-color-rgb: var(--wx-secondary-color-rgb);
-    --bs-tertiary-color: var(--wx-tertiary-color);
-    --bs-emphasis-color: var(--wx-emphasis-color);
-    --bs-heading-color: var(--wx-heading-color);
-    --bs-border-color: var(--wx-border-color);
-    --bs-border-color-translucent: var(--wx-border-color-translucent);
-
-    --bs-primary: var(--wx-primary);
-    --bs-primary-rgb: var(--wx-primary-rgb);
-    --bs-secondary: var(--wx-secondary);
-    --bs-secondary-rgb: var(--wx-secondary-rgb);
-    --bs-success: var(--wx-success);
-    --bs-success-rgb: var(--wx-success-rgb);
-    --bs-info: var(--wx-info);
-    --bs-info-rgb: var(--wx-info-rgb);
-    --bs-warning: var(--wx-warning);
-    --bs-warning-rgb: var(--wx-warning-rgb);
-    --bs-danger: var(--wx-danger);
-    --bs-danger-rgb: var(--wx-danger-rgb);
-    --bs-light: var(--wx-light);
-    --bs-light-rgb: var(--wx-light-rgb);
-    --bs-dark: var(--wx-dark);
-    --bs-dark-rgb: var(--wx-dark-rgb);
-    --bs-white: var(--wx-white);
-
-    --bs-primary-bg-subtle: var(--wx-primary-bg-subtle);
-    --bs-primary-border-subtle: var(--wx-primary-border-subtle);
-    --bs-primary-text-emphasis: var(--wx-primary-text-emphasis);
-    --bs-secondary-bg-subtle: var(--wx-secondary-bg-subtle);
-    --bs-secondary-border-subtle: var(--wx-secondary-border-subtle);
-    --bs-secondary-text-emphasis: var(--wx-secondary-text-emphasis);
-    --bs-success-bg-subtle: var(--wx-success-bg-subtle);
-    --bs-success-border-subtle: var(--wx-success-border-subtle);
-    --bs-success-text-emphasis: var(--wx-success-text-emphasis);
-    --bs-info-bg-subtle: var(--wx-info-bg-subtle);
-    --bs-info-border-subtle: var(--wx-info-border-subtle);
-    --bs-info-text-emphasis: var(--wx-info-text-emphasis);
-    --bs-warning-bg-subtle: var(--wx-warning-bg-subtle);
-    --bs-warning-border-subtle: var(--wx-warning-border-subtle);
-    --bs-warning-text-emphasis: var(--wx-warning-text-emphasis);
-    --bs-danger-bg-subtle: var(--wx-danger-bg-subtle);
-    --bs-danger-border-subtle: var(--wx-danger-border-subtle);
-    --bs-danger-text-emphasis: var(--wx-danger-text-emphasis);
-    --bs-light-bg-subtle: var(--wx-light-bg-subtle);
-    --bs-light-border-subtle: var(--wx-light-border-subtle);
-    --bs-dark-bg-subtle: var(--wx-dark-bg-subtle);
-    --bs-dark-border-subtle: var(--wx-dark-border-subtle);
-
-    --bs-gray: var(--wx-gray);
-    --bs-gray-100: var(--wx-gray-100);
-    --bs-gray-200: var(--wx-gray-200);
-    --bs-gray-300: var(--wx-gray-300);
-    --bs-gray-400: var(--wx-gray-400);
-    --bs-gray-500: var(--wx-gray-500);
-    --bs-gray-600: var(--wx-gray-600);
-    --bs-gray-700: var(--wx-gray-700);
-    --bs-gray-800: var(--wx-gray-800);
-    --bs-gray-900: var(--wx-gray-900);
-
-    --bs-link-color: var(--wx-link-color);
-    --bs-link-color-rgb: var(--wx-link-color-rgb);
-    --bs-link-hover-color: var(--wx-link-hover-color);
-    --bs-code-color: var(--wx-code-color);
 }
 
-/* Dark theme: override only the wx tokens. The Bootstrap bridge above
-   resolves var(--wx-*) against these values automatically, so it is never
-   repeated here. Brand base colors (primary, success, …) intentionally do
-   not flip — only surfaces, text, borders, subtle families and links do. */
-[data-bs-theme="dark"] {
+
+[data-wx-theme="dark"] {
     --wx-body-bg: #212529;
     --wx-body-bg-rgb: 33, 37, 41;
     --wx-body-color: #dee2e6;
@@ -231,6 +136,8 @@
     --wx-danger-text-emphasis: #ea868f;
     --wx-light-bg-subtle: #343a40;
     --wx-light-border-subtle: #495057;
+    --wx-light-text-emphasis: #dee2e6;
+    --wx-dark-text-emphasis: #dee2e6;
     --wx-dark-bg-subtle: #1a1d20;
     --wx-dark-border-subtle: #343a40;
 
@@ -252,66 +159,12 @@
     box-shadow: var(--wx-dropdown-shadow);
 }
 
-/* Open/close animation for dropdown menus and their entries.
-   The menu fades while its entries settle down into place on open and lift
-   back out on close. Bootstrap flips display:none the instant .show is
-   removed, so transition-behavior:allow-discrete defers that flip until the
-   fade finishes, and @starting-style supplies the pre-open state the enter
-   transition animates away from.
-   The :not([style*="display"]) guard skips the typeahead and selection menus,
-   which reuse .dropdown-menu but toggle visibility through an inline display
-   value rather than .show; Popper only writes position/transform inline, so
-   real button-dropdowns still match and animate. */
-.dropdown-menu:not([style*="display"]) {
-    opacity: 0;
-    transition: opacity var(--wx-dropdown-motion-duration) var(--wx-dropdown-motion-ease),
-                display var(--wx-dropdown-motion-duration) var(--wx-dropdown-motion-ease);
-    transition-behavior: allow-discrete;
-}
-
-.dropdown-menu.show {
-    opacity: 1;
-}
-
-@starting-style {
-    .dropdown-menu.show {
-        opacity: 0;
-    }
-}
-
-.dropdown-menu:not([style*="display"]) > li,
-.dropdown-menu:not([style*="display"]) > .dropdown-item {
-    transform: translateY(-0.5rem);
-    transition: transform var(--wx-dropdown-motion-duration) var(--wx-dropdown-motion-ease);
-}
-
-.dropdown-menu.show > li,
-.dropdown-menu.show > .dropdown-item {
-    transform: translateY(0);
-}
-
-@starting-style {
-    .dropdown-menu.show > li,
-    .dropdown-menu.show > .dropdown-item {
-        transform: translateY(-0.5rem);
-    }
-}
-
-/* honour users who ask the OS to minimise animation */
-@media (prefers-reduced-motion: reduce) {
-    .dropdown-menu:not([style*="display"]),
-    .dropdown-menu:not([style*="display"]) > li,
-    .dropdown-menu:not([style*="display"]) > .dropdown-item {
-        transition: none;
-    }
-}
-
 body, html {
     height: 100%;
 }
 
 pre {
-    font-family: var(--bs-font-monospace);
+    font-family: var(--wx-font-monospace);
     color: var(--wx-code-color);
 }
 
@@ -319,7 +172,7 @@ pre {
     display: none;
 }
 
-.alert-dismissible [data-bs-dismiss="alert"] {
+.alert-dismissible [data-wx-dismiss="alert"] {
     position: absolute;
     top: 0;
     right: 0;
@@ -337,7 +190,7 @@ pre {
 }
 
 .wx-link {
-    color: rgba(var(--wx-link-color-rgb), var(--bs-link-opacity, 1));
+    color: rgba(var(--wx-link-color-rgb), var(--wx-link-opacity, 1));
     text-decoration: none;
     cursor: pointer;
     display: inline-flex;
@@ -432,7 +285,7 @@ img.wx-icon-large {
 }
 
 .wx-breadcrumb-prefix {
-    color: var(--bs-muted-color);
+    color: var(--wx-secondary-color);
     opacity: 0.65;
 }
 
@@ -547,7 +400,7 @@ img.wx-icon-large {
     background-clip: border-box;
     border: 1px solid var(--wx-border-color);
     border-left-width: 0.25rem;
-    border-radius: var(--bs-border-radius);
+    border-radius: var(--wx-border-radius);
     background-color: var(--wx-body-bg);
     color: var(--wx-body-color);
 }
@@ -634,8 +487,10 @@ img.wx-icon-large {
     resize: both;
 }
 
-[data-bs-theme=dark] .wx-drag-over {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-drag-over {
     background: repeating-linear-gradient( 45deg, var(--wx-secondary-bg), var(--wx-secondary-bg) 6px, var(--wx-secondary) 6px, var(--wx-secondary) 12px );
+}
 }
 
 .list-group-item.active a {
@@ -706,9 +561,9 @@ img.wx-icon-large {
 }
 
 .table-highlight {
-    --bs-table-bg: rgba(var(--wx-highlight-rgb), 0.25);
-    --bs-table-color: var(--wx-highlight-contrast);
-    --bs-table-border-color: rgba(var(--wx-highlight-rgb), 0.6);
+    --wx-table-bg: rgba(var(--wx-highlight-rgb), 0.25);
+    --wx-table-color: var(--wx-highlight-contrast);
+    --wx-table-border-color: rgba(var(--wx-highlight-rgb), 0.6);
     color: var(--wx-highlight-contrast);
     background-color: rgba(var(--wx-highlight-rgb), 0.25);
 }
@@ -747,256 +602,245 @@ img.wx-icon-large {
     color: var(--wx-highlight);
 }
 
-/* =====================================================================
-   Native Bootstrap components — themed from the wx palette
-   ---------------------------------------------------------------------
-   Bootstrap's .btn-* variants hardcode literal colors in their
-   --bs-btn-* variables, so overriding a palette token alone would not
-   re-skin them. These rules re-point every variant at the wx tokens;
-   hover/active shades are derived from the base hue with color-mix so a
-   theme only has to redefine one --wx-<color> token. Loaded after
-   bootstrap.min.css with equal specificity, so they win by source order.
-   (.bg-*, .text-* and .border-* already read --bs-*-rgb and are themed
-   through the bridge; only .text-bg-* needs its literal text color fixed.)
-   ===================================================================== */
+
 .btn-primary {
-    --bs-btn-color: var(--wx-primary-contrast);
-    --bs-btn-bg: var(--wx-primary);
-    --bs-btn-border-color: var(--wx-primary);
-    --bs-btn-hover-color: var(--wx-primary-contrast);
-    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-primary) 85%, #000);
-    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-primary) 80%, #000);
-    --bs-btn-active-color: var(--wx-primary-contrast);
-    --bs-btn-active-bg: color-mix(in srgb, var(--wx-primary) 80%, #000);
-    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-primary) 75%, #000);
-    --bs-btn-focus-shadow-rgb: var(--wx-primary-rgb);
-    --bs-btn-disabled-color: var(--wx-primary-contrast);
-    --bs-btn-disabled-bg: var(--wx-primary);
-    --bs-btn-disabled-border-color: var(--wx-primary);
+    --wx-btn-color: var(--wx-primary-contrast);
+    --wx-btn-bg: var(--wx-primary);
+    --wx-btn-border-color: var(--wx-primary);
+    --wx-btn-hover-color: var(--wx-primary-contrast);
+    --wx-btn-hover-bg: color-mix(in srgb, var(--wx-primary) 85%, #000);
+    --wx-btn-hover-border-color: color-mix(in srgb, var(--wx-primary) 80%, #000);
+    --wx-btn-active-color: var(--wx-primary-contrast);
+    --wx-btn-active-bg: color-mix(in srgb, var(--wx-primary) 80%, #000);
+    --wx-btn-active-border-color: color-mix(in srgb, var(--wx-primary) 75%, #000);
+    --wx-btn-focus-shadow-rgb: var(--wx-primary-rgb);
+    --wx-btn-disabled-color: var(--wx-primary-contrast);
+    --wx-btn-disabled-bg: var(--wx-primary);
+    --wx-btn-disabled-border-color: var(--wx-primary);
 }
 
 .btn-secondary {
-    --bs-btn-color: var(--wx-secondary-contrast);
-    --bs-btn-bg: var(--wx-secondary);
-    --bs-btn-border-color: var(--wx-secondary);
-    --bs-btn-hover-color: var(--wx-secondary-contrast);
-    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-secondary) 85%, #000);
-    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-secondary) 80%, #000);
-    --bs-btn-active-color: var(--wx-secondary-contrast);
-    --bs-btn-active-bg: color-mix(in srgb, var(--wx-secondary) 80%, #000);
-    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-secondary) 75%, #000);
-    --bs-btn-focus-shadow-rgb: var(--wx-secondary-rgb);
-    --bs-btn-disabled-color: var(--wx-secondary-contrast);
-    --bs-btn-disabled-bg: var(--wx-secondary);
-    --bs-btn-disabled-border-color: var(--wx-secondary);
+    --wx-btn-color: var(--wx-secondary-contrast);
+    --wx-btn-bg: var(--wx-secondary);
+    --wx-btn-border-color: var(--wx-secondary);
+    --wx-btn-hover-color: var(--wx-secondary-contrast);
+    --wx-btn-hover-bg: color-mix(in srgb, var(--wx-secondary) 85%, #000);
+    --wx-btn-hover-border-color: color-mix(in srgb, var(--wx-secondary) 80%, #000);
+    --wx-btn-active-color: var(--wx-secondary-contrast);
+    --wx-btn-active-bg: color-mix(in srgb, var(--wx-secondary) 80%, #000);
+    --wx-btn-active-border-color: color-mix(in srgb, var(--wx-secondary) 75%, #000);
+    --wx-btn-focus-shadow-rgb: var(--wx-secondary-rgb);
+    --wx-btn-disabled-color: var(--wx-secondary-contrast);
+    --wx-btn-disabled-bg: var(--wx-secondary);
+    --wx-btn-disabled-border-color: var(--wx-secondary);
 }
 
 .btn-success {
-    --bs-btn-color: var(--wx-success-contrast);
-    --bs-btn-bg: var(--wx-success);
-    --bs-btn-border-color: var(--wx-success);
-    --bs-btn-hover-color: var(--wx-success-contrast);
-    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-success) 85%, #000);
-    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-success) 80%, #000);
-    --bs-btn-active-color: var(--wx-success-contrast);
-    --bs-btn-active-bg: color-mix(in srgb, var(--wx-success) 80%, #000);
-    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-success) 75%, #000);
-    --bs-btn-focus-shadow-rgb: var(--wx-success-rgb);
-    --bs-btn-disabled-color: var(--wx-success-contrast);
-    --bs-btn-disabled-bg: var(--wx-success);
-    --bs-btn-disabled-border-color: var(--wx-success);
+    --wx-btn-color: var(--wx-success-contrast);
+    --wx-btn-bg: var(--wx-success);
+    --wx-btn-border-color: var(--wx-success);
+    --wx-btn-hover-color: var(--wx-success-contrast);
+    --wx-btn-hover-bg: color-mix(in srgb, var(--wx-success) 85%, #000);
+    --wx-btn-hover-border-color: color-mix(in srgb, var(--wx-success) 80%, #000);
+    --wx-btn-active-color: var(--wx-success-contrast);
+    --wx-btn-active-bg: color-mix(in srgb, var(--wx-success) 80%, #000);
+    --wx-btn-active-border-color: color-mix(in srgb, var(--wx-success) 75%, #000);
+    --wx-btn-focus-shadow-rgb: var(--wx-success-rgb);
+    --wx-btn-disabled-color: var(--wx-success-contrast);
+    --wx-btn-disabled-bg: var(--wx-success);
+    --wx-btn-disabled-border-color: var(--wx-success);
 }
 
 .btn-info {
-    --bs-btn-color: var(--wx-info-contrast);
-    --bs-btn-bg: var(--wx-info);
-    --bs-btn-border-color: var(--wx-info);
-    --bs-btn-hover-color: var(--wx-info-contrast);
-    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-info) 85%, #000);
-    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-info) 80%, #000);
-    --bs-btn-active-color: var(--wx-info-contrast);
-    --bs-btn-active-bg: color-mix(in srgb, var(--wx-info) 80%, #000);
-    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-info) 75%, #000);
-    --bs-btn-focus-shadow-rgb: var(--wx-info-rgb);
-    --bs-btn-disabled-color: var(--wx-info-contrast);
-    --bs-btn-disabled-bg: var(--wx-info);
-    --bs-btn-disabled-border-color: var(--wx-info);
+    --wx-btn-color: var(--wx-info-contrast);
+    --wx-btn-bg: var(--wx-info);
+    --wx-btn-border-color: var(--wx-info);
+    --wx-btn-hover-color: var(--wx-info-contrast);
+    --wx-btn-hover-bg: color-mix(in srgb, var(--wx-info) 85%, #000);
+    --wx-btn-hover-border-color: color-mix(in srgb, var(--wx-info) 80%, #000);
+    --wx-btn-active-color: var(--wx-info-contrast);
+    --wx-btn-active-bg: color-mix(in srgb, var(--wx-info) 80%, #000);
+    --wx-btn-active-border-color: color-mix(in srgb, var(--wx-info) 75%, #000);
+    --wx-btn-focus-shadow-rgb: var(--wx-info-rgb);
+    --wx-btn-disabled-color: var(--wx-info-contrast);
+    --wx-btn-disabled-bg: var(--wx-info);
+    --wx-btn-disabled-border-color: var(--wx-info);
 }
 
 .btn-warning {
-    --bs-btn-color: var(--wx-warning-contrast);
-    --bs-btn-bg: var(--wx-warning);
-    --bs-btn-border-color: var(--wx-warning);
-    --bs-btn-hover-color: var(--wx-warning-contrast);
-    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-warning) 85%, #000);
-    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-warning) 80%, #000);
-    --bs-btn-active-color: var(--wx-warning-contrast);
-    --bs-btn-active-bg: color-mix(in srgb, var(--wx-warning) 80%, #000);
-    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-warning) 75%, #000);
-    --bs-btn-focus-shadow-rgb: var(--wx-warning-rgb);
-    --bs-btn-disabled-color: var(--wx-warning-contrast);
-    --bs-btn-disabled-bg: var(--wx-warning);
-    --bs-btn-disabled-border-color: var(--wx-warning);
+    --wx-btn-color: var(--wx-warning-contrast);
+    --wx-btn-bg: var(--wx-warning);
+    --wx-btn-border-color: var(--wx-warning);
+    --wx-btn-hover-color: var(--wx-warning-contrast);
+    --wx-btn-hover-bg: color-mix(in srgb, var(--wx-warning) 85%, #000);
+    --wx-btn-hover-border-color: color-mix(in srgb, var(--wx-warning) 80%, #000);
+    --wx-btn-active-color: var(--wx-warning-contrast);
+    --wx-btn-active-bg: color-mix(in srgb, var(--wx-warning) 80%, #000);
+    --wx-btn-active-border-color: color-mix(in srgb, var(--wx-warning) 75%, #000);
+    --wx-btn-focus-shadow-rgb: var(--wx-warning-rgb);
+    --wx-btn-disabled-color: var(--wx-warning-contrast);
+    --wx-btn-disabled-bg: var(--wx-warning);
+    --wx-btn-disabled-border-color: var(--wx-warning);
 }
 
 .btn-danger {
-    --bs-btn-color: var(--wx-danger-contrast);
-    --bs-btn-bg: var(--wx-danger);
-    --bs-btn-border-color: var(--wx-danger);
-    --bs-btn-hover-color: var(--wx-danger-contrast);
-    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-danger) 85%, #000);
-    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-danger) 80%, #000);
-    --bs-btn-active-color: var(--wx-danger-contrast);
-    --bs-btn-active-bg: color-mix(in srgb, var(--wx-danger) 80%, #000);
-    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-danger) 75%, #000);
-    --bs-btn-focus-shadow-rgb: var(--wx-danger-rgb);
-    --bs-btn-disabled-color: var(--wx-danger-contrast);
-    --bs-btn-disabled-bg: var(--wx-danger);
-    --bs-btn-disabled-border-color: var(--wx-danger);
+    --wx-btn-color: var(--wx-danger-contrast);
+    --wx-btn-bg: var(--wx-danger);
+    --wx-btn-border-color: var(--wx-danger);
+    --wx-btn-hover-color: var(--wx-danger-contrast);
+    --wx-btn-hover-bg: color-mix(in srgb, var(--wx-danger) 85%, #000);
+    --wx-btn-hover-border-color: color-mix(in srgb, var(--wx-danger) 80%, #000);
+    --wx-btn-active-color: var(--wx-danger-contrast);
+    --wx-btn-active-bg: color-mix(in srgb, var(--wx-danger) 80%, #000);
+    --wx-btn-active-border-color: color-mix(in srgb, var(--wx-danger) 75%, #000);
+    --wx-btn-focus-shadow-rgb: var(--wx-danger-rgb);
+    --wx-btn-disabled-color: var(--wx-danger-contrast);
+    --wx-btn-disabled-bg: var(--wx-danger);
+    --wx-btn-disabled-border-color: var(--wx-danger);
 }
 
 .btn-light {
-    --bs-btn-color: var(--wx-light-contrast);
-    --bs-btn-bg: var(--wx-light);
-    --bs-btn-border-color: var(--wx-light);
-    --bs-btn-hover-color: var(--wx-light-contrast);
-    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-light) 85%, #000);
-    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-light) 80%, #000);
-    --bs-btn-active-color: var(--wx-light-contrast);
-    --bs-btn-active-bg: color-mix(in srgb, var(--wx-light) 80%, #000);
-    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-light) 75%, #000);
-    --bs-btn-focus-shadow-rgb: var(--wx-light-rgb);
-    --bs-btn-disabled-color: var(--wx-light-contrast);
-    --bs-btn-disabled-bg: var(--wx-light);
-    --bs-btn-disabled-border-color: var(--wx-light);
+    --wx-btn-color: var(--wx-light-contrast);
+    --wx-btn-bg: var(--wx-light);
+    --wx-btn-border-color: var(--wx-light);
+    --wx-btn-hover-color: var(--wx-light-contrast);
+    --wx-btn-hover-bg: color-mix(in srgb, var(--wx-light) 85%, #000);
+    --wx-btn-hover-border-color: color-mix(in srgb, var(--wx-light) 80%, #000);
+    --wx-btn-active-color: var(--wx-light-contrast);
+    --wx-btn-active-bg: color-mix(in srgb, var(--wx-light) 80%, #000);
+    --wx-btn-active-border-color: color-mix(in srgb, var(--wx-light) 75%, #000);
+    --wx-btn-focus-shadow-rgb: var(--wx-light-rgb);
+    --wx-btn-disabled-color: var(--wx-light-contrast);
+    --wx-btn-disabled-bg: var(--wx-light);
+    --wx-btn-disabled-border-color: var(--wx-light);
 }
 
 .btn-dark {
-    --bs-btn-color: var(--wx-dark-contrast);
-    --bs-btn-bg: var(--wx-dark);
-    --bs-btn-border-color: var(--wx-dark);
-    --bs-btn-hover-color: var(--wx-dark-contrast);
-    --bs-btn-hover-bg: color-mix(in srgb, var(--wx-dark) 85%, #000);
-    --bs-btn-hover-border-color: color-mix(in srgb, var(--wx-dark) 80%, #000);
-    --bs-btn-active-color: var(--wx-dark-contrast);
-    --bs-btn-active-bg: color-mix(in srgb, var(--wx-dark) 80%, #000);
-    --bs-btn-active-border-color: color-mix(in srgb, var(--wx-dark) 75%, #000);
-    --bs-btn-focus-shadow-rgb: var(--wx-dark-rgb);
-    --bs-btn-disabled-color: var(--wx-dark-contrast);
-    --bs-btn-disabled-bg: var(--wx-dark);
-    --bs-btn-disabled-border-color: var(--wx-dark);
+    --wx-btn-color: var(--wx-dark-contrast);
+    --wx-btn-bg: var(--wx-dark);
+    --wx-btn-border-color: var(--wx-dark);
+    --wx-btn-hover-color: var(--wx-dark-contrast);
+    --wx-btn-hover-bg: color-mix(in srgb, var(--wx-dark) 85%, #000);
+    --wx-btn-hover-border-color: color-mix(in srgb, var(--wx-dark) 80%, #000);
+    --wx-btn-active-color: var(--wx-dark-contrast);
+    --wx-btn-active-bg: color-mix(in srgb, var(--wx-dark) 80%, #000);
+    --wx-btn-active-border-color: color-mix(in srgb, var(--wx-dark) 75%, #000);
+    --wx-btn-focus-shadow-rgb: var(--wx-dark-rgb);
+    --wx-btn-disabled-color: var(--wx-dark-contrast);
+    --wx-btn-disabled-bg: var(--wx-dark);
+    --wx-btn-disabled-border-color: var(--wx-dark);
 }
 
 .btn-outline-primary {
-    --bs-btn-color: var(--wx-primary);
-    --bs-btn-border-color: var(--wx-primary);
-    --bs-btn-hover-color: var(--wx-primary-contrast);
-    --bs-btn-hover-bg: var(--wx-primary);
-    --bs-btn-hover-border-color: var(--wx-primary);
-    --bs-btn-active-color: var(--wx-primary-contrast);
-    --bs-btn-active-bg: var(--wx-primary);
-    --bs-btn-active-border-color: var(--wx-primary);
-    --bs-btn-focus-shadow-rgb: var(--wx-primary-rgb);
-    --bs-btn-disabled-color: var(--wx-primary);
-    --bs-btn-disabled-border-color: var(--wx-primary);
+    --wx-btn-color: var(--wx-primary);
+    --wx-btn-border-color: var(--wx-primary);
+    --wx-btn-hover-color: var(--wx-primary-contrast);
+    --wx-btn-hover-bg: var(--wx-primary);
+    --wx-btn-hover-border-color: var(--wx-primary);
+    --wx-btn-active-color: var(--wx-primary-contrast);
+    --wx-btn-active-bg: var(--wx-primary);
+    --wx-btn-active-border-color: var(--wx-primary);
+    --wx-btn-focus-shadow-rgb: var(--wx-primary-rgb);
+    --wx-btn-disabled-color: var(--wx-primary);
+    --wx-btn-disabled-border-color: var(--wx-primary);
 }
 
 .btn-outline-secondary {
-    --bs-btn-color: var(--wx-secondary);
-    --bs-btn-border-color: var(--wx-secondary);
-    --bs-btn-hover-color: var(--wx-secondary-contrast);
-    --bs-btn-hover-bg: var(--wx-secondary);
-    --bs-btn-hover-border-color: var(--wx-secondary);
-    --bs-btn-active-color: var(--wx-secondary-contrast);
-    --bs-btn-active-bg: var(--wx-secondary);
-    --bs-btn-active-border-color: var(--wx-secondary);
-    --bs-btn-focus-shadow-rgb: var(--wx-secondary-rgb);
-    --bs-btn-disabled-color: var(--wx-secondary);
-    --bs-btn-disabled-border-color: var(--wx-secondary);
+    --wx-btn-color: var(--wx-secondary);
+    --wx-btn-border-color: var(--wx-secondary);
+    --wx-btn-hover-color: var(--wx-secondary-contrast);
+    --wx-btn-hover-bg: var(--wx-secondary);
+    --wx-btn-hover-border-color: var(--wx-secondary);
+    --wx-btn-active-color: var(--wx-secondary-contrast);
+    --wx-btn-active-bg: var(--wx-secondary);
+    --wx-btn-active-border-color: var(--wx-secondary);
+    --wx-btn-focus-shadow-rgb: var(--wx-secondary-rgb);
+    --wx-btn-disabled-color: var(--wx-secondary);
+    --wx-btn-disabled-border-color: var(--wx-secondary);
 }
 
 .btn-outline-success {
-    --bs-btn-color: var(--wx-success);
-    --bs-btn-border-color: var(--wx-success);
-    --bs-btn-hover-color: var(--wx-success-contrast);
-    --bs-btn-hover-bg: var(--wx-success);
-    --bs-btn-hover-border-color: var(--wx-success);
-    --bs-btn-active-color: var(--wx-success-contrast);
-    --bs-btn-active-bg: var(--wx-success);
-    --bs-btn-active-border-color: var(--wx-success);
-    --bs-btn-focus-shadow-rgb: var(--wx-success-rgb);
-    --bs-btn-disabled-color: var(--wx-success);
-    --bs-btn-disabled-border-color: var(--wx-success);
+    --wx-btn-color: var(--wx-success);
+    --wx-btn-border-color: var(--wx-success);
+    --wx-btn-hover-color: var(--wx-success-contrast);
+    --wx-btn-hover-bg: var(--wx-success);
+    --wx-btn-hover-border-color: var(--wx-success);
+    --wx-btn-active-color: var(--wx-success-contrast);
+    --wx-btn-active-bg: var(--wx-success);
+    --wx-btn-active-border-color: var(--wx-success);
+    --wx-btn-focus-shadow-rgb: var(--wx-success-rgb);
+    --wx-btn-disabled-color: var(--wx-success);
+    --wx-btn-disabled-border-color: var(--wx-success);
 }
 
 .btn-outline-info {
-    --bs-btn-color: var(--wx-info);
-    --bs-btn-border-color: var(--wx-info);
-    --bs-btn-hover-color: var(--wx-info-contrast);
-    --bs-btn-hover-bg: var(--wx-info);
-    --bs-btn-hover-border-color: var(--wx-info);
-    --bs-btn-active-color: var(--wx-info-contrast);
-    --bs-btn-active-bg: var(--wx-info);
-    --bs-btn-active-border-color: var(--wx-info);
-    --bs-btn-focus-shadow-rgb: var(--wx-info-rgb);
-    --bs-btn-disabled-color: var(--wx-info);
-    --bs-btn-disabled-border-color: var(--wx-info);
+    --wx-btn-color: var(--wx-info);
+    --wx-btn-border-color: var(--wx-info);
+    --wx-btn-hover-color: var(--wx-info-contrast);
+    --wx-btn-hover-bg: var(--wx-info);
+    --wx-btn-hover-border-color: var(--wx-info);
+    --wx-btn-active-color: var(--wx-info-contrast);
+    --wx-btn-active-bg: var(--wx-info);
+    --wx-btn-active-border-color: var(--wx-info);
+    --wx-btn-focus-shadow-rgb: var(--wx-info-rgb);
+    --wx-btn-disabled-color: var(--wx-info);
+    --wx-btn-disabled-border-color: var(--wx-info);
 }
 
 .btn-outline-warning {
-    --bs-btn-color: var(--wx-warning);
-    --bs-btn-border-color: var(--wx-warning);
-    --bs-btn-hover-color: var(--wx-warning-contrast);
-    --bs-btn-hover-bg: var(--wx-warning);
-    --bs-btn-hover-border-color: var(--wx-warning);
-    --bs-btn-active-color: var(--wx-warning-contrast);
-    --bs-btn-active-bg: var(--wx-warning);
-    --bs-btn-active-border-color: var(--wx-warning);
-    --bs-btn-focus-shadow-rgb: var(--wx-warning-rgb);
-    --bs-btn-disabled-color: var(--wx-warning);
-    --bs-btn-disabled-border-color: var(--wx-warning);
+    --wx-btn-color: var(--wx-warning);
+    --wx-btn-border-color: var(--wx-warning);
+    --wx-btn-hover-color: var(--wx-warning-contrast);
+    --wx-btn-hover-bg: var(--wx-warning);
+    --wx-btn-hover-border-color: var(--wx-warning);
+    --wx-btn-active-color: var(--wx-warning-contrast);
+    --wx-btn-active-bg: var(--wx-warning);
+    --wx-btn-active-border-color: var(--wx-warning);
+    --wx-btn-focus-shadow-rgb: var(--wx-warning-rgb);
+    --wx-btn-disabled-color: var(--wx-warning);
+    --wx-btn-disabled-border-color: var(--wx-warning);
 }
 
 .btn-outline-danger {
-    --bs-btn-color: var(--wx-danger);
-    --bs-btn-border-color: var(--wx-danger);
-    --bs-btn-hover-color: var(--wx-danger-contrast);
-    --bs-btn-hover-bg: var(--wx-danger);
-    --bs-btn-hover-border-color: var(--wx-danger);
-    --bs-btn-active-color: var(--wx-danger-contrast);
-    --bs-btn-active-bg: var(--wx-danger);
-    --bs-btn-active-border-color: var(--wx-danger);
-    --bs-btn-focus-shadow-rgb: var(--wx-danger-rgb);
-    --bs-btn-disabled-color: var(--wx-danger);
-    --bs-btn-disabled-border-color: var(--wx-danger);
+    --wx-btn-color: var(--wx-danger);
+    --wx-btn-border-color: var(--wx-danger);
+    --wx-btn-hover-color: var(--wx-danger-contrast);
+    --wx-btn-hover-bg: var(--wx-danger);
+    --wx-btn-hover-border-color: var(--wx-danger);
+    --wx-btn-active-color: var(--wx-danger-contrast);
+    --wx-btn-active-bg: var(--wx-danger);
+    --wx-btn-active-border-color: var(--wx-danger);
+    --wx-btn-focus-shadow-rgb: var(--wx-danger-rgb);
+    --wx-btn-disabled-color: var(--wx-danger);
+    --wx-btn-disabled-border-color: var(--wx-danger);
 }
 
 .btn-outline-light {
-    --bs-btn-color: var(--wx-light);
-    --bs-btn-border-color: var(--wx-light);
-    --bs-btn-hover-color: var(--wx-light-contrast);
-    --bs-btn-hover-bg: var(--wx-light);
-    --bs-btn-hover-border-color: var(--wx-light);
-    --bs-btn-active-color: var(--wx-light-contrast);
-    --bs-btn-active-bg: var(--wx-light);
-    --bs-btn-active-border-color: var(--wx-light);
-    --bs-btn-focus-shadow-rgb: var(--wx-light-rgb);
-    --bs-btn-disabled-color: var(--wx-light);
-    --bs-btn-disabled-border-color: var(--wx-light);
+    --wx-btn-color: var(--wx-light);
+    --wx-btn-border-color: var(--wx-light);
+    --wx-btn-hover-color: var(--wx-light-contrast);
+    --wx-btn-hover-bg: var(--wx-light);
+    --wx-btn-hover-border-color: var(--wx-light);
+    --wx-btn-active-color: var(--wx-light-contrast);
+    --wx-btn-active-bg: var(--wx-light);
+    --wx-btn-active-border-color: var(--wx-light);
+    --wx-btn-focus-shadow-rgb: var(--wx-light-rgb);
+    --wx-btn-disabled-color: var(--wx-light);
+    --wx-btn-disabled-border-color: var(--wx-light);
 }
 
 .btn-outline-dark {
-    --bs-btn-color: var(--wx-dark);
-    --bs-btn-border-color: var(--wx-dark);
-    --bs-btn-hover-color: var(--wx-dark-contrast);
-    --bs-btn-hover-bg: var(--wx-dark);
-    --bs-btn-hover-border-color: var(--wx-dark);
-    --bs-btn-active-color: var(--wx-dark-contrast);
-    --bs-btn-active-bg: var(--wx-dark);
-    --bs-btn-active-border-color: var(--wx-dark);
-    --bs-btn-focus-shadow-rgb: var(--wx-dark-rgb);
-    --bs-btn-disabled-color: var(--wx-dark);
-    --bs-btn-disabled-border-color: var(--wx-dark);
+    --wx-btn-color: var(--wx-dark);
+    --wx-btn-border-color: var(--wx-dark);
+    --wx-btn-hover-color: var(--wx-dark-contrast);
+    --wx-btn-hover-bg: var(--wx-dark);
+    --wx-btn-hover-border-color: var(--wx-dark);
+    --wx-btn-active-color: var(--wx-dark-contrast);
+    --wx-btn-active-bg: var(--wx-dark);
+    --wx-btn-active-border-color: var(--wx-dark);
+    --wx-btn-focus-shadow-rgb: var(--wx-dark-rgb);
+    --wx-btn-disabled-color: var(--wx-dark);
+    --wx-btn-disabled-border-color: var(--wx-dark);
 }
 
 /* .text-bg-* backgrounds already resolve through --wx-*-rgb; only the
@@ -1031,4 +875,13 @@ img.wx-icon-large {
 
 .text-bg-dark {
     color: var(--wx-dark-contrast) !important;
+}
+
+:root, [data-wx-theme] {
+    --wx-highlight-bg-subtle: color-mix(in srgb, var(--wx-highlight) 20%, var(--wx-body-bg));
+    --wx-highlight-border-subtle: color-mix(in srgb, var(--wx-highlight) 50%, var(--wx-border-color));
+    --wx-highlight-text-emphasis: var(--wx-body-color);
+    --wx-white-bg-subtle: var(--wx-body-bg);
+    --wx-white-border-subtle: var(--wx-border-color);
+    --wx-white-text-emphasis: var(--wx-body-color);
 }

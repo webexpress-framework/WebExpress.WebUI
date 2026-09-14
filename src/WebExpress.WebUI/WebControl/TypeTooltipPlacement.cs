@@ -32,7 +32,7 @@ namespace WebExpress.WebUI.WebControl
     public static class TypeTooltipPlacementExtensions
     {
         /// <summary>
-        /// Converts the placement to the value of the data-bs-placement attribute.
+        /// Converts the placement to the value of the data-wx-placement attribute.
         /// </summary>
         /// <param name="placement">The placement.</param>
         /// <returns>The data attribute value corresponding to the placement.</returns>

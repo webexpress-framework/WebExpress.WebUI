@@ -186,17 +186,17 @@ namespace WebExpress.WebUI.WebControl
             {
                 if ((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor == TypeColor.User && !string.IsNullOrWhiteSpace(HighlightColor?.Invoke(renderContext).UserColor))
                 {
-                    html.AddStyle($"--bs-nav-underline-border-color: {HighlightColor?.Invoke(renderContext).UserColor};", $"--bs-nav-underline-link-active-color: {HighlightColor?.Invoke(renderContext).UserColor};");
+                    html.AddStyle($"--wx-nav-underline-border-color: {HighlightColor?.Invoke(renderContext).UserColor};", $"--wx-nav-underline-link-active-color: {HighlightColor?.Invoke(renderContext).UserColor};");
                 }
                 else if ((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor == TypeColor.Highlight)
                 {
                     var colorVar = "var(--wx-highlight)";
-                    html.AddStyle($"--bs-nav-underline-border-color: {colorVar};", $"--bs-nav-underline-link-active-color: {colorVar};");
+                    html.AddStyle($"--wx-nav-underline-border-color: {colorVar};", $"--wx-nav-underline-link-active-color: {colorVar};");
                 }
                 else if ((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor != TypeColor.Default)
                 {
-                    var colorVar = $"var(--bs-{((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor).ToClass()})";
-                    html.AddStyle($"--bs-nav-underline-border-color: {colorVar};", $"--bs-nav-underline-link-active-color: {colorVar};");
+                    var colorVar = $"var(--wx-{((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor).ToClass()})";
+                    html.AddStyle($"--wx-nav-underline-border-color: {colorVar};", $"--wx-nav-underline-link-active-color: {colorVar};");
                 }
             }
 

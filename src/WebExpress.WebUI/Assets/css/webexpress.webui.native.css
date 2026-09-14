@@ -1,0 +1,142 @@
+/* top-layer placement stays relative to the owning control, even in a scrolling dialog */
+.wx-native-menu[popover] {
+    position: fixed;
+    inset: auto;
+    margin: 0.25rem 0;
+    position-area: block-end span-inline-end;
+    position-try-fallbacks: flip-block, flip-inline, flip-block flip-inline;
+    max-inline-size: calc(100dvi - 1rem);
+    max-block-size: min(24rem, calc(100dvb - 1rem));
+    overflow: auto;
+    padding: 0.5rem;
+    border: 1px solid var(--wx-border-color);
+    border-radius: var(--wx-border-radius, 0.375rem);
+    color: var(--wx-body-color);
+    background: var(--wx-body-bg);
+    box-shadow: var(--wx-dropdown-shadow);
+    opacity: 0;
+    transition: opacity 180ms ease, display 180ms allow-discrete, overlay 180ms allow-discrete;
+}
+.wx-native-menu[popover]:popover-open { display: block; opacity: 1; }
+.wx-native-menu-field[popover] { min-inline-size: anchor-size(inline); }
+.wx-native-menu-field[popover]:popover-open { display: flex; flex-direction: column; }
+.wx-native-menu[popover]:not(:popover-open) { display: none; }
+.wx-native-menu[data-wx-placement="top"] { position-area: block-start; }
+.wx-native-menu[data-wx-placement="bottom"] { position-area: block-end; }
+.wx-native-menu[data-wx-placement="left"] { position-area: inline-start; }
+.wx-native-menu[data-wx-placement="right"] { position-area: inline-end; }
+.wx-native-menu.dropdown-menu-end,
+.wx-native-menu.dropdown-menu-right { position-area: block-end span-inline-start; }
+@starting-style { .wx-native-menu[popover]:popover-open { opacity: 0; } }
+
+dialog.modal {
+    --wx-dialog-width: 32rem;
+    width: min(var(--wx-dialog-width), calc(100dvi - 2rem));
+    max-width: none;
+    max-height: calc(100dvb - 2rem);
+    padding: 0;
+    border: 1px solid var(--wx-border-color);
+    border-radius: 0.5rem;
+    color: var(--wx-body-color);
+    background: var(--wx-body-bg);
+    box-shadow: 0 1rem 3rem #0004;
+    overflow: auto;
+    opacity: 0;
+    transition: opacity 180ms ease, display 180ms allow-discrete, overlay 180ms allow-discrete;
+}
+dialog.modal[open] { display: flex; flex-direction: column; opacity: 1; }
+dialog.modal::backdrop {
+    background: #0008;
+    opacity: 0;
+    transition: opacity 180ms ease, display 180ms allow-discrete, overlay 180ms allow-discrete;
+}
+dialog.modal[open]::backdrop { opacity: 1; }
+@starting-style {
+    dialog.modal[open], dialog.modal[open]::backdrop { opacity: 0; }
+}
+html:has(dialog:modal:not([data-wx-scroll="true"])) { overflow: hidden; }
+dialog.modal-sm { --wx-dialog-width: 20rem; }
+dialog.modal-lg { --wx-dialog-width: 50rem; }
+dialog.modal-xl { --wx-dialog-width: 72rem; }
+dialog.modal-fullscreen {
+    width: 100dvi;
+    height: 100dvb;
+    max-height: none;
+    margin: 0;
+    border: 0;
+    border-radius: 0;
+}
+.modal-header, .modal-footer {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+}
+.modal-header { padding-block: 0.5rem; border-bottom: 1px solid var(--wx-border-color); }
+.modal-title { line-height: 1.25; flex: 1; min-width: 0; margin: 0; font-size: 1.25rem; }
+.modal-footer { justify-content: flex-end; flex-wrap: wrap; border-top: 1px solid var(--wx-border-color); }
+.modal-body { flex: 1 1 auto; min-height: 0; padding: 1rem; }
+.wx-dialog-scrollable :where(.modal-body) { overflow: auto; }
+dialog.modal > form { display: contents; }
+
+.carousel { position: relative; }
+.carousel-inner {
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    overscroll-behavior-inline: contain;
+}
+.carousel-item { position: relative; flex: 0 0 100%; min-width: 0; scroll-snap-align: start; }
+.carousel-item img { display: block; max-width: 100%; }
+.carousel-caption { position: absolute; inset-inline: 15%; bottom: 1.5rem; color: #fff; text-align: center; }
+.carousel-control-prev, .carousel-control-next {
+    position: absolute; inset-block: 0; width: 12%; display: grid; place-items: center;
+    border: 0; background: transparent; color: #fff; cursor: pointer;
+}
+.carousel-control-prev { inset-inline-start: 0; }
+.carousel-control-next { inset-inline-end: 0; }
+.carousel-control-prev-icon, .carousel-control-next-icon { display: grid; place-items: center; width: 2rem; height: 2rem; }
+.carousel-control-prev-icon::before, .carousel-control-next-icon::before {
+    content: ""; display: block; width: 1em; height: 1em; background: currentColor;
+    mask: url("../icons/angle-down.svg") center / contain no-repeat;
+}
+.carousel-control-prev-icon::before { transform: rotate(90deg); }
+.carousel-control-next-icon::before { transform: rotate(-90deg); }
+.carousel-indicators { position: absolute; inset-inline: 15%; bottom: 0.5rem; z-index: 1; display: flex; justify-content: center; gap: 0.5rem; }
+.carousel-indicators button { width: 1.5rem; height: 0.25rem; padding: 0; border: 0; background: #ffffff80; cursor: pointer; }
+.carousel-indicators button.active { background: #fff; }
+
+.offcanvas { max-height: 100dvb; height: 100dvb; width: min(25rem, 100dvi); margin: 0; padding: 0; border: 0; color: var(--wx-body-color); background: var(--wx-body-bg); }
+.offcanvas::backdrop { background: #0008; }
+.offcanvas[data-wx-backdrop="false"]::backdrop { background: transparent; }
+.offcanvas-start { margin-inline-end: auto; }
+.offcanvas-end { margin-inline-start: auto; }
+.offcanvas-top, .offcanvas-bottom { height: min(30dvb, 100%); width: 100dvi; max-width: none; }
+.offcanvas-top { margin-block-end: auto; }
+.offcanvas-bottom { margin-block-start: auto; }
+.offcanvas-header { display: flex; align-items: center; justify-content: space-between; padding: 1rem; }
+.offcanvas-body { padding: 1rem; overflow: auto; }
+
+@media (prefers-reduced-motion: reduce) {
+    .wx-native-menu[popover], dialog.modal, dialog.modal::backdrop { transition: none; }
+    .carousel-inner { scroll-behavior: auto; }
+}
+
+.wx-selection > .form-control > button,
+.wx-date-calendar-icon { border: 0; background: transparent; padding: 0.25rem; color: inherit; }
+.wx-native-menu.wx-emoji-picker[popover]:popover-open { display: flex; }
+
+.wx-dropdown > .btn { display: inline-flex; align-items: center; gap: 0.35rem; }
+.dropdown-toggle::after { content: none; }
+.wx-dropdown-caret { margin-inline-start: 0.3em; flex-shrink: 0; }
+dialog.offcanvas { opacity: 0; transition: opacity 180ms ease, display 180ms allow-discrete, overlay 180ms allow-discrete; }
+dialog.offcanvas[open] { display: flex; flex-direction: column; opacity: 1; }
+dialog.offcanvas::backdrop { opacity: 0; transition: opacity 180ms ease, display 180ms allow-discrete, overlay 180ms allow-discrete; }
+dialog.offcanvas[open]::backdrop { opacity: 1; }
+@starting-style { dialog.offcanvas[open], dialog.offcanvas[open]::backdrop { opacity: 0; } }
+.offcanvas-body { flex: 1 1 auto; min-height: 0; }
+@media (prefers-reduced-motion: reduce) { dialog.offcanvas, dialog.offcanvas::backdrop { opacity: 0; transition: none; } }

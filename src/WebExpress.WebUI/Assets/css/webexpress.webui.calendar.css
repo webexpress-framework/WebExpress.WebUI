@@ -46,7 +46,7 @@
     font-size: 1.15em;
     cursor: pointer;
     padding: 0.15em 0.55em;
-    border-radius: var(--bs-border-radius-sm, 0.25em);
+    border-radius: var(--wx-border-radius-sm, 0.25em);
     transition: background 0.15s;
     line-height: 1.2;
 }
@@ -102,7 +102,7 @@
     width: 100%;
     height: 100%;
     background: none;
-    border-radius: var(--bs-border-radius-sm, 0.25em);
+    border-radius: var(--wx-border-radius-sm, 0.25em);
     border: 0;
 }
 
@@ -185,40 +185,58 @@
 }
 
 /* Dark mode styles */
-[data-bs-theme="dark"] .wx-calendar-monthyear {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-calendar-monthyear {
     color: var(--wx-light, #fff);
 }
-[data-bs-theme="dark"] .wx-calendar-nav {
+}
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-calendar-nav {
     color: var(--wx-light, #fff);
 }
-[data-bs-theme="dark"] .wx-calendar-nav:hover,
-[data-bs-theme="dark"] .wx-calendar-nav:focus {
+}
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-calendar-nav:hover,
+:scope .wx-calendar-nav:focus {
     background: var(--wx-secondary-bg, #23262b);
     color: var(--wx-primary, #0d6efd);
 }
-[data-bs-theme="dark"] .wx-calendar-table th,
-[data-bs-theme="dark"] .wx-calendar-table td {
+}
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-calendar-table th,
+:scope .wx-calendar-table td {
     color: var(--wx-light, #d3d7dc);
 }
-[data-bs-theme="dark"] .wx-calendar-table td.wx-calendar-out {
+}
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-calendar-table td.wx-calendar-out {
     color: var(--wx-tertiary-color, #7a7e85);
 }
-[data-bs-theme="dark"] .wx-calendar-table td.selected,
-[data-bs-theme="dark"] .wx-calendar-table td.wx-calendar-day:hover:not(.wx-calendar-out):not(.selected) {
+}
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-calendar-table td.selected,
+:scope .wx-calendar-table td.wx-calendar-day:hover:not(.wx-calendar-out):not(.selected) {
     background: var(--wx-primary, #0d6efd);
     color: var(--wx-light, #fff);
 }
-[data-bs-theme="dark"] .wx-calendar-table td:first-child {
+}
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-calendar-table td:first-child {
     background: var(--wx-secondary-bg, #23262b);
     color: var(--wx-info, #0dcaf0);
 }
-
-[data-bs-theme="dark"] .wx-calendar-toolbar .btn {
-    background: var(--bs-body, var(--wx-dark, #212529));
-    color: var(--wx-body-color, var(--wx-white, #fff));
 }
 
-[data-bs-theme="dark"] .wx-calendar-toolbar .btn:hover,
-[data-bs-theme="dark"] .wx-calendar-toolbar .btn:focus {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-calendar-toolbar .btn {
+    background: var(--wx-body, var(--wx-dark, #212529));
+    color: var(--wx-body-color, var(--wx-white, #fff));
+}
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-calendar-toolbar .btn:hover,
+:scope .wx-calendar-toolbar .btn:focus {
     background: var(--wx-secondary-bg, #424649);
+}
 }

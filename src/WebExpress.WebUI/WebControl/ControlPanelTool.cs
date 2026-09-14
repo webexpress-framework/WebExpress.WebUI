@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -41,9 +41,9 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("toolpanel", GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
-                Role = role,
-                DataTheme = Theme?.Invoke(renderContext).ToValue()
+                Role = role
             };
+            html.AddUserAttribute("data-wx-theme", Theme?.Invoke(renderContext).ToValue());
 
             return html;
         }

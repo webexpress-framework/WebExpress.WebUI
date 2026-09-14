@@ -993,7 +993,7 @@ webexpress.webui.FilterRegistry = new class {
 /**
  * Central singleton that tracks the current color scheme (light or dark),
  * persists it to a cookie, applies it to the root element via
- * <c>data-bs-theme</c>, and notifies observers via
+ * <c>data-wx-theme</c>, and notifies observers via
  * <c>webexpress.webui.Event.CHANGE_DARKMODE_EVENT</c>.
  */
 webexpress.webui.DarkMode = new class {
@@ -1052,16 +1052,16 @@ webexpress.webui.DarkMode = new class {
         if (fromCookie === "dark" || fromCookie === "light") {
             return fromCookie;
         }
-        const attr = document.documentElement.getAttribute("data-bs-theme");
+        const attr = document.documentElement.getAttribute("data-wx-theme");
         return attr === "dark" ? "dark" : "light";
     }
 
     /**
-     * Applies the given mode to the root element's <c>data-bs-theme</c>.
+     * Applies the given mode to the root element's <c>data-wx-theme</c>.
      * @param {"light"|"dark"} mode - The mode to apply.
      */
     _apply(mode) {
-        document.documentElement.setAttribute("data-bs-theme", mode);
+        document.documentElement.setAttribute("data-wx-theme", mode);
     }
 
     /**
@@ -2200,143 +2200,90 @@ webexpress.webui.Ctrl = class {
 }
 
 /**
- * Base class for popper Controls.
+ * Connects top-layer menus to their invokers while CSS owns all placement decisions.
  */
-webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
-    /**
-     * Initializes Popper.js for managing the menu box positioning.
-     * @param {HTMLElement} container - The container element (searchBox) to position the suggestion box relative to.
-     * @param {HTMLElement} dropdownmenu - The menu box element (as HTMLElement, not jQuery).
-     */
-    _initializePopper(container, dropdownmenu) {
-        // map to track the visibility state of each menu
-        this._menuVisibilityMap = this._menuVisibilityMap || new Map();
-
-        // popper.js instance for positioning. the menu is a child of the control, so an
-        // absolutely positioned one is painted inside whatever scroll box the control sits
-        // in and gets clipped by it - a scrollable modal body cuts the menu off at the
-        // dialog edge. a fixed menu is laid out against the viewport instead and escapes
-        // that clip, as long as no ancestor establishes a containing block for it (bootstrap
-        // clears the dialog's transform once the modal is shown, so it does not).
-        const popperInstance = Popper.createPopper(container, dropdownmenu, {
-            placement: "bottom-start",
-            strategy: "fixed",
-            modifiers: [
-                {
-                    name: "offset",
-                    options: {
-                        offset: [0, 4], // offset the suggestion box slightly
-                    },
-                },
-                {
-                    name: "preventOverflow",
-                    options: {
-                        boundary: "viewport", // ensure the suggestion box stays within the viewport
-                    },
-                },
-            ],
-        });
-
-        // keep the instance reachable per menu. popper measures when it is told to,
-        // and the first measurement happens while the menu is still display:none -
-        // an element without a box and without an offset parent. a control that
-        // opens its menu itself has to ask for the position again afterwards.
-        this._popperInstances = this._popperInstances || new Map();
-        this._popperInstances.set(dropdownmenu, popperInstance);
-
-        // hide the suggestion box when clicking outside of it
-        document.addEventListener("click", (event) => {
-            if (!this._element.contains(event.target)) {
-                if (this._menuVisibilityMap.get(dropdownmenu)) {
-                    this._menuVisibilityMap.delete(dropdownmenu);
-                    // trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
-                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                        detail: {
-                            sender: this._element,
-                            id: this._element.id
-                        }
-                    }));
-                }
-                // hide menu
-                dropdownmenu.style.display = "none";
-            }
-        });
-
-        // register the ESC key to close the suggestion menu
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape") {
-                dropdownmenu.style.display = "none";
-                if (this._menuVisibilityMap.get(dropdownmenu)) {
-                    this._menuVisibilityMap.delete(dropdownmenu);
-                    // trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
-                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                        detail: {
-                            sender: this._element,
-                            id: this._element.id
-                        }
-                    }));
-                }
-            }
-        });
-
-        // show and hide methods for the dropdownmenu (simulate .on('show')/.on('hide'))
-        dropdownmenu.show = () => {
-            dropdownmenu.style.display = "flex";
-            // set width to match the element, if needed
-            dropdownmenu.style.width = this._element.offsetWidth + "px";
-            popperInstance.update();
-            this._menuVisibilityMap.set(dropdownmenu, true);
-            // trigger show event
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id
-                }
-            }));
-        };
-        dropdownmenu.hide = () => {
-            dropdownmenu.style.display = "none";
-            if (this._menuVisibilityMap.get(dropdownmenu)) {
-                this._menuVisibilityMap.delete(dropdownmenu);
-                document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                    detail: {
-                        sender: this._element,
-                        id: this._element.id
-                    }
-                }));
-            }
-        };
-
-        // listen for custom 'show' and 'hide' events
-        dropdownmenu.addEventListener("show", () => {
-            dropdownmenu.show();
-        });
-        dropdownmenu.addEventListener("hide", () => {
-            dropdownmenu.hide();
-        });
-    }
+webexpress.webui.NativeMenu = class {
+    static _nextId = 0;
+    static _sources = new WeakMap();
 
     /**
-     * Re-measures an open menu against the control it belongs to. A control that
-     * opens its menu by making it visible - rather than through the show() helper
-     * this class installs - has to call this once the menu is on screen and its
-     * content is in place, because the position popper computed while the menu was
-     * still hidden refers to an element that had neither a box nor an offset
-     * parent, and would place the menu far from its control.
-     * @param {HTMLElement} dropdownmenu - The menu to reposition.
+     * Gives each menu an independent anchor, including menus nested inside dialogs.
      */
-    _repositionMenu(dropdownmenu) {
-        const instance = this._popperInstances?.get(dropdownmenu);
-
-        if (!instance) {
-            return;
+    static bind(anchor, menu, invoker = anchor) {
+        this._sources.set(menu, invoker || anchor);
+        const id = "wx-menu-" + (++this._nextId);
+        menu.id ||= id;
+        menu.setAttribute("popover", "auto");
+        menu.classList.add("wx-native-menu");
+        const anchors = anchor.style.getPropertyValue("anchor-name");
+        anchor.style.setProperty("anchor-name", [anchors, "--" + id].filter(Boolean).join(", "));
+        menu.style.setProperty("position-anchor", "--" + id);
+        if (invoker?.tagName === "BUTTON") {
+            invoker.type = "button";
+            invoker.setAttribute("popovertarget", menu.id);
+            if (invoker.classList.contains("dropdown-toggle") && !invoker.querySelector(".wx-dropdown-caret")) {
+                const caret = document.createElement("i");
+                caret.className = webexpress.webui.IconSet.resolve("angle-down") + " wx-dropdown-caret";
+                invoker.appendChild(caret);
+            }
         }
-
-        // the menu spans its control, whose width is only known once laid out
-        dropdownmenu.style.width = this._element.offsetWidth + "px";
-        instance.update();
+        menu.addEventListener("click", (event) => {
+            const item = event.target.closest(".dropdown-item");
+            if (item && !item.classList.contains("disabled") && !menu.hasAttribute("data-wx-keep-open")) {
+                this.hide(menu);
+            }
+        });
+        // keyboard navigation belongs to the menu; dismissal and focus restoration belong to the browser
+        const navigate = (event) => {
+            if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) { return; }
+            if (event.defaultPrevented || event.target.matches("input, textarea, select") ||
+                (event.currentTarget === menu && event.target.closest("[popover]") !== menu)) { return; }
+            event.preventDefault();
+            this.show(menu);
+            const items = [...menu.querySelectorAll("button:not(:disabled), a[href], [tabindex]")]
+                .filter(item => !item.hidden && !item.closest("[hidden], .disabled") && item.closest("[popover]") === menu);
+            let index = items.indexOf(document.activeElement);
+            index = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1
+                : (index + (event.key === "ArrowUp" ? -1 : 1) + items.length) % items.length;
+            items[index]?.focus({ preventScroll: true });
+        };
+        invoker?.addEventListener("keydown", navigate);
+        menu.addEventListener("keydown", navigate);
     }
-}
+
+    /**
+     * Typeahead and keyboard interactions can enter the same native menu as its button.
+     */
+    static show(menu) {
+        if (menu.isConnected && !menu.matches(":popover-open")) { menu.showPopover({ source: this._sources.get(menu) }); }
+    }
+
+    /**
+     * Selection commits close only a menu that still owns a top-layer entry.
+     */
+    static hide(menu) {
+        if (menu.matches(":popover-open")) { menu.hidePopover(); }
+    }
+};
+
+/**
+ * Shares native menu lifecycle notifications with selection and suggestion controls.
+ */
+webexpress.webui.MenuCtrl = class extends webexpress.webui.Ctrl {
+    /**
+     * Keeps component events in sync with native light dismissal and Escape.
+     */
+    _initializeMenu(anchor, menu, invoker = anchor) {
+        webexpress.webui.NativeMenu.bind(anchor, menu, invoker);
+        menu.setAttribute("data-wx-keep-open", "");
+        menu.classList.add("wx-native-menu-field");
+        menu.addEventListener("beforetoggle", (event) => {
+            if (event.target !== menu) { return; }
+            this._dispatch(event.newState === "open" ? webexpress.webui.Event.DROPDOWN_SHOW_EVENT
+                : webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
+        });
+    }
+};
 
 /**
  * A utility class for defining and managing event names within the WebExpress UI framework.

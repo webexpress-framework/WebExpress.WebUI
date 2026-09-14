@@ -47,7 +47,7 @@ webexpress.webui.PanelDismissibleCtrl = class extends webexpress.webui.Ctrl {
 
         ["data-title", "data-initial-hidden", "data-dismiss-aria"].forEach((attr) => element.removeAttribute(attr));
 
-        // Bootstrap's "fade" + "show" combo drives the opacity transition the
+        // WebExpress's "fade" + "show" combo drives the opacity transition the
         // alert close button uses, so dismissing the panel fades out and
         // re-showing fades back in.
         element.classList.add("wx-panel-dismissible", "fade");
@@ -108,7 +108,7 @@ webexpress.webui.PanelDismissibleCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Apply the current visibility to the DOM and optionally fire an event.
      *
-     * Uses the same fade pattern Bootstrap's alert / toast components rely on:
+     * Uses the same fade pattern WebExpress's alert / toast components rely on:
      * the host carries the .fade class permanently; toggling .show drives the
      * opacity transition; .d-none is only added once the transition finishes
      * so the fade-out is actually visible before the element is taken out of
@@ -204,7 +204,7 @@ webexpress.webui.PanelDismissibleCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Reads the host element's effective transition duration in milliseconds.
-     * Falls back to 150ms (Bootstrap's .fade default) when nothing is set.
+     * Falls back to 150ms (WebExpress's .fade default) when nothing is set.
      * @returns {number} Duration in milliseconds.
      */
     _readFadeDuration() {
@@ -231,7 +231,7 @@ webexpress.webui.PanelDismissibleCtrl = class extends webexpress.webui.Ctrl {
         this._title.textContent = titleText;
         header.appendChild(this._title);
 
-        // Re-use wx-button-close - the same hover-to-danger animation Bootstrap
+        // Re-use wx-button-close - the same hover-to-danger animation WebExpress
         // alerts use - and ms-auto pins the button to the right regardless of
         // the title length or any additional header content.
         this._dismissBtn = document.createElement("button");

@@ -79,7 +79,7 @@ function svgTagClass(tagName) {
 
 /**
  * Builds the browser-shaped globals that many controls touch at construction
- * time (window, animation frames, observers, the Popper layout helper). They
+ * time (window, animation frames, observers, native top-layer methods). They
  * are deliberately inert stubs: timers resolve, observers never fire, and the
  * layout helper reports an empty state. The set is opt-in through
  * loadWebUi({ browser: true }) so the lean default runtime stays unchanged.
@@ -180,22 +180,7 @@ function createBrowserGlobals(document) {
         ResizeObserver: class { observe() { } unobserve() { } disconnect() { } },
         IntersectionObserver: class { constructor() { this.root = null; } observe() { } unobserve() { } disconnect() { } takeRecords() { return []; } },
         Event: class { constructor(type, init) { init = init || {}; this.type = type; this.bubbles = !!init.bubbles; this.cancelable = !!init.cancelable; this.defaultPrevented = false; } preventDefault() { this.defaultPrevented = true; } stopPropagation() { } },
-        // a Popper that resolves immediately and reports an empty layout state. the stub
-        // keeps every call in `calls`, because the positioning options are the only part of
-        // popper's behaviour a layout-free dom can be asked about.
-        Popper: {
-            calls: [],
-            createPopper(reference, popper, options) {
-                this.calls.push({ reference, popper, options });
-                return {
-                    update: async () => { },
-                    forceUpdate: () => { },
-                    setOptions: async () => { },
-                    destroy: () => { },
-                    state: { elements: {}, modifiersData: {}, rects: {} }
-                };
-            }
-        }
+
     };
 }
 

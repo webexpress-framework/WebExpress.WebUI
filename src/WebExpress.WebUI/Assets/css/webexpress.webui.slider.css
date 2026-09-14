@@ -17,11 +17,11 @@
  */
 .wx-slider,
 .wx-webui-input-slider {
-    --wx-slider-track-bg: #e9ecef;
+    --wx-slider-track-bg: var(--wx-secondary-bg);
     --wx-slider-band-bg: linear-gradient(90deg, #0d6efd 0%, #6610f2 100%);
-    --wx-slider-handle-bg: #ffffff;
+    --wx-slider-handle-bg: var(--wx-body-bg);
     --wx-slider-handle-bd: #0d6efd;
-    --wx-slider-label-color: #495057;
+    --wx-slider-label-color: var(--wx-body-color);
 
     position: relative;
     padding: 0.75rem 0.75rem 1.75rem 0.75rem;
@@ -148,9 +148,4 @@
     --wx-slider-handle-bd: #ffc107;
 }
 
-/* Dark theme support: invert label color and lighten the track */
-[data-bs-theme="dark"] .wx-slider {
-    --wx-slider-track-bg: #343a40;
-    --wx-slider-label-color: #dee2e6;
-    --wx-slider-handle-bg: #1f2326;
-}
+@media (prefers-reduced-motion: reduce) { .wx-slider .wx-slider-band, .wx-slider .wx-slider-handle { transition: none; } }

@@ -2,7 +2,7 @@
 
 # SidebarCtrl
 
-The `SidebarCtrl` component controls a responsive sidebar for web applications. It uses CSS classes prefixed with `wx-sidebar-` and integrates Popper.js to support overlay panels. The sidebar is flexibly configurable and automatically adapts to the window size, switching between compact and expanded view based on a set breakpoint.
+The `SidebarCtrl` component controls a responsive sidebar for web applications. It uses CSS classes prefixed with `wx-sidebar-` and uses native popovers and CSS anchors for overlay panels. The sidebar is flexibly configurable and automatically adapts to the window size, switching between compact and expanded view based on a set breakpoint.
 
 ```
    normal view
@@ -16,8 +16,8 @@ The `SidebarCtrl` component controls a responsive sidebar for web applications. 
    │                                         │
    │ [footer]                                │<--- Footer
    └─────────────────────────────────────────┘
-   
-   compact view 
+
+   compact view
    ┌──────────┐
    │ [icon]   │<--- Link
    │ [icon]   │
@@ -71,7 +71,7 @@ The SidebarCtrl component parses the child elements, handles rendering and manag
 - **Responsive Display:** The sidebar checks whether the window is smaller than the specified breakpoint and then switches to compact mode. In compact mode, elements with `data-mode="hide"` are hidden, panels with `data-mode="overlay"` can be displayed as overlays when clicked.
 - **Hover Flyout:** While the sidebar is reduced to its rail, moving the pointer over its item area reveals the full content as an offcanvas flyout that floats above the adjacent content and collapses again on mouse-leave. Hovering the footer toolbar does not trigger the flyout; once it is open, moving between the items and the toolbar keeps it open until the pointer leaves the sidebar. Choosing a navigation entry inside the flyout dismisses it. The rail keeps its place in the layout (the element is lifted into a fixed overlay pinned over the rail), so the surrounding content never reflows. The behavior can be disabled via `data-hover-expanded="false"` (`HoverExpanded` in C#).
 - **Active Item Visibility:** After the items are built, the first active item is scrolled into the sidebar's visible area so the current location stays visible. If the active item sits inside a collapsed group, its ancestor groups are expanded first; the scroll is confined to the sidebar so the surrounding page does not move. The behavior can be disabled via `data-scroll-active="false"` (`ScrollActiveIntoView` in C#).
-- **Overlay Panel:** Panels in overlay mode open an overlay window when clicked, positioned using Popper.js. The overlay can be closed by clicking outside or pressing the Escape key.
+- **Overlay Panel:** Panels in overlay mode open an overlay window when clicked, positioned using CSS Anchor Positioning. The overlay can be closed by clicking outside or pressing the Escape key.
 - **Toolbar:** A toolbar at the bottom of the sidebar is automatically detected and integrated.
 - **Removable Elements:** Elements with `data-removeable="true"` receive a button for removal from the sidebar.
 - **Row Height:** The item area scrolls, and nothing in it compresses to make room, so rows of every kind — flat links, group heads and nested tree rows — are equally tall and equally spaced. This has to be stated in css because a link carries `overflow: hidden` for its ellipsis, and an overflow other than `visible` switches off the automatic minimum size that otherwise stops a flex item from shrinking; without it a long list squeezed the plain rows while the groups, which set no overflow, kept their height.

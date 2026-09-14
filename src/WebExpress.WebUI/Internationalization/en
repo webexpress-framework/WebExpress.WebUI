@@ -1,4 +1,4 @@
-﻿# en-US language resource file
+# en-US language resource file
 plugin.name=WebExpress.WebUI
 plugin.description=Provides basic components.
 
@@ -46,3 +46,6 @@ darkmode.text.dark=Activate light mode
 
 masterdetail.empty.title=No item selected
 masterdetail.empty.message=Please select an item from the list.
+
+carousel.previous=Previous slide
+carousel.next=Next slide

@@ -39,26 +39,21 @@
 
 /* Hover effect for the clear button */
 .wx-search > div:nth-child(1) > span:hover {
-    color: var(--wx-secondary); /* Use theme-aware secondary color */
+    color: var(--wx-danger);
 }
 
 /* Styling for the suggestion container */
-.wx-search > div:nth-child(2) {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
+.wx-search > div:nth-child(2) {    width: 100%;
     max-height: 200px;
     overflow-y: auto;
     background-color: var(--wx-body-bg); /* Use theme-aware background color */
-    border: var(--bs-border-width) solid var(--wx-border-color); /* Use theme-aware border color */
-    border-radius: var(--bs-border-radius); /* Use theme-aware border radius */
+    border: var(--wx-border-width) solid var(--wx-border-color); /* Use theme-aware border color */
+    border-radius: var(--wx-border-radius); /* Use theme-aware border radius */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slight shadow for better visibility */
     list-style: none;
     z-index: 1000;
     padding: 0;
     resize: both;
-    display: none;
     flex-direction: column;
     height: 25em;
 }
@@ -116,6 +111,11 @@
     padding: 0.2em;
 }
 
-[data-bs-theme=dark] .wx-search > div:nth-child(2) > footer {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-search > div:nth-child(2) > footer {
     background-color: var(--wx-secondary-bg);
 }
+}
+
+.wx-search-clear { border: 0; background: transparent; padding: 0; color: var(--wx-secondary-color); }
+.wx-search-clear:hover, .wx-search-clear:focus-visible { color: var(--wx-danger); }

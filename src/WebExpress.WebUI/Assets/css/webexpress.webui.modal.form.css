@@ -1,7 +1,7 @@
 .wx-modalform {
 }
 
-.wx-modalform > .modal-dialog > form {
+.wx-modalform > form {
     background-color: transparent !important;
     border: none !important;
     margin: 0 !important;
@@ -94,9 +94,9 @@
 .modal-header > .modal-title .wx-modal-title-input:not(.form-control) > :not(.form-control) {
     flex: 0 0 auto;
     margin: 0 0 0 0.5rem;
-    font-size: var(--bs-body-font-size, 1rem);
-    font-weight: var(--bs-body-font-weight, 400);
-    line-height: var(--bs-body-line-height, 1.5);
+    font-size: var(--wx-body-font-size, 1rem);
+    font-weight: var(--wx-body-font-weight, 400);
+    line-height: var(--wx-body-line-height, 1.5);
     white-space: nowrap;
 }
 
@@ -109,13 +109,13 @@
    validity colours, so they are restated here for the title case; the glyph the framework
    paints into the padding is left out, because the control already says it beside the input. */
 .modal-header > .modal-title .wx-modal-title-input:not(.form-control) > .form-control.is-invalid {
-    border-color: var(--wx-form-invalid-border-color, var(--bs-form-invalid-border-color, #dc3545));
+    border-color: var(--wx-form-invalid-border-color, var(--wx-form-invalid-border-color, #dc3545));
     background-image: none;
     padding-right: 0.5rem;
 }
 
 .modal-header > .modal-title .wx-modal-title-input:not(.form-control) > .form-control.is-valid {
-    border-color: var(--wx-form-valid-border-color, var(--bs-form-valid-border-color, #198754));
+    border-color: var(--wx-form-valid-border-color, var(--wx-form-valid-border-color, #198754));
     background-image: none;
     padding-right: 0.5rem;
 }

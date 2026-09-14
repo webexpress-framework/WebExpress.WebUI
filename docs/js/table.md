@@ -42,7 +42,7 @@ Wenn du möchtest, kann ich es noch technischer, kürzer oder stärker an API‑
 
 | Attribute            | Description
 |----------------------|----------------------------------------
-| `data-color`         | Sets table color scheme (Bootstrap etc.)
+| `data-color`         | Sets table color scheme using the framework theme
 | `data-border`        | Adds border style
 | `data-striped`       | Enables zebra striping for rows
 
@@ -175,7 +175,7 @@ In addition to its interactive features, the table control component can be furt
 | `data-allow-column-remove`   | allows columns to be hidden via modal
 | `data-columns-modal-key`     | links modal to external DialogPanel
 
-## Events 
+## Events
 
 In addition to the core event set, the table control component emits several extended events that capture user-driven structural changes—such as reordering columns, toggling visibility, or rearranging rows—while still supporting all base interaction events.
 

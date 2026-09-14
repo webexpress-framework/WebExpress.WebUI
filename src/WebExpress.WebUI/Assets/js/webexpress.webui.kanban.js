@@ -439,7 +439,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             laneWrapper.className = "wx-kanban-swimlane";
 
             // setup section parameters if swimlanes are configured. the header label
-            // deliberately opts out of the bootstrap text-primary default, whose !important
+            // deliberately opts out of the WebExpress text-primary default, whose !important
             // would beat the inline accent color of a colored lane. a lane name is a name, so
             // it keeps its spelling instead of taking the upper case of a structural label, and
             // the board owns the collapsed state, so the section does not remember one of its
@@ -1772,7 +1772,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             cardEl.setAttribute("aria-selected", "true");
         }
 
-        // map bootstrap colors to hex for the top border highlight
+        // map WebExpress colors to hex for the top border highlight
         const colorCss = card.colorCss || "";
         let colorHex = "transparent";
 

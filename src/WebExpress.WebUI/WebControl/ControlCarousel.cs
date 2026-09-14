@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+using WebExpress.WebCore.Internationalization;
+using System.Collections.Generic;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -85,15 +86,16 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlCarouselItem> items)
         {
-            // indicators 
+            // indicators
             var indicators = new HtmlElementTextContentDiv() { Class = "carousel-indicators" };
             var index = 0;
 
-            foreach (var v in Items)
+            foreach (var v in items)
             {
-                var i = new HtmlElementTextContentDiv() { Class = index == 0 ? "active" : string.Empty };
-                i.AddUserAttribute("data-bs-target", "#" + Id);
-                i.AddUserAttribute("data-bs-slide-to", index.ToString());
+                var i = new HtmlElementFieldButton() { Type = "button", Class = index == 0 ? "active" : string.Empty };
+                i.AddUserAttribute("aria-label", (index + 1).ToString());
+                i.AddUserAttribute("data-wx-target", "#" + Id);
+                i.AddUserAttribute("data-wx-slide-to", index.ToString());
 
                 indicators.Add(i);
 
@@ -104,7 +106,7 @@ namespace WebExpress.WebUI.WebControl
 
             // items
             var inner = new HtmlElementTextContentDiv() { Class = "carousel-inner" };
-            foreach (var v in Items)
+            foreach (var v in items)
             {
                 var control = v?.Control?.Invoke(renderContext);
                 var headline = v?.Headline?.Invoke(renderContext);
@@ -135,19 +137,21 @@ namespace WebExpress.WebUI.WebControl
             }
 
             // navigation
-            var navLeft = new HtmlElementTextSemanticsA(new HtmlElementTextSemanticsSpan() { Class = "carousel-control-prev-icon" })
+            var navLeft = new HtmlElementFieldButton(new HtmlElementTextSemanticsSpan() { Class = "carousel-control-prev-icon" })
             {
                 Class = "carousel-control-prev",
-                Href = "#" + Id
+                Type = "button"
             };
-            navLeft.AddUserAttribute("data-bs-slide", "prev");
+            navLeft.AddUserAttribute("data-wx-slide", "prev");
+            navLeft.AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:carousel.previous"));
 
-            var navRight = new HtmlElementTextSemanticsA(new HtmlElementTextSemanticsSpan() { Class = "carousel-control-next-icon" })
+            var navRight = new HtmlElementFieldButton(new HtmlElementTextSemanticsSpan() { Class = "carousel-control-next-icon" })
             {
                 Class = "carousel-control-next",
-                Href = "#" + Id
+                Type = "button"
             };
-            navRight.AddUserAttribute("data-bs-slide", "next");
+            navRight.AddUserAttribute("data-wx-slide", "next");
+            navRight.AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:carousel.next"));
 
             var html = new HtmlElementTextContentDiv
             (
@@ -155,11 +159,10 @@ namespace WebExpress.WebUI.WebControl
             )
             {
                 Id = Id,
-                Class = Css.Concatenate("carousel slide", GetClasses(renderContext)),
+                Class = Css.Concatenate("wx-webui-carousel carousel", GetClasses(renderContext)),
                 Style = GetStyles(renderContext)
             };
 
-            html.AddUserAttribute("data-bs-ride", "carousel");
 
             return html;
         }

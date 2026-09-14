@@ -254,11 +254,8 @@
                 modal.ctrl.hide();
             } else {
                 const modalWrapper = state.webUrlInput.closest(".modal");
-                if (modalWrapper && typeof bootstrap !== "undefined") {
-                    const bsModal = bootstrap.Modal.getInstance(modalWrapper);
-                    if (bsModal) {
-                        bsModal.hide();
-                    }
+                if (modalWrapper?.open) {
+                    modalWrapper.close();
                 }
             }
         }
@@ -346,11 +343,8 @@
                     modal.ctrl.hide();
                 } else {
                     const modalWrapper = container.closest(".modal");
-                    if (modalWrapper && typeof bootstrap !== "undefined") {
-                        const bsModal = bootstrap.Modal.getInstance(modalWrapper);
-                        if (bsModal) {
-                            bsModal.hide();
-                        }
+                    if (modalWrapper?.open) {
+                        modalWrapper.close();
                     }
                 }
             };
@@ -554,11 +548,8 @@
                 modal.ctrl.hide();
             } else {
                 const modalWrapper = state.uploadHost ? state.uploadHost.closest(".modal") : null;
-                if (modalWrapper && typeof bootstrap !== "undefined") {
-                    const bsModal = bootstrap.Modal.getInstance(modalWrapper);
-                    if (bsModal) {
-                        bsModal.hide();
-                    }
+                if (modalWrapper?.open) {
+                    modalWrapper.close();
                 }
             }
         }

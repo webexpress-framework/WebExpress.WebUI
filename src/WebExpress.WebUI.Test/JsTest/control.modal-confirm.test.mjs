@@ -1,14 +1,13 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { loadWebUi } from "./harness.mjs";
-import { bootstrapStub, deferred, settle } from "./modal.harness.mjs";
+import { deferred, settle } from "./modal.harness.mjs";
 
 function setup() {
-    const bootstrap = bootstrapStub();
-    const rt = loadWebUi({ browser: true, globals: { bootstrap }, extraFiles: [
+    const rt = loadWebUi({ browser: true, extraFiles: [
         "i18n/en.js", "webexpress.webui.modal.js", "webexpress.webui.modal.confirm.js"
     ] });
-    return { ...rt, bootstrap, modal: new rt.wx.ModalConfirm() };
+    return { ...rt, modal: new rt.wx.ModalConfirm() };
 }
 
 function confirm(modal) {
@@ -27,34 +26,34 @@ test("confirmation treats titles and messages as text and preserves the modal he
 });
 
 test("confirmation waits for async success and ignores duplicate clicks and dismissal while pending", async () => {
-    const { modal, bootstrap } = setup();
+    const { modal } = setup();
     const request = deferred();
     let calls = 0;
     modal.confirmation("Delete?", "Tab A", () => { calls++; return request.promise; });
     modal.show();
     const first = confirm(modal);
     const second = confirm(modal);
-    bootstrap.Modal.getInstance(modal._element).hide();
+    modal._element.dispatchEvent({ type: "cancel" });
     assert.equal(calls, 1);
     assert.equal(modal._confirmButton.disabled, true);
-    assert.equal(bootstrap.Modal.getInstance(modal._element).visible, true);
+    assert.equal(modal._element.open, true);
     request.resolve(true);
     await Promise.all([first, second]);
-    assert.equal(bootstrap.Modal.getInstance(modal._element).visible, false);
+    assert.equal(modal._element.open, false);
 });
 
 test("a failed confirmation stays open with an accessible error and permits retry", async () => {
-    const { modal, bootstrap } = setup();
+    const { modal } = setup();
     let success = false;
     modal.confirmation("Delete?", "Tab A", () => success, { errorMessage: "Deletion failed." });
     modal.show();
     await confirm(modal);
-    assert.equal(bootstrap.Modal.getInstance(modal._element).visible, true);
+    assert.equal(modal._element.open, true);
     assert.equal(modal._bodyDiv.querySelector('[role="alert"]').textContent, "Deletion failed.");
     assert.equal(modal._confirmButton.disabled, false);
     success = true;
     await confirm(modal);
-    assert.equal(bootstrap.Modal.getInstance(modal._element).visible, false);
+    assert.equal(modal._element.open, false);
 });
 
 test("a rejected action releases the confirmation lock and shows the configured error", async () => {
@@ -66,8 +65,8 @@ test("a rejected action releases the confirmation lock and shows the configured 
     assert.equal(modal._bodyDiv.querySelector('[role="alert"]').textContent, "Try again.");
 });
 
-test("reusing a modal retains one Bootstrap instance and emits one hide event per dismissal", () => {
-    const { modal, bootstrap, wx } = setup();
+test("reusing a native dialog retains its host and emits one hide event per dismissal", () => {
+    const { modal, wx } = setup();
     let hidden = 0;
     modal._element.addEventListener(wx.Event.MODAL_HIDE_EVENT, () => hidden++);
     for (let i = 0; i < 3; i++) {
@@ -75,48 +74,34 @@ test("reusing a modal retains one Bootstrap instance and emits one hide event pe
         modal.show();
         modal._cancelButton.click();
     }
-    assert.equal(bootstrap.created.length, 1);
+    assert.equal(modal._element.tagName, "DIALOG");
     assert.equal(hidden, 3);
     modal.show();
-    bootstrap.Modal.getInstance(modal._element).hide();
+    modal._element.dispatchEvent({ type: "cancel" });
     assert.equal(hidden, 4, "Escape also emits the framework hide event");
 });
 
 test("destroying an open confirmation disposes its dialog even during an outstanding action", async () => {
-    const { modal, bootstrap } = setup();
+    const { modal } = setup();
     const request = deferred();
     modal.confirmation("Delete?", "Tab A", () => request.promise);
     modal.show();
     const action = confirm(modal);
-    const instance = bootstrap.Modal.getInstance(modal._element);
     modal.destroy();
-    assert.equal(instance.disposed, true);
+    assert.equal(modal._element.open, false);
     assert.equal(modal._element.parentNode, null);
     request.resolve(true);
     await action;
     await settle();
-    assert.equal(bootstrap.created.length, 1);
+    assert.equal(modal._element.tagName, "DIALOG");
 });
 
-test("opening transitions prevent premature confirmation and allow deferred teardown", async () => {
-    const { modal, bootstrap } = setup();
-    bootstrap.Modal.prototype.show = function () {
-        this.element.dispatchEvent({ type: "show.bs.modal" });
-        this.element.classList.add("show");
-        this.visible = true;
-    };
-    let calls = 0;
-    modal.confirmation("Delete?", "Tab A", () => calls++);
-    modal.show();
-    await confirm(modal);
-    assert.equal(calls, 0);
-    assert.equal(modal._confirmButton.disabled, true);
-    const instance = bootstrap.Modal.getInstance(modal._element);
-    modal.destroy();
-    assert.equal(instance.disposed, false, "Bootstrap still owns an opening transition");
-    modal._element.dispatchEvent({ type: "shown.bs.modal" });
-    assert.equal(instance.disposed, true);
-    assert.equal(modal._element.parentNode, null);
+test("native dialog structure contains the title, body and footer without wrapper divs", () => {
+    const { modal } = setup();
+    assert.equal(modal._headerDiv.parentNode, modal._element);
+    assert.equal(modal._bodyDiv.parentNode, modal._element);
+    assert.equal(modal._footerDiv.parentNode, modal._element);
+    assert.equal(modal._element.querySelector(".modal-dialog, .modal-content"), null);
 });
 
 test("an open confirmation cannot be retargeted to a different destructive action", async () => {
@@ -149,13 +134,13 @@ test("confirmation restores focus to the caller or its surviving fallback", asyn
     assert.deepEqual(focused, [["trigger", true], ["fallback", true]]);
 });
 
-test("leaving fullscreen preserves Bootstrap's scroll lock and handles an unspecified modal size", () => {
+test("leaving fullscreen keeps the native dialog open and handles an unspecified modal size", () => {
     const { modal, document } = setup();
-    document.body.classList.add("modal-open");
+    modal.show();
     modal.toggleFullscreen();
     modal.toggleFullscreen();
-    assert.equal(modal._dialogDiv.classList.contains("modal-fullscreen"), false);
-    assert.equal(modal._dialogDiv.classList.contains(""), false);
-    assert.equal(document.body.classList.contains("modal-open"), true);
+    assert.equal(modal._element.classList.contains("modal-fullscreen"), false);
+    assert.equal(modal._element.classList.contains(""), false);
+    assert.equal(modal._element.open, true);
     assert.equal(modal._fullscreenButton.getAttribute("aria-pressed"), "false");
 });

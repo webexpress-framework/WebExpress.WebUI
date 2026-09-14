@@ -86,13 +86,14 @@
 .wx-smart-edit-editor {
     font-size: 1em;
     padding: 4px 8px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--wx-border-color);
     border-radius: 3px;
     margin-right: 8px;
     margin-left: 0;
     outline: none;
     box-sizing: border-box;
-    background: #fff;
+    background: var(--wx-body-bg);
+    color: var(--wx-body-color);
     display: block;
     width: 100%;
     box-sizing: border-box;
@@ -108,3 +109,8 @@
     background-color: var(--wx-body-bg);
     right: 1em;
 }
+
+.wx-smart-edit .form-buttons > button { background: var(--wx-secondary-bg); color: var(--wx-body-color); padding: 0.35em 0.6em; }
+.wx-smart-edit .form-buttons > button:hover { background: var(--wx-tertiary-bg); }
+.wx-smart-edit .form-buttons .wx-smart-edit-save { color: var(--wx-success-text-emphasis); }
+.wx-smart-edit .form-buttons .wx-smart-edit-cancel { color: var(--wx-danger-text-emphasis); }

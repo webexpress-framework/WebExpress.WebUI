@@ -15,8 +15,10 @@
 
 /* dark theme: the surface follows the body palette, the same way a card does. the token is
    named rather than the declaration repeated, so the two themes cannot drift apart */
-[data-bs-theme="dark"] .wx-group {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-group {
     --wx-group-bg: var(--wx-dark, #212529);
+}
 }
 
 /* a group inside something that already frames it drops its own surface, so the two frames

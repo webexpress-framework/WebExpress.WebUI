@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -31,9 +31,9 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-overflow", GetClasses(renderContext)),
-                Style = GetStyles(renderContext),
-                DataTheme = Theme?.Invoke(renderContext).ToValue()
+                Style = GetStyles(renderContext)
             }
+                .AddUserAttribute("data-wx-theme", Theme?.Invoke(renderContext).ToValue())
                 .Add(Content.Select(x => x.Render(renderContext, visualTree)));
         }
     }

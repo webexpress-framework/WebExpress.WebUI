@@ -6,6 +6,7 @@ using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebPage;
+using WebExpress.WebUI.WebIcon;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -131,14 +132,16 @@ namespace WebExpress.WebUI.WebControl
             primaryAction?.ApplyUserAttributes(button, TypeAction.Primary);
             secondaryAction?.ApplyUserAttributes(button, TypeAction.Secondary);
 
-            var dropdownButton = new HtmlElementTextSemanticsSpan(new HtmlElementTextSemanticsSpan() { Class = "caret" })
+            var menuId = (string.IsNullOrWhiteSpace(Id) ? DeterministicId.Create() : Id) + "_menu";
+            var anchorName = "--wx-menu-" + Guid.NewGuid().ToString("N");
+            var dropdownButton = new HtmlElementFieldButton(new HtmlElementTextSemanticsI() { Class = Css.Concatenate(new IconAngleDown().Class, "wx-dropdown-caret") })
             {
-                Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_btn",
+                Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_toggle",
                 Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(renderContext), "btn-block", margin?.ToClass())),
                 Style = GetStyles(renderContext)
             };
-            dropdownButton.AddUserAttribute("data-bs-toggle", "dropdown");
-            dropdownButton.AddUserAttribute("aria-expanded", "false");
+            dropdownButton.AddUserAttribute("popovertarget", menuId);
+            dropdownButton.AddUserAttribute("type", "button");
 
             var dropdownElements = new HtmlElementTextContentUl
                 (
@@ -155,6 +158,12 @@ namespace WebExpress.WebUI.WebControl
             {
                 Class = horizontalAlignment == TypeHorizontalAlignment.Right ? "dropdown-menu dropdown-menu-right" : "dropdown-menu"
             };
+
+            dropdownElements.Id = menuId;
+            dropdownElements.AddUserAttribute("popover", "auto");
+            dropdownElements.Class = Css.Concatenate(dropdownElements.Class, "wx-native-menu");
+            dropdownButton.Style = (string.IsNullOrWhiteSpace(dropdownButton.Style) ? "" : dropdownButton.Style.TrimEnd(';') + ";") + "anchor-name:" + anchorName;
+            dropdownElements.Style = "position-anchor:" + anchorName;
 
             var html = new HtmlElementTextContentDiv
             (

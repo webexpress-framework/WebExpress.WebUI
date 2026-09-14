@@ -343,3 +343,33 @@ test("wx-webui-quickfilter offers no edit entry without an authored edit action"
     const items = container.querySelectorAll(".dropdown-item");
     assert.equal(items.length, 1, "only the removal is offered");
 });
+
+test("quickfilter options are native popovers and retain a multi-selection across rendering", async () => {
+    const rt = loadQuickfilter();
+    const host = rt.createElement("div");
+    const template = rt.createElement("div");
+    template.id = "states";
+    template.className = "wx-quickfilter-multiselect";
+    template.dataset.text = "States";
+    const option = rt.createElement("span");
+    option.className = "wx-quickfilter-dropdown-option";
+    option.id = "open-state";
+    option.dataset.text = "Open";
+    template.appendChild(option);
+    host.appendChild(template);
+    rt.document.body.appendChild(host);
+    const ctrl = new rt.wx.QuickFilterCtrl(host);
+    const menu = host.querySelector("[popover]");
+    const button = host.querySelector("[popovertarget]");
+    assert.ok(menu);
+    assert.equal(menu.matches(":popover-open"), false);
+    assert.equal(button.getAttribute("popovertarget"), menu.id);
+    menu.showPopover();
+    ctrl.render();
+    await Promise.resolve();
+    assert.equal(host.querySelector("[popover]").matches(":popover-open"), true);
+    host.querySelector("[popover]").hidePopover();
+    ctrl.render();
+    await Promise.resolve();
+    assert.equal(host.querySelector("[popover]").matches(":popover-open"), false);
+});

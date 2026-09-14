@@ -171,7 +171,7 @@ webexpress.webui.DialogPanels.register("table-columns", {
         const initDragAndDrop = () => {
             dragPlaceholder = document.createElement("div");
             dragPlaceholder.className = "wx-col-placeholder";
-            dragPlaceholder.style.cssText = "height: 2px; background: var(--bs-primary, #0d6efd); margin: 2px 0;";
+            dragPlaceholder.style.cssText = "height: 2px; background: var(--wx-primary, #0d6efd); margin: 2px 0;";
 
             const getItems = () => Array.from(listContainer.querySelectorAll(".wx-col-item"));
 

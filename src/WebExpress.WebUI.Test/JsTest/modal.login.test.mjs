@@ -15,7 +15,6 @@
 import { test } from "node:test";
 import assert from "node:assert";
 import { loadWebUi } from "./harness.mjs";
-import { bootstrapStub } from "./modal.harness.mjs";
 
 const FILES = [
     "i18n/en.js",
@@ -29,7 +28,7 @@ const FILES = [
  * @returns {object} The loaded runtime.
  */
 function load() {
-    return loadWebUi({ browser: true, globals: { bootstrap: bootstrapStub() }, extraFiles: FILES });
+    return loadWebUi({ browser: true, extraFiles: FILES });
 }
 
 /**
@@ -39,7 +38,7 @@ function load() {
  * @returns {object} The dialog host and the login host inside it.
  */
 function renderHost(rt, options = {}) {
-    const host = rt.createElement("div");
+    const host = rt.createElement("dialog");
     host.classList.add("wx-webui-modal-login");
 
     const header = rt.createElement("div");
@@ -131,14 +130,14 @@ test("showing the dialog puts the caret into the field to type into", () => {
     const empty = mount(rt);
     empty.ctrl.login._usernameInput.focus = () => focused.push("username");
     empty.ctrl.login._passwordInput.focus = () => focused.push("password");
-    empty.host.dispatchEvent({ type: "shown.bs.modal" });
+    empty.host.dispatchEvent({ type: "webexpress.webui.modal.show" });
 
     assert.deepEqual(focused, ["username"], "without a name the name is typed first");
 
     const known = mount(rt, { username: "WebExpress" });
     known.ctrl.login._usernameInput.focus = () => focused.push("username");
     known.ctrl.login._passwordInput.focus = () => focused.push("password");
-    known.host.dispatchEvent({ type: "shown.bs.modal" });
+    known.host.dispatchEvent({ type: "webexpress.webui.modal.show" });
 
     assert.deepEqual(focused, ["username", "password"], "a known name leaves only the password to type");
     assert.equal(known.ctrl.login._usernameInput.value, "WebExpress", "the prefill reached the field");

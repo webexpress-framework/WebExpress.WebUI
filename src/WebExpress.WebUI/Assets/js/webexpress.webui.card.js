@@ -1,6 +1,6 @@
 /**
  * A card with an optional header, headline, footer and matching header /
- * footer icons. 
+ * footer icons.
  */
 webexpress.webui.CardCtrl = class extends webexpress.webui.Ctrl {
     /**
@@ -56,7 +56,7 @@ webexpress.webui.CardCtrl = class extends webexpress.webui.Ctrl {
         ].forEach((attr) => element.removeAttribute(attr));
 
         // base styling class - paired with webexpress.webui.panel.card.css; the
-        // wx-card namespace keeps the markup independent of Bootstrap's .card.
+        // wx-card namespace keeps the markup independent of WebExpress's .card.
         element.classList.add("wx-card");
 
         this.render();

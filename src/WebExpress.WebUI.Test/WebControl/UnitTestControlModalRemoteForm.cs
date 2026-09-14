@@ -1,4 +1,4 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the remote modal form control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modal-form"" *></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-modal-form"" *></div>")]
+        [InlineData(null, @"<dialog class=""wx-webui-modal-form"" *></dialog>")]
+        [InlineData("id", @"<dialog id=""id"" class=""wx-webui-modal-form"" *></dialog>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -36,9 +36,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the header property of the remote modal form control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modal-form"" data-close-label=""Close"">*</div>")]
-        [InlineData("abc", @"<div class=""wx-webui-modal-form"" *><div class=""wx-modal-header"">abc</div>*</div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-modal-form"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</div>")]
+        [InlineData(null, @"<dialog class=""wx-webui-modal-form"" data-close-label=""Close"">*</dialog>")]
+        [InlineData("abc", @"<dialog class=""wx-webui-modal-form"" *><div class=""wx-modal-header"">abc</div>*</dialog>")]
+        [InlineData("webexpress.webui:plugin.name", @"<dialog class=""wx-webui-modal-form"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</dialog>")]
         public void Header(string header, string expected)
         {
             // arrange
@@ -60,11 +60,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the size property of the remote modal form control.
         /// </summary>
         [Theory]
-        [InlineData(TypeModalSize.Default, @"<div class=""wx-webui-modal-form"" data-close-label=""Close"">*</div>")]
-        [InlineData(TypeModalSize.Small, @"<div class=""wx-webui-modal-form"" data-size=""modal-sm"" *>*</div>")]
-        [InlineData(TypeModalSize.Large, @"<div class=""wx-webui-modal-form"" data-size=""modal-lg"" *>*</div>")]
-        [InlineData(TypeModalSize.ExtraLarge, @"<div class=""wx-webui-modal-form"" data-size=""modal-xl"" *>*</div>")]
-        [InlineData(TypeModalSize.Fullscreen, @"<div class=""wx-webui-modal-form"" data-size=""modal-fullscreen"" *>*</div>")]
+        [InlineData(TypeModalSize.Default, @"<dialog class=""wx-webui-modal-form"" data-close-label=""Close"">*</dialog>")]
+        [InlineData(TypeModalSize.Small, @"<dialog class=""wx-webui-modal-form"" data-size=""modal-sm"" *>*</dialog>")]
+        [InlineData(TypeModalSize.Large, @"<dialog class=""wx-webui-modal-form"" data-size=""modal-lg"" *>*</dialog>")]
+        [InlineData(TypeModalSize.ExtraLarge, @"<dialog class=""wx-webui-modal-form"" data-size=""modal-xl"" *>*</dialog>")]
+        [InlineData(TypeModalSize.Fullscreen, @"<dialog class=""wx-webui-modal-form"" data-size=""modal-fullscreen"" *>*</dialog>")]
         public void Size(TypeModalSize size, string expected)
         {
             // arrange
@@ -86,8 +86,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the uri property of the remote modal form control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modal-form"" *>*</div>")]
-        [InlineData("/webui/abc", @"<div class=""wx-webui-modal-form"" * data-uri=""/webui/abc"">*</div>")]
+        [InlineData(null, @"<dialog class=""wx-webui-modal-form"" *>*</dialog>")]
+        [InlineData("/webui/abc", @"<dialog class=""wx-webui-modal-form"" * data-uri=""/webui/abc"">*</dialog>")]
         public void Uri(string uri, string expected)
         {
             // arrange
@@ -109,8 +109,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the selector property of the remote modal form control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-modal-form"" *>*</div>")]
-        [InlineData("#main", @"<div class=""wx-webui-modal-form"" * data-selector=""#main"">*</div>")]
+        [InlineData(null, @"<dialog class=""wx-webui-modal-form"" *>*</dialog>")]
+        [InlineData("#main", @"<dialog class=""wx-webui-modal-form"" * data-selector=""#main"">*</dialog>")]
         public void Selector(string selector, string expected)
         {
             // arrange

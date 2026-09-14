@@ -65,8 +65,8 @@
 /* Disabled state for buttons */
 .wx-toolbar-button.disabled {
     cursor: not-allowed; /* Prevent interaction */
-    color: var(--bs-btn-disabled-color);
-    opacity: var(--bs-btn-disabled-opacity);
+    color: var(--wx-btn-disabled-color);
+    opacity: var(--wx-btn-disabled-opacity);
 }
 
 /* Active state for buttons */
@@ -97,8 +97,8 @@
 
 .wx-toolbar-dropdown.disabled {
     cursor: not-allowed; /* Prevent interaction */
-    color: var(--bs-btn-disabled-color);
-    opacity: var(--bs-btn-disabled-opacity);
+    color: var(--wx-btn-disabled-color);
+    opacity: var(--wx-btn-disabled-opacity);
 }
 
 .wx-toolbar-dropdown.active {
@@ -200,29 +200,39 @@
 }
 
 /* Support for dark mode */
-[data-bs-theme="dark"] .wx-toolbar {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-toolbar {
     background-color: var(--wx-dark); /* Dark background */
 }
-
-[data-bs-theme="dark"] .wx-toolbar-button,
-[data-bs-theme="dark"] .wx-toolbar-dropdown,
-[data-bs-theme="dark"] .wx-toolbar-combo .form-select,
-[data-bs-theme="dark"] .wx-toolbar-label,
-[data-bs-theme="dark"] label {
-    color: var(--wx-light); 
-    background-color: inherit;
 }
 
-[data-bs-theme="dark"] .wx-toolbar-button.active,
-[data-bs-theme="dark"] .wx-toolbar-dropdown .dropdown-item.active {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-toolbar-button,
+:scope .wx-toolbar-dropdown,
+:scope .wx-toolbar-combo .form-select,
+:scope .wx-toolbar-label,
+:scope label {
+    color: var(--wx-light);
+    background-color: inherit;
+}
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-toolbar-button.active,
+:scope .wx-toolbar-dropdown .dropdown-item.active {
     background-color: var(--wx-light); /* Light background for active items */
     color: var(--wx-dark); /* Dark text color for active items */
 }
-
-[data-bs-theme="dark"] .wx-toolbar-dropdown .dropdown-menu {
-    background-color: var(--wx-dark); /* Dark background for dropdown menu */
 }
 
-[data-bs-theme="dark"] .wx-toolbar-separator {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-toolbar-dropdown .dropdown-menu {
+    background-color: var(--wx-dark); /* Dark background for dropdown menu */
+}
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-toolbar-separator {
     background-color: var(--wx-light); /* Light separator in dark mode */
+}
 }

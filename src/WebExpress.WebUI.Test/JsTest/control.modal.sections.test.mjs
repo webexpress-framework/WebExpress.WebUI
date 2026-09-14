@@ -24,7 +24,7 @@ const FILES = ["webexpress.webui.modal.js"];
  * @returns {object} The host, the controller and the bars it assembled.
  */
 function mount(rt, sections) {
-    const host = rt.createElement("div");
+    const host = rt.createElement("dialog");
     host.classList.add("wx-webui-modal");
 
     for (const section of sections) {
@@ -68,7 +68,7 @@ test("a dialog takes the sections an author wrote as elements", () => {
 
 test("a footer belonging to the content is not the dialog's", () => {
     const rt = loadWebUi({ browser: true, extraFiles: FILES });
-    const host = rt.createElement("div");
+    const host = rt.createElement("dialog");
     host.classList.add("wx-webui-modal");
 
     const content = rt.createElement("div");
@@ -91,7 +91,7 @@ test("a footer belonging to the content is not the dialog's", () => {
 
 test("a dialog nested in the content keeps its own bars", () => {
     const rt = loadWebUi({ browser: true, extraFiles: FILES });
-    const host = rt.createElement("div");
+    const host = rt.createElement("dialog");
     host.classList.add("wx-webui-modal");
 
     const content = rt.createElement("div");
@@ -99,7 +99,7 @@ test("a dialog nested in the content keeps its own bars", () => {
 
     // a form carrying a whole dialog of its own - the document editor is one - must not be
     // dismantled to build the dialog around it
-    const nested = rt.createElement("div");
+    const nested = rt.createElement("dialog");
     nested.classList.add("wx-webui-modal");
 
     const nestedTitle = rt.createElement("div");

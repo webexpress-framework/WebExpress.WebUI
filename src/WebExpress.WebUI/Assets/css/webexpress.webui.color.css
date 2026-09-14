@@ -51,7 +51,6 @@
 }
 
 .wx-color-input button:hover {
-    transform: scale(1.15);
     z-index: 2;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     position: relative;
@@ -82,7 +81,6 @@
 }
 
 .wx-color-input .wx-color-custom-btn:hover {
-    transform: scale(1.15);
     z-index: 2;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     position: relative;

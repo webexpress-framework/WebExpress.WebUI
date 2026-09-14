@@ -10,24 +10,20 @@
 }
 
 .wx-button-close {
-    padding: calc(var(--bs-modal-header-padding-y) * .5) calc(var(--bs-modal-header-padding-x) * .5);
-    margin-top: calc(-.5 * var(--bs-modal-header-padding-y));
-    margin-right: calc(-.5 * var(--bs-modal-header-padding-x));
-    margin-bottom: calc(-.5 * var(--bs-modal-header-padding-y));
-    margin-left: auto;
-    color: var(--wx-secondary);
+    display: inline-flex; align-items: center; justify-content: center;
+    flex: 0 0 auto; padding: 0.25rem; margin: 0 0 0 auto;
+    border: 0; background: transparent; color: var(--wx-secondary-color);
+    line-height: 1;
 }
-
-.wx-button-close:hover {
-    color: var(--wx-danger);
-    outline: none;
+.wx-button-close:hover, .wx-button-close:focus-visible {
+    color: var(--wx-danger); background: transparent; border-color: transparent;
 }
 
 .wx-button-fullscreen {
-    padding: calc(var(--bs-modal-header-padding-y) * .5) calc(var(--bs-modal-header-padding-x) * .5);
-    margin-top: calc(-.5 * var(--bs-modal-header-padding-y));
-    margin-right: calc(-.5 * var(--bs-modal-header-padding-x));
-    margin-bottom: calc(-.5 * var(--bs-modal-header-padding-y));
+    padding: calc(var(--wx-modal-header-padding-y) * .5) calc(var(--wx-modal-header-padding-x) * .5);
+    margin-top: calc(-.5 * var(--wx-modal-header-padding-y));
+    margin-right: calc(-.5 * var(--wx-modal-header-padding-x));
+    margin-bottom: calc(-.5 * var(--wx-modal-header-padding-y));
     margin-left: auto;
     color: var(--wx-secondary);
 }

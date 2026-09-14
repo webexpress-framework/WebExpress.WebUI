@@ -3,7 +3,7 @@
  * Supports items marked with data-overflow="never" (never move), data-overflow="force" (always in overflow) and data-overflow="hide" (hide in overflow).
  * Overflow logic can be enabled/disabled via setAutoDistribute(boolean).
  */
-webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
+webexpress.webui.OverflowCtrl = class extends webexpress.webui.MenuCtrl {
     /**
      * creates a new overflow controller instance
      * @param {HTMLElement} element root horizontal container
@@ -16,7 +16,6 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         this._idSeq = 0;
         this._resizeObserver = null;
         this._openSubmenus = new Set();
-        this._submenuPopper = null;
 
         // configuration flags
         this._cutoffEnabled = (this._element.dataset.overflowCutoff || "").toLowerCase() === "true";
@@ -37,7 +36,6 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             this._distribute();
         }
         this._setupResizeHandling();
-        this._setupGlobalListeners();
     }
 
     /**
@@ -70,9 +68,6 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             // only distribute if autoDistribute is enabled
             if (this._autoDistribute) {
                 this.reflow();
-                if (this._submenuPopper) {
-                    this._submenuPopper.update();
-                }
             }
         }, 80);
 
@@ -98,8 +93,8 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         this._restoreVisibleBaseline();
         this._growIfSpace();
         // ensure more button and menu are at the end
-        this._element.appendChild(this._moreButton);
-        this._element.appendChild(this._menu);
+        if (this._element.lastElementChild !== this._menu) { this._element.appendChild(this._menu); }
+        if (this._moreButton.nextElementSibling !== this._menu) { this._element.insertBefore(this._moreButton, this._menu); }
         // restoring empties the menu (only force items stay), so keep the trigger
         // in sync: a leftover more button over an empty menu must be hidden
         this._syncMoreButtonVisibility();
@@ -160,7 +155,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
                 }
                 const dropdownButton = el.querySelector("button, .btn, .dropdown-toggle");
                 if (dropdownButton) {
-                    buttonContentNodes = Array.from(dropdownButton.childNodes).map(function(n) { return n.cloneNode(true); });
+                    buttonContentNodes = Array.from(dropdownButton.childNodes).filter(n => !n.classList?.contains("wx-dropdown-caret")).map(function(n) { return n.cloneNode(true); });
                 }
             }
 
@@ -189,6 +184,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         this._moreButton = document.createElement("button");
         this._moreButton.type = "button";
         this._moreButton.className = "btn wx-overflow-more";
+        this._moreButton.setAttribute("aria-label", this._element.dataset.moreLabel || this._i18n("webexpress.webui:overflow.more"));
         this._moreButton.setAttribute("aria-haspopup", "true");
         this._moreButton.setAttribute("aria-expanded", "false");
 
@@ -197,23 +193,19 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             this._moreButton.textContent = label;
         } else {
             const icon = document.createElement("i");
-            icon.className = this._iconClass("chevron-down");
+            icon.className = this._iconClass("angle-down");
             this._moreButton.appendChild(icon);
         }
 
         this._menu = document.createElement("div");
         this._menu.className = "wx-overflow-menu";
         this._menu.setAttribute("role", "menu");
-        this._menu.style.display = "none";
+        webexpress.webui.NativeMenu.hide(this._menu);
 
-        this._moreButton.addEventListener("click", (event) => {
-            const button = event.currentTarget;
-            const expanded = button.getAttribute("aria-expanded") === "true";
-            if (expanded) {
-                this._hideMenu();
-            } else {
-                this._showMenu();
-            }
+        this._menu.addEventListener("beforetoggle", (event) => {
+            if (event.target !== this._menu) { return; }
+            if (event.newState === "closed") { this._closeAllSubmenus(); }
+            this._moreButton.setAttribute("aria-expanded", event.newState === "open" ? "true" : "false");
         });
 
         this._moreButton.addEventListener("keydown", (e) => {
@@ -229,53 +221,9 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             }
         });
 
-        this._menu.addEventListener("keydown", (e) => {
-            if (e.key === "Escape") {
-                if (this._closeTopSubmenu()) {
-                    e.preventDefault();
-                    return;
-                }
-                this._hideMenu(true);
-                this._moreButton.focus();
-            }
-        });
-
-        this._element.appendChild(this._moreButton);
-        document.body.appendChild(this._menu);
-        this._initializePopper(this._moreButton, this._menu);
-    }
-
-    /**
-     * sets up global listeners for outside click and escape
-     */
-    _setupGlobalListeners() {
-        const self = this;
-        document.addEventListener("click", function(e) {
-            if (!self._element.contains(e.target)) {
-                self._closeAllSubmenus();
-                self._hideMenu(true);
-                return;
-            }
-            const inMainMenu = self._menu.contains(e.target);
-            const inSubmenuPanel = !!self._element.querySelector(".wx-overflow-subpanel") &&
-                Array.from(self._element.querySelectorAll(".wx-overflow-subpanel")).some(function(p) { return p.contains(e.target); });
-            const isMoreButton = self._moreButton.contains(e.target);
-
-            // check if click is inside a custom element that might be in overflow or main bar
-            // and has its own dropdown logic (prevent closing the main overflow menu if interacting with custom item internals)
-            const targetEl = e.target;
-            const isInsideCustom = targetEl.closest(".wx-toolpanel, .wx-toolbar-custom");
-
-            if (!inMainMenu && !inSubmenuPanel && !isMoreButton && !isInsideCustom) {
-                self._closeAllSubmenus();
-            }
-        });
-        document.addEventListener("keydown", function(e) {
-            if (e.key === "Escape") {
-                self._closeAllSubmenus();
-                self._hideMenu(true);
-            }
-        });
+        if (this._element.lastElementChild !== this._menu) { this._element.appendChild(this._menu); }
+        if (this._moreButton.nextElementSibling !== this._menu) { this._element.insertBefore(this._moreButton, this._menu); }
+        this._initializeMenu(this._moreButton, this._menu);
     }
 
     /**
@@ -283,12 +231,10 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      * @param {Function} cb callback
      */
     _showMenu(cb) {
-        this._menu.style.display = "flex";
+        webexpress.webui.NativeMenu.show(this._menu);
         this._menu.style.flexDirection = "column";
         this._moreButton.setAttribute("aria-expanded", "true");
-        if (this._menu.show) {
-            this._menu.show();
-        }
+
         if (typeof cb === "function") {
             requestAnimationFrame(cb);
         }
@@ -300,11 +246,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      */
     _hideMenu(suppressFocus) {
         this._moreButton.setAttribute("aria-expanded", "false");
-        if (this._menu.hide) {
-            this._menu.hide();
-        } else {
-            this._menu.style.display = "none";
-        }
+        webexpress.webui.NativeMenu.hide(this._menu);
         this._closeAllSubmenus();
         if (!suppressFocus) {
             this._moreButton.focus();
@@ -369,8 +311,8 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         }
         this._shrinkUntilFit();
         this._growIfSpace();
-        this._element.appendChild(this._moreButton);
-        this._element.appendChild(this._menu);
+        if (this._element.lastElementChild !== this._menu) { this._element.appendChild(this._menu); }
+        if (this._moreButton.nextElementSibling !== this._menu) { this._element.insertBefore(this._moreButton, this._menu); }
         this._syncMoreButtonVisibility();
     }
 
@@ -609,23 +551,21 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
 
             const button = document.createElement("button");
             button.type = "button";
-            button.className = "btn";
+            button.className = "btn wx-overflow-submenu-trigger";
             button.setAttribute("aria-haspopup", "true");
             button.setAttribute("aria-expanded", "false");
             button.dataset.itemId = item.id;
 
             const icon = document.createElement("i");
-            icon.className = this._iconClass("chevron-right");
+            icon.className = this._iconClass("angle-down");
+            icon.style.transform = "rotate(-90deg)";
             button.appendChild(icon);
 
-            // event listeners for submenu
-             label.addEventListener("click", (e) => { this._openSubmenu(item, button); });
-            button.addEventListener("click", (e) => { this._openSubmenu(item, button); });
-
-            triggerRow.appendChild(label);
+            button.prepend(label);
             triggerRow.appendChild(button);
             wrapper.appendChild(triggerRow);
             this._insertOverflowOrdered(wrapper, item.index);
+            this._createSubmenu(item, button);
             item.inOverflowAsTrigger = true;
 
         } else {
@@ -644,7 +584,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
                 fallbackText = el.getAttribute("title") ||
                                el.getAttribute("aria-label") ||
                                el.dataset.label ||
-                               el.dataset.originalTitle; // bootstrap tooltips sometimes move title here
+                               el.dataset.originalTitle; // WebExpress tooltips sometimes move title here
             }
 
             // move the element
@@ -653,7 +593,7 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             if (fallbackText) {
                 // create a label specifically for the overflow view
                 const textSpan = document.createElement("span");
-                textSpan.className = "wx-overflow-fallback-label ms-2"; // add margin-start
+                textSpan.className = "wx-overflow-fallback-label";
                 textSpan.textContent = fallbackText;
 
                 wrapper2.appendChild(textSpan);
@@ -834,73 +774,45 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
      * @param {Function} cb callback
      */
     _openSubmenu(item, trigger, cb) {
+        const panel = this._createSubmenu(item, trigger);
+        if (!panel) { return; }
+        webexpress.webui.NativeMenu.show(panel);
+        if (typeof cb === "function") { requestAnimationFrame(cb); }
+    }
+
+    _createSubmenu(item, trigger) {
+        item.submenuInstances = item.submenuInstances.filter(inst => inst.panel.isConnected);
         const existing = item.submenuInstances.find(inst => inst.trigger === trigger);
-        if (existing) {
-            this._closeSubmenu(item, trigger);
-            return;
-        }
-        if (!item.submenu) {
-            return;
-        }
-        this._closeAllSubmenus();
+        if (existing) { return existing.panel; }
+        if (!item.submenu) { return null; }
 
         const panel = document.createElement("div");
         panel.classList.add("wx-overflow-menu", "wx-overflow-subpanel");
-        panel.setAttribute("role", "menu");
-        this._element.appendChild(panel);
-
+        trigger.parentElement.appendChild(panel);
         this._prepareSubmenuPanel(panel, item.submenu);
-
-        panel.addEventListener("click", (evt) => {
-            const target = evt.target.closest(".wx-overflow-menu-item, .dropdown-item, .wx-overflow-menu-item > a, .wx-overflow-menu-item > button");
-            if (target) {
+        item.submenuInstances.push({ trigger, panel });
+        this._initializeMenu(trigger, panel);
+        panel.setAttribute("data-wx-placement", "right");
+        panel.addEventListener("beforetoggle", (event) => {
+            if (event.target !== panel) { return; }
+            const open = event.newState === "open";
+            trigger.setAttribute("aria-expanded", String(open));
+            if (open) { this._openSubmenus.add(panel); }
+            else { this._openSubmenus.delete(panel); }
+        });
+        panel.addEventListener("click", (event) => {
+            if (event.target.closest(".wx-overflow-menu-item, .dropdown-item")) {
                 this._closeSubmenu(item, trigger);
             }
         });
-
-        trigger.setAttribute("aria-expanded", "true");
-        const instance = { trigger, panel };
-        item.submenuInstances.push(instance);
-        this._openSubmenus.add(panel);
-
-        if (!this._submenuPopper) {
-            this._submenuPopper = this._initializePopper(trigger, panel);
-        } else {
-            this._submenuPopper.state.elements.reference = trigger;
-            this._submenuPopper.state.elements.popper = panel;
-            this._submenuPopper.update();
-        }
-
-        if (panel.show) {
-            panel.show();
-        } else {
-            panel.style.display = "flex";
-            panel.style.flexDirection = "column";
-        }
-
-        panel.addEventListener("keydown", (e) => {
-            if (e.key === "Escape" || e.key === "ArrowLeft") {
-                e.preventDefault();
+        panel.addEventListener("keydown", (event) => {
+            if (event.key === "ArrowLeft") {
+                event.preventDefault();
                 this._closeSubmenu(item, trigger);
-                trigger.focus();
-            } else if (e.key === "ArrowDown") {
-                e.preventDefault();
-                this._focusNextInSubmenu(item, trigger, 1);
-            } else if (e.key === "ArrowUp") {
-                e.preventDefault();
-                this._focusNextInSubmenu(item, trigger, -1);
-            } else if (e.key === "Home") {
-                e.preventDefault();
-                this._focusFirstInSubmenu(item);
-            } else if (e.key === "End") {
-                e.preventDefault();
-                this._focusLastInSubmenu(item);
+                trigger.focus({ preventScroll: true });
             }
         });
-
-        if (typeof cb === "function") {
-            requestAnimationFrame(cb);
-        }
+        return panel;
     }
 
     /**
@@ -939,15 +851,14 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
         for (const inst of instances) {
             const { panel, trigger: trig } = inst;
             if (panel && panel.parentElement) {
-                if (panel.hide) {
-                    panel.hide();
+                if (panel.matches(":popover-open")) {
+                    webexpress.webui.NativeMenu.hide(panel);
                 }
-                panel.parentElement.removeChild(panel);
             }
             this._openSubmenus.delete(panel);
             trig.setAttribute("aria-expanded", "false");
         }
-        item.submenuInstances = item.submenuInstances.filter(inst => !instances.includes(inst));
+        item.submenuInstances = item.submenuInstances.filter(inst => inst.panel.isConnected);
     }
 
     /**
@@ -1059,12 +970,9 @@ webexpress.webui.OverflowCtrl = class extends webexpress.webui.PopperCtrl {
             this._resizeObserver.disconnect();
             this._resizeObserver = null;
         }
-        if (this._submenuPopper) {
-            this._submenuPopper.destroy();
-            this._submenuPopper = null;
-        }
         this._hideMenu(true);
         this._closeAllSubmenus();
+        super.destroy();
     }
 };
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using WebExpress.WebUI.WebPage;
 
@@ -19,15 +19,15 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         Func<IRenderControlContext, string> Header { get; }
 
-        /// <summary>  
-        /// Gets or sets the size of the modal dialog.  
-        /// </summary>  
-        /// <value>  
-        /// One of the values of the <see cref="TypeModalSize"/> enumeration, specifying the size of the modal.  
-        /// </value>  
-        /// <remarks>  
-        /// This property allows you to define the size of the modal dialog, such as Default, Small, Large, ExtraLarge, or Fullscreen.  
-        /// </remarks>  
+        /// <summary>
+        /// Gets or sets the size of the modal dialog.
+        /// </summary>
+        /// <value>
+        /// One of the values of the <see cref="TypeModalSize"/> enumeration, specifying the size of the modal.
+        /// </value>
+        /// <remarks>
+        /// This property allows you to define the size of the modal dialog, such as Default, Small, Large, ExtraLarge, or Fullscreen.
+        /// </remarks>
         Func<IRenderControlContext, TypeModalSize> Size { get; }
 
         /// <summary>
@@ -36,7 +36,7 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, string> CloseLabel { get; }
 
         /// <summary>
-        /// Gets or sets whether the modal body is scrollable (renders the bootstrap
+        /// Gets or sets whether the modal body is scrollable (renders the WebExpress
         /// "modal-dialog-scrollable" variant). Defaults to <c>true</c>. Set to <c>false</c>
         /// only when the dialog should grow with its content instead of scrolling; a menu
         /// opened by a control inside the body is positioned against the viewport and is
@@ -44,46 +44,46 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         Func<IRenderControlContext, bool> Scrollable { get; }
 
-        /// <summary> 
+        /// <summary>
         /// Adds one or more controls to the content of the modal.
-        /// </summary> 
-        /// <param name="controls">The controls to add to the modal.</param> 
+        /// </summary>
+        /// <param name="controls">The controls to add to the modal.</param>
         /// <returns>The current instance for method chaining.</returns>
-        /// <remarks> 
-        /// This method allows adding one or multiple controls to the content collection of 
-        /// the modal. It is useful for dynamically constructing the user interface by appending 
-        /// various controls to the panel's content. 
-        /// 
-        /// Example usage: 
-        /// <code> 
-        /// var modal = new ControlModal(); 
+        /// <remarks>
+        /// This method allows adding one or multiple controls to the content collection of
+        /// the modal. It is useful for dynamically constructing the user interface by appending
+        /// various controls to the panel's content.
+        ///
+        /// Example usage:
+        /// <code>
+        /// var modal = new ControlModal();
         /// var text1 = new ControlText { Text = "Save" };
         /// var text2 = new ControlText { Text = "Cancel" };
         /// modal.Add(text1, text2);
-        /// </code> 
-        /// 
+        /// </code>
+        ///
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         IControlModal Add(params IControl[] controls);
 
-        /// <summary> 
+        /// <summary>
         /// Adds one or more controls to the content of the modal.
-        /// </summary> 
-        /// <param name="controls">The controls to add to the modal.</param> 
+        /// </summary>
+        /// <param name="controls">The controls to add to the modal.</param>
         /// <returns>The current instance for method chaining.</returns>
-        /// <remarks> 
-        /// This method allows adding one or multiple controls to the content collection of 
-        /// the modal. It is useful for dynamically constructing the user interface by appending 
-        /// various controls to the panel's content. 
-        /// 
-        /// Example usage: 
-        /// <code> 
-        /// var modal = new ControlModal(); 
+        /// <remarks>
+        /// This method allows adding one or multiple controls to the content collection of
+        /// the modal. It is useful for dynamically constructing the user interface by appending
+        /// various controls to the panel's content.
+        ///
+        /// Example usage:
+        /// <code>
+        /// var modal = new ControlModal();
         /// var text1 = new ControlText { Text = "Save" };
         /// var text2 = new ControlText { Text = "Cancel" };
         /// modal.Add(text1, text2);
-        /// </code> 
-        /// 
+        /// </code>
+        ///
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         IControlModal Add(IEnumerable<IControl> controls);
@@ -94,7 +94,7 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="control">The control to remove from the content.</param>
         /// <returns>The current instance for method chaining.</returns>
         /// <remarks>
-        /// This method allows removing a specific control from the content collection of 
+        /// This method allows removing a specific control from the content collection of
         /// the modal.
         /// </remarks>
         IControlModal Remove(IControl control);

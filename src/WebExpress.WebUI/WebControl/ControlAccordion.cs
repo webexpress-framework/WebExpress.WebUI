@@ -9,7 +9,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Stacks a set of <see cref="ControlAccordionItem"/> sections into a single
     /// accordion. By default only one section is open at a time; the whole
-    /// behavior is driven by the Bootstrap collapse data API.
+    /// behavior is driven by the WebExpress collapse data API.
     /// </summary>
     public class ControlAccordion : Control
     {

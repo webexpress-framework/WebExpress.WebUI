@@ -261,13 +261,13 @@
 
 .wx-editor-table td {
     padding: 0.5rem;
-    background-color: var(--bs-table-bg, #fff);
+    background-color: var(--wx-table-bg, #fff);
     min-height: 1em;
 }
 
 .wx-editor-content [data-wx-table-selected] {
     box-shadow: inset 0 0 0 100vmax rgba(13, 110, 253, 0.2);
-    outline: 2px solid var(--bs-primary, #0d6efd);
+    outline: 2px solid var(--wx-primary, #0d6efd);
     outline-offset: -2px;
 }
 
@@ -379,7 +379,7 @@
 
 /*
    Ensure Modals are ABOVE the fullscreen editor (Z-Index 2000).
-   Bootstrap Modals default to 1055/1060.
+   WebExpress Modals default to 1055/1060.
    We force them and their backdrop higher.
 */
 .wx-addon-modal,
@@ -509,8 +509,10 @@
     color: var(--wx-secondary-color);
 }
 
-[data-bs-theme="dark"] .wx-addon-cat-item:hover {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-addon-cat-item:hover {
     background-color: rgba(255, 255, 255, 0.08);
+}
 }
 
 .wx-editor-shortcut-popup {
@@ -524,13 +526,13 @@
     overflow: hidden;
     font-size: 13px;
 }
- 
+
 .wx-editor-shortcut-search {
     padding: 6px 6px 4px 6px;
     border-bottom: 1px solid var(--wx-border-color);
     background: var(--wx-tertiary-bg);
 }
- 
+
 .wx-editor-shortcut-search input {
     border: none;
     background: transparent;
@@ -538,18 +540,18 @@
     padding: 4px 6px;
     color: var(--wx-body-color);
 }
- 
+
 .wx-editor-shortcut-search input:focus {
     outline: none;
     box-shadow: none;
 }
- 
+
 .wx-editor-shortcut-list {
     overflow-y: auto;
     padding: 4px 0;
     flex: 1;
 }
- 
+
 .wx-editor-shortcut-group {
     font-size: 10px;
     text-transform: uppercase;
@@ -558,7 +560,7 @@
     padding: 8px 12px 4px 12px;
     font-weight: 600;
 }
- 
+
 .wx-editor-shortcut-item {
     display: flex;
     align-items: center;
@@ -572,33 +574,33 @@
     cursor: pointer;
     transition: background-color 0.1s ease;
 }
- 
+
 .wx-editor-shortcut-item:hover,
 .wx-editor-shortcut-item.active {
     background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.05));
 }
- 
+
 .wx-editor-shortcut-item > i {
     width: 18px;
     text-align: center;
     color: var(--wx-secondary-color);
     flex-shrink: 0;
 }
- 
+
 .wx-editor-shortcut-body {
     display: flex;
     flex-direction: column;
     min-width: 0;
     flex: 1;
 }
- 
+
 .wx-editor-shortcut-label {
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
- 
+
 .wx-editor-shortcut-desc {
     font-size: 11px;
     color: var(--wx-secondary-color);
@@ -606,16 +608,16 @@
     text-overflow: ellipsis;
     white-space: nowrap;
 }
- 
+
 .wx-editor-shortcut-empty {
     padding: 16px;
     text-align: center;
     color: var(--wx-secondary-color);
     font-size: 12px;
 }
- 
+
 /* Bubble menu */
- 
+
 .wx-editor-bubble {
     display: none;
     align-items: center;
@@ -625,7 +627,7 @@
     padding: 2px 4px;
     gap: 2px;
 }
- 
+
 .wx-editor-bubble-btn {
     background: transparent;
     border: none;
@@ -641,25 +643,25 @@
     font-size: 12px;
     transition: background-color 0.1s ease;
 }
- 
+
 .wx-editor-bubble-btn:hover {
     background-color: var(--wx-tertiary-bg);
 }
- 
+
 .wx-editor-bubble-btn.active {
     background-color: var(--wx-primary);
     color: #fff;
 }
- 
+
 .wx-editor-bubble-sep {
     width: 1px;
     height: 16px;
     background-color: var(--wx-border-color);
     margin: 0 2px;
 }
- 
+
 /*  Placeholder */
- 
+
 /*
    The placeholder is a real <span class="wx-editor-placeholder"> element
    injected into empty editor blocks by the placeholder plugin. The default
@@ -671,7 +673,7 @@
 .wx-editor-instruction {
     display: none;
 }
- 
+
 /*
    Inside the editor itself we make the placeholder visible and style it as a
    soft, italic hint. `contenteditable="false"` on the span prevents the caret
@@ -691,9 +693,9 @@
     user-select: none;
     -webkit-user-select: none;
 }
- 
+
 /* Mentions */
- 
+
 .wx-mention {
     display: inline-block;
     padding: 0 4px;
@@ -705,34 +707,34 @@
     text-decoration: none;
     cursor: pointer;
 }
- 
+
 .wx-mention:hover {
     background-color: var(--wx-primary);
     color: #fff;
     text-decoration: none;
 }
- 
+
 /* Inline markdown styling */
- 
+
 .wx-editor-content code {
     background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.06));
     padding: 1px 4px;
     border-radius: 3px;
-    font-family: var(--bs-font-monospace, monospace);
+    font-family: var(--wx-font-monospace, monospace);
     font-size: 0.92em;
 }
- 
+
 .wx-editor-content pre {
     background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.06));
     border: 1px solid var(--wx-border-color);
     border-radius: 6px;
     padding: 12px;
     overflow-x: auto;
-    font-family: var(--bs-font-monospace, monospace);
+    font-family: var(--wx-font-monospace, monospace);
     font-size: 0.9em;
     line-height: 1.45;
 }
- 
+
 .wx-editor-content blockquote {
     border-left: 3px solid var(--wx-border-color);
     margin: 8px 0;
@@ -740,7 +742,7 @@
     color: var(--wx-secondary-color);
     font-style: italic;
 }
- 
+
 .wx-editor-content h1,
 .wx-editor-content h2,
 .wx-editor-content h3 {
@@ -748,19 +750,23 @@
     margin-top: 12px;
     margin-bottom: 6px;
 }
- 
+
 /* Dark-mode adjustments */
- 
-[data-bs-theme="dark"] .wx-editor-shortcut-popup,
-[data-bs-theme="dark"] .wx-editor-bubble {
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-editor-shortcut-popup,
+:scope .wx-editor-bubble {
     background: var(--wx-body-bg);
     border-color: var(--wx-border-color);
 }
- 
-[data-bs-theme="dark"] .wx-editor-shortcut-item:hover,
-[data-bs-theme="dark"] .wx-editor-shortcut-item.active,
-[data-bs-theme="dark"] .wx-editor-bubble-btn:hover {
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-editor-shortcut-item:hover,
+:scope .wx-editor-shortcut-item.active,
+:scope .wx-editor-bubble-btn:hover {
     background-color: rgba(255, 255, 255, 0.08);
+}
 }
 
 /* Bubble context flyout */
@@ -833,13 +839,17 @@
     padding: 2px 10px;
 }
 
-[data-bs-theme="dark"] .wx-editor-bubble-menu {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-editor-bubble-menu {
     background: var(--wx-body-bg);
     border-color: var(--wx-border-color);
 }
+}
 
-[data-bs-theme="dark"] .wx-editor-bubble-menu-item:hover {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-editor-bubble-menu-item:hover {
     background-color: rgba(255, 255, 255, 0.08);
+}
 }
 
 /* Emoji picker */
@@ -851,10 +861,10 @@
     overflow: hidden;
 }
 
-/* only lay the picker out (and reveal it) once Bootstrap adds .show; the base
+/* only lay the picker out (and reveal it) once WebExpress adds .show; the base
    rule must NOT set display, otherwise it overrides .dropdown-menu's display:none
    and the picker is permanently visible. */
-.wx-emoji-picker.show {
+.wx-emoji-picker[popover]:popover-open {
     display: flex;
     flex-direction: column;
 }
@@ -982,9 +992,11 @@
     font-size: 12px;
 }
 
-[data-bs-theme="dark"] .wx-emoji-tab:hover,
-[data-bs-theme="dark"] .wx-emoji-btn:hover {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-emoji-tab:hover,
+:scope .wx-emoji-btn:hover {
     background-color: rgba(255, 255, 255, 0.08);
+}
 }
 
 /* Inline date control inserted via the // command */

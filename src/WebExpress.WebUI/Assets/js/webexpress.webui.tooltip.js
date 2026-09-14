@@ -1,32 +1,52 @@
 /**
- * Initializes a Bootstrap tooltip on the host element. The configuration (title,
- * placement) is authored in C# as data-bs-* attributes; this controller only
- * wires the Bootstrap behavior, because Bootstrap — unlike the collapse,
- * offcanvas and dropdown data APIs — does not auto-initialize tooltips.
+ * Presents contextual information in the browser top layer using an independent CSS anchor.
  */
 webexpress.webui.TooltipCtrl = class extends webexpress.webui.Ctrl {
     /**
-     * Constructor.
-     * @param {HTMLElement} element - The DOM element associated with the instance.
+     * Keeps text supplied by the server as text, including titles containing markup.
      */
     constructor(element) {
         super(element);
-
-        if (typeof bootstrap !== "undefined" && bootstrap.Tooltip) {
-            this._tooltip = bootstrap.Tooltip.getOrCreateInstance(element);
+        this._menu = document.createElement("div");
+        this._menu.className = "wx-tooltip";
+        const title = element.getAttribute("data-wx-title") || element.getAttribute("title") || "";
+        const message = element.getAttribute("data-wx-content") || "";
+        this._menu.textContent = title;
+        if (message) {
+            const body = document.createElement("p");
+            body.textContent = message;
+            this._menu.appendChild(body);
+        }
+        element.removeAttribute("title");
+        element.after(this._menu);
+        webexpress.webui.NativeMenu.bind(element, this._menu, null);
+        this._menu.setAttribute("popover", "hint");
+        this._menu.setAttribute("data-wx-placement", element.getAttribute("data-wx-placement") || "top");
+        const triggers = "hover focus";
+        this._show = () => webexpress.webui.NativeMenu.show(this._menu);
+        this._hide = () => webexpress.webui.NativeMenu.hide(this._menu);
+        if (triggers.includes("hover")) {
+            element.addEventListener("pointerenter", this._show);
+            element.addEventListener("pointerleave", this._hide);
+        }
+        if (triggers.includes("focus")) {
+            element.addEventListener("focusin", this._show);
+            element.addEventListener("focusout", this._hide);
         }
     }
 
     /**
-     * Disposes the Bootstrap tooltip when the element is removed.
+     * Releases the generated top-layer entry with its owner.
      */
     destroy() {
-        if (this._tooltip) {
-            this._tooltip.dispose();
-            this._tooltip = null;
-        }
+        this._element.removeEventListener("pointerenter", this._show);
+        this._element.removeEventListener("pointerleave", this._hide);
+        this._element.removeEventListener("focusin", this._show);
+        this._element.removeEventListener("focusout", this._hide);
+        webexpress.webui.NativeMenu.hide(this._menu);
+        this._menu.remove();
+        super.destroy();
     }
 };
 
-// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-tooltip", webexpress.webui.TooltipCtrl);

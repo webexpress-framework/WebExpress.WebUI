@@ -123,13 +123,13 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             // keep the metadata islands as direct children of the form, ahead of
             // the dialog, so the injected form hydrates from them
             islands.forEach(el => this._form.appendChild(el));
-            this._form.appendChild(this._dialogDiv);
+            this._form.append(this._headerDiv, this._bodyDiv, this._footerDiv);
 
             this._element.innerHTML = "";
             this._element.appendChild(this._form);
 
             // bind dismiss buttons
-            this._dialogDiv.querySelectorAll("[data-wx-dismiss='modal']").forEach(button => {
+            this._element.querySelectorAll("[data-wx-dismiss='modal']").forEach(button => {
                 button.addEventListener("click", () => this.hide());
             });
 
@@ -154,7 +154,7 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             this._footerDiv.appendChild(this._cancelButton);
 
             this._element.innerHTML = "";
-            this._element.appendChild(this._dialogDiv);
+            this._element.append(this._headerDiv, this._bodyDiv, this._footerDiv);
 
             return; // content successfully displayed
         }
@@ -169,11 +169,11 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
         this._footerDiv.appendChild(this._cancelButton);
 
         this._element.innerHTML = "";
-        this._element.appendChild(this._dialogDiv);
+        this._element.append(this._headerDiv, this._bodyDiv, this._footerDiv);
     }
 
     /**
-     * Displays validation errors inside a Bootstrap alert with plain paragraph formatting.
+     * Displays validation errors inside a WebExpress alert with plain paragraph formatting.
      * @param {Array<{ code: string, message: string, field: string }>} errors - List of validation error objects.
      */
     showValidationErrors(errors) {

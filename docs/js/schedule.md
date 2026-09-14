@@ -184,7 +184,7 @@ element.addEventListener(webexpress.webui.Event.SELECT_ITEM_EVENT, (e) => {
 
 With `data-mini-calendar` the toolbar carries a date picker that jumps straight to a day instead of stepping through the periods. It is the framework date control (`InputDateCtrl`, `wx-webui-input-date`) rather than a native `<input type="date">`, so it offers the same calendar, the same formats and the same keyboard model as every other date field in the application.
 
-The picker is built **once** and re-attached on every render rather than rebuilt: the date control installs a popper, and recreating it per render would strand one on every navigation. Navigating the schedule moves the picker onto the new period, and that programmatic move is not reported back as a user pick.
+The picker is built **once** and re-attached on every render rather than rebuilt: the date control owns a native popover and its event listeners, whose lifetime follows the picker. Navigating the schedule moves the picker onto the new period, and that programmatic move is not reported back as a user pick.
 
 The picker's own `CHANGE_VALUE_EVENT` is stopped at its host: it is an implementation detail of the toolbar and must not reach listeners that expect the schedule's item changes under the same name.
 

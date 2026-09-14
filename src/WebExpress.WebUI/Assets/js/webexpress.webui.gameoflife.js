@@ -132,7 +132,7 @@ webexpress.webui.GameOfLifeCtrl = class extends webexpress.webui.Ctrl {
      * @returns {string} Either "dark" or "light".
      */
     _theme() {
-        return document.documentElement?.getAttribute("data-bs-theme") === "dark" ? "dark" : "light";
+        return document.documentElement?.getAttribute("data-wx-theme") === "dark" ? "dark" : "light";
     }
 
     /**
@@ -150,7 +150,7 @@ webexpress.webui.GameOfLifeCtrl = class extends webexpress.webui.Ctrl {
         this._themeObserver = new MutationObserver(() => this._tinted.clear());
         this._themeObserver.observe(document.documentElement, {
             attributes: true,
-            attributeFilter: ["data-bs-theme"]
+            attributeFilter: ["data-wx-theme"]
         });
     }
 

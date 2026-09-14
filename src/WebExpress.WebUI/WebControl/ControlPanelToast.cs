@@ -72,10 +72,11 @@ namespace WebExpress.WebUI.WebControl
 
             var button = new HtmlElementFieldButton()
             {
-                Class = "btn"
+                Class = "btn wx-button-close",
+                Type = "button"
             }
                 .Add(new HtmlElementTextSemanticsI() { Class = "wx-icon-light wx-icon-light-xmark" })
-                .AddUserAttribute("data-bs-dismiss", "alert")
+                .AddUserAttribute("data-wx-dismiss", "alert")
                 .AddUserAttribute("aria-label", "close");
 
             return new HtmlElementTextContentDiv()
@@ -83,9 +84,9 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("alert", GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
-                Role = "alert",
-                DataTheme = theme.ToValue()
+                Role = "alert"
             }
+                .AddUserAttribute("data-wx-theme", theme.ToValue())
                 .Add(!string.IsNullOrWhiteSpace(headText) ? head : null)
                 .Add(new ControlPanel().Add(Content).Render(renderContext, visualTree))
                 .Add(dismissible != TypeDismissibilityAlert.None ? button : null);

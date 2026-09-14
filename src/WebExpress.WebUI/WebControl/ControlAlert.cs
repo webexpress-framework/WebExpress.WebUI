@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebIcon;
@@ -77,10 +77,11 @@ namespace WebExpress.WebUI.WebControl
 
             var button = new HtmlElementFieldButton()
             {
-                Class = "btn wx-button-close"
+                Class = "btn wx-button-close",
+                Type = "button"
             }
                 .Add(new HtmlElementTextSemanticsI() { Class = new IconXmark().Class })
-                .AddUserAttribute("data-bs-dismiss", "alert")
+                .AddUserAttribute("data-wx-dismiss", "alert")
                 .AddUserAttribute("aria-label", "close");
 
             return new HtmlElementTextContentDiv()

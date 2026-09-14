@@ -205,14 +205,14 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
         const btnOk = document.createElement("button");
         const iconOk = document.createElement("i");
-        iconOk.className = "wx-icon-light wx-icon-light-check text-success";
+        iconOk.className = this._iconClass("check") + " wx-smart-edit-save";
         btnOk.type = "submit";
         btnOk.appendChild(iconOk);
         btnOk.title = this._i18n("webexpress.webui:save", "Save");
 
         const btnCancel = document.createElement("button");
         const iconCancel = document.createElement("i");
-        iconCancel.className = "wx-icon-light wx-icon-light-xmark text-danger";
+        iconCancel.className = this._iconClass("xmark") + " wx-smart-edit-cancel";
         btnCancel.type = "button";
         btnCancel.appendChild(iconCancel);
         btnCancel.title = this._i18n("webexpress.webui:cancel", "Cancel");

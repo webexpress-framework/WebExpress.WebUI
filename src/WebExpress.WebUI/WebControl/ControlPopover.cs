@@ -10,7 +10,7 @@ namespace WebExpress.WebUI.WebControl
     /// Represents a trigger that reveals a small popover with a title and a
     /// message. The trigger label is the control's text or child content; the
     /// popover itself is wired by the client-side
-    /// <c>webexpress.webui.PopoverCtrl</c>, because Bootstrap does not
+    /// <c>webexpress.webui.PopoverCtrl</c>, because WebExpress does not
     /// auto-initialize popovers.
     /// </summary>
     public class ControlPopover : Control
@@ -85,7 +85,7 @@ namespace WebExpress.WebUI.WebControl
             var trigger = Trigger?.Invoke(renderContext) ?? TypePopoverTrigger.Click;
             var role = Role?.Invoke(renderContext) ?? "button";
 
-            var html = new HtmlElementTextSemanticsSpan()
+            var html = new HtmlElementFieldButton()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-popover", GetClasses(renderContext)),
@@ -93,12 +93,12 @@ namespace WebExpress.WebUI.WebControl
                 Role = role
             };
 
-            html.AddUserAttribute("tabindex", "0");
-            html.AddUserAttribute("data-bs-toggle", "popover");
-            html.AddUserAttribute("data-bs-trigger", trigger.ToValue());
-            html.AddUserAttribute("data-bs-placement", placement.ToValue());
-            html.AddUserAttribute("data-bs-title", title);
-            html.AddUserAttribute("data-bs-content", message);
+            html.AddUserAttribute("type", "button");
+            html.AddUserAttribute("data-wx-toggle", "popover");
+            html.AddUserAttribute("data-wx-trigger", trigger.ToValue());
+            html.AddUserAttribute("data-wx-placement", placement.ToValue());
+            html.AddUserAttribute("data-wx-title", title);
+            html.AddUserAttribute("data-wx-content", message);
 
             if (!string.IsNullOrWhiteSpace(text))
             {

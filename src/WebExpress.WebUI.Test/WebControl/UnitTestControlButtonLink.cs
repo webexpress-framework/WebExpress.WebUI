@@ -1,4 +1,4 @@
-﻿using System.Globalization;
+using System.Globalization;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
@@ -63,10 +63,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<a class=""btn""></a>")]
-        [InlineData("a", @"<a class=""btn"" title=""a"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("b", @"<a class=""btn"" title=""b"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("a<br/>b", @"<a class=""btn"" title=""a<br/>b"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("webexpress.WebUI:plugin.name", @"<a class=""btn"" title=""WebExpress.WebUI"" data-bs-toggle=""tooltip""></a>")]
+        [InlineData("a", @"<a class=""btn"" title=""a""></a>")]
+        [InlineData("b", @"<a class=""btn"" title=""b""></a>")]
+        [InlineData("a<br/>b", @"<a class=""btn"" title=""a<br/>b""></a>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<a class=""btn"" title=""WebExpress.WebUI""></a>")]
         public void Tooltip(string tooltip, string expected)
         {
             // arrange
@@ -281,7 +281,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            Assert.Equal(@"<a class=""btn"" title=""Abbrechen"" data-bs-toggle=""tooltip"">Speichern</a>", html.Trim());
+            Assert.Equal(@"<a class=""btn"" title=""Abbrechen"">Speichern</a>", html.Trim());
         }
 
         /// <summary>

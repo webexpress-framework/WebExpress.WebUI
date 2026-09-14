@@ -1,4 +1,4 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -134,8 +134,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeTheme.None, @"<header></header>")]
-        [InlineData(TypeTheme.Light, @"<header data-bs-theme=""light""></header>")]
-        [InlineData(TypeTheme.Dark, @"<header data-bs-theme=""dark""></header>")]
+        [InlineData(TypeTheme.Light, @"<header data-wx-theme=""light""></header>")]
+        [InlineData(TypeTheme.Dark, @"<header data-wx-theme=""dark""></header>")]
         public void Theme(TypeTheme theme, string expected)
         {
             // arrange

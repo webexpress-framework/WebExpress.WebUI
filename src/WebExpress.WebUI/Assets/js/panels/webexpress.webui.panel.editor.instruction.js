@@ -176,11 +176,8 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
             modal.ctrl.hide();
         } else {
             const modalWrapper = textInput.closest(".modal");
-            if (modalWrapper && typeof bootstrap !== "undefined") {
-                const bsModal = bootstrap.Modal.getInstance(modalWrapper);
-                if (bsModal) {
-                    bsModal.hide();
-                }
+            if (modalWrapper?.open) {
+                modalWrapper.close();
             }
         }
     }

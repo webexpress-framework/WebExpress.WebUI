@@ -336,7 +336,7 @@ webexpress.webui.ModalSidebarPanelCtrl = class extends webexpress.webui.ModalCtr
      * @private
      */
     _bindModalLifecycle() {
-        this._element.addEventListener("shown.bs.modal", () => {
+        this._element.addEventListener(webexpress.webui.Event.MODAL_SHOW_EVENT, () => {
             this._applyLayoutMode();
 
             this._renderTree();
@@ -359,7 +359,7 @@ webexpress.webui.ModalSidebarPanelCtrl = class extends webexpress.webui.ModalCtr
             }
         });
 
-        this._element.addEventListener("hidden.bs.modal", () => {
+        this._element.addEventListener("close", () => {
             this._hideValidation();
 
             this._removeTreeClickSubscription();
@@ -757,45 +757,16 @@ webexpress.webui.ModalSidebarPanelCtrl = class extends webexpress.webui.ModalCtr
     }
 
     /**
-     * Closes the modal using base class or Bootstrap fallback.
+     * Uses the shared modal lifecycle so consumers receive the close event.
      * @returns {void}
      * @private
      */
     _closeModal() {
-        try {
-            if (typeof this.hide === "function") {
-                this.hide();
-                return;
-            }
-            if (typeof this.close === "function") {
-                this.close();
-                return;
-            }
-        } catch (err) {
-            // ignore and try bootstrap fallback
-        }
-
-        try {
-            const Modal = window.bootstrap && window.bootstrap.Modal ? window.bootstrap.Modal : null;
-            if (Modal) {
-                const instance = Modal.getOrCreateInstance(this._element);
-                if (instance && typeof instance.hide === "function") {
-                    instance.hide();
-                    return;
-                }
-            }
-        } catch (err) {
-            // ignore
-        }
-
-        const dismiss = this._element.querySelector("[data-bs-dismiss='modal'], .btn-close");
-        if (dismiss && typeof dismiss.click === "function") {
-            dismiss.click();
-        }
+        this.hide();
     }
 
     /**
-     * Shows a validation message as a Bootstrap alert above the split control.
+     * Shows a validation message as a WebExpress alert above the split control.
      * @param {string} message - Text to display.
      * @returns {void}
      * @private
@@ -833,7 +804,7 @@ webexpress.webui.ModalSidebarPanelCtrl = class extends webexpress.webui.ModalCtr
     }
 
     /**
-     * Ensures there is a Bootstrap alert element inserted above the split control.
+     * Ensures there is a WebExpress alert element inserted above the split control.
      * @returns {void}
      * @private
      */

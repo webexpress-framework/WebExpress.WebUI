@@ -1,11 +1,11 @@
 /*
  * Card panel rendered by webexpress.webui.PanelCardCtrl. The structure mirrors
- * the Bootstrap card layout but lives in the wx-* namespace so the same markup
- * works without pulling in bootstrap's `.card` rules.
+ * the WebExpress card layout but lives in the wx-* namespace so the same markup
+ * works without pulling in WebExpress's `.card` rules.
  *
- * Spacing, colour and radius values are sourced from the bootstrap CSS
+ * Spacing, colour and radius values are sourced from the WebExpress CSS
  * variables that ship with WebExpress.WebUI so the card picks up theme
- * switches (light / dark) and the bootstrap utility classes (.border, text
+ * switches (light / dark) and the WebExpress utility classes (.border, text
  * colours, background utilities) without extra work.
  */
 
@@ -16,10 +16,10 @@
     --wx-card-cap-padding-y: 0.5rem;
     --wx-card-cap-padding-x: 1rem;
     --wx-card-cap-bg: rgba(var(--wx-body-color-rgb), 0.03);
-    --wx-card-border-width: var(--bs-border-width);
+    --wx-card-border-width: var(--wx-border-width);
     --wx-card-border-color: var(--wx-border-color-translucent);
-    --wx-card-border-radius: var(--bs-border-radius);
-    --wx-card-inner-radius: calc(var(--bs-border-radius) - var(--bs-border-width));
+    --wx-card-border-radius: var(--wx-border-radius);
+    --wx-card-inner-radius: calc(var(--wx-border-radius) - var(--wx-border-width));
     --wx-card-bg: var(--wx-body-bg);
     --wx-card-color: var(--wx-body-color);
 
@@ -34,7 +34,7 @@
     border-radius: var(--wx-card-border-radius);
 }
 
-/* the .border utility shipped by bootstrap already paints a 1px outline; the
+/* the .border utility shipped by WebExpress already paints a 1px outline; the
    wx-card class only adds it when the consumer asked for it via the C#
    `Border` property */
 .wx-card.border {
@@ -94,7 +94,9 @@
 }
 
 /* dark theme: keep cap and body backgrounds in sync with the body palette */
-[data-bs-theme="dark"] .wx-card {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-card {
     --wx-card-bg: var(--wx-dark);
     --wx-card-cap-bg: rgba(255, 255, 255, 0.05);
+}
 }

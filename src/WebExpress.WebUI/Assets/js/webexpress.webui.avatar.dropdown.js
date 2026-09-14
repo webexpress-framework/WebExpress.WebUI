@@ -206,8 +206,6 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
         const button = document.createElement("button");
         button.className = "wx-avatar-dropdown-toggle";
         button.type = "button";
-        button.setAttribute("data-bs-toggle", "dropdown");
-        button.setAttribute("aria-expanded", "false");
         button.setAttribute("aria-label", this._name
             ? (this._i18n("webexpress.webui:avatar.of", "Avatar of") + " " + this._name)
             : this._i18n("webexpress.webui:avatar.label", "Avatar"));
@@ -272,14 +270,10 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
         this._element.appendChild(ul);
 
         // visibility events
-        button.addEventListener("show.bs.dropdown", () => {
+        webexpress.webui.NativeMenu.bind(button, ul);
+        ul.addEventListener("beforetoggle", (event) => {
             this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
-                visible: true
-            });
-        });
-        button.addEventListener("hide.bs.dropdown", () => {
-            this._dispatch(webexpress.webui.Event.CHANGE_VISIBILITY_EVENT, {
-                visible: false
+                visible: event.newState === "open"
             });
         });
     }

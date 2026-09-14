@@ -106,7 +106,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-modal-footer"
             };
 
-            return new HtmlElementTextContentDiv(header, content, footer)
+            return new HtmlElementInteractiveDialog(header, content, footer)
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-modal-login", GetClasses(renderContext)),

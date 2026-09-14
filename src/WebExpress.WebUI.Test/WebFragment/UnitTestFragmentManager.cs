@@ -898,7 +898,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlCarousel()
         {
             // arrange
-            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolcarousel"" class=""carousel slide""*>*</div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolcarousel"" class=""wx-webui-carousel carousel""*>*</div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);

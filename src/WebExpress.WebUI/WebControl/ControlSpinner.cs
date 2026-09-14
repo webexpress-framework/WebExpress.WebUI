@@ -7,7 +7,7 @@ namespace WebExpress.WebUI.WebControl
     /// <summary>
     /// Represents a loading spinner that signals an in-progress operation. The
     /// color is taken from the inherited <see cref="Control.TextColor"/>, exactly
-    /// like a Bootstrap spinner.
+    /// like a WebExpress spinner.
     /// </summary>
     public class ControlSpinner : Control
     {

@@ -64,13 +64,13 @@ namespace WebExpress.WebUI.WebControl
         public System.Func<IRenderControlContext, TypeTarget> Target { get; set; }
 
         /// <summary>
-        /// Gets or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a
         /// click to open a modal or similar target.
         /// </summary>
         public System.Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
-        /// Gets or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a
         /// double-click to open a modal or similar target.
         /// </summary>
         public System.Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
@@ -134,10 +134,10 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
         /// <remarks>
-        /// This method allows adding one or multiple controls to the content collection 
-        /// of the control panel. It is useful for dynamically constructing the user interface by 
+        /// This method allows adding one or multiple controls to the content collection
+        /// of the control panel. It is useful for dynamically constructing the user interface by
         /// appending various controls to the panel's content.
-        /// 
+        ///
         /// Example usage:
         /// <code>
         /// var link = new ControlLink();
@@ -145,7 +145,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlText { Text = "B" };
         /// link.Add(text1, text2);
         /// </code>
-        /// 
+        ///
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         public void Add(params IControl[] controls)
@@ -158,10 +158,10 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
         /// <remarks>
-        /// This method allows adding one or multiple controls to the content collection 
-        /// of the control panel. It is useful for dynamically constructing the user interface by 
+        /// This method allows adding one or multiple controls to the content collection
+        /// of the control panel. It is useful for dynamically constructing the user interface by
         /// appending various controls to the panel's content.
-        /// 
+        ///
         /// Example usage:
         /// <code>
         /// var link = new ControlLink();
@@ -169,7 +169,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlText { Text = "B" };
         /// link.Add(text1, text2);
         /// </code>
-        /// 
+        ///
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         public void Add(IEnumerable<IControl> controls)
@@ -263,7 +263,6 @@ namespace WebExpress.WebUI.WebControl
 
             if (!string.IsNullOrWhiteSpace(tooltip))
             {
-                html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
             PrimaryAction?.Invoke(renderContext)?.ApplyUserAttributes(html, TypeAction.Primary);

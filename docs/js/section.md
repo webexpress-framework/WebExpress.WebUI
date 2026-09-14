@@ -58,7 +58,7 @@ const ctrl = new webexpress.webui.SectionCtrl(lane);
 ctrl.headerElement.appendChild(buildLaneMenu());
 ```
 
-A section is flat by construction, so a host that wants a surface paints its own element — the swimlane brings `.wx-kanban-swimlane`, the error box a bootstrap `alert`.
+A section is flat by construction, so a host that wants a surface paints its own element — the swimlane brings `.wx-kanban-swimlane`, the error box a WebExpress `alert`.
 
 ### Layout
 
@@ -128,7 +128,7 @@ section.expanded = false;
 
 ### Styling
 
-All colours come from the bootstrap CSS variables shipped with `WebExpress.WebUI`, so a section follows the light / dark switch without extra rules. The rhythm is exposed as custom properties on `.wx-section` and can be re-declared per zone:
+All colours come from the WebExpress CSS variables shipped with `WebExpress.WebUI`, so a section follows the light / dark switch without extra rules. The rhythm is exposed as custom properties on `.wx-section` and can be re-declared per zone:
 
 | Property                      | Purpose
 |-------------------------------|-----------------------------------------------------------------------------

@@ -63,7 +63,7 @@ All three are removed from the host after they are read, so the rendered element
 | Property             | Description
 |----------------------|-------------
 | `--wx-group-columns` | Fields per row. Set from `data-columns`; defaults to `4` in the stylesheet, narrowed to `2` below 62rem and `1` below 34rem.
-| `--wx-group-bg`      | The surface colour. Follows `--wx-body-bg`, and `--wx-dark` under `[data-bs-theme="dark"]`.
+| `--wx-group-bg`      | The surface colour. Follows `--wx-body-bg`, and `--wx-dark` under `[data-wx-theme="dark"]`.
 | `--wx-group-border`  | The colour of the border and the dividers. Follows `--wx-border-color`.
 | `--wx-group-padding` | The padding of a field. Moved by the spacing variants rather than overridden per rule.
 

@@ -20,6 +20,7 @@ class TextNode {
         this.parentNode = null;
         this._text = String(text);
     }
+    cloneNode() { return new TextNode(this._text); }
     get textContent() { return this._text; }
     set textContent(value) { this._text = String(value); }
 }
@@ -75,6 +76,9 @@ function selectorGroups(selector) {
 function matchesCompound(el, compound) {
     if (!el || el.nodeType !== 1 || !compound) { return false; }
     if (compound === "*") { return true; }
+    if (compound === ":popover-open") { return !!el._popoverOpen; }
+    if (compound === ":modal") { return el.tagName === "DIALOG" && el.open; }
+    if (compound === ":not(:popover-open)") { return !el._popoverOpen; }
 
     const idMatch = compound.match(/#([\w-]+)/);
     if (idMatch && el.id !== idMatch[1]) { return false; }
@@ -132,6 +136,31 @@ class Element {
         this.value = "";
         this.checked = false;
     }
+
+    get open() { return this.hasAttribute("open"); }
+    showModal() {
+        if (this.tagName !== "DIALOG") { throw new TypeError("showModal requires a dialog"); }
+        this.setAttribute("open", "");
+    }
+    close() {
+        if (!this.open) { return; }
+        this.removeAttribute("open");
+        this.dispatchEvent({ type: "close" });
+    }
+    showPopover() {
+        if (!this.hasAttribute("popover")) { throw new TypeError("popover attribute required"); }
+        if (this._popoverOpen) { return; }
+        this.dispatchEvent({ type: "beforetoggle", oldState: "closed", newState: "open" });
+        this._popoverOpen = true;
+        this.dispatchEvent({ type: "toggle", oldState: "closed", newState: "open" });
+    }
+    hidePopover() {
+        if (!this._popoverOpen) { return; }
+        this.dispatchEvent({ type: "beforetoggle", oldState: "open", newState: "closed" });
+        this._popoverOpen = false;
+        this.dispatchEvent({ type: "toggle", oldState: "open", newState: "closed" });
+    }
+    after(node) { this.parentNode?.insertBefore(node, this.nextSibling); }
 
     get id() { return this._id; }
     set id(value) { this._id = value == null ? null : String(value); }
@@ -419,6 +448,7 @@ class Element {
         return copy;
     }
 
+    setCustomValidity(message) { this.validationMessage = String(message); }
     focus() { }
     blur() { }
     select() { }

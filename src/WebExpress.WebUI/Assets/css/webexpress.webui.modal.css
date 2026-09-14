@@ -1,3 +1,5 @@
-[data-bs-theme=dark] .modal {
-    --bs-modal-color: var(--wx-body-color);
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .modal {
+    --wx-modal-color: var(--wx-body-color);
+}
 }

@@ -18,10 +18,11 @@
 }
 
 /* Main and side pane containers */
-.wx-split .wx-main-pane,
-.wx-split .wx-side-pane {
-    min-width: 20px;
-    min-height: 20px;
+.wx-split > .wx-main-pane,
+.wx-split > .wx-side-pane {
+    min-width: 0;
+    min-height: 0;
+    overflow: auto;
     box-sizing: border-box;
 }
 
@@ -30,7 +31,7 @@
 }
 
 /* Splitter styles */
-.wx-split .wx-splitter {
+.wx-split > .wx-splitter {
     z-index: 10;
     flex: 0 0 auto;
     user-select: none;
@@ -41,7 +42,10 @@
     position: relative;
     background: var(--wx-tertiary-bg);
     color: var(--wx-secondary-color);
-    border-inline: 1px solid var(--wx-border-color);
+    border: 0;
+    padding: 0;
+    margin: 0;
+    align-self: stretch;
 }
 
 .wx-split .wx-splitter-vertical {

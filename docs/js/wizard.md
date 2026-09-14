@@ -1,8 +1,8 @@
-﻿![WebExpress](https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png)
+![WebExpress](https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png)
 
 # RestWizardCtrl
 
-The `RestWizardCtrl` component seamlessly transforms a standard HTML form into a highly interactive, multi-step wizard. Extending the foundational `RestFormCtrl`, this component orchestrates complex data entry processes by breaking them down into digestible, sequential steps. It uniquely combines the simplicity of static, pre-rendered HTML form fields with the flexibility of dynamic, asynchronously loaded steps. 
+The `RestWizardCtrl` component seamlessly transforms a standard HTML form into a highly interactive, multi-step wizard. Extending the foundational `RestFormCtrl`, this component orchestrates complex data entry processes by breaking them down into digestible, sequential steps. It uniquely combines the simplicity of static, pre-rendered HTML form fields with the flexibility of dynamic, asynchronously loaded steps.
 
 As users navigate through the wizard, the controller automatically handles client-side validation, state preservation, and payload aggregation. A standout feature of this component is its server-driven skip logic: the server can dictate whether a specific step is necessary based on the data entered in previous steps, allowing for highly personalized and dynamic user journeys without requiring complex client-side rules.
 
@@ -57,8 +57,8 @@ Inside a modal the wizard confines scrolling to its pages: the dialog body stops
 and the page container carries the overflow instead, so the progress indicator at the top
 and the buttons at the bottom stay in place however long a step is. This requires the chain
 from the dialog body down to the pages to be a flex column that may shrink; the stylesheet
-of the form (`webexpress.webapp.form.css`) declares it, and a rule outranking bootstrap's
-`.modal-dialog-scrollable .modal-body` turns the scrolling of the body off.
+of the form (`webexpress.webapp.form.css`) declares it, and a rule overriding
+`.wx-dialog-scrollable :where(.modal-body)` turns the scrolling of the body off.
 
 The error, confirmation and prologue banners the form control keeps as direct children of
 the dialog body stay above the scrolling area, so a validation message cannot scroll out of
@@ -106,7 +106,7 @@ In this example, all pages are immediately available in the DOM. Navigation betw
 <form id="staticWizard" name="registration"
       class="wx-webapp-restwizard"
       data-api="/api/users/register">
-    
+
     <confirm>The data was <b>successfully</b> transmitted to the server.</confirm>
     <h3>Registration</h3>
 
@@ -136,10 +136,10 @@ In this example, the second and third steps are dynamic. When the user clicks "N
 <form id="dynamicWizard" name="profileWizard"
       class="wx-webapp-restwizard"
       data-api="/api/profile/complete">
-    
+
     <confirm>Your profile has been updated.</confirm>
     <h3>Setup Profile</h3>
-    
+
     <!-- Step 1: Static -->
     <div class="wx-wizard-page" data-title="Basic Data">
         <div class="mb-3">
@@ -147,16 +147,16 @@ In this example, the second and third steps are dynamic. When the user clicks "N
             <input id="name" name="name" type="text" class="form-control" required />
         </div>
     </div>
-    
+
     <!-- Step 2: Dynamic (Server evaluates Step 1 data) -->
-    <div class="wx-wizard-page" 
-         data-title="Settings" 
+    <div class="wx-wizard-page"
+         data-title="Settings"
          data-uri="/api/wizard/settings">
     </div>
-    
+
     <!-- Step 3: Dynamic -->
-    <div class="wx-wizard-page" 
-         data-title="Description" 
+    <div class="wx-wizard-page"
+         data-title="Description"
          data-uri="/api/wizard/description">
     </div>
 </form>

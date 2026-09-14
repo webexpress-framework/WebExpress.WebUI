@@ -237,7 +237,10 @@
 .wx-dashboard-widget-card > .card-header {
     display: flex;
     border-bottom: none;
-    background-color: var(--bs-body);
+    background-color: var(--wx-tertiary-bg);
+    color: var(--wx-body-color);
+    min-width: 0;
+    gap: 0.5rem;
     justify-content: space-between;
     align-items: center;
 }
@@ -362,3 +365,6 @@
     border-radius: 0.2rem;
     background: var(--wx-body-bg);
 }
+
+.wx-dashboard-widget-card > .card-header > :first-child { min-width: 0; }
+.wx-dashboard-widget-card > .card-header > :last-child { flex-shrink: 0; }

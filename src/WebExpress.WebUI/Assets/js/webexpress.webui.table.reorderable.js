@@ -227,7 +227,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
     _createColumnsModal() {
         const id = `wx-table-columns-msp-${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
-        const el = document.createElement("div");
+        const el = document.createElement("dialog");
         el.id = id;
         el.setAttribute("aria-labelledby", `${id}-label`);
         el.setAttribute("aria-hidden", "true");
@@ -821,8 +821,8 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
             top: ${startY + 8}px;
             pointer-events: none;
             padding: 2px 6px;
-            background: rgba(var(--bs-primary-rgb), 0.15);
-            border: 1px solid rgba(var(--bs-primary-rgb), 0.6);
+            background: rgba(var(--wx-primary-rgb), 0.15);
+            border: 1px solid rgba(var(--wx-primary-rgb), 0.6);
             border-radius: 4px;
             font-size: 12px;
             z-index: 2147483647;
@@ -838,7 +838,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
         const td = document.createElement("div");
         td.className = "wx-grid-cell";
         td.style.gridColumn = "1 / -1";
-        td.style.background = "var(--bs-primary, #0d6efd)";
+        td.style.background = "var(--wx-primary, #0d6efd)";
         td.style.opacity = "0.35";
         td.style.height = "100%";
 

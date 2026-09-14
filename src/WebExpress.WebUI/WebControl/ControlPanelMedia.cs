@@ -88,9 +88,9 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("media", GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
-                Role = role,
-                DataTheme = theme.ToValue()
+                Role = role
             };
+            html.AddUserAttribute("data-wx-theme", theme.ToValue());
 
             return html;
         }

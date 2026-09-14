@@ -45,14 +45,18 @@
 }
 
 /* dark mode support */
-[data-bs-theme="dark"] .wx-code {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-code {
     background-color: var(--wx-gray-900, #212529);
     color: var(--wx-gray-100, #f8f9fa);
 }
+}
 
-[data-bs-theme="dark"] .wx-code-header {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-code-header {
     border-bottom: 1px solid var(--wx-gray-800, #343a40);
     color: var(--wx-gray-100, #f8f9fa);
+}
 }
 
 /* copy button */
@@ -72,17 +76,21 @@
     opacity: 1;
 }
 
-[data-bs-theme="dark"] .wx-code button.btn {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-code button.btn {
     background: var(--wx-gray-900, #212529);
     border: 1px solid var(--wx-gray-700, #495057);
     color: var(--wx-gray-100, #f8f9fa);
 }
+}
 
-[data-bs-theme="dark"] .wx-code button.btn:hover,
-[data-bs-theme="dark"] .wx-code button.btn:focus {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-code button.btn:hover,
+:scope .wx-code button.btn:focus {
     background: var(--wx-gray-800, #343a40);
     border-color: var(--wx-gray-600, #6c757d);
     color: var(--wx-white, #fff);
+}
 }
 
 .wx-code .wx-code-line,

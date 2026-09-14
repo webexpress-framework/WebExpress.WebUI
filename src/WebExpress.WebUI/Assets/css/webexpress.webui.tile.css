@@ -5,9 +5,9 @@
     flex-direction: column;
     align-items: stretch;
     color: var(--wx-body-color);
-    font-family: var(--bs-body-font-family);
-    font-size: var(--bs-body-font-size);
-    line-height: var(--bs-body-line-height);
+    font-family: var(--wx-body-font-family);
+    font-size: var(--wx-body-font-size);
+    line-height: var(--wx-body-line-height);
 }
 
 /* Fill mode: the tiles take the height their host offers instead of growing with
@@ -55,7 +55,7 @@
 /* Tile card */
 .wx-tile-container > .wx-tile-card {
     border: 1px solid var(--wx-border-color);
-    border-radius: var(--bs-border-radius);
+    border-radius: var(--wx-border-radius);
     box-shadow: 0 2px 6px rgba(0,0,0,.05);
     width: 200px;
     min-height: 110px;
@@ -157,7 +157,7 @@
     display: inline-flex;
     align-items: center;
     padding: 0.1em 0.45em;
-    border-radius: var(--bs-border-radius-sm, 0.25rem);
+    border-radius: var(--wx-border-radius-sm, 0.25rem);
     font-size: 0.62em;
     font-weight: 700;
     letter-spacing: 0.06em;

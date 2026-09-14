@@ -1,4 +1,4 @@
-﻿# de_DE  language resource file
+# de_DE  language resource file
 plugin.name=WebExpress.WebUI
 plugin.description=Stellt Basiskomponenten bereit.
 
@@ -47,3 +47,6 @@ darkmode.text.dark=Hellmodus aktivieren
 
 masterdetail.empty.title=Kein Element ausgewählt
 masterdetail.empty.message=Bitte wählen Sie ein Element aus der Liste aus.
+
+carousel.previous=Vorherige Folie
+carousel.next=Nächste Folie
