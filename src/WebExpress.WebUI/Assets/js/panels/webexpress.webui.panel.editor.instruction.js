@@ -152,7 +152,7 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
         if (target && root && root.contains(target)) {
             // edit mode: update the existing element in place so its position
             // is kept and a cancelled dialog can never lose the instruction
-            target.innerHTML = innerHtml;
+            editor.updateNode(target, { text: textVal });
             if (typeof editor._syncValue === "function") {
                 editor._syncValue();
             }

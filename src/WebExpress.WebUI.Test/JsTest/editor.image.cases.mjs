@@ -1,106 +1,32 @@
-/** Image regressions shared by the Node runner and browser page. */
 export function imageCases(test, assert, loadEditor) {
-    test("editing an image preserves its identity, link, attributes and document position", () => {
-        const { wx, root, panels, editorMock } = loadEditor();
-        root.innerHTML = '<p>before<a href="/article"><img src="/old.png" alt="old" class="photo" data-id="asset" style="width: 100px;"></a>after</p>';
-        const image = root.querySelector("img");
-        const anchor = image.parentNode;
-        const editor = editorMock();
-        editor._history = new wx.EditorHistory(editor);
-        editor._syncValue = () => editor._history.notify(false);
-        const modal = {
-            _editor: editor, _imageTarget: image,
-            _image: { webUrlInput: { value: "/new.png" }, webAltInput: { value: 'An "image" <caption>' },
-                widthInput: { value: "50%" }, heightInput: { value: "" } },
-            hide() { this.hidden = true; }
-        };
-        panels.get("image-web").onSubmit(modal);
-        assert.equal(root.querySelector("img"), image);
-        assert.equal(image.parentNode, anchor);
-        assert.equal(image.getAttribute("class"), "photo");
-        assert.equal(image.getAttribute("data-id"), "asset");
-        assert.equal(image.getAttribute("src"), "/new.png");
-        assert.equal(image.getAttribute("alt"), 'An "image" <caption>');
-        assert.equal(image.style.width, "50%");
-        assert.equal(root.textContent, "beforeafter");
-        assert.equal(modal.hidden, true);
-        editor._history.undo();
-        assert.equal(root.querySelector("img").getAttribute("src"), "/old.png");
-        editor._history.redo();
-        assert.equal(root.querySelector("img").getAttribute("src"), "/new.png");
+    test("typing and atom deletion are separate transactions with exact undo", () => {
+        const r = loadEditor({ html: '<p>a<img src="/photo.png" alt="photo">b</p>', files: ["editor/media.js"] });
+        r.select(1); r.input("insertText", "x");
+        r.wx.EditorImage.remove(r.editor, r.root.querySelector("img"));
+        assert.equal(r.editor.exportHtml({ layout: false }), "<p>axb</p>");
+        assert.deepEqual(Array.from(r.editor._history._entries, e => e.action.type), ["insertText", "removeNode"]);
+        r.editor.execCommand("undo"); assert.match(r.editor.exportHtml({ layout: false }), /ax<img/);
+        r.editor.execCommand("undo"); assert.match(r.editor.exportHtml({ layout: false }), /a<img/);
+        r.editor.execCommand("redo"); r.editor.execCommand("redo"); assert.equal(r.editor.exportHtml({ layout: false }), "<p>axb</p>");
     });
-
-    test("opening an image dialog keeps the image until submit and passes its dimensions", () => {
-        const { root, plugins, editorMock } = loadEditor();
-        root.innerHTML = '<p><img src="/old.png" alt="old" width="320" height="200"></p>';
-        const image = root.querySelector("img");
-        const plugin = plugins.get("media");
-        plugin.getContextMenuItems(editorMock(), image)[0].action();
-        const modal = plugin.imageModal.ctrl;
-        assert.equal(root.querySelector("img"), image);
-        assert.equal(modal._imageTarget, image);
-        assert.equal(modal._imagePrefill.width, "320");
-        assert.equal(modal._imagePrefill.height, "200");
-        assert.equal(modal.page, "image-web");
-        modal.hide?.();
-        assert.equal(root.querySelector("img"), image);
+    test("linked image updates preserve link, dimensions and position in JSON", () => {
+        const r = loadEditor({ html: '<p>a<a href="/page"><img src="/old" alt="old"></a>b</p>', files: ["editor/media.js"] });
+        r.wx.EditorImage.update(r.editor, r.root.querySelector("img"), { src: "/new", alt: '<literal>', width: "50%", align: "center" });
+        const node = r.wx.EditorModel.entries(r.editor._state.doc).find(e => e.node.type === "image").node;
+        assert.equal(node.attrs.link.href, "/page"); assert.equal(node.attrs.width, "50%"); assert.equal(node.attrs.alt, "<literal>");
+        assert.equal(r.root.querySelector("img").getAttribute("alt"), "<literal>");
+        r.editor.execCommand("undo"); assert.match(r.editor.exportHtml({ layout: false }), /src="\/old"/);
     });
-
-    test("image context actions resize, align and remove with undo", () => {
-        const { wx, root, plugins, editorMock } = loadEditor();
-        root.innerHTML = '<p>before<img src="/photo.png" width="320" height="200">after</p>';
-        const image = root.querySelector("img");
-        const editor = editorMock();
-        editor._history = new wx.EditorHistory(editor);
-        editor._syncValue = () => editor._history.notify(false);
-        const items = plugins.get("media").getContextMenuItems(editor, image);
-        items.find(item => item.label.endsWith("align.center")).action();
-        assert.equal(image.style.marginLeft, "auto");
-        assert.equal(image.style.marginRight, "auto");
-        items.find(item => item.submenu).submenu[1].action();
-        assert.equal(image.style.width, "50%");
-        assert.equal(image.getAttribute("height"), null);
-        items.find(item => item.label.endsWith("remove.image")).action();
-        assert.equal(root.querySelector("img"), null);
-        assert.equal(root.textContent, "beforeafter");
-        editor._history.undo();
-        assert.equal(root.querySelector("img").style.width, "50%");
+    test("image selection resolves to one state unit across rendering", () => {
+        const r = loadEditor({ html: '<p>a<img src="/photo">b</p>', files: ["editor/media.js"] });
+        r.wx.EditorImage.select(r.editor, r.root.querySelector("img"));
+        assert.equal(r.editor.selection.anchor, 1); assert.equal(r.editor.selection.focus, 2);
+        r.editor.render(true); r.input("deleteContentBackward"); assert.equal(r.editor.exportHtml({ layout: false }), "<p>ab</p>");
     });
-
-    test("image dimension validation rejects invalid CSS and accepts automatic sizing", () => {
-        const { wx } = loadEditor();
-        for (const value of ["-1", "0", "NaN", "url(test)", "1px;color:red"]) {
-            assert.equal(wx.EditorImage.dimension(value), null);
-        }
-        assert.equal(wx.EditorImage.dimension("320"), "320px");
-        assert.equal(wx.EditorImage.dimension("50%"), "50%");
-        assert.equal(wx.EditorImage.dimension(""), "");
-    });
-
-    test("a stale image edit never inserts a duplicate at a different cursor position", () => {
-        const { root, document, panels, editorMock } = loadEditor();
-        root.innerHTML = '<p>unchanged</p>';
-        const editor = editorMock();
-        let inserted = false;
-        editor.insertHtmlAtCursor = () => { inserted = true; };
-        const modal = { _editor: editor, _imageTarget: document.createElement("img"),
-            _image: { webUrlInput: { value: "/new.png" }, webAltInput: { value: "" } }, hide() {} };
-        panels.get("image-web").onSubmit(modal);
-        assert.equal(inserted, false);
-        assert.equal(root.innerHTML, "<p>unchanged</p>");
-    });
-
-    test("choosing a site image updates the existing image without losing its size", () => {
-        const { root, panels, editorMock } = loadEditor();
-        root.innerHTML = '<p><img src="/old.png" width="320"></p>';
-        const image = root.querySelector("img");
-        const modal = { _editor: editorMock(), _imageTarget: image,
-            _image: { selectedSiteImage: { src: "/site.png", alt: "Site" }, siteAltInput: { value: "New" } },
-            hide() {} };
-        panels.get("image-site").onSubmit(modal);
-        assert.equal(root.querySelector("img"), image);
-        assert.equal(image.getAttribute("width"), "320");
-        assert.equal(image.getAttribute("src"), "/site.png");
-        assert.equal(image.getAttribute("alt"), "New");
+    for (const width of ["-1", "0", "url(evil)", "expression(evil)"]) test(`invalid image dimension ${width} is filtered`, () => {
+        const r = loadEditor({ files: ["editor/media.js"] });
+        r.wx.EditorImage.insert(r.editor, { src: "/ok", width });
+        const node = r.wx.EditorModel.entries(r.editor._state.doc).find(e => e.node.type === "image").node;
+        assert.equal(node.attrs.width, undefined);
     });
 }

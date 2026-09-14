@@ -7,6 +7,7 @@ import { contract } from "./controls.contract.mjs";
 
 contract({
     file: "webexpress.webui.editor.js",
+    deps: ["webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js"],
     selector: "wx-webui-editor",
     ctrl: "EditorCtrl"
 });

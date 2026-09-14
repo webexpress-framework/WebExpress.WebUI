@@ -43,7 +43,7 @@ webexpress.webui.EditorPlugins.register("instruction", 5000, {
                 label: webexpress.webui.I18N.translate("webexpress.webui:editor.remove"),
                 icon: "trash",
                 action: () => {
-                    instruction.remove();
+                    editor.removeNode(instruction);
                     if (typeof editor._syncValue === "function") {
                         editor._syncValue();
                     }

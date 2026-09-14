@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
@@ -139,7 +139,7 @@ namespace WebExpress.WebUI.WebControl
                     Placeholder = I18N.Translate(renderContext, placeholder),
                     Rows = rows?.ToString()
                 },
-                TypeEditTextFormat.Wysiwyg => new HtmlElementTextContentDiv(new HtmlText(value?.Text))
+                TypeEditTextFormat.Wysiwyg => new HtmlElementTextContentDiv()
                 {
                     Id = id,
                     Class = Css.Concatenate("wx-webui-editor", classes),
@@ -147,6 +147,9 @@ namespace WebExpress.WebUI.WebControl
                     Role = role,
                 }
                     .AddUserAttribute("name", name)
+                    .AddUserAttribute("value", value?.Text)
+                    .AddUserAttribute("data-disabled", disabled ? "true" : null)
+                    .AddUserAttribute("aria-disabled", disabled ? "true" : null)
                     .AddUserAttribute("data-fill", fill ? "true" : null),
                 _ => new HtmlElementFieldInput()
                 {
@@ -186,6 +189,19 @@ namespace WebExpress.WebUI.WebControl
             if (disabled)
             {
                 return [];
+            }
+
+            if ((Format?.Invoke(renderContext) ?? TypeEditTextFormat.Default) == TypeEditTextFormat.Wysiwyg && EditorState.IsState(value))
+            {
+                try
+                {
+                    value = EditorState.ValidationText(value);
+                }
+                catch (System.Text.Json.JsonException)
+                {
+                    validationResults.Add(new ValidationResult(TypeInputValidity.Error, "webexpress.webui:editor.state.invalid"));
+                    return validationResults;
+                }
             }
 
             if (required && string.IsNullOrWhiteSpace(value))

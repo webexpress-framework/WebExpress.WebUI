@@ -34,7 +34,10 @@ webexpress.webui.ContentFormat = class {
     static toFragment(html, options) {
         const keepInstruction = !!(options && options.instruction);
         const source = document.createElement("div");
-        source.innerHTML = html || "";
+        if (typeof html === "object" && html !== null || typeof html === "string" && html.trim().startsWith("{")) {
+            const state = webexpress.webui.EditorModel.validate(typeof html === "string" ? JSON.parse(html) : html);
+            new webexpress.webui.EditorView(null).render(state, source, true);
+        } else source.innerHTML = html || "";
 
         this._removeChrome(source, keepInstruction);
         this._unwrapBlockAddons(source);

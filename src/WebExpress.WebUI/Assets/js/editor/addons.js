@@ -26,167 +26,13 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
         return target;
     },
 
-    /**
-     * Handles the Enter key inside an editable add-on body so the line break is
-     * created within the add-on instead of escaping to the end of the document.
-     * @param {object} editor - The editor instance.
-     * @param {KeyboardEvent} e - The keydown event.
-     */
-    _handleBodyEnter: function(editor, e) {
-        if (e.key !== "Enter" || e.shiftKey || e.ctrlKey || e.metaKey || e.altKey || e.isComposing) {
-            return;
-        }
-        const sel = window.getSelection();
-        if (!sel || !sel.rangeCount) {
-            return;
-        }
-        let el = sel.anchorNode;
-        if (el && el.nodeType === 3) {
-            el = el.parentElement;
-        }
-        const body = el && el.closest ? el.closest(".wx-addon-body-container") : null;
-        if (!body || !editor.getEditorElement().contains(body)) {
-            return; // not inside an add-on body -> native behaviour
-        }
-        // only editable container bodies; the table frame reuses the same class
-        // but is contenteditable="false" (its table handles Enter natively)
-        if (body.getAttribute("contenteditable") !== "true") {
-            return;
-        }
-        // tables inside a container keep their native cell behaviour
-        if (el.closest("table") && body.contains(el.closest("table"))) {
-            return;
-        }
 
-        e.preventDefault();
 
-        const range = sel.getRangeAt(0);
-        range.deleteContents();
 
-        let startEl = range.startContainer;
-        if (startEl.nodeType === 3) {
-            startEl = startEl.parentElement;
-        }
-        const block = startEl && startEl.closest
-            ? startEl.closest("p, h1, h2, h3, h4, h5, h6, li, blockquote, pre")
-            : null;
 
-        if (block && body.contains(block) && block !== body) {
-            this._splitBlock(block, range, sel);
-        } else {
-            this._insertBreak(range, sel);
-        }
 
-        if (typeof editor._syncValue === "function") {
-            editor._syncValue();
-        }
-        if (typeof editor._updateUndoRedoStates === "function") {
-            editor._updateUndoRedoStates();
-        }
-    },
 
-    /**
-     * Splits a block element at the caret, moving the trailing content into a
-     * new sibling block of the same type and placing the caret at its start.
-     * @param {HTMLElement} block - The block to split.
-     * @param {Range} range - The collapsed caret range.
-     * @param {Selection} sel - The current selection.
-     */
-    _splitBlock: function(block, range, sel) {
-        const tail = document.createRange();
-        tail.setStart(range.startContainer, range.startOffset);
-        tail.setEnd(block, block.childNodes.length);
-        const frag = tail.extractContents();
 
-        const newBlock = document.createElement(block.tagName);
-        const style = block.getAttribute("style");
-        if (style) {
-            newBlock.setAttribute("style", style);
-        }
-        if (!frag.childNodes.length || ((frag.textContent || "").trim() === "" && !frag.querySelector("br, img"))) {
-            newBlock.innerHTML = "<br>";
-        } else {
-            newBlock.appendChild(frag);
-        }
-
-        if ((block.textContent || "").trim() === "" && !block.querySelector("br, img")) {
-            block.innerHTML = "<br>";
-        }
-
-        block.parentNode.insertBefore(newBlock, block.nextSibling);
-
-        const r = document.createRange();
-        r.setStart(newBlock, 0);
-        r.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(r);
-    },
-
-    /**
-     * Inserts a line break at the caret, adding a filler break when needed so
-     * the caret can move to the new visual line.
-     * @param {Range} range - The collapsed caret range.
-     * @param {Selection} sel - The current selection.
-     */
-    _insertBreak: function(range, sel) {
-        const br = document.createElement("br");
-        range.insertNode(br);
-
-        const next = br.nextSibling;
-        const needsFiller = !next || (next.nodeType === 3 && next.textContent === "");
-        if (needsFiller) {
-            const filler = document.createElement("br");
-            br.parentNode.insertBefore(filler, br.nextSibling);
-        }
-
-        const r = document.createRange();
-        r.setStartAfter(br);
-        r.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(r);
-    },
-
-    /**
-     * Brings persisted add-ons back to life after the content has been loaded
-     * or programmatically replaced. Instantiating a control consumes its
-     * marker class and replaces the widget markup with runtime DOM (e.g. the
-     * Game of Life canvas), so persisted content only carries a dead shell.
-     * Re-rendering the widget body from the definition restores the marker
-     * class, which lets the controller instantiate the control again.
-     * Containers (user content) and purely static add-ons are left untouched.
-     * @param {object} editor -The editor instance.
-     */
-    onContentChange: function(editor) {
-        const root = editor.getEditorElement();
-        if (!root) {
-            return;
-        }
-
-        root.querySelectorAll("[data-addon-id]").forEach((frame) => {
-            const def = webexpress.webui.EditorAddOns.get(frame.getAttribute("data-addon-id") || "");
-            if (!def || def.isContainer) {
-                return; // container bodies carry user content and must survive
-            }
-
-            const host = (def.type || "block") === "inline"
-                ? frame
-                : frame.querySelector(".card-body");
-            if (!host) {
-                return;
-            }
-
-            const data = this._readAddonData(def, frame, host.firstElementChild);
-            const html = typeof def.renderer === "function" ? def.renderer(data) : (def.content || "");
-            if (!this._containsRegisteredControl(html)) {
-                return; // static content persists on its own
-            }
-            if (this._hasLiveControl(host)) {
-                return; // already instantiated or about to be picked up
-            }
-
-            host.innerHTML = html;
-        });
-    },
 
     /**
      * Collects the persisted property values of an add-on. The widget element
@@ -220,52 +66,9 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
         return "data-" + name.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
     },
 
-    /**
-     * Returns whether the rendered add-on markup contains the marker class of
-     * a registered control, i.e. whether the add-on hosts a JS control that
-     * needs instantiation (in contrast to purely static markup).
-     * @param {string} html -The freshly rendered add-on markup.
-     * @returns {boolean}
-     */
-    _containsRegisteredControl: function(html) {
-        const registry = webexpress.webui.Controller.classRegistry;
-        if (!registry) {
-            return false;
-        }
-        for (const selector of registry.keys()) {
-            const escaped = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-            if (new RegExp("(^|[^-\\w])" + escaped + "($|[^-\\w])").test(html)) {
-                return true;
-            }
-        }
-        return false;
-    },
 
-    /**
-     * Returns whether the add-on body still hosts a living control: either an
-     * element with a registered instance, or one that still carries a marker
-     * class and is therefore about to be instantiated by the observer.
-     * @param {HTMLElement} host -The add-on body element.
-     * @returns {boolean}
-     */
-    _hasLiveControl: function(host) {
-        const controller = webexpress.webui.Controller;
-        const elements = [host, ...host.querySelectorAll("*")];
-        return elements.some((el) => {
-            if (controller.instanceMap && controller.instanceMap.has(el)) {
-                return true;
-            }
-            if (!el.classList || !controller.classRegistry) {
-                return false;
-            }
-            for (const selector of controller.classRegistry.keys()) {
-                if (el.classList.contains(selector)) {
-                    return true;
-                }
-            }
-            return false;
-        });
-    },
+
+
 
     /**
      * Initializes the plugin.
@@ -273,36 +76,19 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
      * @param {object} editor -The editor instance.
      */
     init: function(editor) {
-        // expose plugin to the editor so external pages can call property dialogs
         editor._addonPlugin = this;
-
-        const editorElem = editor.getEditorElement();
-
-        // keep Enter inside an editable add-on body (a contenteditable="true"
-        // island nested in the contenteditable="false" frame). Native Enter
-        // there tends to escape the island and land at the document end.
-        editorElem.addEventListener("keydown", (e) => this._handleBodyEnter(editor, e));
-
-        // handle clicks on settings buttons inside add-on frames
-        editorElem.addEventListener("click", (e) => {
-            const target = this._getSafeTarget(e);
-            if (!target) {
-                return;
-            }
-
-            const btn = target.closest(".wx-addon-settings-btn");
-            if (btn) {
-                const frame = btn.closest("[data-addon-id]");
-                if (frame) {
-                    this._openSettingsForNode(editor, frame);
-                }
-                e.preventDefault();
-                e.stopPropagation();
-            }
+        const root = editor.getEditorElement();
+        editor.listen(root, "click", e => {
+            if (editor.disabled) return;
+            const button = e.target.closest?.(".wx-addon-settings-btn");
+            if (button) { e.preventDefault(); this._openSettingsForNode(editor, button.closest("[data-addon-id]")); }
         });
-
-        // initialize drag and drop behavior
-        this._initDragEvents(editorElem, editor);
+        this._initDragEvents(root, editor);
+        return () => {
+            this._removeDropMarker();
+            for (const key of ["_propModal", "_selectionModal"]) this[key]?.remove();
+            this._propModalCtrl?.destroy?.();
+        };
     },
 
     /**
@@ -311,126 +97,26 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
      * @param {HTMLElement} editorElem -The content editable element.
      * @param {object} editor -The editor instance.
      */
-    _initDragEvents: function(editorElem, editor) {
-        editorElem.addEventListener("mousedown", (e) => {
-            const target = this._getSafeTarget(e);
-            if (!target) {
-                return;
-            }
-
-            const frame = target.closest(".wx-addon-frame");
-            if (!frame) {
-                return;
-            }
-
-            // never start an element drag from inside a table - the user is
-            // selecting cell text - regardless of where exactly the press lands
-            if (target.closest("table")) {
-                frame.setAttribute("draggable", "false");
-                return;
-            }
-
-            if (target.closest(".wx-addon-header") || target.closest(".wx-addon-drag-handle")) {
-                if (!target.closest(".wx-addon-settings-btn")) {
-                    frame.setAttribute("draggable", "true");
-                }
-            } else {
-                frame.setAttribute("draggable", "false");
-            }
+    _initDragEvents: function(root, editor) {
+        editor.listen(root, "dragstart", e => {
+            if (editor.disabled) { e.preventDefault(); return; }
+            const frame = e.target.closest?.("[data-addon-id]");
+            if (!frame) return;
+            this._draggedId = editor.nodeId(frame);
+            e.dataTransfer.setData("application/x-webexpress-editor-node", this._draggedId);
         });
-
-        editorElem.addEventListener("mouseup", (e) => {
-            const target = this._getSafeTarget(e);
-            if (target) {
-                const frame = target.closest(".wx-addon-frame");
-                if (frame) {
-                    frame.setAttribute("draggable", "false");
-                }
-            }
+        editor.listen(root, "dragover", e => { if (this._draggedId && !editor.disabled) e.preventDefault(); });
+        editor.listen(root, "drop", e => {
+            if (!this._draggedId || editor.disabled) return;
+            const range = this._getRangeFromEvent(e);
+            if (!range) return;
+            const position = editor._view.index(range.startContainer, range.startOffset);
+            if (position === null) return;
+            e.preventDefault(); e.stopPropagation();
+            editor.dispatch({ type: "moveNode", id: this._draggedId, position });
+            this._draggedId = null;
         });
-
-        editorElem.addEventListener("dragstart", (e) => {
-            const target = this._getSafeTarget(e);
-            if (!target) {
-                return;
-            }
-
-            const frame = target.closest("[data-addon-id]");
-            if (frame && frame.getAttribute("draggable") === "true") {
-                this._draggedNode = frame;
-                e.dataTransfer.effectAllowed = "move";
-                e.dataTransfer.setData("text/html", frame.outerHTML);
-                setTimeout(() => {
-                    frame.style.opacity = "0.4";
-                }, 0);
-            } else {
-                e.preventDefault();
-            }
-        });
-
-        editorElem.addEventListener("dragend", () => {
-            if (this._draggedNode) {
-                this._draggedNode.style.opacity = "";
-                this._draggedNode.setAttribute("draggable", "false");
-            }
-            this._draggedNode = null;
-            this._removeDropMarker();
-        });
-
-        editorElem.addEventListener("dragover", (e) => {
-            if (this._draggedNode) {
-                e.preventDefault();
-                e.dataTransfer.dropEffect = "move";
-
-                const range = this._getRangeFromEvent(e);
-                if (range) {
-                    if (this._draggedNode.contains(range.startContainer)) {
-                        this._removeDropMarker();
-                        return;
-                    }
-                    this._updateDropMarker(range);
-                }
-            }
-        });
-
-        editorElem.addEventListener("dragleave", (e) => {
-            const rect = editorElem.getBoundingClientRect();
-            if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
-                this._removeDropMarker();
-            }
-        });
-
-        editorElem.addEventListener("drop", (e) => {
-            if (this._draggedNode) {
-                e.preventDefault();
-                e.stopPropagation();
-                this._removeDropMarker();
-
-                const range = this._getRangeFromEvent(e);
-                if (range) {
-                    if (this._draggedNode.contains(range.startContainer)) {
-                        return;
-                    }
-
-                    range.insertNode(this._draggedNode);
-
-                    this._draggedNode.style.opacity = "";
-                    this._draggedNode.setAttribute("draggable", "false");
-
-                    if (editor._syncValue) {
-                        editor._syncValue();
-                    }
-
-                    const sel = window.getSelection();
-                    sel.removeAllRanges();
-                    const newRange = document.createRange();
-                    newRange.setStartAfter(this._draggedNode);
-                    newRange.collapse(true);
-                    sel.addRange(newRange);
-                }
-                this._draggedNode = null;
-            }
-        });
+        editor.listen(root, "dragend", () => { this._draggedId = null; });
     },
 
     /**
@@ -674,7 +360,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
             label: "Remove",
             icon: "trash",
             action: () => {
-                wrapper.remove();
+                editor.removeNode(wrapper);
                 if (editor._syncValue) {
                     editor._syncValue();
                 }
@@ -816,7 +502,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
         });
 
         if (this._activeAddonNode) {
-            this._updateAddonNode(this._activeAddonNode, addonDef, data);
+            this._currentEditor.updateNode(this._activeAddonNode, { data });
         } else {
             this._insertAddon(addonDef, data);
         }
@@ -832,113 +518,18 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
      * @param {object} data -Configuration data.
      */
     _insertAddon: function(addon, data) {
-        if (!this._currentEditor) {
-            return;
-        }
-
-        if (this._backupRange) {
-            this._currentEditor._savedRange = this._backupRange.cloneRange();
-            const sel = window.getSelection();
-            if (sel) {
-                sel.removeAllRanges();
-                sel.addRange(this._backupRange);
-            }
-        } else if (typeof this._currentEditor.restoreSavedRange === "function") {
-            this._currentEditor.restoreSavedRange();
-        }
-
-        let innerHtml = "";
-        if (typeof addon.renderer === "function") {
-            innerHtml = addon.renderer(data);
-        } else {
-            innerHtml = addon.content;
-        }
-
-        const frameHtml = this._createFrameHtml(addon, innerHtml, data);
-        this._currentEditor.insertHtmlAtCursor(frameHtml);
-
-        // drop the caret inside the new container body so the first edit happens
-        // inside the add-on, not in the document after it
-        if (addon.isContainer) {
-            this._focusNewContainerBody(this._currentEditor);
-        }
+        const editor = this._currentEditor;
+        if (!editor || editor.disabled) return;
+        const Model = webexpress.webui.EditorModel;
+        const content = addon.isContainer ? webexpress.webui.EditorHtml.read(typeof addon.renderer === "function" ? addon.renderer(data) : addon.content || "").state.doc.children : [];
+        const node = Model.node("addon", content, { name: addon.id, data: data || {}, inline: addon.type === "inline", container: !!addon.isContainer });
+        editor.dispatch({ type: "insertNodes", nodes: [node] });
+        if (addon.isContainer) { const entry = Model.find(editor._state.doc, node.id); if (entry) editor.selection = { anchor: entry.start, focus: entry.start }; }
     },
 
-    /**
-     * Places the caret inside a freshly inserted editable container body
-     * (marked with data-wx-focus-new) and clears the marker.
-     * @param {object} editor - The editor instance.
-     */
-    _focusNewContainerBody: function(editor) {
-        const root = editor.getEditorElement();
-        if (!root) {
-            return;
-        }
-        const body = root.querySelector('[data-wx-focus-new="1"]');
-        if (!body) {
-            return;
-        }
-        body.removeAttribute("data-wx-focus-new");
 
-        const target = body.querySelector("p, h1, h2, h3, h4, h5, h6, li, blockquote, pre, div") || body;
-        const range = document.createRange();
-        range.selectNodeContents(target);
-        range.collapse(true);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
 
-        if (typeof editor._saveCurrentSelection === "function") {
-            editor._saveCurrentSelection();
-        }
-        if (typeof editor._syncValue === "function") {
-            editor._syncValue();
-        }
-    },
 
-    /**
-     * Updates an existing add-on node with new data.
-     * @param {HTMLElement} frameNode -The wrapper element.
-     * @param {object} def -Add-on definition.
-     * @param {object} data -New configuration data.
-     */
-    _updateAddonNode: function(frameNode, def, data) {
-        let widget = null;
-        if (def.type === "inline") {
-            if (typeof def.renderer === "function") {
-                frameNode.innerHTML = def.renderer(data);
-            } else {
-                frameNode.innerHTML = def.content;
-            }
-            widget = frameNode.firstElementChild;
-        } else {
-            const body = frameNode.querySelector(".card-body");
-            if (body) {
-                widget = body.firstElementChild;
-            }
-        }
-
-        if (widget) {
-            const ctrl = webexpress.webui.Controller.getInstanceByElement(widget);
-            if (ctrl && typeof ctrl.updateSettings === "function") {
-                if (data.cellSize && data.color) {
-                    ctrl.updateSettings(data.cellSize, data.color);
-                }
-            }
-
-            Object.keys(data).forEach(key => {
-                const attr = this._propertyAttributeName(key);
-                widget.setAttribute(attr, data[key]);
-            });
-        }
-
-        // mirror the values onto the frame: it survives even when a control
-        // replaces the widget markup at runtime, so rehydration after a
-        // reload can re-render the add-on with the persisted configuration
-        Object.keys(data).forEach(key => {
-            frameNode.setAttribute(this._propertyAttributeName(key), data[key]);
-        });
-    },
 
     /**
      * Serializes property values as data attributes for the add-on frame so

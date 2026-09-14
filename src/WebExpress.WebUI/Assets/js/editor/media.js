@@ -36,61 +36,17 @@ webexpress.webui.EditorImage = class {
      * Preserves the node, its link and unrelated attributes when an image changes.
      */
     static update(editor, image, values) {
-        return this._change(editor, image, () => this._apply(image, values));
+        const attrs = { ...values };
+        return editor.updateNode(image, attrs);
     }
 
-    /**
-     * Builds new images through DOM attributes so alternative text remains text.
-     */
     static insert(editor, values) {
-        const image = document.createElement("img");
-        this._apply(image, values);
-        const container = document.createElement("div");
-        container.appendChild(image);
-        editor.insertHtmlAtCursor(container.innerHTML);
+        editor.dispatch({ type: "insertNodes", nodes: [webexpress.webui.EditorModel.node("image", [], values)] });
     }
 
-    /**
-     * Removes an image with a recoverable caret and an undo checkpoint.
-     */
-    static remove(editor, image) {
-        return this._change(editor, image, () => image.parentNode.removeChild(image));
-    }
+    static remove(editor, image) { return editor.removeNode(image); }
 
-    static _change(editor, image, change) {
-        if (!this.select(editor, image)) {
-            return false;
-        }
-        editor._history?.prepare();
-        change();
-        editor._saveCurrentSelection();
-        editor._syncValue();
-        editor._updateUndoRedoStates();
-        return true;
-    }
 
-    static _apply(image, values) {
-        ["src", "alt"].forEach(name => {
-            if (values[name] !== undefined) {
-                image.setAttribute(name, values[name]);
-            }
-        });
-        ["width", "height"].forEach(name => {
-            if (values[name] !== undefined) {
-                const value = this.dimension(values[name]);
-                if (value !== null) {
-                    image.removeAttribute(name);
-                    image.style[name] = value;
-                }
-            }
-        });
-        if (values.align !== undefined) {
-            image.style.float = "";
-            image.style.display = values.align === "inline" ? "" : "block";
-            image.style.marginLeft = values.align === "center" || values.align === "right" ? "auto" : "";
-            image.style.marginRight = values.align === "center" || values.align === "left" ? "auto" : "";
-        }
-    }
 };
 
 /**

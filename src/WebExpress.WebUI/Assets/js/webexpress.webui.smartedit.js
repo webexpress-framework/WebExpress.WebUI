@@ -391,7 +391,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         }
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
         if (ctrl && this._isCtrl(ctrl, "EditorCtrl")) {
-            return ctrl._editorElement?.innerHTML;
+            return ctrl.value;
         }
         if (["INPUT", "TEXTAREA"].includes(this._editor.tagName)) {
             return this._editor.value;

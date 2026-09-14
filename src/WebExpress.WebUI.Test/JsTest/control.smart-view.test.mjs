@@ -27,7 +27,7 @@ contract({
 test("a view over an editor reports what the editor holds", () => {
     const rt = loadWebUi({
         browser: true,
-        extraFiles: ["webexpress.webui.editor.js", "webexpress.webui.smartview.js"]
+        extraFiles: ["webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js", "webexpress.webui.editor.js", "webexpress.webui.smartview.js"]
     });
 
     const host = rt.createElement("div");

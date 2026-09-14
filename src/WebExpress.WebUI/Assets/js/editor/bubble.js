@@ -39,25 +39,25 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         const editorElem = editor.getEditorElement();
 
         // selectionchange is global; we filter for ranges inside THIS editor
-        document.addEventListener("selectionchange", () => {
-            setTimeout(() => this._onSelectionChange(editor), 0);
+        editor.listen(document, "selectionchange", () => {
+            editor.defer(() => this._onSelectionChange(editor), 0);
         });
 
         // keep bubble glued to the selection on scroll / resize
-        window.addEventListener("scroll", () => {
+        editor.listen(window, "scroll", () => {
             if (this._currentEditor === editor) {
                 this._reposition();
             }
         }, true);
-        window.addEventListener("resize", () => {
+        editor.listen(window, "resize", () => {
             if (this._currentEditor === editor) {
                 this._reposition();
             }
         });
 
         // hide when the editor loses focus, unless focus moved into the bubble
-        editorElem.addEventListener("blur", () => {
-            setTimeout(() => {
+        editor.listen(editorElem, "blur", () => {
+            editor.defer(() => {
                 if (this._currentEditor !== editor) {
                     return;
                 }
@@ -73,7 +73,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         });
 
         // hide on outside click
-        document.addEventListener("mousedown", (e) => {
+        editor.listen(document, "mousedown", (e) => {
             if (this._currentEditor !== editor) {
                 return;
             }
@@ -88,6 +88,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
             }
             this._hide();
         }, true);
+        return () => { this._hide(); this._bubbleEl?.remove(); this._flyoutEl?.remove(); };
     },
 
     /**
@@ -97,6 +98,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
      * @param {object} editor - The editor whose selection state is checked.
      */
     _onSelectionChange: function(editor) {
+        if (editor.disabled || editor._destroyed) { this._hide(); return; }
         // while the context flyout is open the user is interacting with the
         // menu (some plugin actions move the selection); don't rebuild or hide.
         if (this._flyoutEl) {
@@ -299,7 +301,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         b.className = "wx-editor-bubble-btn";
         b.title = title;
         b.setAttribute("aria-label", title);
-        if (webexpress.webui.EditorFormat.handles(icon)) {
+        if (webexpress.webui.EditorCtrl.formatMark(icon)) {
             b.dataset.command = icon;
             b.setAttribute("aria-pressed", "false");
         }
@@ -369,7 +371,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
      * @returns {Array<object>}
      */
     _collectContextItems: function(editor, target) {
-        const plugins = webexpress.webui.EditorPlugins.getAll() || [];
+        const plugins = editor._plugins || [];
         let items = [];
         plugins.forEach((p) => {
             if (typeof p.getContextMenuItems !== "function") {
@@ -517,7 +519,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
      * @param {Function} action - The action callback.
      */
     _runAction: function(editor, action) {
-        editor?._history?.prepare();
+        if (editor.disabled || editor._destroyed) return;
         if (typeof action === "function") {
             try {
                 action();
@@ -578,7 +580,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
             return;
         }
         editor._saveCurrentSelection?.();
-        const media = (webexpress.webui.EditorPlugins.getAll() || []).find(p => p && p.linkModal !== undefined);
+        const media = (editor._plugins || []).find(p => p && p.linkModal !== undefined);
         if (media && typeof media._openModal === "function") {
             const range = editor._savedRange?.cloneRange?.() || null;
             const selectedText = window.getSelection()?.toString() || "";

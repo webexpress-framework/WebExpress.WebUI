@@ -561,7 +561,7 @@ function parseHtmlInto(parent, html, doc) {
  */
 function serializeNode(node) {
     if (node.nodeType === TEXT_NODE) {
-        return node.textContent;
+        return node.textContent.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
     }
     if (node.nodeType === DOCUMENT_FRAGMENT_NODE) {
         return node.childNodes.map(serializeNode).join("");
@@ -569,7 +569,7 @@ function serializeNode(node) {
     const tag = node.tagName.toLowerCase();
     let attrs = "";
     node.attributes.forEach((a) => {
-        attrs += ` ${a.name}="${a.value}"`;
+        attrs += ` ${a.name}="${String(a.value).replace(/&/g, "&amp;").replace(/"/g, "&quot;")}"`;
     });
     if (VOID_TAGS.has(node.tagName)) {
         return `<${tag}${attrs}>`;

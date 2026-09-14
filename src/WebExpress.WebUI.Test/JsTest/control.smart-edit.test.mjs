@@ -69,7 +69,7 @@ test("the read view survives repeated edit cycles", () => {
     const rt = loadWebUi({
         browser: true,
         extraFiles: [
-            "webexpress.webui.editor.js",
+            "webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js", "webexpress.webui.editor.js",
             "webexpress.webui.content.js",
             "webexpress.webui.smartedit.js"
         ]

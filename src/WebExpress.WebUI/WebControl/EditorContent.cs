@@ -73,6 +73,11 @@ namespace WebExpress.WebUI.WebControl
                 return [];
             }
 
+            if (EditorState.IsState(html))
+            {
+                html = EditorState.ToHtml(html);
+            }
+
             var unwrapped = new HashSet<IHtmlNode>();
             var nodes = Strip(new HtmlParser().Parse(html), unwrapped);
 

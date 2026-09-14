@@ -44,45 +44,21 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {object} editor - The editor instance.
      */
     init: function(editor) {
-        const editorElem = editor.getEditorElement();
-
-        editorElem.addEventListener("keydown", (e) => this._onKeyDown(editor, e));
-        editorElem.addEventListener("input", (e) => this._onInput(editor, e));
-
-        // clicking an inserted date re-opens the picker for editing
-        editorElem.addEventListener("click", (e) => {
-            const dateEl = e.target.closest ? e.target.closest(".wx-editor-date") : null;
-            if (dateEl && editorElem.contains(dateEl)) {
-                e.preventDefault();
-                this._editDate(editor, dateEl);
-            }
+        const root = editor.getEditorElement();
+        editor.listen(root, "keydown", e => { if (editor.ownsInput(e) && !e.defaultPrevented && !e.isComposing) this._onKeyDown(editor, e); });
+        editor.listen(root, "click", e => {
+            if (editor.disabled) return;
+            const date = e.target.closest?.(".wx-editor-date");
+            if (date) { e.preventDefault(); this._editDate(editor, date); }
         });
-
-        editorElem.addEventListener("blur", () => {
-            // close on blur, but allow clicks inside the popup to win
-            setTimeout(() => {
-                if (this._popup && this._popup.contains(document.activeElement)) {
-                    return;
-                }
-                this._closeSlashMenu();
-            }, 100);
+        editor.listen(document, "mousedown", e => {
+            if (!this._popup?.contains(e.target) && !root.contains(e.target)) this._closeSlashMenu();
+            if (!this._mentionPopup?.contains(e.target) && !root.contains(e.target)) this._closeMentionMenu();
         });
-
-        if (!this._docClickHandler) {
-            this._docClickHandler = (e) => {
-                if (this._popup && this._popup.style.display !== "none") {
-                    if (!this._popup.contains(e.target)) {
-                        this._closeSlashMenu();
-                    }
-                }
-                if (this._mentionPopup && this._mentionPopup.style.display !== "none") {
-                    if (!this._mentionPopup.contains(e.target)) {
-                        this._closeMentionMenu();
-                    }
-                }
-            };
-            document.addEventListener("mousedown", this._docClickHandler, true);
-        }
+        return () => {
+            this._closeDatePopup(); this._closeMentionMenu(); this._closeSlashMenu();
+            this._popup?.remove(); this._mentionPopup?.remove();
+        };
     },
 
     /**
@@ -129,7 +105,9 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {object} editor
      * @param {InputEvent} e
      */
-    _onInput: function(editor, e) {
+    onTransaction: function(editor, action) {
+        if (action.type !== "insertText") return;
+        const e = { inputType: "insertText", data: action.text };
         // if mention menu is open, update its query
         if (this._mentionPopup && this._mentionPopup.style.display !== "none" && this._mentionState && this._mentionState.editor === editor) {
             this._updateMentionQuery();
@@ -142,6 +120,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         if (inputType === "insertText" || inputType === "insertCompositionText" || inputType === "" || !inputType) {
             const data = e.data;
 
+            if (data === "/" && this._isAtBlockStart(editor)) this._openSlashMenu(editor);
             if (data === "/") {
                 if (this._consumeDoubleTrigger(editor, "/")) {
                     return;
@@ -182,28 +161,8 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @returns {boolean}
      */
     _isAtBlockStart: function(editor) {
-        const sel = window.getSelection();
-        if (!sel || sel.rangeCount === 0) return false;
-        const range = sel.getRangeAt(0);
-        if (!range.collapsed) return false;
-        const editorElem = editor.getEditorElement();
-        if (!editorElem.contains(range.startContainer)) return false;
-
-        // walk up to the block parent
-        let node = range.startContainer;
-        if (node.nodeType === Node.TEXT_NODE) {
-            node = node.parentElement;
-        }
-        const block = node?.closest?.("p, h1, h2, h3, h4, h5, h6, blockquote, pre, li, div");
-        if (!block || !editorElem.contains(block) || block === editorElem) return false;
-
-        // strip placeholder span if present
-        const clone = block.cloneNode(true);
-        clone.querySelectorAll(".wx-editor-placeholder").forEach((el) => el.remove());
-
-        // the only typed character should be the leading `/`
-        const text = (clone.textContent || "").replace(/ /g, " ");
-        return text === "/" || text.trimStart() === "/";
+        const block = webexpress.webui.EditorModel.block(editor._state.doc, editor.selection.focus);
+        return !!block && editor.selection.focus === block.start + 1;
     },
 
     /**
@@ -213,6 +172,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
     _openSlashMenu: function(editor) {
         this._ensurePopup();
         this._currentEditor = editor;
+        this._slashPosition = editor.selection.focus - 1;
 
         // remember where the slash was typed so we can replace it on commit.
         // we also capture the parent block, because the easiest way to clean
@@ -245,7 +205,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         this._popup.style.display = "block";
 
         // focus the search field so subsequent typing filters the list
-        setTimeout(() => {
+        editor.defer(() => {
             try { this._searchInput.focus(); } catch (_) { /* noop */ }
         }, 0);
     },
@@ -495,31 +455,8 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {object} editor
      */
     _removeSlashTrigger: function(editor) {
-        const editorElem = editor.getEditorElement();
-        const block = this._slashBlock;
-        if (!block || !editorElem.contains(block)) {
-            return;
-        }
-
-        try {
-            while (block.firstChild) {
-                block.removeChild(block.firstChild);
-            }
-            block.appendChild(document.createElement("br"));
-
-            // place caret at the start of the now-empty block
-            const range = document.createRange();
-            range.selectNodeContents(block);
-            range.collapse(true);
-            const sel = window.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-
-            // tell the editor about the new selection so execCommand picks it up
-            editor._saveCurrentSelection?.();
-        } catch (_) {
-            // ignore - caret will land somewhere sensible after execution
-        }
+        if (this._slashPosition == null) return;
+        editor.dispatch({ type: "delete", selection: { anchor: this._slashPosition, focus: this._slashPosition + 1 }, source: "shortcut" });
     },
 
     /**
@@ -594,46 +531,16 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @returns {boolean}
      */
     _consumeDoubleTrigger: function(editor, char) {
-        const sel = window.getSelection();
-        if (!sel || sel.rangeCount === 0) return false;
-        const range = sel.getRangeAt(0);
-        const node = range.startContainer;
-        if (node.nodeType !== Node.TEXT_NODE) return false;
-
-        const offset = range.startOffset;
-        const text = node.textContent || "";
-        // last two characters before the caret
-        if (offset < 2) return false;
-        const prev = text.charAt(offset - 2);
-        const cur = text.charAt(offset - 1);
-        if (prev !== char || cur !== char) return false;
-
-        // strip the two characters from the text
-        node.textContent = text.slice(0, offset - 2) + text.slice(offset);
-
-        // restore caret
-        const newRange = document.createRange();
-        const newOffset = offset - 2;
-        newRange.setStart(node, Math.min(newOffset, (node.textContent || "").length));
-        newRange.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(newRange);
-
-        editor._saveCurrentSelection?.();
-
-        if (char === "[") {
-            this._triggerLinkDialog(editor);
-            return true;
-        }
-        if (char === "{") {
-            this._triggerAddonDialog(editor);
-            return true;
-        }
-        if (char === "/") {
-            this._triggerDateDialog(editor);
-            return true;
-        }
-        return false;
+        const Model = webexpress.webui.EditorModel, pos = editor.selection.focus;
+        const block = Model.block(editor._state.doc, pos);
+        if (!block) return false;
+        const before = Model.slice(block.node.children, 0, pos - block.start).map(n => n.text || "\ufffc").join("");
+        if (!before.endsWith(char + char)) return false;
+        editor.dispatch({ type: "delete", selection: { anchor: pos - 2, focus: pos }, source: "shortcut" });
+        if (char === "[") this._triggerLinkDialog(editor);
+        if (char === "{") this._triggerAddonDialog(editor);
+        if (char === "/") this._triggerDateDialog(editor);
+        return true;
     },
 
     /**
@@ -641,7 +548,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {object} editor
      */
     _triggerLinkDialog: function(editor) {
-        const media = (webexpress.webui.EditorPlugins.getAll() || []).find((p) => p && p.linkModal !== undefined);
+        const media = editor._plugins.find((p) => p && p.linkModal !== undefined);
         if (media && typeof media._openModal === "function") {
             const range = editor._savedRange?.cloneRange?.() || null;
             media._openModal(editor, "linkModal", "editor-link", "webexpress.webui:editor.insert.link.title", { url: "", text: "" }, range);
@@ -658,7 +565,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {object} editor
      */
     _triggerAddonDialog: function(editor) {
-        const addons = (webexpress.webui.EditorPlugins.getAll() || []).find((p) => p && p._selectionModal !== undefined && typeof p._openModal === "function");
+        const addons = editor._plugins.find((p) => p && p._selectionModal !== undefined && typeof p._openModal === "function");
         if (addons) {
             const range = editor._savedRange?.cloneRange?.() || null;
             addons._openModal(editor, "_selectionModal", "editor-addon", "webexpress.webui:editor.insert.addon.title", range);
@@ -705,7 +612,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         });
 
         // open the calendar right away for a smooth flow
-        setTimeout(() => {
+        editor.defer(() => {
             const ctrl = webexpress.webui.Controller.getInstanceByElement(host) ||
                 webexpress.webui.Controller.getInstanceByElement(popup.firstElementChild);
             if (ctrl && typeof ctrl._showCalendarPopup === "function") {
@@ -731,9 +638,9 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
             }
             this._closeDatePopup();
         };
-        document.addEventListener("keydown", this._dateKeyHandler, true);
+        editor.listen(document, "keydown", this._dateKeyHandler, true);
         // defer so the triggering interaction does not immediately close it
-        setTimeout(() => document.addEventListener("mousedown", this._dateClickHandler, true), 0);
+        editor.defer(() => editor.listen(document, "mousedown", this._dateClickHandler, true), 0);
     },
 
     /**
@@ -743,21 +650,12 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {string} format - The date format used for the display control.
      */
     _commitDate: function(editor, value, format) {
-        if (this._datePopup) {
-            this._datePopup.done = true;
-        }
+        const id = this._dateTargetId; this._dateTargetId = null;
+        if (this._datePopup) this._datePopup.done = true;
         this._closeDatePopup();
-
-        const escapeHtml = (text) => {
-            const div = document.createElement("div");
-            div.textContent = text;
-            return div.innerHTML;
-        };
-
-        const html =
-            `<span class="wx-webui-date wx-editor-date" contenteditable="false" data-format="${escapeHtml(format)}" data-value="${escapeHtml(value)}">${escapeHtml(value)}</span>&nbsp;`;
-
-        editor.insertHtmlAtCursor(html);
+        const attrs = { kind: "date", text: value, value, format };
+        if (id) editor.updateNode(id, attrs);
+        else editor.dispatch({ type: "insertNodes", nodes: [webexpress.webui.EditorModel.node("atom", [], attrs)] });
     },
 
     /**
@@ -846,7 +744,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
                 label: this._i18n("webexpress.webui:editor.remove", "Remove"),
                 icon: "trash",
                 action: () => {
-                    dateEl.remove();
+                    editor.removeNode(dateEl);
                     editor._syncValue?.();
                     editor._updateUndoRedoStates?.();
                 }
@@ -861,15 +759,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {HTMLElement} dateEl - The .wx-editor-date element.
      */
     _editDate: function(editor, dateEl) {
-        const range = document.createRange();
-        range.setStartBefore(dateEl);
-        range.collapse(true);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-        dateEl.remove();
-        editor._saveCurrentSelection?.();
-        editor._syncValue?.();
+        this._dateTargetId = editor.nodeId(dateEl);
         this._triggerDateDialog(editor);
     },
 
@@ -893,14 +783,13 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         this._mentionState = {
             editor: editor,
             uri: uri,
-            anchorNode: r.startContainer,
-            anchorOffset: r.startOffset - 1, // the `@` sits before the caret
+            anchor: editor.selection.focus - 1,
             timer: null,
             items: [],
             activeIndex: -1,
             range: r.cloneRange()
         };
-        if (this._mentionState.anchorOffset < 0) this._mentionState.anchorOffset = 0;
+
 
         this._mentionPopup.style.display = "block";
         this._positionMentionPopup();
@@ -948,39 +837,14 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * Extracts the current query (`@xyz`) and fetches matching candidates.
      */
     _updateMentionQuery: function() {
-        if (!this._mentionState) return;
-        const editorElem = this._mentionState.editor.getEditorElement();
-        const sel = window.getSelection();
-        if (!sel || sel.rangeCount === 0) {
-            this._closeMentionMenu();
-            return;
-        }
-        const r = sel.getRangeAt(0);
-        if (!editorElem.contains(r.startContainer)) {
-            this._closeMentionMenu();
-            return;
-        }
-
-        // pull the text between the `@` and the caret
-        const node = this._mentionState.anchorNode;
-        let q = "";
-        if (node && node.nodeType === Node.TEXT_NODE && r.startContainer === node) {
-            const text = node.textContent || "";
-            const start = this._mentionState.anchorOffset + 1; // skip the `@`
-            const end = r.startOffset;
-            if (end < start) {
-                this._closeMentionMenu();
-                return;
-            }
-            q = text.slice(start, end);
-        }
-
-        // debounce
-        if (this._mentionState.timer) clearTimeout(this._mentionState.timer);
         const state = this._mentionState;
-        state.timer = setTimeout(() => {
-            this._fetchMentions(state, q);
-        }, 180);
+        if (!state) return;
+        const Model = webexpress.webui.EditorModel, block = Model.block(state.editor._state.doc, state.anchor);
+        const end = state.editor.selection.focus;
+        if (!block || end < state.anchor + 1) { this._closeMentionMenu(); return; }
+        const q = Model.slice(block.node.children, state.anchor + 1 - block.start, end - block.start).map(n => n.text || "").join("");
+        if (state.timer) state.editor.cancelDeferred(state.timer);
+        state.timer = state.editor.defer(() => this._fetchMentions(state, q), 180);
     },
 
     /**
@@ -989,22 +853,16 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {string} q
      */
     _fetchMentions: function(state, q) {
-        if (!this._mentionState || this._mentionState !== state) return;
-        const url = state.uri + (state.uri.indexOf("?") === -1 ? "?" : "&") + "q=" + encodeURIComponent(q);
-        fetch(url, { headers: { "Accept": "application/json" } })
-            .then((res) => res.ok ? res.json() : [])
-            .then((data) => {
-                if (!this._mentionState || this._mentionState !== state) return;
-                state.items = Array.isArray(data) ? data : [];
-                state.activeIndex = state.items.length > 0 ? 0 : -1;
-                this._renderMentionList();
-            })
-            .catch(() => {
-                if (!this._mentionState || this._mentionState !== state) return;
-                state.items = [];
-                state.activeIndex = -1;
-                this._renderMentionList();
-            });
+        const service = webexpress.webapp?.ServiceRegistry;
+        if (!service || this._mentionState !== state || state.editor._destroyed) return;
+        const url = state.uri + (state.uri.includes("?") ? "&" : "?") + "q=" + encodeURIComponent(q);
+        const request = (state.request || 0) + 1; state.request = request;
+        service.request(url, { method: "GET" }).then(result => {
+            if (this._mentionState !== state || state.editor._destroyed || state.request !== request) return;
+            state.items = result.ok && Array.isArray(result.data) ? result.data : [];
+            state.activeIndex = state.items.length ? 0 : -1;
+            this._renderMentionList();
+        });
     },
 
     /**
@@ -1099,47 +957,11 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * Inserts the chosen mention into the editor, replacing the `@query` text.
      */
     _activateMention: function() {
-        if (!this._mentionState) return;
-        const state = this._mentionState;
-        const entry = state.items[state.activeIndex];
-        if (!entry) {
-            this._closeMentionMenu();
-            return;
-        }
-
-        // remove the @query text first
-        const node = state.anchorNode;
-        if (node && node.nodeType === Node.TEXT_NODE) {
-            try {
-                const text = node.textContent || "";
-                const sel = window.getSelection();
-                let end = text.length;
-                if (sel && sel.rangeCount) {
-                    const r = sel.getRangeAt(0);
-                    if (r.startContainer === node) {
-                        end = r.startOffset;
-                    }
-                }
-                if (end > state.anchorOffset) {
-                    node.textContent = text.slice(0, state.anchorOffset) + text.slice(end);
-                }
-                const range = document.createRange();
-                range.setStart(node, state.anchorOffset);
-                range.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(range);
-                state.editor._saveCurrentSelection?.();
-            } catch (_) { /* noop */ }
-        }
-
-        const label = entry.label || entry.name || entry.id || "";
-        const href = entry.uri || "#";
-        const safeLabel = label.replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        const html = `<a class="wx-mention" data-id="${entry.id || ""}" href="${href}" contenteditable="false">@${safeLabel}</a>&nbsp;`;
-
+        const state = this._mentionState, entry = state?.items[state.activeIndex];
+        if (!entry) return;
+        const editor = state.editor, selection = { anchor: state.anchor, focus: editor.selection.focus };
         this._closeMentionMenu();
-        state.editor.getEditorElement().focus({ preventScroll: true });
-        state.editor.insertHtmlAtCursor(html);
+        editor.dispatch({ type: "insertNodes", selection, nodes: [webexpress.webui.EditorModel.node("atom", [], { kind: "mention", text: "@" + (entry.label || entry.name || entry.id || ""), value: String(entry.id || "") })] });
     },
 
     /**
@@ -1147,7 +969,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      */
     _positionMentionPopup: function() {
         if (!this._mentionPopup || !this._mentionState) return;
-        const r = this._mentionState.range;
+        const r = webexpress.webui.EditorSelection.getRange(this._mentionState.editor.getEditorElement());
         if (!r) return;
         const rect = r.getBoundingClientRect();
         const pRect = this._mentionPopup.getBoundingClientRect();
@@ -1178,62 +1000,16 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {object} editor
      */
     _applyMarkdownBlock: function(editor) {
-        const editorElem = editor.getEditorElement();
-        const sel = window.getSelection();
-        if (!sel || sel.rangeCount === 0) return;
-        const range = sel.getRangeAt(0);
-        if (!editorElem.contains(range.startContainer)) return;
-
-        let node = range.startContainer;
-        if (node.nodeType !== Node.TEXT_NODE) return;
-        const block = node.parentElement?.closest?.("p, h1, h2, h3, h4, h5, h6, blockquote, pre, li, div");
-        if (!block || !editorElem.contains(block) || block === editorElem) return;
-
-        // clone block text without placeholder
-        const clone = block.cloneNode(true);
-        clone.querySelectorAll(".wx-editor-placeholder").forEach((el) => el.remove());
-        const text = (clone.textContent || "").replace(/ /g, " ");
-
-        // pattern table
-        const patterns = [
-            { rx: /^# $/, action: () => editor.execCommand("formatBlock", "<h1>") },
-            { rx: /^## $/, action: () => editor.execCommand("formatBlock", "<h2>") },
-            { rx: /^### $/, action: () => editor.execCommand("formatBlock", "<h3>") },
-            { rx: /^> $/, action: () => editor.execCommand("formatBlock", "<blockquote>") },
-            { rx: /^``` $/, action: () => editor.execCommand("formatBlock", "<pre>") },
-            { rx: /^[-*] $/, action: () => editor.execCommand("insertUnorderedList") },
-            { rx: /^1\. $/, action: () => editor.execCommand("insertOrderedList") },
-            { rx: /^--- $/, action: () => editor.insertHtmlAtCursor("<hr><p><br></p>") }
-        ];
-
-        for (const p of patterns) {
-            if (p.rx.test(text)) {
-                // wipe the marker text from the block
-                this._clearBlockText(block);
-                // place caret inside the block
-                const r = document.createRange();
-                r.selectNodeContents(block);
-                r.collapse(true);
-                sel.removeAllRanges();
-                sel.addRange(r);
-                editor._saveCurrentSelection?.();
-                try { p.action(); } catch (_) { /* noop */ }
-                return;
-            }
-        }
+        const Model = webexpress.webui.EditorModel, block = Model.block(editor._state.doc, editor.selection.focus);
+        if (!block) return;
+        const text = block.node.children.map(n => n.text || "\ufffc").join("");
+        const blocks = { "# ": "h1", "## ": "h2", "### ": "h3", "``` ": "pre", "> ": "blockquote" };
+        const command = blocks[text] ? { type: "block", block: blocks[text] } : ["- ", "* ", "1. "].includes(text) ? { type: "list", command: text === "1. " ? "insertorderedlist" : "insertunorderedlist" } : null;
+        if (!command) return;
+        editor.dispatch({ type: "batch", actions: [{ type: "delete", selection: { anchor: block.start, focus: block.end - 1 } }, command], source: "markdown" });
     },
 
-    /**
-     * Wipes all child text/elements from a block while keeping it usable.
-     * @param {HTMLElement} block
-     */
-    _clearBlockText: function(block) {
-        // preserve a `<br>` filler so contenteditable behaves
-        while (block.firstChild) {
-            block.removeChild(block.firstChild);
-        }
-        block.appendChild(document.createElement("br"));
-    },
+
 
     /**
      * Applies inline markdown transformations after a Space was typed.
@@ -1242,67 +1018,15 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {object} editor
      */
     _applyMarkdownInline: function(editor) {
-        const editorElem = editor.getEditorElement();
-        const sel = window.getSelection();
-        if (!sel || sel.rangeCount === 0) return;
-        const range = sel.getRangeAt(0);
-        if (!editorElem.contains(range.startContainer)) return;
-        if (range.startContainer.nodeType !== Node.TEXT_NODE) return;
-
-        const node = range.startContainer;
-        const offset = range.startOffset; // caret is just after the Space
-        if (offset < 2) return;
-
-        const text = node.textContent || "";
-        // the Space is at offset-1; look backwards from offset-1
-        const beforeSpace = text.slice(0, offset - 1);
-        const afterSpace = text.slice(offset - 1);
-
-        // lookbehind on the `_italic_` pattern keeps the boundary character
-        // (space, line start, opening paren) outside the match, so it doesn't
-        // get clobbered when the inline element replaces the matched range.
-        const patterns = [
-            { rx: /\*\*([^*\n]+)\*\*$/, tag: "strong" },
-            { rx: /__([^_\n]+)__$/, tag: "strong" },
-            { rx: /\*([^*\n]+)\*$/, tag: "em" },
-            { rx: /(?<=^|[\s(])_([^_\n]+)_$/, tag: "em" },
-            { rx: /~~([^~\n]+)~~$/, tag: "s" },
-            { rx: /`([^`\n]+)`$/, tag: "code" }
-        ];
-
-        for (const p of patterns) {
-            const m = beforeSpace.match(p.rx);
-            if (!m) continue;
-            const inner = m[1];
-            const matchLen = m[0].length;
-            const replaceStart = beforeSpace.length - matchLen;
-
-            // build the replacement
-            const before = beforeSpace.slice(0, replaceStart);
-            const el = document.createElement(p.tag);
-            el.textContent = inner;
-
-            // mutate the text node and insert the element
-            const parent = node.parentNode;
-            if (!parent) continue;
-
-            // text before the match stays in `node`
-            node.textContent = before;
-
-            // insert the element after the text node
-            const afterTextNode = document.createTextNode(afterSpace);
-            const next = node.nextSibling;
-            parent.insertBefore(el, next);
-            parent.insertBefore(afterTextNode, el.nextSibling);
-
-            // place caret right after the Space inside the new text node
-            const r2 = document.createRange();
-            r2.setStart(afterTextNode, 1);
-            r2.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(r2);
-            editor._saveCurrentSelection?.();
-            return;
+        const Model = webexpress.webui.EditorModel, pos = editor.selection.focus, block = Model.block(editor._state.doc, pos);
+        if (!block) return;
+        const text = Model.slice(block.node.children, 0, pos - block.start).map(n => n.text || "\ufffc").join("");
+        const patterns = [[/\*\*([^*\n]+)\*\* $/, "bold"], [/__([^_\n]+)__ $/, "bold"], [/\*([^*\n]+)\* $/, "italic"], [/(?<=^|[\s(])_([^_\n]+)_ $/, "italic"], [/~~([^~\n]+)~~ $/, "strikethrough"], [/`([^`\n]+)` $/, "code"]];
+        for (const [regex, mark] of patterns) {
+            const match = text.match(regex);
+            if (!match) continue;
+            editor.dispatch({ type: "insertNodes", selection: { anchor: pos - match[0].length, focus: pos }, nodes: [{ type: "text", text: match[1], marks: { [mark]: true } }, { type: "text", text: " ", marks: {} }], source: "markdown" });
+            break;
         }
     }
 });
