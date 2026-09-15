@@ -21,7 +21,9 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     _addableWidget = false;
     _configurableWidget = false;
     _settingsDialog = null;
-    _onDocClick = null;
+
+    // the delete confirmation; owned dialog outside the host, created on first use
+    _confirm = null;
 
     // the widget types offered in the add menu, supplied by the REST layer; the
     // base leaves it empty so a standalone board offers nothing until told
@@ -48,41 +50,18 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         this._addableWidget = element.dataset.addableWidget === "true";
         this._configurableWidget = element.dataset.configurableWidget === "true";
 
-        // a single document listener closes any open board/widget dropdown when
-        // the click lands outside its own menu container
-        this._onDocClick = (e) => this._closeMenusOnOutsideClick(e);
-        document.addEventListener("click", this._onDocClick);
-
         this._parseStaticConfig();
         this.render();
     }
 
     /**
-     * Removes the document-level menu listener when the control is torn down.
+     * Releases the separately owned confirmation dialog, which does not go away
+     * with the host element.
      */
     destroy() {
-        if (this._onDocClick) {
-            document.removeEventListener("click", this._onDocClick);
-            this._onDocClick = null;
-        }
+        this._confirm?.destroy();
+        this._confirm = null;
         super.destroy();
-    }
-
-    /**
-     * Closes every open board or widget dropdown whose container does not
-     * contain the click target, so only a menu the user is interacting with
-     * stays open.
-     * @param {MouseEvent} e - The document click event.
-     */
-    _closeMenusOnOutsideClick(e) {
-        const menus = this._element.querySelectorAll(".wx-dashboard-menu > .dropdown-menu.show");
-        for (let i = 0; i < menus.length; i++) {
-            const container = menus[i].closest(".wx-dashboard-menu");
-            if (container && !container.contains(e.target)) {
-                menus[i].classList.remove("show");
-                container.classList.remove("wx-menu-open");
-            }
-        }
     }
 
     /**
@@ -377,14 +356,9 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         bar.className = "wx-dashboard-toolbar";
 
         const container = document.createElement("div");
-        container.className = "wx-dashboard-menu position-relative";
+        container.className = "wx-dashboard-menu";
 
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "wx-dashboard-menu-btn";
-        button.title = this._i18n("webexpress.webapp:dashboard.menu", "Options");
-        button.setAttribute("aria-label", button.title);
-        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
+        const button = this._buildMenuButton(this._i18n("webexpress.webapp:dashboard.menu", "Options"));
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
@@ -436,17 +410,56 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             return null;
         }
 
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this._toggleMenu(menu);
-        });
-
-        container.appendChild(button);
-        container.appendChild(menu);
+        this._attachMenu(container, button, menu);
         bar.appendChild(container);
 
         return bar;
+    }
+
+    /**
+     * Builds the "…" trigger shared by the board, column and widget menus.
+     * @param {string} label - The accessible name and tooltip of the trigger.
+     * @returns {HTMLButtonElement} The trigger button.
+     */
+    _buildMenuButton(label) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "wx-dashboard-menu-btn";
+        button.title = label;
+        button.setAttribute("aria-label", label);
+        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
+
+        return button;
+    }
+
+    /**
+     * Mounts a menu as a native popover under its trigger. The browser owns the
+     * toggle, the placement and the light dismissal; the control only mirrors
+     * the open state onto the container so a hover-only trigger stays visible
+     * while its menu is open, even once the pointer leaves the header or card.
+     * @param {HTMLElement} container - The menu container holding trigger and menu.
+     * @param {HTMLButtonElement} button - The trigger button.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     */
+    _attachMenu(container, button, menu) {
+        container.appendChild(button);
+        container.appendChild(menu);
+
+        webexpress.webui.NativeMenu.bind(button, menu);
+
+        // the column menu drills down in place, so a click on one of its entries
+        // must not close it; every entry that leaves the menu closes it itself
+        menu.setAttribute("data-wx-keep-open", "");
+
+        // neither the trigger nor an entry is a click on the header or card the
+        // container sits in; the menu is a child of the container even while it
+        // is shown in the top layer, and the popover opens through the trigger's
+        // own activation, which does not depend on the click bubbling
+        container.addEventListener("click", (e) => e.stopPropagation());
+
+        menu.addEventListener("toggle", (e) => {
+            container.classList.toggle("wx-menu-open", e.newState === "open");
+        });
     }
 
     /**
@@ -495,35 +508,12 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Toggles a dropdown menu, closing any other open dashboard menu first so
-     * only one stays open at a time.
-     * @param {HTMLElement} menu - The dropdown menu element.
-     */
-    _toggleMenu(menu) {
-        const willShow = !menu.classList.contains("show");
-        this._closeAllMenus();
-        if (willShow) {
-            menu.classList.add("show");
-            // the open class keeps the hover-only trigger visible while the menu
-            // is open, even once the pointer leaves the header or card
-            const container = menu.closest(".wx-dashboard-menu");
-            if (container) {
-                container.classList.add("wx-menu-open");
-            }
-        }
-    }
-
-    /**
      * Closes every open board, column or widget dropdown of this dashboard.
      */
     _closeAllMenus() {
-        const menus = this._element.querySelectorAll(".wx-dashboard-menu > .dropdown-menu.show");
+        const menus = this._element.querySelectorAll(".wx-dashboard-menu > .dropdown-menu");
         for (let i = 0; i < menus.length; i++) {
-            menus[i].classList.remove("show");
-        }
-        const open = this._element.querySelectorAll(".wx-dashboard-menu.wx-menu-open");
-        for (let i = 0; i < open.length; i++) {
-            open[i].classList.remove("wx-menu-open");
+            webexpress.webui.NativeMenu.hide(menus[i]);
         }
     }
 
@@ -701,30 +691,23 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
      */
     _buildColumnMenu(headerEl, index) {
         const container = document.createElement("span");
-        container.className = "wx-dashboard-menu wx-board-col-menu position-relative";
+        container.className = "wx-dashboard-menu wx-board-col-menu";
 
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "wx-dashboard-menu-btn";
-        button.title = this._i18n("webexpress.webapp:column.menu", "Column options");
-        button.setAttribute("aria-label", button.title);
-        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
+        const button = this._buildMenuButton(this._i18n("webexpress.webapp:column.menu", "Column options"));
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
 
         this._populateColumnMenuRoot(menu, headerEl, index);
 
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            // a re-opened menu always starts at the top level
-            this._populateColumnMenuRoot(menu, headerEl, index);
-            this._toggleMenu(menu);
+        // a re-opened menu always starts at the top level
+        menu.addEventListener("beforetoggle", (e) => {
+            if (e.newState === "open") {
+                this._populateColumnMenuRoot(menu, headerEl, index);
+            }
         });
 
-        container.appendChild(button);
-        container.appendChild(menu);
+        this._attachMenu(container, button, menu);
 
         return container;
     }
@@ -1040,10 +1023,40 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Deletes a column (and its widgets) and persists the new column layout.
+     * Asks before a column is dropped: the deletion takes the widgets with it and
+     * cannot be undone, yet its entry sits next to harmless ones in the same menu.
      * @param {number} index - The column index.
      */
     _deleteColumn(index) {
+        const col = this._columns[index];
+        if (!col) {
+            return;
+        }
+
+        this._confirm = this._confirm || new webexpress.webui.ModalConfirm();
+        const accepted = this._confirm.confirmation(
+            "webexpress.webapp:column.delete.title",
+            this._i18n("webexpress.webapp:dashboard.column.delete.message", "Delete column “{name}” and all of its widgets? This action cannot be undone.")
+                .replace("{name}", () => col.title ?? col.label ?? ""),
+            () => this._removeColumn(index),
+            {
+                confirmLabel: this._i18n("webexpress.webapp:column.delete.confirm", "Delete"),
+                // the trigger that opened the menu is gone with the column, so a
+                // cancelled or finished dialog hands the focus to the board's first menu
+                fallbackFocus: () => this._element.querySelector(".wx-dashboard-menu-btn")
+            }
+        );
+        if (accepted) {
+            this._confirm.show();
+        }
+    }
+
+    /**
+     * Removes a confirmed column together with its widgets and persists the new
+     * column layout.
+     * @param {number} index - The column index.
+     */
+    _removeColumn(index) {
         if (index < 0 || index >= this._columns.length) {
             return;
         }
@@ -1263,14 +1276,10 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
      */
     _buildWidgetMenu(colIdx, widgetData, canConfigure, canRemove) {
         const container = document.createElement("div");
-        container.className = "wx-dashboard-menu position-relative";
+        container.className = "wx-dashboard-menu";
 
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "wx-dashboard-menu-btn wx-dashboard-widget-menu-btn";
-        button.title = this._i18n("webexpress.webapp:dashboard.widget.menu", "Options");
-        button.setAttribute("aria-label", button.title);
-        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
+        const button = this._buildMenuButton(this._i18n("webexpress.webapp:dashboard.widget.menu", "Options"));
+        button.classList.add("wx-dashboard-widget-menu-btn");
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
@@ -1286,23 +1295,52 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
 
         if (canRemove) {
             menu.appendChild(this._buildMenuEntry(
-                this._iconClass("xmark"),
+                this._iconClass("trash"),
                 this._i18n("webexpress.webui:remove", "Remove"),
                 null,
-                () => this._removeWidget(colIdx, widgetData.instanceId)
+                () => this._confirmRemoveWidget(colIdx, widgetData.instanceId)
             ));
         }
 
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this._toggleMenu(menu);
-        });
-
-        container.appendChild(button);
-        container.appendChild(menu);
+        this._attachMenu(container, button, menu);
 
         return container;
+    }
+
+    /**
+     * Asks before a widget is removed: a widget carries the settings a user made
+     * for it, which are gone with it, and the entry sits next to the harmless
+     * settings entry in the same menu.
+     * @param {number} colIdx - Index of the column containing the widget.
+     * @param {string} instanceId - Unique instance identifier of the widget.
+     */
+    _confirmRemoveWidget(colIdx, instanceId) {
+        const column = this._columns[colIdx];
+        const widget = column && column.widgets.find((w) => w.instanceId === instanceId);
+        if (!widget) {
+            return;
+        }
+
+        // the header resolves the shown name the same way, down to the registry title
+        const registeredWidget = webexpress.webui.DashboardWidgets.get(widget.id) || {};
+        const name = widget.title || widget.label || registeredWidget.title || "";
+
+        this._confirm = this._confirm || new webexpress.webui.ModalConfirm();
+        const accepted = this._confirm.confirmation(
+            "webexpress.webui:dashboard.widget.remove.title",
+            this._i18n("webexpress.webui:dashboard.widget.remove.message", "Remove widget “{name}”? This action cannot be undone.")
+                .replace("{name}", () => name),
+            () => this._removeWidget(colIdx, instanceId),
+            {
+                confirmLabel: this._i18n("webexpress.webui:dashboard.widget.remove.confirm", "Remove"),
+                // the trigger that opened the menu is gone with the widget, so a
+                // cancelled or finished dialog hands the focus to the board's first menu
+                fallbackFocus: () => this._element.querySelector(".wx-dashboard-menu-btn")
+            }
+        );
+        if (accepted) {
+            this._confirm.show();
+        }
     }
 
     /**
@@ -1333,7 +1371,8 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Removes a widget from the specified column and re-renders the dashboard.
+     * Removes a confirmed widget from the specified column and re-renders the
+     * dashboard.
      * @param {number} colIdx - Index of the column containing the widget.
      * @param {string} instanceId - Unique instance identifier of the widget.
      */

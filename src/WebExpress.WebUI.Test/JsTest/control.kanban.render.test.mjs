@@ -264,19 +264,52 @@ test("adding a swimlane from the board menu switches the board into swimlane mod
     assert.equal(ctrl._swimlanes.length, 1);
 });
 
-test("the column menu deletes the column", () => {
-    const runtime = load();
+/**
+ * Loads a runtime with the kanban control and the confirmation dialog a
+ * deletion asks through; the dialog needs the browser globals of a top layer.
+ * @returns {object} The loaded runtime.
+ */
+function loadWithConfirm() {
+    return loadWebUi({ browser: true, extraFiles: [
+        webuiAsset("webexpress.webui.modal.js"), webuiAsset("webexpress.webui.modal.confirm.js"),
+        webuiAsset("webexpress.webui.section.js"), webuiAsset("webexpress.webui.kanban.js")
+    ] });
+}
+
+test("the column menu asks before deleting and drops the column only once confirmed", async () => {
+    const runtime = loadWithConfirm();
     const { ctrl, host } = buildBoard(runtime, {
         columns: "todo,done", columnTitles: "To Do,Done",
         editableColumn: "true", deletableColumn: "true"
     });
+    runtime.document.body.appendChild(host);
 
+    // the wording ships with the webapp dictionary; the test supplies the shape
+    // so the name substitution is what is checked, not the sentence
+    runtime.wx.I18N.register("en", "webexpress.webapp", { "kanban.column.delete.message": "Delete “{name}”?" });
+
+    const askToDelete = () => clickEntry(entry(host.querySelectorAll(".wx-board-col-menu")[0], "webexpress.webapp:column.delete"));
+
+    askToDelete();
+    const confirm = ctrl._confirm;
+    assert.equal(ctrl._columns.length, 2, "nothing is deleted before the answer");
+    assert.equal(confirm._element.open, true, "the confirmation is shown");
+    assert.equal(confirm._bodyDiv.querySelector("p").textContent, "Delete “To Do”?", "the question names the column");
+
+    // dismissing keeps the column and leaves the dialog reusable
+    confirm._cancelButton.click();
+    assert.equal(confirm._element.open, false);
     assert.equal(ctrl._columns.length, 2);
-    const firstMenu = host.querySelectorAll(".wx-board-col-menu")[0];
-    clickEntry(entry(firstMenu, "webexpress.webapp:column.delete"));
 
+    askToDelete();
+    await confirm._confirmButton.onclick();
+    assert.equal(confirm._element.open, false);
     assert.equal(ctrl._columns.length, 1);
     assert.equal(ctrl._columns[0].id, "done");
+
+    // the dialog is owned by the control and leaves with it
+    ctrl.destroy();
+    assert.equal(confirm._element.isConnected, false);
 });
 
 test("the column menu starts an inline rename", () => {
@@ -347,18 +380,35 @@ test("the swimlane color menu clears the color via None", () => {
     assert.equal(ctrl._swimlanes[0].color, null);
 });
 
-test("the swimlane menu deletes the swimlane", () => {
-    const runtime = loadFull();
+test("the swimlane menu asks before deleting and drops the lane only once confirmed", async () => {
+    const runtime = loadWithConfirm();
     const { ctrl, host } = buildBoard(runtime, {
-        columns: "todo", swimlanes: "a,b",
+        columns: "todo", swimlanes: "a,b", swimlaneTitles: "Alpha,Beta",
         editableSwimlane: "true", deletableSwimlane: "true"
     });
+    runtime.document.body.appendChild(host);
+
+    // the wording ships with the webapp dictionary; the test supplies the shape
+    // so the name substitution is what is checked, not the sentence
+    runtime.wx.I18N.register("en", "webexpress.webapp", { "swimlane.delete.message": "Delete “{name}”?" });
+
+    const askToDelete = () => clickEntry(entry(host.querySelectorAll(".wx-kanban-swimlane-menu")[0], "webexpress.webapp:swimlane.delete"));
 
     assert.equal(ctrl._swimlanes.length, 2);
-    const firstMenu = host.querySelectorAll(".wx-kanban-swimlane-menu")[0];
-    assert.ok(firstMenu, "the swimlane menu exists");
-    clickEntry(entry(firstMenu, "webexpress.webapp:swimlane.delete"));
+    askToDelete();
+    const confirm = ctrl._confirm;
+    assert.equal(ctrl._swimlanes.length, 2, "nothing is deleted before the answer");
+    assert.equal(confirm._element.open, true, "the confirmation is shown");
+    assert.equal(confirm._bodyDiv.querySelector("p").textContent, `Delete “${ctrl._swimlanes[0].label}”?`, "the question names the lane");
 
+    // dismissing keeps the lane and leaves the dialog reusable
+    confirm._cancelButton.click();
+    assert.equal(confirm._element.open, false);
+    assert.equal(ctrl._swimlanes.length, 2);
+
+    askToDelete();
+    await confirm._confirmButton.onclick();
+    assert.equal(confirm._element.open, false);
     assert.equal(ctrl._swimlanes.length, 1);
     assert.equal(ctrl._swimlanes[0].id, "b");
 });
@@ -424,4 +474,145 @@ test("moving a swimlane down reorders the lanes", () => {
     const firstMenu = host.querySelectorAll(".wx-kanban-swimlane-menu")[0];
     clickEntry(entry(firstMenu, "webexpress.webapp:swimlane.movedown"));
     assert.deepEqual(ctrl._swimlanes.map((s) => s.id), ["b", "a", "c"]);
+});
+
+/**
+ * Builds a board whose board, column and swimlane menus are all enabled and
+ * connects it to the document, which a popover needs to enter the top layer.
+ * @param {object} runtime - The loaded runtime.
+ * @returns {{ctrl: object, host: object}} The control and its host.
+ */
+function buildMenuBoard(runtime) {
+    const built = buildBoard(runtime, {
+        columns: "todo,done", swimlanes: "a,b",
+        addableColumn: "true", editableColumn: "true", deletableColumn: "true",
+        editableSwimlane: "true", deletableSwimlane: "true"
+    });
+    runtime.document.body.appendChild(built.host);
+    return built;
+}
+
+/**
+ * Finds the entry that leads a drilled-down menu back to its root. It is the
+ * one muted entry; its label cannot be matched because the stub keeps the icon
+ * markup in front of it as text.
+ * @param {object} menu - The dropdown menu element.
+ * @returns {object|undefined} The back button, or undefined at the top level.
+ */
+function backEntry(menu) {
+    return menu.querySelectorAll(".dropdown-item").find((b) => b.classList.contains("text-muted"));
+}
+
+test("the board, column and swimlane menus are closed native popovers under their triggers", () => {
+    const runtime = loadFull();
+    const { host } = buildMenuBoard(runtime);
+
+    const containers = host.querySelectorAll(".wx-kanban-menu");
+    assert.equal(containers.length, 1 + 2 + 2, "board, two columns, two swimlanes");
+
+    for (const container of containers) {
+        const button = container.querySelector(".wx-kanban-menu-btn");
+        const menu = container.querySelector(".dropdown-menu");
+        assert.equal(menu.getAttribute("popover"), "auto");
+        assert.ok(menu.classList.contains("wx-native-menu"));
+        assert.equal(menu.matches(":popover-open"), false, "the menu is closed after rendering");
+        assert.equal(menu.classList.contains("show"), false, "no leftover of the class-toggled dropdown");
+        assert.equal(button.getAttribute("popovertarget"), menu.id, "the browser toggles the menu on the trigger");
+        assert.equal(menu.style.getPropertyValue("position-anchor"), button.style.getPropertyValue("anchor-name"));
+        assert.equal(container.classList.contains("wx-menu-open"), false);
+    }
+});
+
+test("an open column menu keeps its trigger visible, stays open while drilling down and closes on a pick", () => {
+    const runtime = loadFull();
+    const { ctrl, host } = buildMenuBoard(runtime);
+
+    const container = host.querySelector(".wx-board-col-menu");
+    const menu = container.querySelector(".dropdown-menu");
+
+    runtime.wx.NativeMenu.show(menu);
+    assert.equal(menu.matches(":popover-open"), true);
+    assert.ok(container.classList.contains("wx-menu-open"), "the open state is mirrored onto the container");
+    assert.equal(menu.style.position, undefined, "the top layer needs no fixed positioning to escape the board clip");
+
+    clickEntry(entry(menu, "webexpress.webapp:column.size"));
+    assert.equal(menu.matches(":popover-open"), true, "drilling down keeps the menu open");
+    assert.ok(backEntry(menu), "the sub-level leads back");
+
+    clickEntry(entry(menu, "50 %"));
+    assert.equal(menu.matches(":popover-open"), false, "the pick closes the menu before acting");
+    assert.equal(container.classList.contains("wx-menu-open"), false);
+    assert.equal(ctrl._columns[0].size, "50%");
+});
+
+test("a reopened column or swimlane menu starts at its top level again", () => {
+    const runtime = loadFull();
+    const { host } = buildMenuBoard(runtime);
+
+    for (const selector of [".wx-board-col-menu", ".wx-kanban-swimlane-menu"]) {
+        const menu = host.querySelector(selector).querySelector(".dropdown-menu");
+        const rootCount = menu.querySelectorAll(".dropdown-item").length;
+
+        runtime.wx.NativeMenu.show(menu);
+        clickEntry(entry(menu, selector === ".wx-board-col-menu" ? "webexpress.webapp:column.color" : "webexpress.webapp:swimlane.color"));
+        assert.ok(backEntry(menu), `${selector} drilled into the colors`);
+
+        runtime.wx.NativeMenu.hide(menu);
+        runtime.wx.NativeMenu.show(menu);
+        assert.equal(menu.querySelectorAll(".dropdown-item").length, rootCount, `${selector} reopens at the top level`);
+        assert.equal(backEntry(menu), undefined);
+    }
+});
+
+/**
+ * Dispatches a click the way a browser does: on the target first, then on each
+ * ancestor until a handler stops the propagation. The stub itself dispatches on
+ * one element only.
+ * @param {object} target - The element that was clicked.
+ */
+function bubbleClick(target) {
+    let stopped = false;
+    const event = { type: "click", target, preventDefault() { }, stopPropagation() { stopped = true; } };
+    for (let node = target; node && !stopped; node = node.parentNode) {
+        if (typeof node.dispatchEvent === "function") { node.dispatchEvent(event); }
+    }
+}
+
+test("opening or using the swimlane menu does not fold the lane whose header carries it", () => {
+    const runtime = loadFull();
+    const { host } = buildMenuBoard(runtime);
+
+    const lane = host.querySelector(".wx-kanban-swimlane");
+    const container = lane.querySelector(".wx-kanban-swimlane-menu");
+    const trigger = container.querySelector(".wx-kanban-menu-btn");
+    const menu = container.querySelector(".dropdown-menu");
+
+    bubbleClick(trigger);
+    assert.equal(lane.classList.contains("wx-section-collapsed"), false, "the trigger is not a click on the header");
+
+    runtime.wx.NativeMenu.show(menu);
+    bubbleClick(entry(menu, "webexpress.webapp:swimlane.color"));
+    assert.equal(lane.classList.contains("wx-section-collapsed"), false, "an entry is not a click on the header either");
+
+    // the header itself still folds the lane, so the guard is scoped to the menu
+    bubbleClick(lane.querySelector(".wx-kanban-swimlane-header"));
+    assert.equal(lane.classList.contains("wx-section-collapsed"), true);
+});
+
+test("the board settings open as a native dialog in the top layer, not as a block at the end of the page", () => {
+    const runtime = loadWebUi({ browser: true, extraFiles: [
+        webuiAsset("webexpress.webui.modal.js"), webuiAsset("webexpress.webui.kanban.settings.js"), webuiAsset("webexpress.webui.kanban.js")
+    ] });
+    const { ctrl, host } = buildBoard(runtime, { columns: "todo", configurableBoard: "true" });
+    runtime.document.body.appendChild(host);
+
+    clickEntry(entry(host.querySelector(".wx-kanban-toolbar"), "webexpress.webapp:board.settings"));
+
+    const dialog = ctrl._settingsDialog;
+    assert.equal(dialog._element.tagName, "DIALOG", "only a dialog element is styled and layered as a modal");
+    assert.equal(dialog._element.open, true, "the settings are shown modally");
+    assert.equal(dialog._element.parentNode, runtime.document.body);
+
+    dialog._cancelButton.click();
+    assert.equal(dialog._element.open, false);
 });

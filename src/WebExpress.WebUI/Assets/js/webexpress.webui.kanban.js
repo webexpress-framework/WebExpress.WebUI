@@ -52,7 +52,9 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     _filter = "";
     _settingsDialog = null;
     _activeSwimlaneEdit = null;
-    _onDocClick = null;
+
+    // the delete confirmation; owned dialog outside the host, created on first use
+    _confirm = null;
 
     /**
      * Initializes the kanban control.
@@ -83,17 +85,22 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         // selectable default is what a board embedded in a master-detail needs
         this._selectable = element.dataset.selectable !== "false";
 
-        // a single document listener closes any open board / column / swimlane
-        // dropdown when the click lands outside its own menu container
-        this._onDocClick = (e) => this._closeMenusOnOutsideClick(e);
-        document.addEventListener("click", this._onDocClick);
-
         // delegated, because render() rebuilds every card: a listener on the host
         // survives that, per-card listeners would have to be re-bound each time
         element.addEventListener("click", (e) => this._onCardClick(e));
 
         this._parseStaticConfig();
         this.render();
+    }
+
+    /**
+     * Releases the separately owned confirmation dialog, which does not go away
+     * with the host element.
+     */
+    destroy() {
+        this._confirm?.destroy();
+        this._confirm = null;
+        super.destroy();
     }
 
     /**
@@ -192,17 +199,6 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 cardEl.removeAttribute("aria-selected");
             }
         }
-    }
-
-    /**
-     * Removes the document-level menu listener when the control is torn down.
-     */
-    destroy() {
-        if (this._onDocClick) {
-            document.removeEventListener("click", this._onDocClick);
-            this._onDocClick = null;
-        }
-        super.destroy();
     }
 
     /**
@@ -611,14 +607,9 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         bar.className = "wx-kanban-toolbar";
 
         const container = document.createElement("div");
-        container.className = "wx-kanban-menu position-relative";
+        container.className = "wx-kanban-menu";
 
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "wx-kanban-menu-btn";
-        button.title = this._i18n("webexpress.webapp:kanban.menu", "Options");
-        button.setAttribute("aria-label", button.title);
-        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
+        const button = this._buildMenuButton(this._i18n("webexpress.webapp:kanban.menu", "Options"));
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
@@ -658,17 +649,60 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             }
         }
 
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            this._toggleMenu(menu);
-        });
-
-        container.appendChild(button);
-        container.appendChild(menu);
+        this._attachMenu(container, button, menu);
         bar.appendChild(container);
 
         return bar;
+    }
+
+    /**
+     * Builds the "…" trigger shared by the board, column and swimlane menus.
+     * @param {string} label - The accessible name and tooltip of the trigger.
+     * @returns {HTMLButtonElement} The trigger button.
+     */
+    _buildMenuButton(label) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "wx-kanban-menu-btn";
+        button.title = label;
+        button.setAttribute("aria-label", label);
+        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
+
+        return button;
+    }
+
+    /**
+     * Mounts a menu as a native popover under its trigger. The browser owns the
+     * toggle, the placement and the light dismissal, and the top layer escapes
+     * the clip of the board scroller (.wx-kanban) without any fixed positioning.
+     * The control only mirrors the open state onto the container so a hover-only
+     * trigger stays visible while its menu is open, even once the pointer leaves
+     * the header.
+     * @param {HTMLElement} container - The menu container holding trigger and menu.
+     * @param {HTMLButtonElement} button - The trigger button.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     */
+    _attachMenu(container, button, menu) {
+        container.appendChild(button);
+        container.appendChild(menu);
+
+        webexpress.webui.NativeMenu.bind(button, menu);
+
+        // the column and swimlane menus drill down in place, so a click on one of
+        // their entries must not close them; every entry that leaves the menu
+        // closes it itself
+        menu.setAttribute("data-wx-keep-open", "");
+
+        // the trigger sits inside a header that acts on click (the swimlane header
+        // folds its lane), and the menu is a child of the same container even while
+        // it is shown in the top layer; neither the trigger nor an entry is a click
+        // on that header. the popover itself opens through the trigger's own
+        // activation, which does not depend on the click bubbling.
+        container.addEventListener("click", (e) => e.stopPropagation());
+
+        menu.addEventListener("toggle", (e) => {
+            container.classList.toggle("wx-menu-open", e.newState === "open");
+        });
     }
 
     /**
@@ -752,91 +786,12 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Toggles a dropdown menu, closing any other open kanban menu first so only
-     * one stays open at a time.
-     * @param {HTMLElement} menu - The dropdown menu element.
-     */
-    _toggleMenu(menu) {
-        const willShow = !menu.classList.contains("show");
-        this._closeAllMenus();
-        if (willShow) {
-            menu.classList.add("show");
-            // the open class keeps the hover-only trigger visible while the menu
-            // is open, even once the pointer leaves the header
-            const container = menu.closest(".wx-kanban-menu");
-            if (container) {
-                container.classList.add("wx-menu-open");
-                const button = container.querySelector(".wx-kanban-menu-btn");
-                if (button) {
-                    this._positionMenu(button, menu);
-                }
-            }
-        }
-    }
-
-    /**
-     * Pins an open dropdown to the viewport with a fixed position anchored under
-     * the trigger. The board scroller (.wx-kanban) clips overflow on both axes,
-     * so an absolutely positioned menu would be cut off; a fixed position
-     * escapes the clip, mirroring the framework's fixed dropdown strategy.
-     * @param {HTMLElement} button - The trigger button.
-     * @param {HTMLElement} menu - The dropdown menu element.
-     */
-    _positionMenu(button, menu) {
-        const rect = button.getBoundingClientRect();
-        const viewportWidth = (typeof window !== "undefined" && window.innerWidth)
-            || (document.documentElement && document.documentElement.clientWidth) || 0;
-
-        menu.style.position = "fixed";
-        menu.style.top = rect.bottom + "px";
-        // anchor by the right edge so the menu stays under a dropdown-menu-end trigger
-        menu.style.left = "auto";
-        menu.style.right = Math.max(0, viewportWidth - rect.right) + "px";
-        menu.style.bottom = "auto";
-    }
-
-    /**
-     * Closes every open board, column or swimlane dropdown of this board and
-     * drops the fixed positioning applied on open.
+     * Closes every open board, column or swimlane dropdown of this board.
      */
     _closeAllMenus() {
-        const menus = this._element.querySelectorAll(".wx-kanban-menu > .dropdown-menu.show");
+        const menus = this._element.querySelectorAll(".wx-kanban-menu > .dropdown-menu");
         for (let i = 0; i < menus.length; i++) {
-            menus[i].classList.remove("show");
-            this._resetMenuPosition(menus[i]);
-        }
-        const open = this._element.querySelectorAll(".wx-kanban-menu.wx-menu-open");
-        for (let i = 0; i < open.length; i++) {
-            open[i].classList.remove("wx-menu-open");
-        }
-    }
-
-    /**
-     * Clears the inline fixed-position styles a menu carries while open.
-     * @param {HTMLElement} menu - The dropdown menu element.
-     */
-    _resetMenuPosition(menu) {
-        menu.style.removeProperty("position");
-        menu.style.removeProperty("top");
-        menu.style.removeProperty("left");
-        menu.style.removeProperty("right");
-        menu.style.removeProperty("bottom");
-    }
-
-    /**
-     * Closes every open menu whose container does not contain the click target,
-     * so only a menu the user is interacting with stays open.
-     * @param {MouseEvent} e - The document click event.
-     */
-    _closeMenusOnOutsideClick(e) {
-        const menus = this._element.querySelectorAll(".wx-kanban-menu > .dropdown-menu.show");
-        for (let i = 0; i < menus.length; i++) {
-            const container = menus[i].closest(".wx-kanban-menu");
-            if (container && !container.contains(e.target)) {
-                menus[i].classList.remove("show");
-                this._resetMenuPosition(menus[i]);
-                container.classList.remove("wx-menu-open");
-            }
+            webexpress.webui.NativeMenu.hide(menus[i]);
         }
     }
 
@@ -980,30 +935,23 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
      */
     _buildColumnMenu(headerEl, index) {
         const container = document.createElement("span");
-        container.className = "wx-kanban-menu wx-board-col-menu position-relative";
+        container.className = "wx-kanban-menu wx-board-col-menu";
 
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "wx-kanban-menu-btn";
-        button.title = this._i18n("webexpress.webapp:column.menu", "Column options");
-        button.setAttribute("aria-label", button.title);
-        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
+        const button = this._buildMenuButton(this._i18n("webexpress.webapp:column.menu", "Column options"));
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
 
         this._populateColumnMenuRoot(menu, headerEl, index);
 
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            // a re-opened menu always starts at the top level
-            this._populateColumnMenuRoot(menu, headerEl, index);
-            this._toggleMenu(menu);
+        // a re-opened menu always starts at the top level
+        menu.addEventListener("beforetoggle", (e) => {
+            if (e.newState === "open") {
+                this._populateColumnMenuRoot(menu, headerEl, index);
+            }
         });
 
-        container.appendChild(button);
-        container.appendChild(menu);
+        this._attachMenu(container, button, menu);
 
         return container;
     }
@@ -1285,10 +1233,40 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Deletes a column (and its cards) and persists the new column layout.
+     * Asks before a column is dropped: the deletion takes the cards with it and
+     * cannot be undone, yet its entry sits next to harmless ones in the same menu.
      * @param {number} index - The column index.
      */
     _deleteColumn(index) {
+        const col = this._columns[index];
+        if (!col) {
+            return;
+        }
+
+        this._confirm = this._confirm || new webexpress.webui.ModalConfirm();
+        const accepted = this._confirm.confirmation(
+            "webexpress.webapp:column.delete.title",
+            this._i18n("webexpress.webapp:kanban.column.delete.message", "Delete column “{name}” and all of its cards? This action cannot be undone.")
+                .replace("{name}", () => col.label ?? col.title ?? ""),
+            () => this._removeColumn(index),
+            {
+                confirmLabel: this._i18n("webexpress.webapp:column.delete.confirm", "Delete"),
+                // the trigger that opened the menu is gone with the column, so a
+                // cancelled or finished dialog hands the focus to the board's first menu
+                fallbackFocus: () => this._element.querySelector(".wx-kanban-menu-btn")
+            }
+        );
+        if (accepted) {
+            this._confirm.show();
+        }
+    }
+
+    /**
+     * Removes a confirmed column together with its cards and persists the new
+     * column layout.
+     * @param {number} index - The column index.
+     */
+    _removeColumn(index) {
         if (index < 0 || index >= this._columns.length) {
             return;
         }
@@ -1429,30 +1407,23 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         header.classList.add("wx-kanban-swimlane-configurable");
 
         const container = document.createElement("span");
-        container.className = "wx-kanban-menu wx-kanban-swimlane-menu position-relative";
+        container.className = "wx-kanban-menu wx-kanban-swimlane-menu";
 
-        const button = document.createElement("button");
-        button.type = "button";
-        button.className = "wx-kanban-menu-btn";
-        button.title = this._i18n("webexpress.webapp:swimlane.menu", "Swimlane options");
-        button.setAttribute("aria-label", button.title);
-        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
+        const button = this._buildMenuButton(this._i18n("webexpress.webapp:swimlane.menu", "Swimlane options"));
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
 
         this._populateSwimlaneMenuRoot(menu, headerSpan, index);
 
-        button.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            // a re-opened menu always starts at the top level
-            this._populateSwimlaneMenuRoot(menu, headerSpan, index);
-            this._toggleMenu(menu);
+        // a re-opened menu always starts at the top level
+        menu.addEventListener("beforetoggle", (e) => {
+            if (e.newState === "open") {
+                this._populateSwimlaneMenuRoot(menu, headerSpan, index);
+            }
         });
 
-        container.appendChild(button);
-        container.appendChild(menu);
+        this._attachMenu(container, button, menu);
 
         // place the menu at the end of the header row, after the label and any badge
         header.appendChild(container);
@@ -1662,10 +1633,40 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Deletes a swimlane (and its cards) and persists the new swimlane layout.
+     * Asks before a swimlane is dropped: the deletion takes the cards with it and
+     * cannot be undone, yet its entry sits next to harmless ones in the same menu.
      * @param {number} index - The swimlane index.
      */
     _deleteSwimlane(index) {
+        const lane = this._swimlanes[index];
+        if (!lane) {
+            return;
+        }
+
+        this._confirm = this._confirm || new webexpress.webui.ModalConfirm();
+        const accepted = this._confirm.confirmation(
+            "webexpress.webapp:swimlane.delete.title",
+            this._i18n("webexpress.webapp:swimlane.delete.message", "Delete swimlane “{name}” and all of its cards? This action cannot be undone.")
+                .replace("{name}", () => lane.label ?? ""),
+            () => this._removeSwimlane(index),
+            {
+                confirmLabel: this._i18n("webexpress.webapp:swimlane.delete.confirm", "Delete"),
+                // the trigger that opened the menu is gone with the lane, so a
+                // cancelled or finished dialog hands the focus to the board's first menu
+                fallbackFocus: () => this._element.querySelector(".wx-kanban-menu-btn")
+            }
+        );
+        if (accepted) {
+            this._confirm.show();
+        }
+    }
+
+    /**
+     * Removes a confirmed swimlane together with its cards and persists the new
+     * swimlane layout.
+     * @param {number} index - The swimlane index.
+     */
+    _removeSwimlane(index) {
         if (index < 0 || index >= this._swimlanes.length) {
             return;
         }

@@ -94,6 +94,9 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "properties": "Eigenschaften",
 
     "dashboard.widget.unavailable": "Widget-Inhalt nicht verfügbar.",
+    "dashboard.widget.remove.title": "Widget entfernen?",
+    "dashboard.widget.remove.message": "Möchten Sie das Widget „{name}“ entfernen? Diese Aktion kann nicht rückgängig gemacht werden.",
+    "dashboard.widget.remove.confirm": "Entfernen",
     "dashboard.settings.title": "Einstellungen",
     "dashboard.settings.name": "Name",
     "dashboard.settings.color": "Farbe",

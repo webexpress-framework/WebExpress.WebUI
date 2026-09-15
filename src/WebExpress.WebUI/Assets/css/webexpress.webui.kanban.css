@@ -101,7 +101,8 @@
     left: 0;
 }
 
-/* the "…" menu container anchors its own dropdown */
+/* the "…" menu container; its dropdown is a native popover anchored to the
+   trigger, so the container only sizes the trigger */
 .wx-kanban-menu {
     display: inline-flex;
 }

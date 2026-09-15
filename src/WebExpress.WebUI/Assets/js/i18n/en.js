@@ -94,6 +94,9 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "properties": "Properties",
 
     "dashboard.widget.unavailable": "Widget content not available.",
+    "dashboard.widget.remove.title": "Remove widget?",
+    "dashboard.widget.remove.message": "Remove widget “{name}”? This action cannot be undone.",
+    "dashboard.widget.remove.confirm": "Remove",
     "dashboard.settings.title": "Settings",
     "dashboard.settings.name": "Name",
     "dashboard.settings.color": "Color",

@@ -80,10 +80,10 @@ While a column is dragged by its grip, the header under the pointer shows an ins
 Three `…` menus mirror the dashboard control; the per-column and per-swimlane triggers reveal on hover, while the board menu (top right) stays visible.
 
 - **Board `…` menu** — **Settings** (`data-configurable-board`, opens the board settings dialog with the WQL filter), **New column** (`data-addable-column`) and **New swimlane** (`data-addable-swimlane`). Adding the first swimlane moves the existing (lane-less) cards into it so they stay visible.
-- **Column `…` menu** — **Rename** (inline edit), **Size** (drill-down: Auto / 25 % / 33 % / 50 % / 66 % / 75 %), **Color** (drill-down palette + None), **Delete**. Rename, size and color require `data-editable-column`; delete requires `data-deletable-column`.
-- **Swimlane `…` menu** — **Rename** and **Color** (drill-down palette + None, both behind `data-editable-swimlane`), **Settings** (`data-configurable-swimlane`, the per-swimlane WQL filter), **Move up** / **Move down** (`data-movable-swimlane`) and **Delete** (`data-deletable-swimlane`, removes the lane and its cards). Only the direction with room is offered, so the first and last lanes never carry a dead move entry.
+- **Column `…` menu** — **Rename** (inline edit), **Size** (drill-down: Auto / 25 % / 33 % / 50 % / 66 % / 75 %), **Color** (drill-down palette + None), **Delete**. Rename, size and color require `data-editable-column`; delete requires `data-deletable-column`. Delete asks first through the framework confirmation dialog (`webexpress.webui.ModalConfirm`, the same one the tabs use), naming the column and its cards; the column is only removed and persisted once confirmed.
+- **Swimlane `…` menu** — **Rename** and **Color** (drill-down palette + None, both behind `data-editable-swimlane`), **Settings** (`data-configurable-swimlane`, the per-swimlane WQL filter), **Move up** / **Move down** (`data-movable-swimlane`) and **Delete** (`data-deletable-swimlane`, removes the lane and its cards after the same confirmation as a column). Only the direction with room is offered, so the first and last lanes never carry a dead move entry.
 
-Each change re-renders the board and dispatches a `CHANGE_VALUE_EVENT` (see below) so the REST layer can persist it. The board scroller clips its overflow, so an open menu is pinned to the viewport with a fixed position to escape the clip.
+Each change re-renders the board and dispatches a `CHANGE_VALUE_EVENT` (see below) so the REST layer can persist it. The menus are native popovers anchored to their `…` trigger, so they open in the top layer and escape the clip of the board scroller without any positioning code.
 
 ## Settings (WQL filter)
 

@@ -11,10 +11,11 @@ webexpress.webui.DashboardWidgetSettings = class extends webexpress.webui.ModalC
 
     /**
      * Creates the dialog and attaches it to the document body. A single instance
-     * is reused for every widget of a dashboard.
+     * is reused for every widget of a dashboard. The modal is a native dialog, so
+     * only a dialog element enters the top layer and is styled as one.
      */
     constructor() {
-        super(document.createElement("div"));
+        super(document.createElement("dialog"));
 
         document.body.appendChild(this._element);
 

@@ -9,10 +9,12 @@ webexpress.webui.KanbanBoardSettings = class extends webexpress.webui.ModalCtrl 
     _okButton = document.createElement("button");
 
     /**
-     * Creates the dialog and attaches it to the document body.
+     * Creates the dialog and attaches it to the document body. The modal is a
+     * native dialog, so only a dialog element enters the top layer and is styled
+     * as one.
      */
     constructor() {
-        super(document.createElement("div"));
+        super(document.createElement("dialog"));
 
         document.body.appendChild(this._element);
 

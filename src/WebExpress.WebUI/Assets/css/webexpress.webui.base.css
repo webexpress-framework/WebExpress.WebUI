@@ -78,7 +78,10 @@ legend { width: 100%; padding: 0; margin-bottom: 0.5rem; font-size: 1.5rem; }
 .form-label { margin-bottom: 0.5rem; }
 .form-text { margin-top: 0.25rem; font-size: 0.875em; color: var(--wx-secondary-color); }
 .form-check { display: block; min-height: 1.5rem; padding-inline-start: 1.5rem; }
-.form-check-input { width: 1rem; height: 1rem; margin: 0.25rem 0 0 -1.5rem; float: left; accent-color: var(--wx-primary); }
+.form-check-input { width: 1rem; height: 1rem; margin: 0.25rem 0 0; vertical-align: top; accent-color: var(--wx-primary); }
+/* the box hangs into the padding of its .form-check only; a box standing alone in a
+   flex row (a settings toggle) has no padding to hang into and would leave the row */
+.form-check .form-check-input { float: left; margin-left: -1.5rem; }
 .form-check-inline { display: inline-block; margin-inline-end: 1rem; }
 .form-switch .form-check-input { width: 2rem; border-radius: 1rem; }
 .form-switch { padding-inline-start: 2.5rem; }

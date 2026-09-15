@@ -44,7 +44,8 @@
     margin-bottom: 0.75rem;
 }
 
-/* the "…" menu container anchors its own dropdown */
+/* the "…" menu container; its dropdown is a native popover anchored to the
+   trigger, so the container only sizes the trigger */
 .wx-dashboard-menu {
     display: inline-flex;
 }
@@ -234,10 +235,13 @@
     position: relative;
 }
 
+/* the header is part of the card surface, not a cap of its own: the accent is
+   the colored top border, so neither a fill nor a rule separates it from the
+   body */
 .wx-dashboard-widget-card > .card-header {
     display: flex;
     border-bottom: none;
-    background-color: var(--wx-tertiary-bg);
+    background-color: transparent;
     color: var(--wx-body-color);
     min-width: 0;
     gap: 0.5rem;
