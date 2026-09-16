@@ -11,7 +11,7 @@ namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// A flat, collapsible section: a quiet label row over a body of content, without the
-    /// frame, background or shadow of a <see cref="ControlPanelCard"/>.
+    /// frame, background or shadow of a <see cref="ControlCard"/>.
     /// </summary>
     /// <remarks>
     /// A card separates its content from the page by drawing a box around it. That reads well
@@ -28,7 +28,7 @@ namespace WebExpress.WebUI.WebControl
     /// on their next visit.
     /// </para>
     /// <para>
-    /// Like <see cref="ControlPanelCard"/>, the C# side emits only a host element carrying the
+    /// Like <see cref="ControlCard"/>, the C# side emits only a host element carrying the
     /// <c>wx-webui-section</c> class and the relevant <c>data-*</c> attributes; the header row,
     /// the chevron and the collapsible body are built at runtime by
     /// <c>webexpress.webui.SectionCtrl</c>.

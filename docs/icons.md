@@ -166,5 +166,5 @@ boundaries of what an icon can do:
 - An icon carries no semantics of its own — no `<title>`, no role. Where an icon is the
   only content of a control, the accessible name has to come from the control, not from the
   icon. Controls that render an icon-only affordance set it themselves (see
-  `ControlPanelDismissible.DismissAriaLabel`); a control that renders one from application
+  `ControlDismissible.DismissAriaLabel`); a control that renders one from application
   code needs an explicit `aria-label` on the host element.

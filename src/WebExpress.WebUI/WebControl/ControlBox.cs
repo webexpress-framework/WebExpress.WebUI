@@ -20,8 +20,8 @@ namespace WebExpress.WebUI.WebControl
     /// from the page, to organize it, or to draw the eye to it.
     /// </summary>
     /// <remarks>
-    /// A <see cref="ControlPanelCard"/> is a surface with a filled header bar and a footer; a
-    /// <see cref="ControlPanelCallout"/> is a colored note; a <see cref="ControlSection"/> draws
+    /// A <see cref="ControlCard"/> is a surface with a filled header bar and a footer; a
+    /// <see cref="ControlCallout"/> is a colored note; a <see cref="ControlSection"/> draws
     /// no frame at all. The box sits between them: it draws exactly one frame, chosen through
     /// <see cref="Layout"/>, around content it otherwise leaves alone. Which frame is the whole
     /// statement - a hairline groups, a dashed line marks something provisional, a raised surface
@@ -36,7 +36,7 @@ namespace WebExpress.WebUI.WebControl
     /// why the control is an <see cref="IScope"/>.
     /// </para>
     /// <para>
-    /// Like <see cref="ControlPanelCard"/>, the C# side emits only a host element carrying the
+    /// Like <see cref="ControlCard"/>, the C# side emits only a host element carrying the
     /// <c>wx-webui-box</c> class and the relevant <c>data-*</c> attributes; the header and the
     /// body are built at runtime by <c>webexpress.webui.BoxCtrl</c>. The same controller adopts
     /// the reading view of the editor's box add-on, so a box authored in rich text and a box

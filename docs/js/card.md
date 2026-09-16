@@ -19,7 +19,7 @@ The `CardCtrl` renders a card panel with an optional header, headline, footer an
 
 ### Configuration
 
-The component is initialised declaratively from `data-` attributes on the host element. The C# side (`ControlPanelCard`) sets these attributes automatically; manual HTML usage is possible too. The original children of the host element are preserved and moved into the `card-text` wrapper during the first render.
+The component is initialised declaratively from `data-` attributes on the host element. The C# side (`ControlCard`) sets these attributes automatically; manual HTML usage is possible too. The original children of the host element are preserved and moved into the `card-text` wrapper during the first render.
 
 | Attribute                    | Description
 |------------------------------|-------------

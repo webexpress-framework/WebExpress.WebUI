@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.WebControl
     /// <c>webexpress.webui.GroupCtrl</c> and re-answered whenever the width changes.
     /// </para>
     /// <para>
-    /// Like <see cref="ControlPanelCard"/> and <see cref="ControlSection"/>, the C# side emits
+    /// Like <see cref="ControlCard"/> and <see cref="ControlSection"/>, the C# side emits
     /// only a host element carrying the <c>wx-webui-group</c> class and the relevant
     /// <c>data-*</c> attributes.
     /// </para>

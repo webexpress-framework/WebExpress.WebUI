@@ -343,17 +343,17 @@ namespace WebExpress.WebUI.Test.WebFragment
         /// Test the render function of the fragment manager for PanelFlex.
         /// </summary>
         [Fact]
-        public void Render_TestSectionFragmentControlPanelFlex()
+        public void Render_TestSectionFragmentControlFlex()
         {
             // arrange
-            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolpanelflex""></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolflex""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             // act
-            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlPanelFlex));
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlFlex));
 
             // validation
             Assert.NotNull(html);
@@ -365,17 +365,17 @@ namespace WebExpress.WebUI.Test.WebFragment
         /// Test the render function of the fragment manager for PanelTool.
         /// </summary>
         [Fact]
-        public void Render_TestSectionFragmentControlPanelTool()
+        public void Render_TestSectionFragmentControlTool()
         {
             // arrange
-            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolpaneltool"" class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""></div><div><div>TestFragmentControlPanelTool</div></div></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltool"" class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""></div><div><div>TestFragmentControlTool</div></div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             // act
-            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlPanelTool));
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlTool));
 
             // validation
             Assert.NotNull(html);
@@ -825,21 +825,25 @@ namespace WebExpress.WebUI.Test.WebFragment
 
         /// <summary>
         /// Test the render function of the fragment manager for the dismissible
-        /// panel fragment-control. The base class composes both its own content
-        /// and any fragments registered for the body section.
+        /// panel fragment-control. The body is composed from the panel's own content
+        /// followed by the fragment controls registered for the body section - an
+        /// ordinary text fragment scoped to this panel type, no dedicated body fragment.
         /// </summary>
         [Fact]
-        public void Render_TestSectionFragmentControlPanelDismissible()
+        public void Render_TestSectionFragmentControlDismissible()
         {
             // arrange
-            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolpaneldismissible"" class=""wx-webui-panel-dismissible"" data-title=""FragmentPanel""><div>fragment-content</div></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroldismissible"" class=""wx-webui-panel-dismissible"" data-title=""FragmentPanel"">"
+                + @"<div>fragment-content</div>"
+                + @"<p id=""webexpress-webui-test-testfragmentcontroldismissiblebody"">body-fragment</p>"
+                + @"</div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
             var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
 
             // act
-            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlPanelDismissibleBody));
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlDismissible));
 
             // validation
             Assert.NotNull(html);

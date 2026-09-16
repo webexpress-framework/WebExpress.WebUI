@@ -23,7 +23,7 @@ namespace WebExpress.WebUI.WebControl
     /// composite reusable for content it was never written against.
     ///
     /// The splitter is not reimplemented; the composite renders a
-    /// <see cref="ControlPanelSplit"/> and inherits its dragging, persistence and
+    /// <see cref="ControlSplit"/> and inherits its dragging, persistence and
     /// content-visibility behaviour. Hiding the detail side therefore also hides
     /// the splitter and restores the previous position when it comes back.
     /// </remarks>
@@ -221,7 +221,7 @@ namespace WebExpress.WebUI.WebControl
                 Classes = ["wx-detail"]
             };
 
-            var split = new ControlPanelSplit($"{Id}-split", [masterPanel], [detailPanel])
+            var split = new ControlSplit($"{Id}-split", [masterPanel], [detailPanel])
             {
                 Orientation = _ => TypeOrientationSplit.Horizontal,
                 Order = _ => TypeSplitOrder.SideMain,
