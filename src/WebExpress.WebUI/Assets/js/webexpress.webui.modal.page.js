@@ -26,18 +26,22 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
             this._dispatch(webexpress.webui.Event.DATA_REQUESTED_EVENT, {});
 
             if (this._uri) {
-                fetch(this._uri)
-                    .then((response) => {
-                        return response.text();
-                    })
-                    .then((data) => {
-                        this._update(data);
+                // the served page is shown whatever the status says, an error page included;
+                // only an answer that never arrived leaves the dialog as it is
+                webexpress.webui.Transport.request(this._uri).then((result) => {
+                    const data = result.data && result.data.text !== undefined ? result.data.text : null;
 
-                        // trigger event when data has successfully arrived
-                        this._element.dispatchEvent(new CustomEvent(webexpress.webui.Event.DATA_ARRIVED_EVENT, {
-                            detail: { sender: this._element, id: this._element.id, response: data }
-                        }));
-                    });
+                    if (data === null) {
+                        return;
+                    }
+
+                    this._update(data);
+
+                    // trigger event when data has successfully arrived
+                    this._element.dispatchEvent(new CustomEvent(webexpress.webui.Event.DATA_ARRIVED_EVENT, {
+                        detail: { sender: this._element, id: this._element.id, response: data }
+                    }));
+                });
             } else {
                 this._update(this._element.innerHTML);
             }

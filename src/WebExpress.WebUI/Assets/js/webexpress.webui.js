@@ -2201,6 +2201,243 @@ webexpress.webui.Ctrl = class {
 }
 
 /**
+ * The built-in transport adapter: fetch for requests, XMLHttpRequest for uploads, because
+ * only the latter reports upload progress. It normalises every outcome and announces the
+ * failures on the document.
+ */
+webexpress.webui.FetchTransport = class {
+    /**
+     * The event the built-in adapter announces a non-abort failure with.
+     */
+    static ERROR_EVENT = "webexpress.webui.transport.error";
+
+    /**
+     * Performs a request with fetch. The body is read by content type, as json for
+     * application/json and as { text } otherwise, on success and failure alike, so a caller
+     * can show a server's answer to a refused submission.
+     * @param {string} url - The request url.
+     * @param {object} [init={}] - The fetch init.
+     * @returns {Promise<object>} The normalised result.
+     */
+    async request(url, init = {}) {
+        try {
+            const response = await fetch(url, Object.assign({ credentials: "same-origin" }, init));
+            const contentType = (response.headers && typeof response.headers.get === "function"
+                ? response.headers.get("content-type")
+                : "") || "";
+
+            let data = null;
+
+            if (response.status !== 204) {
+                try {
+                    data = contentType.includes("application/json") ? await response.json() : { text: await response.text() };
+                } catch (parseError) {
+                    return this._report(this._result(false, response, contentType, null, "parse", "response could not be read", false), init);
+                }
+            }
+
+            if (!response.ok) {
+                const message = response.statusText || ("request failed with status " + response.status);
+                return this._report(this._result(false, response, contentType, data, "http", message, response.status >= 500), init);
+            }
+
+            return this._result(true, response, contentType, data, null, "", false);
+        } catch (networkError) {
+            // the signal is the authority on why the request ended: an abort with a reason
+            // rejects with that reason rather than with an AbortError
+            const aborted = (init.signal && init.signal.aborted) || (networkError && networkError.name === "AbortError");
+            const result = webexpress.webui.Transport.fail(aborted ? "abort" : "network", 0, networkError ? networkError.message : "network error", !aborted);
+
+            return aborted ? result : this._report(result, init);
+        }
+    }
+
+    /**
+     * Uploads a body with XMLHttpRequest, so the progress of the upload can be reported.
+     * @param {string} url - The request url.
+     * @param {FormData|Blob} body - The body.
+     * @param {object} [options={}] - method (default POST), onProgress(percent), signal, and
+     *     report: false for an adapter that wraps this upload and announces the failure itself.
+     * @returns {Promise<object>} The normalised result.
+     */
+    upload(url, body, options = {}) {
+        return new Promise((resolve) => {
+            const xhr = new XMLHttpRequest();
+            const method = options.method || "POST";
+            const settle = (result) => resolve(result.ok || result.error.kind === "abort" || options.report === false ? result : this._report(result, { method: method }));
+
+            xhr.open(method, url, true);
+            xhr.withCredentials = options.credentials === "include";
+
+            if (typeof options.onProgress === "function") {
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        options.onProgress(Math.round((e.loaded / e.total) * 100), e);
+                    }
+                };
+            }
+
+            xhr.onload = () => {
+                const contentType = xhr.getResponseHeader("content-type") || "";
+                let data = null;
+
+                if (xhr.status !== 204 && xhr.responseText) {
+                    try {
+                        data = contentType.includes("application/json") ? JSON.parse(xhr.responseText) : { text: xhr.responseText };
+                    } catch (parseError) {
+                        settle(this._result(false, xhr, contentType, null, "parse", "response could not be read", false));
+                        return;
+                    }
+                }
+
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    settle(this._result(true, xhr, contentType, data, null, "", false));
+                } else {
+                    settle(this._result(false, xhr, contentType, data, "http", xhr.statusText || ("request failed with status " + xhr.status), xhr.status >= 500));
+                }
+            };
+            xhr.onerror = () => settle(webexpress.webui.Transport.fail("network", 0, "network error", true));
+            xhr.onabort = () => settle(webexpress.webui.Transport.fail("abort", 0, "request was aborted", false));
+
+            if (options.signal) {
+                if (options.signal.aborted) {
+                    xhr.onabort();
+                    return;
+                }
+                options.signal.addEventListener("abort", () => xhr.abort(), { once: true });
+            }
+
+            xhr.send(body);
+        });
+    }
+
+    /**
+     * Builds a result around a response.
+     * @param {boolean} ok - Whether the request succeeded.
+     * @param {Response|XMLHttpRequest} response - The response the result came from.
+     * @param {string} contentType - The content type of the body.
+     * @param {*} data - The parsed body.
+     * @param {string|null} kind - The failure kind, null on success.
+     * @param {string} message - The failure message.
+     * @param {boolean} retriable - Whether a retry may succeed.
+     * @returns {object} The normalised result.
+     */
+    _result(ok, response, contentType, data, kind, message, retriable) {
+        return {
+            ok: ok,
+            status: response.status,
+            data: data,
+            error: ok ? null : { kind: kind, status: response.status, message: message, retriable: !!retriable },
+            response: response,
+            contentType: contentType
+        };
+    }
+
+    /**
+     * Announces a failure on the document and hands the result back unchanged.
+     * @param {object} result - The failed result.
+     * @param {object} init - The request init, for the operation name.
+     * @returns {object} The same result.
+     */
+    _report(result, init) {
+        document.dispatchEvent(new CustomEvent(webexpress.webui.FetchTransport.ERROR_EVENT, {
+            detail: Object.assign({ operation: (init && init.method) || "GET", result: result }, result.error)
+        }));
+
+        return result;
+    }
+};
+
+/**
+ * The one door of the WebUI controls to the network.
+ *
+ * A control that talks to a server - the frame loading a page, the dialog submitting a form,
+ * the inline editor storing a value, the upload - never calls fetch itself. It asks the
+ * transport, and the transport answers with one result shape whatever happened:
+ * { ok, status, data, error, response, contentType }, where error is null on success and
+ * { kind, status, message, retriable } on failure, with kind one of "http", "network",
+ * "parse" or "abort". A request never rejects, so a control has one path to write and an
+ * abort is a result like any other rather than an exception to catch.
+ *
+ * The built-in adapter is plain fetch. An application replaces it through use(), which is
+ * how WebExpress.WebApp routes every WebUI request through its service layer and its error
+ * channel without the WebUI knowing that layer exists. The built-in adapter announces its
+ * non-abort failures on the document as "webexpress.webui.transport.error", so a page that
+ * has no service layer still sees them in one place.
+ */
+webexpress.webui.Transport = new class {
+    /**
+     * Creates the transport with the built-in adapter installed.
+     */
+    constructor() {
+        this._adapter = null;
+        this._builtIn = new webexpress.webui.FetchTransport();
+    }
+
+    /**
+     * Returns the built-in adapter, for an installed adapter that wraps rather than
+     * replaces it.
+     * @returns {webexpress.webui.FetchTransport} The built-in adapter.
+     */
+    get builtIn() {
+        return this._builtIn;
+    }
+
+    /**
+     * Installs an adapter. An adapter answers request(url, init) with the result shape
+     * described above; upload(url, body, options) is optional and falls back to the
+     * built-in one. Passing null restores the built-in adapter.
+     * @param {object|null} adapter - The adapter.
+     * @returns {this} The transport for chaining.
+     */
+    use(adapter) {
+        this._adapter = adapter && typeof adapter.request === "function" ? adapter : null;
+        return this;
+    }
+
+    /**
+     * Performs a request.
+     * @param {string} url - The request url.
+     * @param {object} [init={}] - The fetch init: method, headers, body, signal, credentials.
+     * @returns {Promise<object>} The normalised result; the promise never rejects.
+     */
+    request(url, init = {}) {
+        return (this._adapter || this._builtIn).request(url, init);
+    }
+
+    /**
+     * Uploads a body, reporting progress on the way.
+     * @param {string} url - The request url.
+     * @param {FormData|Blob} body - The body.
+     * @param {object} [options={}] - method (default POST), onProgress(percent), signal.
+     * @returns {Promise<object>} The normalised result; the promise never rejects.
+     */
+    upload(url, body, options = {}) {
+        const adapter = this._adapter && typeof this._adapter.upload === "function" ? this._adapter : this._builtIn;
+        return adapter.upload(url, body, options);
+    }
+
+    /**
+     * Builds a failed result.
+     * @param {string} kind - One of "http", "network", "parse", "abort".
+     * @param {number} status - The http status, 0 when there is none.
+     * @param {string} message - What went wrong, for a log or a reader.
+     * @param {boolean} retriable - Whether a retry may succeed.
+     * @returns {object} The normalised failure result.
+     */
+    fail(kind, status, message, retriable) {
+        return {
+            ok: false,
+            status: status,
+            data: null,
+            error: { kind: kind, status: status, message: message, retriable: !!retriable },
+            response: null,
+            contentType: ""
+        };
+    }
+};
+
+/**
  * Connects top-layer menus to their invokers while CSS owns all placement decisions.
  */
 webexpress.webui.NativeMenu = class {

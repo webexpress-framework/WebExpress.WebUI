@@ -98,31 +98,21 @@
     pointer-events: none; /* prevent interaction with the indicator */
 }
 
-/* The indicator glyphs are painted rather than embedded, so they follow the text
-   colour of whatever they sit in and therefore work in both themes; an embedded
-   image carries its own fill and stays the same grey on a dark surface. */
-:root {
-    --wx-tree-dot-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 135 190'%3E%3Cg transform='translate(30,-58)'%3E%3Cpath d='M0 153.96 A37.9359 37.9359 0 0 1 75.87 153.96 A37.9359 37.9359 0 1 1 0 153.96 Z' fill='%23000'/%3E%3C/g%3E%3C/svg%3E");
-}
-
-.wx-tree-indicator-dot {
-    display: inline-block;
-    width: 1em;
-    height: 1em;
-    background-color: currentColor;
-    -webkit-mask: var(--wx-tree-dot-mask) no-repeat center / contain;
-    mask: var(--wx-tree-dot-mask) no-repeat center / contain;
-    opacity: 0.6;
-}
-
+/* both indicators are drawings of the icon set, so they follow the text colour of
+   whatever they sit in and therefore work in both themes; what the tree adds is one
+   size for the two and the restraint of a marker next to a label */
+.wx-tree-indicator-dot,
 .wx-tree-indicator-angle {
     display: inline-block;
     width: 0.8rem;
     height: 0.8rem;
     background-color: currentColor;
+    opacity: 0.6;
+}
+
+.wx-tree-indicator-angle {
     transform: rotate(-90deg);
     transition: transform .15s ease;
-    opacity: 0.6;
 }
 
 /* --- guide columns ---------------------------------------------------------

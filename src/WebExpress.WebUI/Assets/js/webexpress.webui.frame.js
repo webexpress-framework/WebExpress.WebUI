@@ -213,24 +213,22 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
         // notify that data fetching starts
         this._dispatch(webexpress.webui.Event.DATA_REQUESTED_EVENT, { uri: this._uri });
 
-        // perform fetch and update
-        fetch(this._uri, { credentials: "same-origin" })
-            .then((response) => {
-                // ensure http ok
-                if (!response.ok) {
-                    throw new Error("Failed to load content. HTTP status: " + response.status);
+        // load through the transport, which answers with one result whatever happened
+        webexpress.webui.Transport.request(this._uri, { credentials: "same-origin" }).then((result) => {
+            if (!result.ok) {
+                // a superseded load says nothing about the content; every other failure does
+                if (result.error.kind !== "abort") {
+                    this._renderError("Failed to load content. " + result.error.message);
                 }
-                return response.text();
-            })
-            .then((html) => {
-                this._update(html);
+                return;
+            }
 
-                // notify that data has arrived
-                this._dispatch(webexpress.webui.Event.DATA_ARRIVED_EVENT, { uri: this._uri, response: html });
-            })
-            .catch((error) => {
-                this._renderError(error);
-            });
+            const html = result.data && result.data.text !== undefined ? result.data.text : "";
+            this._update(html);
+
+            // notify that data has arrived
+            this._dispatch(webexpress.webui.Event.DATA_ARRIVED_EVENT, { uri: this._uri, response: html });
+        });
     }
 
     /**

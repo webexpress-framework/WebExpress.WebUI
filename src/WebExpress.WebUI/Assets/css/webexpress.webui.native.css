@@ -17,6 +17,11 @@
     opacity: 0;
     transition: opacity 180ms ease, display 180ms allow-discrete, overlay 180ms allow-discrete;
 }
+/* a menu of entries runs them edge to edge, so the hover surface of an entry spans the
+   whole width of the menu; the inset stays for the panels that host a field or a grid.
+   :where() keeps the rule at the weight of the one above, so a control's own
+   ".wx-x .dropdown-menu" padding still outranks it */
+.wx-native-menu[popover]:where(.dropdown-menu) { padding-inline: 0; }
 .wx-native-menu[popover]:popover-open { display: block; opacity: 1; }
 .wx-native-menu-field[popover] { min-inline-size: anchor-size(inline); }
 .wx-native-menu-field[popover]:popover-open { display: flex; flex-direction: column; }

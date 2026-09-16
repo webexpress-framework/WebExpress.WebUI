@@ -431,6 +431,53 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
     }
 
     /**
+     * Returns the items the menu shows for a filter text: the options that pass it and are not
+     * chosen yet, and only the headers and dividers that still structure something.
+     *
+     * A header stands for the group of options below it and a divider for a boundary between
+     * two groups; once the filter or the selection has taken the options of a group away, the
+     * header names nothing and the divider separates nothing. Left in, the menu of a narrow
+     * filter is a column of captions and rules with a single option somewhere in between.
+     * @param {string} filterText - The filter text.
+     * @returns {Array<object>} The items in menu order.
+     */
+    _visibleItems(filterText) {
+        const kept = this._items.filter((item) => {
+            if (item.type === "divider" || item.type === "header") {
+                return true;
+            }
+
+            // an option the depended-on field does not offer is left out rather than
+            // shown disabled: it is not unavailable for now, it does not belong to what
+            // was chosen there, and a list of struck-through impossibilities is noise
+            return this._isOffered(item)
+                && this._optionfilter(item.label, filterText)
+                && !this._values.includes(item.id);
+        });
+
+        // a header whose group holds no option any more - the next structural item or the
+        // end follows it directly - is dropped
+        const withGroups = kept.filter((item, index) => {
+            if (item.type !== "header") {
+                return true;
+            }
+
+            const next = kept[index + 1];
+
+            return next !== undefined && next.type !== "header" && next.type !== "divider";
+        });
+
+        // a divider at either end or next to another divider separates nothing
+        return withGroups.filter((item, index) => {
+            if (item.type !== "divider") {
+                return true;
+            }
+
+            return index > 0 && index < withGroups.length - 1 && withGroups[index - 1].type !== "divider";
+        });
+    }
+
+    /**
      * Renders the selection control options and current selection.
      */
     render() {
@@ -439,25 +486,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
         const filterText = this._filterInput ? this._filterInput.value : "";
 
         // render each selection item or structural item
-        this._items.forEach((item) => {
-            // apply filter logic
-            if (item.type !== "divider" && item.type !== "header") {
-                 // an option the depended-on field does not offer is left out rather than
-                 // shown disabled: it is not unavailable for now, it does not belong to what
-                 // was chosen there, and a list of struck-through impossibilities is noise
-                 if (!this._isOffered(item)) {
-                     return;
-                 }
-
-                 const isVisible = this._optionfilter(item.label, filterText);
-                 if (!isVisible) {
-                     return;
-                 }
-            }
-
-            // prevent rendering dividers/headers if they are adjacent or at start/end due to filtering
-            // (simple logic: just render all structure for now, complex logic omitted for brevity)
-
+        this._visibleItems(filterText).forEach((item) => {
             if (item.type === "divider") {
                 const li = document.createElement("li");
                 li.className = "dropdown-divider";
@@ -467,7 +496,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
                 li.className = "dropdown-header";
                 li.innerHTML = item.content;
                 fragment.appendChild(li);
-            } else if (!this._values.includes(item.id)) {
+            } else {
                 const li = document.createElement("li");
                 li.className = "dropdown-item";
                 // store id for event delegation

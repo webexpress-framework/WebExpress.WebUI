@@ -64,5 +64,23 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             Assert.Equal("paging", new BindPaging().Name);
         }
+
+        /// <summary>
+        /// Verifies that the JSON representation carries the same facts as the attributes: the
+        /// bind name and the normalised source selector, and no source key when there is none.
+        /// </summary>
+        [Fact]
+        public void ToJsonMirrorsTheAttributes()
+        {
+            // act
+            var withSource = new BindPaging { Source = "mySource" }.ToJson();
+            var withoutSource = new BindPaging().ToJson();
+
+            // validation
+            Assert.Equal("paging", withSource["bind"]);
+            Assert.Equal("#mySource", withSource["source"]);
+            Assert.Equal("paging", withoutSource["bind"]);
+            Assert.False(withoutSource.ContainsKey("source"));
+        }
     }
 }

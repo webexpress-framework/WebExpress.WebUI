@@ -69,14 +69,20 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
                 event.preventDefault();
                 const formData = new FormData(this._form);
 
-                fetch(action, { method, body: formData })
-                    .then(r => r.text())
-                    .then(data => this._update(data))
-                    .catch(error => {
-                        this._bodyDiv.innerHTML =
-                            error.message ||
+                // the served page is shown whatever the status says: a refused submission
+                // comes back as the form with its validation messages, which is what the
+                // dialog has to show; only an answer that never arrived is an error
+                webexpress.webui.Transport.request(action, { method, body: formData }).then((result) => {
+                    const html = result.data && result.data.text !== undefined ? result.data.text : null;
+
+                    if (html !== null) {
+                        this._update(html);
+                    } else if (result.error && result.error.kind !== "abort") {
+                        this._bodyDiv.textContent =
+                            result.error.message ||
                             this._i18n("webexpress.webui:modal.form.error", "An error occurred.");
-                    });
+                    }
+                });
             };
 
             this._form.addEventListener("submit", this._submitHandler);

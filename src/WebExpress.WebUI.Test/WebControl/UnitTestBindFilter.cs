@@ -40,5 +40,20 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             Assert.Equal("filter", new BindFilter().Name);
         }
+
+        /// <summary>
+        /// Verifies that the JSON representation names the bind, which is all a filter bind
+        /// consists of.
+        /// </summary>
+        [Fact]
+        public void ToJsonNamesTheBind()
+        {
+            // act
+            var json = new BindFilter().ToJson();
+
+            // validation
+            Assert.Equal("filter", json["bind"]);
+            Assert.Single(json);
+        }
     }
 }

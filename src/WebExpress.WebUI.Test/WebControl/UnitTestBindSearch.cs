@@ -86,5 +86,23 @@ namespace WebExpress.WebUI.Test.WebControl
             Assert.Contains(@"data-wx-source-search=""#mySearch""", html);
             Assert.Contains(@"data-wx-source-paging=""#myPager""", html);
         }
+
+        /// <summary>
+        /// Verifies that the JSON representation carries the same facts as the attributes: the
+        /// bind name and the normalised source selector, and no source key when there is none.
+        /// </summary>
+        [Fact]
+        public void ToJsonMirrorsTheAttributes()
+        {
+            // act
+            var withSource = new BindSearch { Source = "mySource" }.ToJson();
+            var withoutSource = new BindSearch().ToJson();
+
+            // validation
+            Assert.Equal("search", withSource["bind"]);
+            Assert.Equal("#mySource", withSource["source"]);
+            Assert.Equal("search", withoutSource["bind"]);
+            Assert.False(withoutSource.ContainsKey("source"));
+        }
     }
 }

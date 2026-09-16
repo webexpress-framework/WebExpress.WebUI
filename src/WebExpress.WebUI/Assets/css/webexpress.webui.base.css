@@ -32,6 +32,10 @@ a:hover { color: var(--wx-link-hover-color); }
 img, svg { vertical-align: middle; }
 img { max-width: 100%; }
 p, ul, ol, dl, pre, blockquote { margin-top: 0; margin-bottom: 1rem; }
+/* the bottom margin separates a list from the prose after it; a nested list ends inside
+   its parent item, where the same margin would open a gap between the last child and
+   the next item of the parent level - visible as a jump in every tree */
+ul ul, ul ol, ol ul, ol ol { margin-bottom: 0; }
 h1, h2, h3, h4, h5, h6 { margin: 0 0 0.5rem; font-weight: 500; line-height: 1.2; }
 h1 { font-size: 2.5rem; } h2 { font-size: 2rem; } h3 { font-size: 1.75rem; }
 h4 { font-size: 1.5rem; } h5 { font-size: 1.25rem; } h6 { font-size: 1rem; }
@@ -89,6 +93,13 @@ legend { width: 100%; padding: 0; margin-bottom: 0.5rem; font-size: 1.5rem; }
 .form-range { width: 100%; accent-color: var(--wx-primary); }
 .input-group { display: flex; align-items: stretch; flex-wrap: wrap; width: 100%; }
 .input-group > .form-control, .input-group > .form-select { flex: 1 1 auto; width: 1%; min-width: 0; }
+/* the members of a group read as one field: the corners where two of them meet are
+   squared and their borders overlap, so a button or an addon is part of the field rather
+   than a box set beside it; the focused field rises above its neighbours so its ring is
+   not cut off by them */
+.input-group > :not(:first-child) { margin-inline-start: -1px; border-start-start-radius: 0; border-end-start-radius: 0; }
+.input-group > :not(:last-child) { border-start-end-radius: 0; border-end-end-radius: 0; }
+.input-group > .form-control:focus, .input-group > .form-select:focus { z-index: 5; }
 .input-group-text { display: flex; align-items: center; padding: 0.375rem 0.75rem; border: 1px solid var(--wx-border-color); background: var(--wx-tertiary-bg); border-radius: var(--wx-border-radius); }
 .is-invalid { border-color: var(--wx-form-invalid-border-color); }
 .is-valid { border-color: var(--wx-form-valid-border-color); }
@@ -97,10 +108,14 @@ legend { width: 100%; padding: 0; margin-bottom: 0.5rem; font-size: 1.5rem; }
 .dropdown { position: relative; }
 .dropdown-menu { list-style: none; margin: 0; padding: 0.5rem 0; min-width: 10rem; }
 .dropdown-item { display: block; width: 100%; padding: 0.25rem 1rem; border: 0; background: transparent; color: var(--wx-body-color); text-align: start; text-decoration: none; white-space: nowrap; }
-.dropdown-item:hover, .dropdown-item:focus { color: var(--wx-body-color); background: var(--wx-tertiary-bg); }
+/* the raised surface, not the recessed one: a menu sits on the body background, from which
+   the recessed tone is one step and in light mode not a legible one */
+.dropdown-item:hover, .dropdown-item:focus { color: var(--wx-body-color); background: var(--wx-secondary-bg); }
 .dropdown-item.active { background: var(--wx-primary); color: var(--wx-primary-contrast); }
 .dropdown-item.disabled { pointer-events: none; }
-.dropdown-divider { border: 0; border-top: 1px solid var(--wx-border-color); margin: 0.5rem 0; }
+/* a divider is a list item as often as an <hr>, and an item with a marker box would open
+   a line's height around the rule */
+.dropdown-divider { height: 0; overflow: hidden; border: 0; border-top: 1px solid var(--wx-border-color); margin: 0.25rem 0; }
 .dropdown-header { padding: 0.5rem 1rem; font-size: 0.875rem; color: var(--wx-secondary-color); }
 .dropdown-toggle::after { content: none; }
 .dropdown-toggle-split { padding-inline: 0.5rem; }

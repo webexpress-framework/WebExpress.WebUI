@@ -8699,3 +8699,8 @@
     -webkit-mask-image: url("../icons/amplifier.svg");
     mask-image: url("../icons/amplifier.svg");
 }
+
+.wx-icon-light-dot {
+    -webkit-mask-image: url("../icons/dot.svg");
+    mask-image: url("../icons/dot.svg");
+}

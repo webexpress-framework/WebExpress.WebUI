@@ -293,7 +293,7 @@ test("a transition is reported and persisted to the endpoint the widget was give
     const runtime = load({
         fetch: async (uri, init) => {
             calls.push({ uri, body: JSON.parse(init.body) });
-            return { ok: true, json: async () => ({ elapsed: 60, paused: true }) };
+            return { ok: true, status: 200, headers: { get: () => "application/json" }, json: async () => ({ elapsed: 60, paused: true }) };
         }
     });
     const { ctrl, host } = build(runtime, { status: "fulfilled", actionUri: "/api/v1/sla" });
@@ -315,7 +315,7 @@ test("a transition is reported and persisted to the endpoint the widget was give
 });
 
 test("a failing request is reported rather than swallowed", async () => {
-    const runtime = load({ fetch: async () => ({ ok: false, status: 500, statusText: "Internal Server Error" }) });
+    const runtime = load({ fetch: async () => ({ ok: false, status: 500, statusText: "Internal Server Error", headers: { get: () => "" }, text: async () => "" }) });
     const { ctrl, host } = build(runtime, { status: "fulfilled", actionUri: "/api/v1/sla" });
     const errors = [];
 

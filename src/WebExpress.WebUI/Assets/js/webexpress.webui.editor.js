@@ -88,9 +88,25 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._plugins = webexpress.webui.EditorPlugins.getAll().map(plugin => Object.assign({}, plugin));
         this._createToolbar(element); this._createEditorArea(element); this._createStatusBar(element); this._initContextMenu();
         this._history = new webexpress.webui.EditorHistory(this);
-        this._attachEventHandlers();
+        this._attachEventHandlers(); this._observeFieldsets(element);
         this._pluginCleanups = this._plugins.map(plugin => plugin.init?.(this)).filter(fn => typeof fn === "function");
         this.render(false); this._setupFormIntegration(); this._syncValue(false);
+    }
+
+    /**
+     * Follows the disabled attribute of every fieldset the host sits in.
+     *
+     * A disabled fieldset disables the native fields inside it live, and the editor reads it the
+     * same way - but the inert flags on its own DOM are only written when the state is applied.
+     * A group re-enabled after the editor rendered inside it, which is what a form does around
+     * loading its record, would otherwise leave the surface locked with nothing to unlock it.
+     * @param {HTMLElement} element - The host element whose enclosing fieldsets are observed.
+     */
+    _observeFieldsets(element) {
+        this._fieldsetObserver = new MutationObserver(() => { if (!this._destroyed) this._applyDisabled(); });
+        for (let fieldset = element.closest("fieldset"); fieldset; fieldset = fieldset.parentElement?.closest("fieldset")) {
+            this._fieldsetObserver.observe(fieldset, { attributes: true, attributeFilter: ["disabled"] });
+        }
     }
 
     /** Applies validation before data becomes part of an editor document. */
@@ -396,7 +412,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     destroy() {
         if (this._destroyed) return;
         this._destroyed = true; this._composing = false;
-        this._history.destroy();
+        this._history.destroy(); this._fieldsetObserver.disconnect();
         this._listeners.splice(0).forEach(cleanup => cleanup());
         this._timers.forEach(timer => clearTimeout(timer)); this._timers.clear();
         this._pluginCleanups.splice(0).forEach(cleanup => cleanup());

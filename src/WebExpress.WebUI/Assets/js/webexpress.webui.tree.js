@@ -384,7 +384,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             } else if (this._showIndicator && this._showLeafIndicator) {
                 // optional dot indicator for leaf nodes
                 indicator = document.createElement("i");
-                indicator.className = "wx-tree-indicator-dot";
+                indicator.className = "wx-tree-indicator-dot " + this._iconClass("dot");
             }
 
             // render image and icon if present

@@ -51,9 +51,10 @@ function loadRuntime() {
     return {
         rt,
         settle: async () => {
-            pending({ ok: true, status: 200, text: async () => "<html><body><p>content</p></body></html>" });
-            // let the fetch .then chain and the update run to completion
-            for (let i = 0; i < 5; i++) { await Promise.resolve(); }
+            pending({ ok: true, status: 200, headers: { get: () => "text/html" }, text: async () => "<html><body><p>content</p></body></html>" });
+            // let the transport, its promise chain and the update run to completion; a
+            // macrotask outlasts however many microtask turns the chain takes
+            await new Promise((resolve) => setTimeout(resolve, 0));
         }
     };
 }

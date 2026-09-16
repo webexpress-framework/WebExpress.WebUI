@@ -333,25 +333,24 @@ webexpress.webui.SlaCtrl = class extends webexpress.webui.Ctrl {
             return Promise.resolve();
         }
 
-        return fetch(this._actionUri, {
+        return webexpress.webui.Transport.request(this._actionUri, {
             method: "POST",
             credentials: "same-origin",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ action: action })
-        })
-            .then((response) => {
-                if (!response.ok) {
-                    throw new Error(`${response.status} ${response.statusText}`);
-                }
-                return response.json();
-            })
-            .then((state) => this.apply(state))
-            .catch((error) => {
+        }).then((result) => {
+            if (result.ok) {
+                this.apply(result.data);
+                return;
+            }
+
+            if (result.error.kind !== "abort") {
                 this._dispatch(webexpress.webui.Event.DATA_ERROR_EVENT, {
                     action: action,
-                    error: String(error)
+                    error: `${result.status} ${result.error.message}`
                 });
-            });
+            }
+        });
     }
 
     /**

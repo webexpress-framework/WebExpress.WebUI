@@ -33,7 +33,28 @@ export function loadEditor(options = {}) {
         ModalSidebarPanelCtrl: class { show() {} hide() {} selectPage() {} destroy() {} },
         ModalCtrl: class { show() {} hide() {} destroy() {} }
     };
-    const sandbox = vm.createContext({ console, ...globals, Intl, navigator: { language: "en" }, setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); }, webexpress: { webui: wx } });
+    const observers = [];
+    /**
+     * Stands in for the browser's MutationObserver. It never fires on its own: a case that
+     * needs a mutation delivered calls the callback it registered through the observers list.
+     */
+    const MutationObserver = class {
+        /**
+         * Registers the observer so a case can reach its callback.
+         * @param {Function} callback - The mutation callback the editor registered.
+         */
+        constructor(callback) { this.callback = callback; observers.push(this); }
+        /** Accepts any target; nothing is watched. */
+        observe() {}
+        /** Nothing was watched, so there is nothing to release. */
+        disconnect() {}
+        /**
+         * Reports no pending mutations.
+         * @returns {Array} An empty record list.
+         */
+        takeRecords() { return []; }
+    };
+    const sandbox = vm.createContext({ console, ...globals, Intl, navigator: { language: "en" }, MutationObserver, setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); }, webexpress: { webui: wx } });
     const load = name => vm.runInContext(fs.readFileSync(webuiAsset(name), "utf8"), sandbox, { filename: name });
     ["webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js", "webexpress.webui.editor.js", ...(options.files || [])].forEach(load);
     if (options.addons) Object.entries(options.addons).forEach(([id, def]) => wx.EditorAddOns.register(id, def));
@@ -41,12 +62,14 @@ export function loadEditor(options = {}) {
     host.setAttribute("name", "document");
     host.setAttribute("value", options.html || "<p>alpha</p>");
     if (options.disabled) host.setAttribute("disabled", "disabled");
-    form.appendChild(host); document.body.appendChild(form);
+    // the group the host sits in, so a case can disable the surface the way a form does
+    const fieldset = document.createElement("fieldset");
+    fieldset.appendChild(host); form.appendChild(fieldset); document.body.appendChild(form);
     const editor = new wx.EditorCtrl(host);
     instances.set(host, editor);
     const root = editor.getEditorElement();
     return {
-        wx, editor, root, host, form, document, window, selection, plugins, panels, timers, sandbox, load,
+        wx, editor, root, host, form, fieldset, observers, document, window, selection, plugins, panels, timers, sandbox, load,
         select(anchor, focus = anchor) { editor.selection = { anchor, focus }; },
         input(inputType, data, extra = {}) {
             const event = { type: "beforeinput", target: root.querySelector(".wx-editor-region"), inputType, data, cancelable: true, defaultPrevented: false,

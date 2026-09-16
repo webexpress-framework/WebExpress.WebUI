@@ -193,26 +193,26 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
             // create basic auth token
             const token = btoa(username + ":" + password);
 
-            // setup the fetch request with the authorization header
-            fetch(window.location.href, {
+            // the request goes through the transport with the authorization header
+            webexpress.webui.Transport.request(window.location.href, {
                 method: "POST",
                 headers: {
                     "Authorization": "Basic " + token,
                     "Content-Type": "application/json"
                 }
-            }).then((response) => {
-                if (response.ok) {
+            }).then((result) => {
+                if (result.ok) {
                     // the session cookie arrived with this response, http-only and set by
                     // the server; the reload carries it
                     window.location.reload();
-                } else {
-                    // notify user about failed login
+                } else if (result.error.kind === "http") {
+                    // the server answered and said no: the credentials
                     alert(this._i18n("webexpress.webui:login.failed", "Login failed. Please check your credentials."));
+                } else if (result.error.kind !== "abort") {
+                    // nothing answered: the network, or an answer that could not be read
+                    console.error("error during login:", result.error.message);
+                    alert(this._i18n("webexpress.webui:login.error", "An error occurred. Please try again."));
                 }
-            }).catch((error) => {
-                // log and notify about network or generic errors
-                console.error("error during login:", error);
-                alert(this._i18n("webexpress.webui:login.error", "An error occurred. Please try again."));
             });
         });
     }

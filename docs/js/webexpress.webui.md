@@ -20,6 +20,7 @@ The file `webexpress.webui.js` is the core of the WebExpress.WebUI JavaScript fr
 |`webexpress.webui.DashboardWidgets` |Singleton |Registry for dashboard widget definitions.
 |`webexpress.webui.TableTemplates`   |Singleton |Registry for table cell renderer templates.
 |`webexpress.webui.IconSet`          |Singleton |Resolves an icon reference - a symbolic name, a class string or a legacy FontAwesome class - to the CSS classes of the active icon set.
+|`webexpress.webui.Transport`        |Singleton |The one door of the controls to the network: one result contract for every request, and an adapter an application installs in place of plain `fetch`.
 |`webexpress.webui.Ctrl`             |Class     |Abstract base class for all UI controls.
 |`webexpress.webui.MenuCtrl`         |Class     |Base class for controls with native anchored popover menus.
 |`webexpress.webui.Event`            |Class     |Utility class that defines all event name constants.
@@ -459,6 +460,52 @@ Within controls that extend `Ctrl`, use the built-in `_i18n` helper:
 
 ```javascript
 const label = this._i18n("webexpress.webui:calendar.may", "May");
+```
+
+## Transport
+
+A control that talks to a server - the frame loading a page, the modal form submitting, the inline
+editor storing a value, the upload - never calls `fetch` itself. It asks the `Transport`, and the
+transport answers with one result shape whatever happened. A request never rejects: an abort, a
+network failure and a refused status are all results, so a control has one path to write and
+nothing to catch.
+
+```javascript
+const result = await webexpress.webui.Transport.request("/api/thing", { method: "POST", body: json });
+// { ok, status, data, error, response, contentType }
+//   ok          true on a 2xx answer
+//   data        the body: the parsed json for application/json, { text } for anything else,
+//               on success and failure alike - a refused form still carries the page it answered with
+//   error       null, or { kind, status, message, retriable } with kind "http" | "network" | "parse" | "abort"
+```
+
+### Methods
+
+|Method                          |Description
+|--------------------------------|--------------------------------------------------------------
+|`request(url, init)`            |Performs a request; `init` is the fetch init (method, headers, body, signal, credentials).
+|`upload(url, body, options)`    |Uploads a body with progress: `options.onProgress(percent)`, `options.signal`, `options.method`.
+|`use(adapter)`                  |Installs an adapter; `null` restores the built-in one.
+|`builtIn`                       |The built-in adapter, for an installed adapter that wraps rather than replaces it.
+|`fail(kind, status, message, retriable)` |Builds a failed result in the contract's shape.
+
+### The adapter
+
+The built-in adapter (`webexpress.webui.FetchTransport`) is plain `fetch`, with `XMLHttpRequest`
+for uploads because only that reports progress. It announces every non-abort failure on the
+document as `webexpress.webui.transport.error`, so a page without a service layer still sees
+its failures in one place.
+
+An application replaces it to route the controls' requests through its own layer. That is what
+keeps the WebUI independent of any application: it knows an adapter with a `request` method and
+an optional `upload`, nothing more. WebExpress.WebApp installs its service layer this way, so a
+frame or a dialog on a WebApp page reports on the same error channel as every data control:
+
+```javascript
+webexpress.webui.Transport.use({
+    request: (url, init) => webexpress.webapp.ServiceRegistry.request(url, init),
+    upload: (url, body, options) => webexpress.webui.Transport.builtIn.upload(url, body, { ...options, report: false })
+});
 ```
 
 ## Syntax

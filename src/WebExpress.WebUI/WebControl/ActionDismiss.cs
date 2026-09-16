@@ -49,14 +49,24 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns a string that represents the value of the property.
+        /// Returns the action as the client reads it from a JSON island - the same facts
+        /// the attributes carry: what is dismissed, and which element.
         /// </summary>
-        /// <returns>A string that contains the value of the property.</returns>
+        /// <returns>The JSON representation of the action.</returns>
         public virtual Dictionary<string, object> ToJson()
         {
-            // todo
+            var dict = new Dictionary<string, object>
+            {
+                ["action"] = "dismiss",
+                ["dismiss"] = "fullscreen"
+            };
 
-            return null;
+            if (!string.IsNullOrWhiteSpace(Target))
+            {
+                dict["target"] = Target;
+            }
+
+            return dict;
         }
     }
 }

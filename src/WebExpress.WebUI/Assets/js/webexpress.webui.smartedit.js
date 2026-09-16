@@ -242,31 +242,31 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             this._prepareValueField(form, valueField, newValue);
             this._showEditSpinner(element);
 
-            try {
-                const response = await fetch(this._formAction, {
-                    method: this._formMethod ?? "PUT",
-                    body: new FormData(form)
-                });
+            const result = await webexpress.webui.Transport.request(this._formAction, {
+                method: this._formMethod ?? "PUT",
+                body: new FormData(form)
+            });
 
-                this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
-                    value: newValue,
-                    status: response.status,
-                    statusText: response.statusText || ""
-                });
+            // the save event carries the status the application checks: the server's own
+            // when it answered, 500 with the reason when nothing did - which is what the
+            // application saw for a network failure before the transport
+            const answered = !!result.response;
 
-                // bei erfolg übernimmt _finishEditing(save=true) den neuen wert
-            } catch (error) {
-                this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
-                    value: newValue,
-                    status: 500,
-                    statusText: error.message || this._i18n("webexpress.webui:smartedit.network.error", "Network Error")
-                });
-                console.error("failed to edit", error);
-                // bei fehler wird dennoch save=true weitergegeben, die anwendung kann status prüfen
-            } finally {
-                this._hideEditSpinner(element);
-                this._finishEditing(true, element, newValue);
+            this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
+                value: newValue,
+                status: answered ? result.status : 500,
+                statusText: answered
+                    ? (result.response.statusText || "")
+                    : (result.error.message || this._i18n("webexpress.webui:smartedit.network.error", "Network Error"))
+            });
+
+            if (!result.ok && !answered) {
+                console.error("failed to edit", result.error.message);
             }
+
+            // the new value is taken over whatever the outcome; the application checks the status
+            this._hideEditSpinner(element);
+            this._finishEditing(true, element, newValue);
         });
 
         btnCancel.addEventListener("click", (e) => {

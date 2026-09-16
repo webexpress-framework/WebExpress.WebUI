@@ -64,5 +64,23 @@ namespace WebExpress.WebUI.Test.WebControl
         {
             Assert.Equal("upload", new BindUpload().Name);
         }
+
+        /// <summary>
+        /// Verifies that the JSON representation carries the same facts as the attributes: the
+        /// bind name and the normalised source selector, and no source key when there is none.
+        /// </summary>
+        [Fact]
+        public void ToJsonMirrorsTheAttributes()
+        {
+            // act
+            var withSource = new BindUpload { Source = "mySource" }.ToJson();
+            var withoutSource = new BindUpload().ToJson();
+
+            // validation
+            Assert.Equal("upload", withSource["bind"]);
+            Assert.Equal("#mySource", withSource["source"]);
+            Assert.Equal("upload", withoutSource["bind"]);
+            Assert.False(withoutSource.ContainsKey("source"));
+        }
     }
 }

@@ -211,52 +211,37 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Uploads a single file using XMLHttpRequest to support progress tracking.
+     * Uploads a single file through the transport, which reports the progress on the way.
      * @param {File} file The file to upload.
      */
     _uploadFile(file) {
-        const xhr = new XMLHttpRequest();
         const formData = new FormData();
         formData.append("file", file);
         formData.append(this._name, this._id || "true");
 
-        xhr.open("POST", this._uploadUri, true);
-
-        // handle upload progress
-        xhr.upload.onprogress = e => {
-            if (e.lengthComputable && this._showProgress) {
-                const percent = Math.round((e.loaded / e.total) * 100);
-                this._dispatch(webexpress.webui.Event.UPLOAD_PROGRESS_EVENT, { file, percent });
-                this._updateProgress(file.name, percent);
+        webexpress.webui.Transport.upload(this._uploadUri, formData, {
+            onProgress: (percent) => {
+                if (this._showProgress) {
+                    this._dispatch(webexpress.webui.Event.UPLOAD_PROGRESS_EVENT, { file, percent });
+                    this._updateProgress(file.name, percent);
+                }
             }
-        };
-
-        // handle successful or failed upload
-        xhr.onload = () => {
+        }).then((result) => {
             const previewElement = this._preview.querySelector(`[data-file-name="${file.name}"]`);
-            if (xhr.status >= 200 && xhr.status < 300) {
+
+            if (result.ok) {
                 this._dispatch(webexpress.webui.Event.UPLOAD_SUCCESS_EVENT, { file });
                 if (previewElement) {
                     previewElement.remove();
                 }
-            } else {
-                this._dispatch(webexpress.webui.Event.UPLOAD_ERROR_EVENT, { file, error: xhr.statusText, status: xhr.status });
-                if (previewElement) {
-                    previewElement.classList.add("error");
-                }
+                return;
             }
-        };
 
-        // handle network errors
-        xhr.onerror = () => {
-            this._dispatch(webexpress.webui.Event.UPLOAD_ERROR_EVENT, { file, error: "Network Error", status: xhr.status });
-            const previewElement = this._preview.querySelector(`[data-file-name="${file.name}"]`);
+            this._dispatch(webexpress.webui.Event.UPLOAD_ERROR_EVENT, { file, error: result.error.message, status: result.status });
             if (previewElement) {
                 previewElement.classList.add("error");
             }
-        };
-
-        xhr.send(formData);
+        });
     }
 
     /**

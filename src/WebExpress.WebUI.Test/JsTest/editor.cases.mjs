@@ -102,6 +102,22 @@ export function editorCases(test, assert, loadEditor) {
         r.editor.disabled = false; r.input("insertText", "z"); assert.notEqual(r.editor.value, before);
         r.editor.disabled = true; r.editor._history.undo(); assert.equal(r.editor.exportHtml({ layout: false }), "<p>zalpha</p>");
     });
+    test("a fieldset re-enabled after a render inside it unlocks the surface again", () => {
+        // the shape of a rest form loading its record: the group is disabled, the value
+        // arrives and renders, the group is enabled - and nothing else touches the editor
+        const r = loadEditor(); const before = r.editor.value;
+        r.fieldset.setAttribute("disabled", "disabled");
+        const state = r.editor.getState(); state.doc.children[0].children[0].children[0].children[0].text = "loaded";
+        r.editor.setState(state, { emit: false });
+        assert.equal(r.root.querySelector(".wx-editor-region").getAttribute("contenteditable"), "false");
+        assert.equal(r.host.querySelector("button").disabled, true);
+        r.fieldset.removeAttribute("disabled");
+        r.observers.forEach(observer => observer.callback([]));
+        assert.equal(r.root.querySelector(".wx-editor-region").getAttribute("contenteditable"), "true");
+        assert.equal(r.host.querySelector("button").disabled, false);
+        r.input("insertText", "z"); assert.notEqual(r.editor.value, before);
+        assert.equal(r.editor.exportHtml({ layout: false }), "<p>zloaded</p>");
+    });
     test("external JSON replacement resets history and malformed values leave it intact", () => {
         const r = loadEditor(); r.input("insertText", "x");
         const state = r.editor.getState(); state.doc.children[0].children[0].children[0].children[0].text = "external";
