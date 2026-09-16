@@ -258,6 +258,21 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "editor.addon.error.select": "Please select an AddOn from the list.",
     "editor.addon.error.internal": "Internal error: Editor instance not found.",
 
+    // box add-on
+    "editor.addon.box.label": "Box",
+    "editor.addon.box.description": "An enclosing frame around content that belongs together.",
+    "editor.addon.box.layout": "Frame",
+    "editor.addon.box.header": "Label",
+    "editor.addon.box.content": "Content of the box...",
+    "box.layout.solid": "Solid line",
+    "box.layout.dashed": "Dashed line",
+    "box.layout.dotted": "Dotted line",
+    "box.layout.double": "Double line",
+    "box.layout.accent": "Bar on the leading edge",
+    "box.layout.raised": "Raised",
+    "box.layout.inset": "Inset",
+    "box.layout.none": "No frame",
+
     // instruction
     "editor.instruction.title": "Instruction Text",
     "editor.instruction.text.label": "Enter an instruction text here.",

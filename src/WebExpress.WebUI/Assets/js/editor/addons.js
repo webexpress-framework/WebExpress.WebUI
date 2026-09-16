@@ -470,9 +470,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
             label.className = "form-label";
             label.textContent = prop.label;
 
-            const input = document.createElement("input");
-            input.className = prop.type === "color" ? "form-control form-control-color" : "form-control";
-            input.type = prop.type || "text";
+            const input = this._createPropertyInput(prop);
             input.dataset.propName = prop.name;
             input.value = values[prop.name] || prop.default || "";
 
@@ -489,12 +487,38 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     },
 
     /**
+     * Builds the form field of a property. A property with a fixed set of values declares
+     * `type: "select"` and its `options` as `{ value, label }` pairs; everything else is a
+     * text-like input whose `type` is passed through.
+     * @param {object} prop -The property definition.
+     * @returns {HTMLElement} The field element.
+     */
+    _createPropertyInput: function(prop) {
+        if (prop.type === "select") {
+            const select = document.createElement("select");
+            select.className = "form-select";
+            (prop.options || []).forEach(option => {
+                const item = document.createElement("option");
+                item.value = option.value;
+                item.textContent = option.label != null ? option.label : option.value;
+                select.appendChild(item);
+            });
+            return select;
+        }
+
+        const input = document.createElement("input");
+        input.className = prop.type === "color" ? "form-control form-control-color" : "form-control";
+        input.type = prop.type || "text";
+        return input;
+    },
+
+    /**
      * Saves properties from the dialog and updates or inserts the add-on.
      */
     _handlePropertySave: function() {
         const addonId = this._propModal.dataset.addonId;
         const addonDef = webexpress.webui.EditorAddOns.get(addonId);
-        const inputs = this._propModal.querySelectorAll("input");
+        const inputs = this._propModal.querySelectorAll("input, select");
         const data = {};
 
         inputs.forEach(input => {

@@ -1662,9 +1662,10 @@ webexpress.webui.EditorAddOns = new class {
      * @param {string} [definition.category] - Category group (e.g., 'Widgets', 'Layout'). Defaults to 'General'.
      * @param {string} [definition.type] - Layout type: 'block' (default) or 'inline'.
      * @param {boolean} [definition.isContainer] - If true, the body is editable (for nesting).
+     * @param {string} [definition.contentClass] - Marker class the reading view puts on the block, so a registered controller adopts the content of a container add-on the way it adopts a server-rendered host.
      * @param {string} [definition.content] - Static HTML content (used if no renderer is provided).
      * @param {string} [definition.description] - Optional description text shown in the picker.
-     * @param {Array<object>} [definition.properties] - Array of property definitions for the settings dialog.
+     * @param {Array<object>} [definition.properties] - Array of property definitions for the settings dialog. A property with `type: "select"` lists its values as `options` of `{ value, label }`.
      * @param {Function} [definition.renderer] - Function(data) returning HTML string based on properties.
      * @returns {this} The registry instance for chaining.
      */

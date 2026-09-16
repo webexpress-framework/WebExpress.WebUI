@@ -346,7 +346,8 @@ webexpress.webui.EditorAddOns.register("alert-box", {
 });
 ```
 
-AddOns appear in the AddOn picker (opened via `{{`, or the toolbar button). When the AddOn has `properties`, a property dialog opens before insertion.
+AddOns appear in the AddOn picker (opened via `{{`, or the toolbar button). When the AddOn has `properties`, a property dialog opens before insertion. A property with a fixed set of values declares `type: "select"` and lists them as `options` of `{ value, label }` pairs; every other `type` becomes an input of that type.
+Inside the editor such an add-on keeps the generic card frame with the header that names it, and that frame carries the persisted properties as `data-*` attributes — which is what a stylesheet keys a preview on. The box stylesheet names the body of a frame with a given `data-layout` in every frame rule, so the author sees the frame the reader will get. See [Box](box.md).
 
 ## Use Case Examples
 

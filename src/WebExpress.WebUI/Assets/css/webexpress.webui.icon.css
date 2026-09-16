@@ -2116,6 +2116,11 @@
     mask-image: url("../icons/control-badge.svg");
 }
 
+.wx-icon-light-control-box {
+    -webkit-mask-image: url("../icons/control-box.svg");
+    mask-image: url("../icons/control-box.svg");
+}
+
 .wx-icon-light-control-breadcrumb {
     -webkit-mask-image: url("../icons/control-breadcrumb.svg");
     mask-image: url("../icons/control-breadcrumb.svg");

@@ -258,6 +258,21 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "editor.addon.error.select": "Bitte wählen Sie ein AddOn aus der Liste.",
     "editor.addon.error.internal": "Interner Fehler: Editor-Instanz nicht gefunden.",
 
+    // box add-on
+    "editor.addon.box.label": "Box",
+    "editor.addon.box.description": "Ein umschließender Rahmen um zusammengehörige Inhalte.",
+    "editor.addon.box.layout": "Rahmen",
+    "editor.addon.box.header": "Beschriftung",
+    "editor.addon.box.content": "Inhalt der Box...",
+    "box.layout.solid": "Durchgezogene Linie",
+    "box.layout.dashed": "Gestrichelte Linie",
+    "box.layout.dotted": "Gepunktete Linie",
+    "box.layout.double": "Doppelte Linie",
+    "box.layout.accent": "Balken am linken Rand",
+    "box.layout.raised": "Erhaben",
+    "box.layout.inset": "Vertieft",
+    "box.layout.none": "Kein Rahmen",
+
     // instruction
     "editor.instruction.title": "Anweisungstext",
     "editor.instruction.text.label": "Geben Sie hier einen Anweisungstext ein.",

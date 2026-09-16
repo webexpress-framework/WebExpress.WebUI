@@ -848,6 +848,36 @@ namespace WebExpress.WebUI.Test.WebFragment
         }
 
         /// <summary>
+        /// Test the render function of the fragment manager for the box fragment-control. The
+        /// body is composed in the documented order - preferences and primary fragments, the
+        /// content the box adds itself, then secondary fragments - and only the fragments scoped
+        /// to this box type take part.
+        /// </summary>
+        [Fact]
+        public void Render_TestSectionFragmentControlBox()
+        {
+            // arrange
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolbox"" class=""wx-webui-box"" data-layout=""solid"" data-header=""FragmentBox"">"
+                + @"<p id=""webexpress-webui-test-testfragmentcontrolboxpreferences"">preferences-fragment</p>"
+                + @"<p id=""webexpress-webui-test-testfragmentcontrolboxprimary"">primary-fragment</p>"
+                + @"<div>fragment-content</div>"
+                + @"<p id=""webexpress-webui-test-testfragmentcontrolboxsecondary"">secondary-fragment</p>"
+                + @"</div>";
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+
+            // act
+            var html = componentHub.FragmentManager.Render(renderContext, visualTree, typeof(TestSectionFragmentControlBox));
+
+            // validation
+            Assert.NotNull(html);
+            Assert.NotEmpty(html);
+            AssertExtensions.EqualWithPlaceholders(expected, html.FirstOrDefault()?.ToString());
+        }
+
+        /// <summary>
         /// Test the render function of the fragment manager for tab control items.
         /// </summary>
         [Fact]

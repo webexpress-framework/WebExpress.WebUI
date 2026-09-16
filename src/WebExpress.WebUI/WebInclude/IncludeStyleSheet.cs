@@ -15,6 +15,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/css/webexpress.webui.avatar.css")]
     [Asset("/assets/css/webexpress.webui.avatar.dropdown.css")]
     [Asset("/assets/css/webexpress.webui.barcode.css")]
+    [Asset("/assets/css/webexpress.webui.box.css")]
     [Asset("/assets/css/webexpress.webui.button.css")]
     [Asset("/assets/css/webexpress.webui.calendar.css")]
     [Asset("/assets/css/webexpress.webui.card.css")]

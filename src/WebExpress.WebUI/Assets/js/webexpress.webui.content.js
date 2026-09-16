@@ -105,6 +105,7 @@ webexpress.webui.ContentFormat = class {
             const block = document.createElement("div");
             block.className = "wx-content-addon";
             this._carryConfiguration(frame, block);
+            this._adoptContentClass(frame, block);
 
             const source = body || frame;
             if (!body) {
@@ -145,6 +146,25 @@ webexpress.webui.ContentFormat = class {
 
             frame.parentNode.replaceChild(span, frame);
         });
+    }
+
+    /**
+     * Marks the reading element with the class the add-on declares as its
+     * `contentClass`, if any. A container add-on that is a control on the page
+     * (a box) has no widget markup to survive the conversion - its content is
+     * the author's own - so the class is what lets the controller registry
+     * adopt the block and build the control around that content, the same way
+     * it builds it around the host element the C# control emits.
+     * @param {HTMLElement} frame - The add-on frame.
+     * @param {HTMLElement} target - The reading element replacing it.
+     */
+    static _adoptContentClass(frame, target) {
+        const registry = webexpress.webui.EditorAddOns;
+        const definition = registry && registry.get(frame.getAttribute("data-addon-id"));
+
+        if (definition && definition.contentClass) {
+            target.classList.add(definition.contentClass);
+        }
     }
 
     /**

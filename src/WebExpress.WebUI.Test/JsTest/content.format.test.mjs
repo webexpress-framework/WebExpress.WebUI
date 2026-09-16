@@ -29,9 +29,12 @@ const contentJs = path.resolve(here, "..", "..", "WebExpress.WebUI", "Assets", "
  * Loads the content sources into a fresh vm context backed by the rich DOM
  * stub. Only the namespace surface the file touches is stubbed; the converter
  * and the control under test are the real, shipped implementations.
+ * @param {object} [options] - `addons` maps an add-on id to the definition the
+ *     registry would answer with; without it no registry exists, as on a page
+ *     that ships no editor.
  * @returns {object} The namespace, document and helpers.
  */
-function loadContent() {
+function loadContent(options = {}) {
     const { document, globals } = createEditorDocument();
 
     const instantiated = [];
@@ -55,6 +58,7 @@ function loadContent() {
                     createInstances(element) { instantiated.push(element); }
                 },
                 I18N: { translate: (key) => key },
+                ...(options.addons ? { EditorAddOns: { get: (id) => options.addons[id] } } : {}),
                 IconSet: { resolve: (icon) => icon }
             }
         }
@@ -155,6 +159,28 @@ test("the guard paragraphs around a non-editable block are dropped, an authored 
 
     const authored = rt.convert("<p>one</p><p><br></p><p>two</p>");
     assert.equal(authored, "<p>one</p><p><br></p><p>two</p>", "a blank line between two paragraphs is content");
+});
+
+test("a container add-on that is a control on the page is handed to its controller", () => {
+    const value = `<div class="wx-addon-frame card my-3 shadow-sm" contenteditable="false" data-addon-id="box" data-layout="dashed" data-header="Notes">`
+        + `<div class="card-header"><span class="wx-addon-drag-handle">x</span><span>Box</span><button class="wx-addon-settings-btn">c</button></div>`
+        + `<div class="card-body p-2 wx-addon-body-container" contenteditable="true"><p>inside</p></div>`
+        + `</div>`;
+
+    // the box has no widget markup of its own - the content is the author's - so the marker
+    // class is the only way the controller registry can find the block and frame it
+    const rt = loadContent({ addons: { box: { contentClass: "wx-webui-box" } } });
+    const html = rt.convert(value);
+
+    assert.ok(html.includes(`class="wx-content-addon wx-webui-box"`), "the block carries the marker class the controller registers under");
+    assert.ok(html.includes(`data-layout="dashed"`), "the frame choice reaches the controller");
+    assert.ok(html.includes(`data-header="Notes"`), "so does the label");
+    assert.ok(html.includes("<p>inside</p>"), "the author's content is the body");
+    assert.ok(!html.includes("card-header"), "the editing frame is gone");
+
+    // an add-on without a content class, and a page without the registry, keep the plain block
+    assert.ok(!loadContent({ addons: {} }).convert(value).includes("wx-webui-box"), "no declaration, no marker");
+    assert.ok(!loadContent().convert(value).includes("wx-webui-box"), "no registry, no marker");
 });
 
 test("an inline add-on becomes plain markup in the running text", () => {
