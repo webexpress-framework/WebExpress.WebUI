@@ -42,3 +42,20 @@ test("the transported source survives characters outside ascii", () => {
 
     assert.equal(ctrl._code, source, "the umlauts, the dash and the quotation marks arrive intact");
 });
+
+test("a source that holds markup is shown, not rendered, by every highlighter", () => {
+    const languages = ["bash", "basic", "cmd", "cobol", "cpp", "csharp", "groovy", "java", "javascript", "json", "markdown", "php", "powershell", "property", "python", "visualbasic", "xml"];
+    const rt = loadWebUi({
+        browser: true,
+        extraFiles: languages.map(language => "syntax/" + language + ".js")
+    });
+
+    // a line a tutorial shows: a button as source, an ampersand and a comparison
+    const source = "x = \"<button class=\\\"btn\\\">Open & close</button>\" if a < b";
+    for (const language of languages) {
+        const html = rt.wx.Syntax.get(language)(source);
+        assert.ok(!/<button/.test(html), language + " does not let a tag of the source through");
+        assert.ok(/&lt;button/.test(html), language + " shows the tag as text");
+        assert.ok(!/(^|[^&;a-z])&(?![a-z]+;)/.test(html.replace(/&amp;|&lt;|&gt;|&quot;/g, "")), language + " leaves no bare ampersand");
+    }
+});

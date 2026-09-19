@@ -48,6 +48,10 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         this._allowRemove = ds.allowRemove === "true";
         this._persistKey = ds.persistKey || element.id || null;
 
+        // the outline level of the card titles: fifth by default, as a card title is, or what the
+        // page asks for to keep its outline without a gap
+        this._headingLevel = Math.min(6, Math.max(1, parseInt(ds.headingLevel, 10) || 5));
+
         // check for large icon option
         this._largeIcon = ds.largeIcon === "true";
         if (this._largeIcon) {
@@ -421,8 +425,11 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
 
         // render header with icon/image/label and supporting large icons
         if (tile.label || tile.icon || tile.image) {
-            const header = document.createElement("h5");
-            header.className = "card-title";
+            // a card with a picture but no words has nothing to head: a heading with no text is
+            // an empty entry in the outline, so the picture goes into a plain title row
+            const header = document.createElement(tile.label ? "h" + this._headingLevel : "div");
+            // the h5 class keeps the look of a card title whatever level the outline asks for
+            header.className = "card-title h5";
             if (tile.icon) {
                 const icon = document.createElement("i");
                 icon.className = tile.icon;

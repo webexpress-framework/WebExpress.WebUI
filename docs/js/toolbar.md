@@ -42,7 +42,7 @@ Individual elements are configured via `data-` attributes in the HTML. These att
 |--------------------|-----------------------------------------------------------------------------------------|----------------------
 | `data-label`       | Sets the visible text for buttons, comboboxes, or text items.                           | `data-label="Save"`
 | `data-icon`        | Assigns a CSS icon class to a button.                                                   | `data-icon="floppy-disk"`
-| `data-title`       | Adds a tooltip to a button, displayed on mouseover.                                     | `data-title="Save changes"`
+| `data-title`       | Adds a tooltip to a button, displayed on mouseover. It also names a tool that shows an icon alone; without it the icon's own name stands in. | `data-title="Save changes"`
 | `data-color-css`   | Applies a predefined color class to an element.                                         | `data-color-css="btn-primary"`
 | `data-color-style` | Applies a direct CSS style to an element.                                               | `data-color-style="background-color: #ff0000;"`
 | `data-align`       | Sets the alignment of an element within the toolbar (`left` or `right`). Default: `left`| `data-align="right"`

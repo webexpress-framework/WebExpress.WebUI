@@ -136,8 +136,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form move control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-move"" *></div>*")]
-        [InlineData("abc", @"*<div class=""wx-webui-input-move"" * data-value=""abc""></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-move"" *></div>*")]
+        [InlineData("abc", @"*<div id=""*"" class=""wx-webui-input-move"" * data-value=""abc""></div>*")]
         public void Value(string value, string expected)
         {
             // arrange

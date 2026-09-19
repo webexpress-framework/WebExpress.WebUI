@@ -112,7 +112,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(typeof(ControlText), @"<div class=""wx-callout""><div class=""wx-callout-body""><div></div></div></div>")]
         [InlineData(typeof(ControlLink), @"<div class=""wx-callout""><div class=""wx-callout-body""><a class=""wx-link""></a></div></div>")]
-        [InlineData(typeof(ControlImage), @"<div class=""wx-callout""><div class=""wx-callout-body""><img></div></div>")]
+        [InlineData(typeof(ControlImage), @"<div class=""wx-callout""><div class=""wx-callout-body""><img alt></div></div>")]
         public void Add(Type child, string expected)
         {
             // arrange

@@ -1428,6 +1428,13 @@ webexpress.webui.ScheduleCtrl = class extends webexpress.webui.Ctrl {
             }
         } else if (item.colorStyle) {
             entry.style.cssText += ";" + item.colorStyle;
+            // a fill chosen by the author has no rule of its own for the text on it, so the text
+            // takes whichever of black and white reads better on that fill
+            const fill = webexpress.webui.ContrastColor.background(item.colorStyle);
+            const text = fill && !webexpress.webui.ContrastColor.setsColor(item.colorStyle) ? webexpress.webui.ContrastColor.on(fill) : null;
+            if (text) {
+                entry.style.color = text;
+            }
         }
 
         entry.addEventListener("click", (e) => {

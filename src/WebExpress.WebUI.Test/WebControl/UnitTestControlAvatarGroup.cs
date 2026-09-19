@@ -57,7 +57,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the item color, emitted as a class or an inline style.
         /// </summary>
         [Theory]
-        [InlineData(true, @"<span class=""wx-avatar-group-avatar"" style=""background:#ff8800;"" title=""Stan"">S</span>")]
+        [InlineData(true, @"<span class=""wx-avatar-group-avatar"" style=""background:#ff8800;color:#000;"" title=""Stan"">S</span>")]
         [InlineData(false, @"<span class=""wx-avatar-group-avatar bg-primary"" title=""Stan"">S</span>")]
         public void ItemColor(bool userColor, string expected)
         {

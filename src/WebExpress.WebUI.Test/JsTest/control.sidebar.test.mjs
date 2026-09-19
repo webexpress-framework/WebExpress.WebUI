@@ -204,6 +204,20 @@ test("wx-webui-sidebar marks a nested row whose own level does not branch furthe
     assert.equal(host.querySelectorAll(".wx-sidebar-bullet").length, 2, "every row below a group is inside the tree by construction");
 });
 
+test("wx-webui-sidebar draws the bullet with the dot of the icon set, the glyph the tree marks its leaves with", () => {
+    const rt = loadSidebar();
+    const host = rt.document.createElement("div");
+    host.appendChild(group(rt, "branch", [link(rt, "child", null)]));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.SidebarCtrl(host);
+
+    const glyph = host.querySelector(".wx-sidebar-bullet > i");
+    assert.ok(glyph, "the marker is a glyph, not a drawing of its own");
+    assert.equal(glyph.className, rt.wx.IconSet.resolve("dot"), "the same dot the tree uses, in the set the page carries");
+    assert.equal(host.querySelector(".wx-sidebar-bullet").getAttribute("aria-hidden"), "true", "and it says nothing to a reader");
+});
+
 test("wx-webui-sidebar reveals a flyout while reduced and hides it on mouse-leave", () => {
     const rt = loadSidebar();
     const host = rt.document.createElement("div");

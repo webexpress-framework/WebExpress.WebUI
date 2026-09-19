@@ -523,6 +523,8 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
         button.type = "button";
+        button.title = webexpress.webui.I18N.translate("webexpress.webui:editor.table");
+        button.setAttribute("aria-label", button.title);
 
         button.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("table")}"></i>`;
 

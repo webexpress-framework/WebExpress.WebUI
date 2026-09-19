@@ -25,7 +25,6 @@ webexpress.webui.TrafficLightCtrl = class extends webexpress.webui.Ctrl {
         element.classList.add("wx-traffic-light");
         element.classList.toggle("wx-traffic-light-horizontal", this._horizontal);
         element.setAttribute("role", "img");
-        element.setAttribute("aria-readonly", "true");
 
         const tooltip = element.dataset.tooltip;
         if (tooltip) {

@@ -12,6 +12,12 @@ webexpress.webui.SectionCtrl = class extends webexpress.webui.Ctrl {
     static STORAGE_PREFIX = "wx-section:";
 
     /**
+     * Counts the sections without an id of their own, so each body still gets an id that
+     * the toggle can point at without colliding with the next section on the page.
+     */
+    static _nextBodyId = 0;
+
+    /**
      * Initializes the section: lifts the content aside, builds the header row and the
      * collapsible body around it, and applies the remembered state.
      * @param {HTMLElement} element - The DOM element associated with the section.
@@ -190,6 +196,15 @@ webexpress.webui.SectionCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Gets the button that folds the section, or null for a section that does not fold. It is
+     * the element the keyboard reaches and the one that reports the state.
+     * @returns {HTMLButtonElement|null}
+     */
+    get toggleElement() {
+        return this._toggle || null;
+    }
+
+    /**
      * Gets the body, which is where the adopted content lives.
      * @returns {HTMLElement}
      */
@@ -240,7 +255,7 @@ webexpress.webui.SectionCtrl = class extends webexpress.webui.Ctrl {
         }
 
         if (this._collapsible) {
-            this._headerRow.setAttribute("aria-expanded", this._expanded ? "true" : "false");
+            this._toggle.setAttribute("aria-expanded", this._expanded ? "true" : "false");
         }
     }
 
@@ -269,12 +284,13 @@ webexpress.webui.SectionCtrl = class extends webexpress.webui.Ctrl {
      * Builds the header row: the chevron, the optional icon, the label and the optional note.
      */
     _buildHeader() {
-        const row = document.createElement(this._collapsible ? "button" : "div");
+        const row = document.createElement("div");
         row.className = "wx-section-header";
 
         if (this._collapsible) {
-            row.type = "button";
-            row.setAttribute("aria-controls", this._bodyId());
+            // the whole row folds the section on a click, but the control the keyboard reaches is
+            // the button around the label: a row that is itself a button could not hold the menu
+            // or badge a host appends beside the label, as a control may not contain another
             row.addEventListener("click", () => this.toggle());
 
             const chevron = document.createElement("span");
@@ -303,7 +319,16 @@ webexpress.webui.SectionCtrl = class extends webexpress.webui.Ctrl {
             this._title.classList.add(...this._labelCss.split(" ").filter(Boolean));
         }
 
-        row.appendChild(this._title);
+        if (this._collapsible) {
+            this._toggle = document.createElement("button");
+            this._toggle.type = "button";
+            this._toggle.className = "wx-section-toggle";
+            this._toggle.setAttribute("aria-controls", this._bodyId());
+            this._toggle.appendChild(this._title);
+            row.appendChild(this._toggle);
+        } else {
+            row.appendChild(this._title);
+        }
 
         this._badgeElement = document.createElement("span");
         this._badgeElement.className = "wx-section-badge badge rounded-pill";
@@ -349,11 +374,17 @@ webexpress.webui.SectionCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Returns the id the header row points at with aria-controls.
+     * Returns the id the toggle points at with aria-controls. A section without an id draws a
+     * number, because the reference must single out this body among all on the page.
      * @returns {string}
      */
     _bodyId() {
-        return (this._element.id || "wx-section") + "-body";
+        if (!this._generatedBodyId) {
+            this._generatedBodyId = this._element.id
+                ? this._element.id + "-body"
+                : "wx-section-" + (++webexpress.webui.SectionCtrl._nextBodyId) + "-body";
+        }
+        return this._generatedBodyId;
     }
 
     /**

@@ -25,7 +25,9 @@ body { margin: 0; font: var(--wx-body-font-weight) var(--wx-body-font-size)/var(
 [data-wx-theme="light"] { color-scheme: light; }
 [hidden] { display: none !important; }
 button, input, select, textarea { font: inherit; color: inherit; }
-button, [type="button"], [type="submit"], [type="reset"] { cursor: pointer; }
+/* everything that acts as a button shows the pointer, whatever element it is drawn on: a div
+   the toolbar hands to a button controller would otherwise show the text cursor over its label */
+button, [type="button"], [type="submit"], [type="reset"], .btn, [role="button"] { cursor: pointer; }
 button:disabled, .disabled { cursor: default; opacity: 0.65; }
 a { color: var(--wx-link-color); text-decoration: underline; }
 a:hover { color: var(--wx-link-hover-color); }
@@ -144,7 +146,7 @@ legend { width: 100%; padding: 0; margin-bottom: 0.5rem; font-size: 1.5rem; }
 .list-group-flush > .list-group-item { border-inline: 0; }
 .nav, .navbar-nav { display: flex; flex-wrap: wrap; padding: 0; margin: 0; list-style: none; }
 .nav-link { display: block; padding: 0.5rem 1rem; color: var(--wx-nav-link-color, var(--wx-link-color)); text-decoration: none; border: 0; background: transparent; }
-.nav-link.active { color: var(--wx-nav-tabs-link-active-color, var(--wx-primary)); }
+.nav-link.active { color: var(--wx-nav-tabs-link-active-color, var(--wx-primary-text-emphasis)); }
 .nav-tabs { border-bottom: 1px solid var(--wx-border-color); }
 .nav-tabs .nav-link { margin-bottom: -1px; border: 1px solid transparent; border-radius: var(--wx-border-radius) var(--wx-border-radius) 0 0; }
 .nav-tabs .nav-link:hover { border-color: var(--wx-secondary-bg) var(--wx-secondary-bg) var(--wx-border-color); }
@@ -182,7 +184,7 @@ legend { width: 100%; padding: 0; margin-bottom: 0.5rem; font-size: 1.5rem; }
 .accordion-item[open] > .accordion-button > .wx-accordion-caret { transform: none; }
 .accordion-item[open] > .accordion-button { background: var(--wx-primary-bg-subtle); }
 .accordion-item + .accordion-item { border-top: 0; }
-.accordion-item[open] > .accordion-button { color: var(--wx-primary); }
+.accordion-item[open] > .accordion-button { color: var(--wx-primary-text-emphasis); }
 .accordion-body { padding: 1rem; }
 .container, .container-fluid { width: 100%; margin-inline: auto; padding-inline: 0.75rem; }
 .row { display: flex; flex-wrap: wrap; margin-inline: -0.75rem; }
@@ -216,61 +218,74 @@ legend { width: 100%; padding: 0; margin-bottom: 0.5rem; font-size: 1.5rem; }
 .ratio-16x9 { aspect-ratio: 16/9; } .ratio-4x3 { aspect-ratio: 4/3; }
 @media (prefers-reduced-motion: reduce) { .spinner-border, .spinner-grow { animation-duration: 1.5s; } .placeholder-glow .placeholder, .progress-bar-animated { animation: none; } }
 
-/* utility classes emitted by the control style builders */
+/* utility classes emitted by the control style builders. a colored surface brings the text
+   color that reads on it: the body color is tuned for the body background and drops below
+   4.5:1 on most brand colors. the same color is published as --wx-on-surface, so a control
+   that paints its own text takes it over instead of the body color */
 .text-primary { color: var(--wx-primary) !important; }
-.bg-primary { background-color: var(--wx-primary) !important; }
+.bg-primary { background-color: var(--wx-primary) !important; color: var(--wx-primary-contrast); --wx-on-surface: var(--wx-primary-contrast); }
 .border-primary { border-color: var(--wx-primary) !important; }
 .alert-primary { --wx-alert-color: var(--wx-primary-text-emphasis); --wx-alert-bg: var(--wx-primary-bg-subtle); --wx-alert-border-color: var(--wx-primary-border-subtle); }
 .table-primary { background: var(--wx-primary-bg-subtle); color: var(--wx-primary-text-emphasis); }
 .navbar-primary { background-color: var(--wx-primary) !important; }
 .text-secondary { color: var(--wx-secondary) !important; }
-.bg-secondary { background-color: var(--wx-secondary) !important; }
+.bg-secondary { background-color: var(--wx-secondary) !important; color: var(--wx-secondary-contrast); --wx-on-surface: var(--wx-secondary-contrast); }
 .border-secondary { border-color: var(--wx-secondary) !important; }
 .alert-secondary { --wx-alert-color: var(--wx-secondary-text-emphasis); --wx-alert-bg: var(--wx-secondary-bg-subtle); --wx-alert-border-color: var(--wx-secondary-border-subtle); }
 .table-secondary { background: var(--wx-secondary-bg-subtle); color: var(--wx-secondary-text-emphasis); }
 .navbar-secondary { background-color: var(--wx-secondary) !important; }
 .text-success { color: var(--wx-success) !important; }
-.bg-success { background-color: var(--wx-success) !important; }
+.bg-success { background-color: var(--wx-success) !important; color: var(--wx-success-contrast); --wx-on-surface: var(--wx-success-contrast); }
 .border-success { border-color: var(--wx-success) !important; }
 .alert-success { --wx-alert-color: var(--wx-success-text-emphasis); --wx-alert-bg: var(--wx-success-bg-subtle); --wx-alert-border-color: var(--wx-success-border-subtle); }
 .table-success { background: var(--wx-success-bg-subtle); color: var(--wx-success-text-emphasis); }
 .navbar-success { background-color: var(--wx-success) !important; }
-.text-info { color: var(--wx-info) !important; }
-.bg-info { background-color: var(--wx-info) !important; }
+.text-info { color: var(--wx-info-text-emphasis) !important; }
+.bg-info { background-color: var(--wx-info) !important; color: var(--wx-info-contrast); --wx-on-surface: var(--wx-info-contrast); }
 .border-info { border-color: var(--wx-info) !important; }
 .alert-info { --wx-alert-color: var(--wx-info-text-emphasis); --wx-alert-bg: var(--wx-info-bg-subtle); --wx-alert-border-color: var(--wx-info-border-subtle); }
 .table-info { background: var(--wx-info-bg-subtle); color: var(--wx-info-text-emphasis); }
 .navbar-info { background-color: var(--wx-info) !important; }
-.text-warning { color: var(--wx-warning) !important; }
-.bg-warning { background-color: var(--wx-warning) !important; }
+.text-warning { color: var(--wx-warning-text-emphasis) !important; }
+.bg-warning { background-color: var(--wx-warning) !important; color: var(--wx-warning-contrast); --wx-on-surface: var(--wx-warning-contrast); }
 .border-warning { border-color: var(--wx-warning) !important; }
 .alert-warning { --wx-alert-color: var(--wx-warning-text-emphasis); --wx-alert-bg: var(--wx-warning-bg-subtle); --wx-alert-border-color: var(--wx-warning-border-subtle); }
 .table-warning { background: var(--wx-warning-bg-subtle); color: var(--wx-warning-text-emphasis); }
 .navbar-warning { background-color: var(--wx-warning) !important; }
 .text-danger { color: var(--wx-danger) !important; }
-.bg-danger { background-color: var(--wx-danger) !important; }
+.bg-danger { background-color: var(--wx-danger) !important; color: var(--wx-danger-contrast); --wx-on-surface: var(--wx-danger-contrast); }
 .border-danger { border-color: var(--wx-danger) !important; }
 .alert-danger { --wx-alert-color: var(--wx-danger-text-emphasis); --wx-alert-bg: var(--wx-danger-bg-subtle); --wx-alert-border-color: var(--wx-danger-border-subtle); }
 .table-danger { background: var(--wx-danger-bg-subtle); color: var(--wx-danger-text-emphasis); }
 .navbar-danger { background-color: var(--wx-danger) !important; }
 .text-light { color: var(--wx-light) !important; }
-.bg-light { background-color: var(--wx-light) !important; }
+.bg-light { background-color: var(--wx-light) !important; color: var(--wx-light-contrast); --wx-on-surface: var(--wx-light-contrast); }
 .border-light { border-color: var(--wx-light) !important; }
 .alert-light { --wx-alert-color: var(--wx-light-text-emphasis); --wx-alert-bg: var(--wx-light-bg-subtle); --wx-alert-border-color: var(--wx-light-border-subtle); }
 .table-light { background: var(--wx-light-bg-subtle); color: var(--wx-light-text-emphasis); }
 .navbar-light { background-color: var(--wx-light) !important; }
 .text-dark { color: var(--wx-dark) !important; }
-.bg-dark { background-color: var(--wx-dark) !important; }
+.bg-dark { background-color: var(--wx-dark) !important; color: var(--wx-dark-contrast); --wx-on-surface: var(--wx-dark-contrast); }
 .border-dark { border-color: var(--wx-dark) !important; }
 .alert-dark { --wx-alert-color: var(--wx-dark-text-emphasis); --wx-alert-bg: var(--wx-dark-bg-subtle); --wx-alert-border-color: var(--wx-dark-border-subtle); }
 .table-dark { background: var(--wx-dark-bg-subtle); color: var(--wx-dark-text-emphasis); }
 .navbar-dark { background-color: var(--wx-dark) !important; }
 .text-white { color: var(--wx-white) !important; }
-.bg-white { background-color: var(--wx-white) !important; }
+.bg-white { background-color: var(--wx-white) !important; color: var(--wx-dark); --wx-on-surface: var(--wx-dark); }
 .border-white { border-color: var(--wx-white) !important; }
 .alert-white { --wx-alert-color: var(--wx-white-text-emphasis); --wx-alert-bg: var(--wx-white-bg-subtle); --wx-alert-border-color: var(--wx-white-border-subtle); }
 .table-white { background: var(--wx-white-bg-subtle); color: var(--wx-white-text-emphasis); }
 .navbar-white { background-color: var(--wx-white) !important; }
+/* text on the dark body: the brand colors are tuned for surfaces and fall short of the
+   4.5:1 text contrast there, so the text utilities take the emphasis variants. info and
+   warning fall short on the light body as well and use them above unconditionally */
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .text-primary { color: var(--wx-primary-text-emphasis) !important; }
+:scope .text-secondary { color: var(--wx-secondary-text-emphasis) !important; }
+:scope .text-success { color: var(--wx-success-text-emphasis) !important; }
+:scope .text-danger { color: var(--wx-danger-text-emphasis) !important; }
+:scope .text-dark { color: var(--wx-dark-text-emphasis) !important; }
+}
 .text-highlight { color: var(--wx-highlight) !important; }
 .bg-highlight { background-color: var(--wx-highlight) !important; }
 .border-highlight { border-color: var(--wx-highlight) !important; }

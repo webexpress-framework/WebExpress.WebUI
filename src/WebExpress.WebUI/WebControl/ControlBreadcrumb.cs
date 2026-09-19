@@ -64,12 +64,19 @@ namespace WebExpress.WebUI.WebControl
             var siteManager = WebEx.ComponentHub.SitemapManager;
             var lastEndpointContext = default(WebCore.WebEndpoint.IEndpointContext);
 
+            // the trail is a navigation landmark of its own, named so it is told apart from
+            // the site menu; the list inside keeps the crumbs
             var html = new HtmlElementTextContentOl()
             {
-                Id = Id,
-                Class = Css.Concatenate("wx-breadcrumb", GetClasses(renderContext)),
-                Style = GetStyles(renderContext),
+                Class = "wx-breadcrumb"
             };
+            var nav = new HtmlElementSectionNav(html)
+            {
+                Id = Id,
+                Class = Css.Concatenate("wx-breadcrumb-nav", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
+            }
+                .AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:breadcrumb.label"));
 
             if (!string.IsNullOrWhiteSpace(prefix))
             {
@@ -90,7 +97,7 @@ namespace WebExpress.WebUI.WebControl
 
             if (uri is null)
             {
-                return html;
+                return nav;
             }
 
             takeLast = (ushort)Math.Min(takeLast, uri?.PathSegments.Count() ?? 0);
@@ -166,7 +173,10 @@ namespace WebExpress.WebUI.WebControl
                 lastEndpointContext = endpointContext;
             }
 
-            return html;
+            // the last crumb is the page being read
+            (html.Elements.LastOrDefault() as HtmlElement)?.Elements.OfType<HtmlElementTextSemanticsA>().LastOrDefault()?.AddUserAttribute("aria-current", "page");
+
+            return nav;
         }
     }
 }

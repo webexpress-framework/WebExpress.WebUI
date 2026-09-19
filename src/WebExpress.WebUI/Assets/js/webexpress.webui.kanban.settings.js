@@ -31,7 +31,7 @@ webexpress.webui.KanbanBoardSettings = class extends webexpress.webui.ModalCtrl 
      * @param {string} [title] - The dialog title; defaults to the board settings title.
      */
     open(settings, onSave, title) {
-        this._titleH1.textContent = title || this._i18n("webexpress.webui:kanban.settings.title", "Board settings");
+        this._titleHeading.textContent = title || this._i18n("webexpress.webui:kanban.settings.title", "Board settings");
 
         const form = document.createElement("form");
         form.className = "wx-kanban-settings-form";

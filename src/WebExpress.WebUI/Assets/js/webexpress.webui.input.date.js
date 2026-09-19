@@ -145,6 +145,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.MenuCtrl {
         this._input.setCustomValidity(parsed.valid ? "" : this._i18n("webexpress.webui:calendar.invalid_date"));
         this._input.classList.toggle("is-invalid", !parsed.valid);
         this._dropdown.classList.toggle("is-invalid", !parsed.valid);
+        this._input.setAttribute("aria-invalid", parsed.valid ? "false" : "true");
         if (parsed.valid && parsed.viewDate) { this._viewDate = parsed.viewDate; this.render(); }
     }
 
@@ -156,6 +157,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.MenuCtrl {
         this._input.setCustomValidity(parsed.valid ? "" : this._i18n("webexpress.webui:calendar.invalid_date"));
         this._input.classList.toggle("is-invalid", !parsed.valid);
         this._dropdown.classList.toggle("is-invalid", !parsed.valid);
+        this._input.setAttribute("aria-invalid", parsed.valid ? "false" : "true");
         if (parsed.valid) { this.value = parsed.value; }
     }
 
@@ -345,6 +347,7 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.MenuCtrl {
         this._input.setCustomValidity("");
         this._input.classList.remove("is-invalid");
         this._dropdown.classList.remove("is-invalid");
+        this._input.setAttribute("aria-invalid", "false");
 
         // update view date if available
         if (this._rangeMode) {

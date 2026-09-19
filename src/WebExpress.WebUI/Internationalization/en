@@ -49,3 +49,10 @@ masterdetail.empty.message=Please select an item from the list.
 
 carousel.previous=Previous slide
 carousel.next=Next slide
+breadcrumb.label=Breadcrumb
+toolbar.label=Toolbar
+form.actions=Actions
+table.actions=Actions
+sidebar.label=Sidebar
+splitbutton.toggle=More options
+quickfilter.label=Filter

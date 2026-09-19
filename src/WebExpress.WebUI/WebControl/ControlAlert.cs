@@ -82,7 +82,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .Add(new HtmlElementTextSemanticsI() { Class = new IconXmark().Class })
                 .AddUserAttribute("data-wx-dismiss", "alert")
-                .AddUserAttribute("aria-label", "close");
+                .AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:modal.close.label"));
 
             return new HtmlElementTextContentDiv()
             {

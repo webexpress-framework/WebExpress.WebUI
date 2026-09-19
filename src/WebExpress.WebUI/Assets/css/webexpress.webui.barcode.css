@@ -31,7 +31,8 @@
    symbol, and a light one would leave the message unreadable. */
 .wx-barcode-invalid {
     background-color: transparent;
-    color: var(--wx-danger);
+    /* the emphasis shade: the raw danger tint falls under 4.5:1 on the dark body */
+    color: var(--wx-danger-text-emphasis, var(--wx-danger));
 }
 
 .wx-barcode-error {

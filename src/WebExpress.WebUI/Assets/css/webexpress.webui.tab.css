@@ -14,16 +14,44 @@
     width: 100%;
 }
 
-/* the tab bar is a list and would otherwise carry the margin of a list in
-   running text, which is more than a control needs to its own content. the
-   container is named as well, because the prose rule is the more specific one */
-.wx-tab-container ul.wx-tab-nav {
+/* the header row: the tab list takes the width, the tools that are not tabs sit at its
+   end. they stand beside the list rather than in it, because a tab list may hold nothing
+   but tabs; the bottom edge of bordered tabs runs on under the tools so the row reads
+   as one bar */
+.wx-tab-header {
+    display: flex;
+    align-items: stretch;
     margin-bottom: 0.375rem;
 }
 
-/* bordered tabs share their bottom edge with the content frame */
-.wx-tab-container ul.wx-tab-nav.nav-tabs {
+.wx-tab-header:has(> .nav-tabs) {
     margin-bottom: 0;
+}
+
+.wx-tab-header > ul.wx-tab-nav {
+    flex: 1 1 auto;
+    /* the list would otherwise carry the margin of a list in running text, which is
+       more than a control needs to its own content */
+    margin-bottom: 0;
+}
+
+.wx-tab-tools {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.wx-tab-tools:empty {
+    display: none;
+}
+
+.wx-tab-header:has(> .nav-tabs) > .wx-tab-tools {
+    border-bottom: 1px solid var(--wx-border-color);
+}
+
+.wx-tab-tools-item {
+    display: flex;
+    align-items: center;
 }
 
 /* styling for the content area to match WebExpress border radiuses */

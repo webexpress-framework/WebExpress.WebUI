@@ -61,8 +61,12 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
         this._input = document.createElement("input");
         this._input.type = "text";
         this._input.className = "input";
-        // placeholder will be set dynamically depending on tags present
-        this._input.setAttribute("aria-label", this._i18n("webexpress.webui:tag.add", "add Tag"));
+        // placeholder will be set dynamically depending on tags present; the field label
+        // names the input where the form rendered one, the generic name is the fallback
+        this._adoptFieldLabel(this._input, fieldId, element);
+        if (!this._input.hasAttribute("aria-labelledby") && !this._input.hasAttribute("aria-label")) {
+            this._input.setAttribute("aria-label", this._i18n("webexpress.webui:tag.add", "add Tag"));
+        }
 
         // initial rendering
         this.render();
@@ -171,15 +175,16 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
             if (this._colorCss) {
                 tagElement.classList.add(this._colorCss);
             } else if (this._colorStyle) {
-                tagElement.style.cssText = this._colorStyle;
+                webexpress.webui.ContrastColor.paint(tagElement, this._colorStyle);
             } else {
                 tagElement.classList.add("wx-tag-primary");
             }
 
-            // x-button to remove tag
-            const removeBtn = document.createElement("a");
+            // the remove control is a button, not a link to nowhere: it acts, it does not navigate
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "wx-tag-remove";
             removeBtn.innerHTML = "&times;";
-            removeBtn.href = "#";
             removeBtn.title = this._i18n("webexpress.webui:remove");
             removeBtn.setAttribute("aria-label", `Tag "${tag}" ${removeBtn.title}`);
             removeBtn.addEventListener("click", (e) => {

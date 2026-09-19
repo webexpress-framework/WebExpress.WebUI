@@ -29,6 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -59,6 +60,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -85,6 +87,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -109,6 +112,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -133,6 +137,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -142,7 +147,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(typeof(ControlText), @"<nav class=""navbar""><div></div></nav>")]
         [InlineData(typeof(ControlLink), @"<nav class=""navbar""><a class=""wx-link""></a></nav>")]
-        [InlineData(typeof(ControlImage), @"<nav class=""navbar""><img></nav>")]
+        [InlineData(typeof(ControlImage), @"<nav class=""navbar""><img alt></nav>")]
         public void Add(Type child, string expected)
         {
             // arrange
@@ -155,6 +160,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             control.Add(childInstance);
 
+            // validation
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

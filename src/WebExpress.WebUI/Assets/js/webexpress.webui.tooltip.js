@@ -21,6 +21,10 @@ webexpress.webui.TooltipCtrl = class extends webexpress.webui.Ctrl {
         element.after(this._menu);
         webexpress.webui.NativeMenu.bind(element, this._menu, null);
         this._menu.setAttribute("popover", "hint");
+        // the title left the element with the hint; the description reference brings the text
+        // back to the reader whether or not the hint is showing
+        this._menu.setAttribute("role", "tooltip");
+        element.setAttribute("aria-describedby", this._menu.id);
         this._menu.setAttribute("data-wx-placement", element.getAttribute("data-wx-placement") || "top");
         const triggers = "hover focus";
         this._show = () => webexpress.webui.NativeMenu.show(this._menu);

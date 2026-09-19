@@ -60,6 +60,9 @@ webexpress.webui.InputPasswordCtrl = class extends webexpress.webui.Ctrl {
             this._input.maxLength = parseInt(maxLength, 10);
         }
 
+        // the label reaches the input by its id; a help text referenced on the host does not
+        this._adoptFieldLabel(this._input, null, element);
+
         // assemble dom
         element.appendChild(this._hiddenInput);
         element.appendChild(this._input);

@@ -144,5 +144,5 @@ test("the visible fields move to the modal body and the submit to the footer", (
     );
 
     // the title reflects the fetched page
-    assert.equal(ctrl._titleH1.textContent, "Edit Character");
+    assert.equal(ctrl._titleHeading.textContent, "Edit Character");
 });

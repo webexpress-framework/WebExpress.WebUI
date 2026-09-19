@@ -39,7 +39,11 @@ webexpress.webui.InputTrafficLightCtrl = class extends webexpress.webui.Ctrl {
         this._housing = document.createElement("div");
         this._housing.className = "wx-traffic-light-housing";
         this._housing.setAttribute("role", "radiogroup");
-        this._housing.setAttribute("aria-label", element.getAttribute("aria-label") || this._i18n("webexpress.webui:trafficlight", "Traffic light"));
+        // the field label names the group where the form rendered one, the generic name is the fallback
+        this._adoptFieldLabel(this._housing, this._id, element);
+        if (!this._housing.hasAttribute("aria-labelledby") && !this._housing.hasAttribute("aria-label")) {
+            this._housing.setAttribute("aria-label", this._i18n("webexpress.webui:trafficlight", "Traffic light"));
+        }
 
         element.innerHTML = "";
         element.appendChild(this._hidden);

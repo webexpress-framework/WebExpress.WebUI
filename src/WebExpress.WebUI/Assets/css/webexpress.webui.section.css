@@ -46,11 +46,27 @@
 }
 
 .wx-section-collapsible > .wx-section-header:hover,
-.wx-section-collapsible > .wx-section-header:focus-visible {
+.wx-section-collapsible > .wx-section-header:has(> .wx-section-toggle:focus-visible) {
     color: var(--wx-body-color);
 }
 
-.wx-section-collapsible > .wx-section-header:focus-visible {
+/* the toggle is the button around the label: it takes the focus and the state, while the
+   row stays a plain box so a host can put a menu of its own beside the label */
+.wx-section-toggle {
+    display: inline-flex;
+    align-items: center;
+    min-width: 0;
+    padding: 0;
+    margin: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.wx-section-toggle:focus-visible {
     outline: 2px solid var(--wx-primary);
     outline-offset: 2px;
     border-radius: 2px;
@@ -137,7 +153,7 @@ img.wx-section-icon {
 
 /* a label that is a name or a sentence keeps the spelling and the size it was given: upper
    case makes a word read as structure, which is exactly wrong for content */
-.wx-section-verbatim > .wx-section-header > .wx-section-title {
+.wx-section-verbatim > .wx-section-header .wx-section-title {
     font-size: inherit;
     letter-spacing: 0;
     text-transform: none;
@@ -148,7 +164,7 @@ img.wx-section-icon {
 /* the accent is set on the host, so the label row and the guide inherit it */
 .wx-section-accented > .wx-section-header,
 .wx-section-accented.wx-section-collapsible > .wx-section-header:hover,
-.wx-section-accented.wx-section-collapsible > .wx-section-header:focus-visible {
+.wx-section-accented.wx-section-collapsible > .wx-section-header:has(> .wx-section-toggle:focus-visible) {
     color: inherit;
 }
 

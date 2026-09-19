@@ -192,7 +192,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlImage()
         {
             // arrange
-            var expected = @"<img id=""webexpress-webui-test-testfragmentcontrolimage"" src=""/a/b/c"">";
+            var expected = @"<img id=""webexpress-webui-test-testfragmentcontrolimage"" src=""/a/b/c"" alt>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -214,7 +214,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlDropdown()
         {
             // arrange
-            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroldropdown"" class=""wx-webui-dropdown"" role=""button"" data-label=""TestFragmentControlDropdown""></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroldropdown"" class=""wx-webui-dropdown"" data-label=""TestFragmentControlDropdown""></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -368,7 +368,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlTool()
         {
             // arrange
-            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltool"" class=""toolpanel border""><div class=""wx-webui-dropdown"" role=""button""></div><div><div>TestFragmentControlTool</div></div></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroltool"" class=""toolpanel border""><div class=""wx-webui-dropdown""></div><div><div>TestFragmentControlTool</div></div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -808,7 +808,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlQuickfilter()
         {
             // arrange
-            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolquickfilter"" class=""wx-webui-quickfilter"" role=""filter""><button type=""button"" class=""wx-quickfilter-button""></button></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolquickfilter"" class=""wx-webui-quickfilter"" role=""group"" aria-label=""Filter""><button type=""button"" class=""wx-quickfilter-button""></button></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);
@@ -1043,7 +1043,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlSla()
         {
             // arrange
-            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolsla"" class=""wx-sla wx-webui-sla wx-sla-fulfilled"" role=""group"" aria-label=""TestFragmentControlSla"" data-status=""fulfilled"" data-now=""2026-08-01T09:00:00"" data-target=""14400"" data-elapsed=""3600"" data-remaining=""10800"" data-progress=""0.25"" data-warning-threshold=""0.8"" data-cycle=""1"" data-cycles=""1"" data-deadline=""2026-08-01T12:00:00""><div class=""wx-sla-header""><span class=""wx-sla-label"">TestFragmentControlSla</span><span class=""wx-sla-status"" role=""status"" aria-live=""polite"">Fulfilled</span></div><div class=""wx-sla-meter"" role=""progressbar"" aria-valuemin=""0"" aria-valuemax=""100"" aria-valuenow=""25"" aria-valuetext=""25% - 3 h""><div class=""wx-sla-meter-track""><div class=""wx-sla-meter-value"" style=""width: 25%;""></div></div></div><div class=""wx-sla-footer""><time class=""wx-sla-remaining"" datetime=""PT3H0M0S"">3 h</time></div></div>";
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontrolsla"" class=""wx-sla wx-webui-sla wx-sla-fulfilled"" role=""group"" aria-label=""TestFragmentControlSla"" data-status=""fulfilled"" data-now=""2026-08-01T09:00:00"" data-target=""14400"" data-elapsed=""3600"" data-remaining=""10800"" data-progress=""0.25"" data-warning-threshold=""0.8"" data-cycle=""1"" data-cycles=""1"" data-deadline=""2026-08-01T12:00:00""><div class=""wx-sla-header""><span class=""wx-sla-label"">TestFragmentControlSla</span><span class=""wx-sla-status"" role=""status"" aria-live=""polite"">Fulfilled</span></div><div class=""wx-sla-meter"" role=""progressbar"" aria-label=""TestFragmentControlSla"" aria-valuemin=""0"" aria-valuemax=""100"" aria-valuenow=""25"" aria-valuetext=""25% - 3 h""><div class=""wx-sla-meter-track""><div class=""wx-sla-meter-value"" style=""width: 25%;""></div></div></div><div class=""wx-sla-footer""><time class=""wx-sla-remaining"" datetime=""PT3H0M0S"">3 h</time></div></div>";
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var renderContext = UnitTestControlFixture.CreateRenderContextMock(application, [typeof(IScope)]);

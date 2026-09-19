@@ -39,7 +39,7 @@ function mount(rt, sections) {
 
     const ctrl = rt.wx.Controller.instanceMap.get(host);
 
-    return { host, ctrl, title: ctrl._titleH1, body: ctrl._bodyDiv, footer: ctrl._footerDiv };
+    return { host, ctrl, title: ctrl._titleHeading, body: ctrl._bodyDiv, footer: ctrl._footerDiv };
 }
 
 test("a dialog takes the sections a control marked with a class", () => {
@@ -115,7 +115,7 @@ test("a dialog nested in the content keeps its own bars", () => {
 
     const ctrl = rt.wx.Controller.instanceMap.get(host);
 
-    assert.doesNotMatch(ctrl._titleH1.textContent, /inner name/, "the inner title is not hoisted");
+    assert.doesNotMatch(ctrl._titleHeading.textContent, /inner name/, "the inner title is not hoisted");
 });
 
 test("the lift reports whether the subtree declared a title, so a caller can fall back", () => {
@@ -130,6 +130,6 @@ test("the lift reports whether the subtree declared a title, so a caller can fal
     rt.document.body.appendChild(root);
 
     assert.equal(ctrl.liftTitle(root), 1, "a served subtree can be lifted the same way");
-    assert.match(ctrl._titleH1.textContent, /Served/);
+    assert.match(ctrl._titleHeading.textContent, /Served/);
     assert.equal(ctrl.liftTitle(root), 0, "and reports nothing left to lift");
 });

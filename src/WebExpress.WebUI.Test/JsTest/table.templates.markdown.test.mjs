@@ -37,7 +37,7 @@ test("markdown renders emphasis, code and links as elements", () => {
 test("markdown renders headings and lists", () => {
     const node = render("markdown", "# Title\n- one\n- two\n1. first");
 
-    assert.ok(node.innerHTML.includes("<h1>Title</h1>"), "the heading is rewritten");
+    assert.ok(node.innerHTML.includes("<p class=\"h1 wx-table-markdown-heading\">Title</p>"), "the heading keeps its look but stays out of the page outline");
     assert.ok(node.innerHTML.includes("<ul><li>one</li><li>two</li></ul>"), "the unordered list is rewritten");
     assert.ok(node.innerHTML.includes("<ol><li>first</li></ol>"), "the ordered list is rewritten");
 });

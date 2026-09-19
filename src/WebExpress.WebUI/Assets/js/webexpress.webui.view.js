@@ -246,6 +246,8 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         const dropdownHost = document.createElement("div");
         dropdownHost.dataset.icon = webexpress.webui.IconSet.resolve("layers");
+        // the switch shows an icon alone, so it says what it opens
+        dropdownHost.title = this._i18n("webexpress.webui:view.switch", "Switch view");
         this._viewDropdownHost = dropdownHost;
         tb.appendChild(dropdownHost);
 

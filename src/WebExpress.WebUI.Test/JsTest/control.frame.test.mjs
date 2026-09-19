@@ -109,3 +109,59 @@ test("an empty uri clears the frame", () => {
     assert.equal(frame.element.firstChild, null, "nothing is left to show");
     assert.equal(frame.element.querySelector(".placeholder-glow"), null, "and nothing is loading either");
 });
+
+test("the landmarks of an embedded page step down, so the host page keeps one main and distinct names", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.frame.js"] });
+    const element = rt.createElement("div");
+    element.classList.add("wx-webui-frame");
+    rt.document.body.appendChild(element);
+    const ctrl = new rt.wx.FrameCtrl(element);
+
+    const header = rt.createElement("header");
+    const nav = rt.createElement("nav");
+    nav.setAttribute("aria-label", "Breadcrumb");
+    const main = rt.createElement("main");
+    const inner = rt.createElement("nav");
+    inner.setAttribute("aria-label", "Sidebar");
+    main.appendChild(inner);
+    element.appendChild(header);
+    element.appendChild(nav);
+    element.appendChild(main);
+
+    ctrl._demoteLandmarks(element, "Guest page");
+
+    // a main admits no other role, so it is exchanged for a section in its place
+    const region = element.children[2];
+    assert.equal(region.tagName, "SECTION", "a second main is no main element any more");
+    assert.equal(region.getAttribute("role"), "region", "it is a region");
+    assert.equal(region.getAttribute("aria-label"), "Guest page", "named after the page it came from");
+    assert.equal(inner.parentNode, region, "with the content it had");
+    assert.equal(header.getAttribute("role"), "group", "the banner of the guest page is no banner here");
+    assert.equal(nav.getAttribute("aria-label"), "Breadcrumb – Guest page", "a named landmark says which page it belongs to");
+    assert.equal(inner.getAttribute("aria-label"), "Sidebar – Guest page", "at any depth");
+});
+
+test("the headings of an embedded page continue the section of the host page", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.frame.js"] });
+    const section = rt.createElement("h4");
+    section.textContent = "Light Mode";
+    rt.document.body.appendChild(section);
+    const element = rt.createElement("div");
+    element.classList.add("wx-webui-frame");
+    rt.document.body.appendChild(element);
+    const ctrl = new rt.wx.FrameCtrl(element);
+
+    const title = rt.createElement("h1");
+    const sub = rt.createElement("h2");
+    element.appendChild(title);
+    element.appendChild(sub);
+    // the stub has no document order; the host heading reports that the frame follows it
+    element.compareDocumentPosition = () => 0;
+    section.compareDocumentPosition = () => 4;
+
+    ctrl._fitHeadings(element);
+
+    assert.equal(title.getAttribute("aria-level"), "5", "the page title sits one level under the section it is embedded in");
+    assert.equal(sub.getAttribute("aria-level"), "6", "and its own steps are kept");
+    assert.equal(title.getAttribute("role"), "heading", "the level is spoken through the role");
+});

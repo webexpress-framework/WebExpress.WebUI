@@ -1,4 +1,5 @@
 using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -77,7 +78,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .Add(new HtmlElementTextSemanticsI() { Class = "wx-icon-light wx-icon-light-xmark" })
                 .AddUserAttribute("data-wx-dismiss", "alert")
-                .AddUserAttribute("aria-label", "close");
+                .AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:modal.close.label"));
 
             return new HtmlElementTextContentDiv()
             {

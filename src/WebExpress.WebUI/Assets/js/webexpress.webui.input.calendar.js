@@ -84,6 +84,13 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
         wrapper.style.flexDirection = "column";
         wrapper.style.gap = "0.5em";
         element.appendChild(wrapper);
+        // the field label names the whole picker, as no single element stands for the value
+        wrapper.setAttribute("role", "group");
+        this._adoptFieldLabel(wrapper, id, element);
+        this._status = document.createElement("div");
+        this._status.className = "visually-hidden";
+        this._status.setAttribute("role", "status");
+        wrapper.appendChild(this._status);
 
         const previewToolbarRow = document.createElement("div");
         previewToolbarRow.className = "wx-calendar-preview-toolbar-row";
@@ -550,11 +557,16 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
      * @param {function} onclick - Click handler function.
      * @returns {HTMLButtonElement} Navigation button.
      */
-    _createNavButton(text, onclick) {
+    _createNavButton(text, onclick, label = null) {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "wx-calendar-nav";
         btn.textContent = text;
+        // the glyph is a picture of an arrow, not a name
+        if (label) {
+            btn.setAttribute("aria-label", label);
+            btn.title = label;
+        }
         btn.addEventListener("click", (e) => {
             e.stopPropagation();
             onclick();
@@ -588,15 +600,20 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
 
         const header = document.createElement("div");
         header.classList.add("wx-calendar-header");
-        const btnPrevYear = this._createNavButton("«", () => { this._changeView(-1, "year"); });
-        const btnPrevMonth = this._createNavButton("‹", () => { this._changeView(-1, "month"); });
-        const btnNextMonth = this._createNavButton("›", () => { this._changeView(1, "month"); });
-        const btnNextYear = this._createNavButton("»", () => { this._changeView(1, "year"); });
+        const btnPrevYear = this._createNavButton("«", () => { this._changeView(-1, "year"); }, this._i18n("webexpress.webui:calendar.previous_year", "Previous year"));
+        const btnPrevMonth = this._createNavButton("‹", () => { this._changeView(-1, "month"); }, this._i18n("webexpress.webui:calendar.previous_month", "Previous month"));
+        const btnNextMonth = this._createNavButton("›", () => { this._changeView(1, "month"); }, this._i18n("webexpress.webui:calendar.next_month", "Next month"));
+        const btnNextYear = this._createNavButton("»", () => { this._changeView(1, "year"); }, this._i18n("webexpress.webui:calendar.next_year", "Next year"));
         const monthYear = document.createElement("span");
         monthYear.textContent = viewDate.getFullYear() +
             " - " +
             this._i18n(`webexpress.webui:calendar.${this._getMonthKey(viewDate.getMonth())}`);
         monthYear.classList.add("wx-calendar-monthyear");
+        // the month a navigation lands on is announced without moving the focus off the
+        // button; the status element outlives the re-rendered grid, which a live region must
+        if (this._status && this._status.textContent !== monthYear.textContent) {
+            this._status.textContent = monthYear.textContent;
+        }
 
         header.appendChild(btnPrevYear);
         header.appendChild(btnPrevMonth);
@@ -638,7 +655,11 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
             for (let wd = 1; wd <= 7; wd++) {
                 const td = document.createElement("td");
                 const button = document.createElement("button");
+                // a bare button inside a form submits it on enter
+                button.type = "button";
                 button.textContent = date.getDate().toString();
+                // the digit alone does not say which month or year it belongs to
+                button.setAttribute("aria-label", this._formatDate(date));
 
                 // store timestamp for event delegation
                 button.dataset.ts = date.getTime().toString();
@@ -680,6 +701,8 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
                     date.getDate() === this._selectedDate.getDate()) {
                     button.classList.add("selected");
                 }
+                // the highlight is color only; the state is spelled out for the reader
+                button.setAttribute("aria-pressed", button.classList.contains("selected") ? "true" : "false");
 
                 td.appendChild(button);
                 tr.appendChild(td);
@@ -803,5 +826,5 @@ webexpress.webui.InputCalendarCtrl = class extends webexpress.webui.Ctrl {
     }
 };
 
-// Register the class in the controller
+// register the class in the controller
 webexpress.webui.Controller.registerClass("wx-webui-input-calendar", webexpress.webui.InputCalendarCtrl);

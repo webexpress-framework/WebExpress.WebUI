@@ -69,6 +69,18 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         // element layout vorbereiten (tileList & hidden input setzen)
         this._tileList = document.createElement("div");
         this._tileList.className = "wx-tile-picker-tiles";
+        // the cards are the options of one field: a list box named by the field label
+        this._tileList.setAttribute("role", "listbox");
+        if (this._multiselect) {
+            this._tileList.setAttribute("aria-multiselectable", "true");
+        }
+        if (this._required) {
+            this._tileList.setAttribute("aria-required", "true");
+        }
+        this._adoptFieldLabel(this._tileList, id, element);
+        if (!this._tileList.hasAttribute("aria-labelledby") && !this._tileList.hasAttribute("aria-label")) {
+            this._tileList.setAttribute("aria-label", this._searchPlaceholder || this._i18n("webexpress.webui:tile.picker", "Tiles"));
+        }
         element.innerHTML = "";
         element.removeAttribute("id");
         element.removeAttribute("name");
@@ -599,7 +611,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         if (tile.colorStyle) {
             card.style.cssText = tile.colorStyle;
         }
-        card.setAttribute("role", "group");
+        card.setAttribute("role", "option");
         card.tabIndex = 0;
 
         // apply action attributes
@@ -682,7 +694,9 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
 
         // add card header with optional icon/image and label
         if (tile.label || tile.icon || tile.image) {
-            const header = document.createElement("h5");
+            // a card with a picture but no words has nothing to head: a heading with no text is
+            // an empty entry in the outline, so the picture goes into a plain title row
+            const header = document.createElement(tile.label ? "h5" : "div");
             header.className = "card-title";
             if (tile.icon) {
                 const icon = document.createElement("i");

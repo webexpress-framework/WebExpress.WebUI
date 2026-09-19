@@ -363,7 +363,7 @@ namespace WebExpress.WebUI.WebControl
             html.Add(!string.IsNullOrWhiteSpace(description)
                 ? new HtmlElementTextContentDiv(new HtmlText(description)) { Class = "wx-sla-description" }
                 : null);
-            html.Add(RenderMeter(evaluation));
+            html.Add(RenderMeter(evaluation, label));
             html.Add(RenderFooter(evaluation));
             html.Add((ShowActions?.Invoke(renderContext) ?? true) ? RenderActions(evaluation) : null);
 
@@ -478,8 +478,9 @@ namespace WebExpress.WebUI.WebControl
         /// Builds the meter of the consumed budget.
         /// </summary>
         /// <param name="evaluation">The result of the evaluation.</param>
+        /// <param name="label">The name of the agreement the meter belongs to.</param>
         /// <returns>The meter element.</returns>
-        protected static IHtmlElement RenderMeter(SlaEvaluation evaluation)
+        protected static IHtmlElement RenderMeter(SlaEvaluation evaluation, string label = null)
         {
             var percent = (int)Math.Round(evaluation.Progress * 100d, MidpointRounding.AwayFromZero);
 
@@ -497,6 +498,8 @@ namespace WebExpress.WebUI.WebControl
                 Role = "progressbar"
             };
 
+            // the meter is named after its agreement, so several on a page are told apart
+            meter.AddUserAttribute("aria-label", label);
             meter.AddUserAttribute("aria-valuemin", "0")
                  .AddUserAttribute("aria-valuemax", "100")
                  .AddUserAttribute("aria-valuenow", percent.ToString(CultureInfo.InvariantCulture))

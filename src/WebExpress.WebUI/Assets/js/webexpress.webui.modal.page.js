@@ -59,7 +59,7 @@ webexpress.webui.ModalPageCtrl = class extends webexpress.webui.ModalCtrl {
         // locate the main content area
         const contentNode = doc.querySelector(this._selector);
 
-        this._titleH1.textContent = doc.title?.trim();
+        this._titleHeading.textContent = doc.title?.trim();
 
         // clear existing content in body
         this._bodyDiv.innerHTML = "";

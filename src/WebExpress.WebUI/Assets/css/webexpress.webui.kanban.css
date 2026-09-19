@@ -174,13 +174,17 @@
    is unaffected and stays visible as the entry point for adding columns / lanes */
 .wx-board-col-header .wx-board-col-menu .wx-kanban-menu-btn,
 .wx-kanban-swimlane-menu .wx-kanban-menu-btn {
-    visibility: hidden;
+    /* faded rather than hidden: a hidden button cannot take the focus, so the keyboard
+       could never reach the menu */
+    opacity: 0;
 }
 
 .wx-board-col-header:hover .wx-board-col-menu .wx-kanban-menu-btn,
+.wx-board-col-header:focus-within .wx-board-col-menu .wx-kanban-menu-btn,
 .wx-kanban-swimlane:hover .wx-kanban-swimlane-menu .wx-kanban-menu-btn,
+.wx-kanban-swimlane:focus-within .wx-kanban-swimlane-menu .wx-kanban-menu-btn,
 .wx-kanban-menu.wx-menu-open .wx-kanban-menu-btn {
-    visibility: visible;
+    opacity: 1;
 }
 
 /* the color palette shown in the column menu */
@@ -212,7 +216,7 @@
     margin: 0;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid var(--wx-border-color, #dee2e6);
-    color: var(--wx-heading-color, #495057);
+    color: var(--wx-heading-color, var(--wx-body-color));
     background: transparent;
     /* dark theme adaptation */
     transition: background 0.15s, color 0.15s;
@@ -241,9 +245,11 @@
 
 /* the swimlane header label. it carries the primary tint the WebExpress
    text-primary utility used to supply, but without the !important that would
-   beat the inline accent color a colored lane sets */
+   beat the inline accent color a colored lane sets. the emphasis shade rather
+   than the raw primary: small text in the raw tint falls short of the contrast
+   the body background asks for, on either theme */
 .wx-kanban-swimlane-header {
-    color: var(--wx-primary, #0d6efd);
+    color: var(--wx-primary-text-emphasis, var(--wx-primary, #0d6efd));
 }
 
 /* Swimlane title style */
@@ -251,7 +257,7 @@
     font-size: 1.15rem;
     font-weight: bold;
     margin: 0.5em 0 0.75em 0;
-    color: var(--wx-primary, #0d6efd);
+    color: var(--wx-primary-text-emphasis, var(--wx-primary, #0d6efd));
     border-bottom: 1px solid rgba(0,0,0,0.05);
     padding-bottom: 0.25rem;
     background: transparent;
@@ -260,7 +266,7 @@
 
 @scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
 :scope .wx-kanban-swimlane-title {
-    color: var(--wx-primary, #6ea8fe);
+    color: var(--wx-primary-text-emphasis, #6ea8fe);
     border-bottom: 1px solid rgba(255,255,255,0.05);
 }
 }
@@ -508,7 +514,7 @@
     vertical-align: middle;
     line-height: 1;
     color: var(--wx-secondary-color, #6c757d);
-    visibility: hidden;
+    opacity: 0;
 }
 
 .wx-board-col-grip:active {
@@ -526,7 +532,7 @@
     font-size: 0.85em;
     cursor: pointer;
     color: var(--wx-secondary-color, #6c757d);
-    visibility: hidden;
+    opacity: 0;
 }
 
 .wx-board-col-grip:hover,
@@ -537,8 +543,11 @@
 
 .wx-board-col-header:hover .wx-board-col-grip,
 .wx-board-col-header:hover .wx-board-col-edit,
-.wx-board-col-header:hover .wx-board-col-delete {
-    visibility: visible;
+.wx-board-col-header:hover .wx-board-col-delete,
+.wx-board-col-header:focus-within .wx-board-col-grip,
+.wx-board-col-header:focus-within .wx-board-col-edit,
+.wx-board-col-header:focus-within .wx-board-col-delete {
+    opacity: 1;
 }
 
 .wx-board-col-header.wx-board-col-dragging {

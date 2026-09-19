@@ -89,7 +89,7 @@
     padding: 0 0.35em;
     border-radius: 0.2em;
     background-color: var(--wx-body-bg);
-    color: var(--wx-secondary);
+    color: var(--wx-secondary-color);
     font-size: 0.7em;
     font-weight: 600;
     letter-spacing: 0.06em;
@@ -110,7 +110,7 @@
     display: flex;
     align-items: center;
     gap: 0.6em;
-    color: var(--wx-secondary);
+    color: var(--wx-secondary-color);
     font-size: 0.75em;
     font-weight: 600;
     letter-spacing: 0.06em;
@@ -204,7 +204,8 @@
 }
 
 .wx-dnf-operator {
-    color: var(--wx-secondary);
+    /* the muted text color follows the theme; the fixed gray falls short of 4.5:1 on dark */
+    color: var(--wx-secondary-color);
     font-size: 0.75em;
     font-weight: 600;
     letter-spacing: 0.06em;
@@ -212,7 +213,7 @@
 }
 
 .wx-dnf-placeholder {
-    color: var(--wx-secondary);
+    color: var(--wx-secondary-color);
 }
 
 /*

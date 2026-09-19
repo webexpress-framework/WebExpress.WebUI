@@ -105,8 +105,9 @@ webexpress.webui.SearchContentCtrl = class extends webexpress.webui.Ctrl {
         }
         if (placeholder) {
             input.placeholder = placeholder;
-            input.setAttribute("aria-label", placeholder);
         }
+        // the field is named by its placeholder, or by what it does when there is none
+        input.setAttribute("aria-label", placeholder || this._i18n("webexpress.webui:search", "Search"));
 
         // react to user input and update highlights
         input.addEventListener("input", () => {

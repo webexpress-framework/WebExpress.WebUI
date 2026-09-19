@@ -26,15 +26,32 @@
     height: 1.5em;
 }
 
-.wx-tag > ul > li > a {
-    display:inline-flex;
-    text-decoration: none;
+/* the remove button spans the pointer target size the guideline asks for, drawn as a bare
+   glyph so the tag stays a tag; the negative margin keeps the tag as high as it was */
+.wx-tag > ul > li > .wx-tag-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
+    margin: -0.25em 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    font: inherit;
+    line-height: 1;
     cursor: pointer;
-    color:inherit;
+    color: inherit;
 }
 
-.wx-tag > ul > li > a:hover {
+.wx-tag > ul > li > .wx-tag-remove:hover {
     color: var(--wx-body-color);
+}
+
+.wx-tag > ul > li > .wx-tag-remove:focus-visible {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: 1px;
+    border-radius: 0.2em;
 }
 
 .wx-tag input {
@@ -48,18 +65,20 @@
     background: inherit;
 }
 
+/* the text on a brand fill is the contrast color of that fill, pure white on the dark ones: the
+   off-white of the light tone falls just under 4.5:1 on success, danger and secondary */
 .wx-tag-primary {
     color: var(--wx-white);
     background-color: var(--wx-primary);
 }
 
 .wx-tag-secondary {
-    color: var(--wx-light);
+    color: var(--wx-secondary-contrast, var(--wx-white));
     background-color: var(--wx-secondary);
 }
 
 .wx-tag-success {
-    color: var(--wx-light);
+    color: var(--wx-success-contrast, var(--wx-white));
     background-color: var(--wx-success);
 }
 
@@ -74,7 +93,7 @@
 }
 
 .wx-tag-danger {
-    color: var(--wx-light);
+    color: var(--wx-danger-contrast, var(--wx-white));
     background-color: var(--wx-danger);
 }
 
@@ -84,6 +103,12 @@
 }
 
 .wx-tag-dark {
-    color: var(--wx-light);
+    color: var(--wx-dark-contrast, var(--wx-white));
     background-color: var(--wx-dark);
+}
+
+/* the text field inside the box has no outline of its own, so the box shows the focus */
+.wx-tag:focus-within {
+    border-color: var(--wx-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--wx-primary-rgb), 0.2);
 }

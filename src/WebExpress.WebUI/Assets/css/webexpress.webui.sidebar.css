@@ -61,7 +61,8 @@
     font-weight: bold;
     font-size: clamp(0.75em, 0.9vw, 1em);
     padding: 0em clamp(0.75em, 0.9vw, 1em) clamp(0.25em, 0.3vw, 0.5em) clamp(0.75em, 0.9vw, 1em);
-    color: var(--wx-secondary);
+    /* the muted text color follows the theme; the fixed gray falls short of 4.5:1 on dark */
+    color: var(--wx-secondary-color);
     letter-spacing: 0.03em;
     text-transform: uppercase;
 }
@@ -312,7 +313,9 @@
 
 /* leaf marker that fills the group caret's slot so leaf and group rows line
    up; the box mirrors the chevron's advance width to keep the labels aligned,
-   while the dot marks a terminal node rather than an expandable group */
+   while the dot marks a terminal node rather than an expandable group. the dot
+   is the glyph of the icon set, as in the tree, so a sidebar link and a sidebar
+   tree read alike and follow the set the page carries */
 .wx-sidebar .wx-sidebar-bullet {
     flex: 0 0 auto;
     display: inline-flex;
@@ -321,15 +324,15 @@
     box-sizing: content-box;
     width: 0.625em;
     padding: 0 clamp(0.2em, 0.3vw, 0.5em);
-    color: var(--wx-secondary);
+    /* the muted text color of the theme, like the header: the fixed gray is a faint speck on the
+       light ground and falls under the 3:1 a graphical mark needs on the dark one */
+    color: var(--wx-secondary-color);
 }
 
-.wx-sidebar .wx-sidebar-bullet::before {
-    content: "";
-    width: 0.3em;
-    height: 0.3em;
-    border-radius: 50%;
-    background: currentColor;
+/* the size the tree draws its dot at, so the two markers match side by side */
+.wx-sidebar .wx-sidebar-bullet > i {
+    width: 0.8rem;
+    height: 0.8rem;
 }
 
 /* placeholder rows shown while the REST sidebar loads its items */

@@ -74,6 +74,11 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
 
         // attach native popover behavior for the dropdown menu
         this._initializeMenu(dropdown, dropdownMenu);
+        // the trigger is named by the field label followed by the current value
+        this._adoptFieldLabel(dropdown, id, element, [this._valueText]);
+        if (!dropdown.hasAttribute("aria-labelledby") && !dropdown.hasAttribute("aria-label")) {
+            dropdown.setAttribute("aria-label", this._i18n("webexpress.webui:editor.color", "Color"));
+        }
 
         this.render();
     }
@@ -109,7 +114,6 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
         const dropdown = document.createElement("button");
         dropdown.type = "button";
         dropdown.disabled = this._disabled;
-        dropdown.setAttribute("aria-label", this._i18n("webexpress.webui:editor.color", "Color"));
         dropdown.classList.add("form-control", "wx-color-trigger");
 
         // add disabled class for visual feedback
@@ -122,11 +126,17 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
         colorPreview.className = "wx-color-preview-box";
         this._colorPreview = colorPreview;
 
+        // the swatch says nothing to a reader; the value is spelled out beside it
+        const valueText = document.createElement("span");
+        valueText.className = "visually-hidden";
+        this._valueText = valueText;
+
         const expandIcon = document.createElement("i");
         expandIcon.className = this._iconClass("angle-down");
         expandIcon.style.color = "#666";
 
         dropdown.appendChild(colorPreview);
+        dropdown.appendChild(valueText);
         dropdown.appendChild(expandIcon);
 
         return dropdown;
@@ -193,6 +203,7 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
         const nativePicker = document.createElement("input");
         nativePicker.type = "color";
         nativePicker.className = "wx-native-color-picker";
+        nativePicker.setAttribute("aria-label", customWrapper.title);
 
         // ensure native picker is disabled if parent is disabled
         if (this._disabled) {
@@ -230,6 +241,7 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.title = color;
+        btn.setAttribute("aria-label", color);
         btn.style.backgroundColor = color;
 
         // disable button if control is disabled
@@ -258,6 +270,9 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
         if (this._colorPreview) {
             this._colorPreview.style.backgroundColor = this._value;
             this._colorPreview.title = this._value;
+        }
+        if (this._valueText) {
+            this._valueText.textContent = this._value;
         }
 
         // update hidden input

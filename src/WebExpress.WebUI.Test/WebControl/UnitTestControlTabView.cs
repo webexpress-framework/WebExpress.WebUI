@@ -155,7 +155,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree);
 
             // validation
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-tab-view"" data-badge=""7"" data-badge-style=""background:#7c3aed;""></div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-tab-view"" data-badge=""7"" data-badge-style=""background:#7c3aed;color:#fff;""></div>", html);
         }
 
         /// <summary>

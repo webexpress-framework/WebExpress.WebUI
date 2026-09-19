@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -83,9 +84,11 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
+                // filter is not a role; the chips form a named group
                 Class = "wx-webui-quickfilter",
-                Role = "filter"
+                Role = "group"
             }
+                .AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:quickfilter.label"))
                 .Add(_items.Select(x => x.Render(renderContext, visualTree)))
                 .Add(RenderEditAction(renderContext));
 

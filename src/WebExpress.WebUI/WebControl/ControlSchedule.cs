@@ -230,7 +230,8 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate(cssClass, (Fill?.Invoke(renderContext) ?? false) ? "wx-fill" : null, GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
-                Role = Role?.Invoke(renderContext) ?? "region"
+                // a group rather than a region: a region is a landmark and would need a name of its own
+                Role = Role?.Invoke(renderContext) ?? "group"
             };
 
             html.AddUserAttribute("data-view", view != TypeViewSchedule.Default ? view.ToValue() : null)

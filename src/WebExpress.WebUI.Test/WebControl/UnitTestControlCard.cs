@@ -273,7 +273,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree).ToString();
 
             // validation
-            Assert.Contains(@"data-header-bg-style=""background:gold;""", html);
+            Assert.Contains(@"data-header-bg-style=""background:gold;color:#000;""", html);
             Assert.DoesNotContain("data-header-bg-class", html);
         }
 
@@ -343,7 +343,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree).ToString();
 
             // validation
-            Assert.Contains(@"data-footer-bg-style=""background:#abcdef;""", html);
+            Assert.Contains(@"data-footer-bg-style=""background:#abcdef;color:#000;""", html);
         }
 
         /// <summary>

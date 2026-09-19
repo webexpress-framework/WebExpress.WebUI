@@ -42,6 +42,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            EnsureInputIds();
+
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);
 
             var html = new HtmlElementTextContentDiv()

@@ -1,7 +1,7 @@
 // Syntax highlighting for XML.
 webexpress.webui.Syntax.register("xml", "html", (code) => {
-  // HTML escaping
-  code = code.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  // the source is shown, not rendered: the ampersand goes first, or it would double the others
+  code = webexpress.webui.Syntax.escape(code);
 
   // Attribute pattern
   const attribute = /\s+([A-Za-z0-9\-._]+)(\s*=\s*)("[^"]*"|'[^']*')/g;

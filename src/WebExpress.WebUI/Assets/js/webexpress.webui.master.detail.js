@@ -340,6 +340,11 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
         this._detailPane = element.querySelector(".wx-detail");
         this._detailBody = element.querySelector(".wx-detail-body") || this._detailPane;
         this._emptyState = this._detailBody ? this._detailBody.querySelector(".wx-empty-state") : null;
+        // the detail body scrolls on its own and shows content that may hold nothing
+        // focusable, so it takes the focus for the keyboard to scroll it
+        if (this._detailBody && !this._detailBody.hasAttribute("tabindex")) {
+            this._detailBody.setAttribute("tabindex", "0");
+        }
 
         // the child controls are upgraded first, so the split has already traded
         // its marker class for the runtime one; both are accepted because a
@@ -769,13 +774,20 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
                 root.setAttribute("role", "listbox");
             }
             root.setAttribute("aria-multiselectable", "false");
+            // a list box is a field and needs a name; the host may bring one, otherwise
+            // the list is what it is: the master of the detail beside it
+            if (!root.hasAttribute("aria-label") && !root.hasAttribute("aria-labelledby")) {
+                root.setAttribute("aria-label", this._element.getAttribute("aria-label") || this._i18n("webexpress.webui:masterdetail.list", "Entries"));
+            }
             if (detailId) {
                 root.setAttribute("aria-controls", detailId);
             }
         }
 
         for (const item of items) {
-            if (!item.getAttribute("role")) {
+            // a card is a plain group on its own; as an entry of the master it is an option,
+            // the only role that may carry the selected state
+            if (!item.getAttribute("role") || item.getAttribute("role") === "group") {
                 item.setAttribute("role", "option");
             }
             if (!item.hasAttribute("aria-selected")) {
@@ -786,6 +798,14 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
             }
             if (detailId) {
                 item.setAttribute("aria-controls", detailId);
+            }
+            // a selectable list makes the body of a plain row a toggle of its own; as an
+            // option of the master the row is chosen through the option, so the toggle
+            // would be one control nested in another
+            for (const toggle of item.querySelectorAll(".wx-list-body[role=\"button\"]")) {
+                toggle.removeAttribute("role");
+                toggle.removeAttribute("tabindex");
+                toggle.removeAttribute("aria-pressed");
             }
         }
 

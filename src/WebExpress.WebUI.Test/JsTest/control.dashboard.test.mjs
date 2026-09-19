@@ -129,7 +129,7 @@ test("removing a widget asks first and drops it only once confirmed", async () =
     const confirm = ctrl._confirm;
     assert.equal(host.querySelectorAll(".wx-dashboard-widget-card").length, 1, "nothing is removed before the answer");
     assert.equal(confirm._element.open, true, "the confirmation is shown");
-    assert.equal(confirm._titleH1.textContent, "Remove widget?");
+    assert.equal(confirm._titleHeading.textContent, "Remove widget?");
     assert.equal(confirm._bodyDiv.querySelector("p").textContent, "Remove widget “User”? This action cannot be undone.", "the question names the widget");
     assert.equal(confirm._confirmButton.textContent, "Remove");
 

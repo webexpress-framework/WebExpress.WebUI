@@ -212,6 +212,20 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Reads a display name off the last segment of a uri, for a file that came without one.
+     * @param {string} uri - The file uri.
+     * @returns {string} The last path segment, or an empty string when there is none.
+     */
+    _fileNameFromUri(uri) {
+        const segment = String(uri || "").split(/[?#]/)[0].split("/").filter(Boolean).pop() || "";
+        try {
+            return decodeURIComponent(segment);
+        } catch {
+            return segment;
+        }
+    }
+
+    /**
      * Builds the row of one file.
      * @param {object} file - The file.
      * @param {object} [options] - toggle: the version toggle to place before the
@@ -253,7 +267,8 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
 
         const link = document.createElement("a");
         link.href = file.uri;
-        link.textContent = file.name;
+        // a file without a name is still a link that must say where it leads
+        link.textContent = file.name || this._fileNameFromUri(file.uri) || this._i18n("webexpress.webui:filelist.file", "File");
         link.target = "_blank";
         link.rel = "noopener noreferrer";
         link.className = "wx-link";

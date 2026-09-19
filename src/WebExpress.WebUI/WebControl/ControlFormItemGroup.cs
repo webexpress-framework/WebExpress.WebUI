@@ -111,6 +111,18 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Gives every input of the group an id, so the label the group renders beside it can
+        /// point at it. Called before a group lays its items out.
+        /// </summary>
+        protected void EnsureInputIds()
+        {
+            foreach (var input in Items.OfType<IControlFormItemInput>())
+            {
+                input.EnsureId();
+            }
+        }
+
+        /// <summary>
         /// Initializes the form element.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>

@@ -26,6 +26,7 @@ The initial state and behavior of the tile container are defined via `data-` att
 | `data-movable`      | Allows reordering of tiles via drag-and-drop.                       | `data-movable="true"`
 | `data-allow-remove` | Allows hiding or removing tiles.                                    | `data-allow-remove="true"`
 | `data-persist-key`  | A unique key to save the order and visibility of tiles in a cookie. | `data-persist-key="dashboard-tiles"`
+| `data-heading-level` | The outline level of the card titles, `5` by default. A page that places the tiles right under a shallower heading sets the level that keeps its outline without a gap; the look stays that of a card title. | `data-heading-level="4"`
 
 ### Tile Attributes
 

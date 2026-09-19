@@ -7,7 +7,9 @@
    without restating its layout. */
 
 .wx-view-switcher {
-    --wx-view-switcher-track: var(--wx-border-color, #dee2e6);
+    /* the track is a tint of the border color: on the full border color of the dark
+       theme the muted caption of an inactive entry drops below 4.5:1 */
+    --wx-view-switcher-track: var(--wx-tertiary-bg, #f8f9fa);
     --wx-view-switcher-surface: var(--wx-body-bg, #fff);
     --wx-view-switcher-text: var(--wx-body-color, #212529);
     --wx-view-switcher-muted: var(--wx-secondary-color, #6c757d);

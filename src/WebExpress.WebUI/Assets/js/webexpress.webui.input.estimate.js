@@ -38,7 +38,11 @@ webexpress.webui.InputEstimateCtrl = class extends webexpress.webui.Ctrl {
         this._container = document.createElement("div");
         this._container.className = "wx-estimate-container";
         this._container.setAttribute("role", "radiogroup");
-        this._container.setAttribute("aria-label", element.getAttribute("aria-label") || this._i18n("webexpress.webui:estimate", "Estimate"));
+        // the field label names the group where the form rendered one, the generic name is the fallback
+        this._adoptFieldLabel(this._container, this._id, element);
+        if (!this._container.hasAttribute("aria-labelledby") && !this._container.hasAttribute("aria-label")) {
+            this._container.setAttribute("aria-label", this._i18n("webexpress.webui:estimate", "Estimate"));
+        }
 
         element.replaceChildren(this._hidden, this._container);
 

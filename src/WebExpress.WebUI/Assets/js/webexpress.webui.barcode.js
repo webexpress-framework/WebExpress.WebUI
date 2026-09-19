@@ -1026,8 +1026,11 @@ webexpress.webui.BarcodeCtrl = class extends webexpress.webui.Ctrl {
      */
     get backgroundColor() {
         // the server states the ground as the background shorthand, a runtime
-        // caller as the longhand; both name the same color
-        return this._bgColorStyle ? this._bgColorStyle.replace(/^background(-color)?:\s*|;$/g, "") : null;
+        // caller as the longhand; both name the same color. the declaration may
+        // travel with the text color the server picked for the ground, so the
+        // value is read out rather than what is left after stripping the name
+        const match = this._bgColorStyle ? this._bgColorStyle.match(/background(?:-color)?:\s*([^;]+)/) : null;
+        return match ? match[1].trim() : null;
     }
 
     /**
@@ -1071,6 +1074,8 @@ webexpress.webui.BarcodeCtrl = class extends webexpress.webui.Ctrl {
         this._element.classList.remove("wx-barcode-invalid");
         this._applyColors(true);
         this._element.appendChild(graphic);
+        // the bars are a picture of the value; the label spells the value out
+        this._element.setAttribute("role", "img");
         this._element.setAttribute("aria-label", `${this._i18n("webexpress.webui:barcode", "Barcode")}: ${this._value}`);
     }
 
@@ -1209,7 +1214,8 @@ webexpress.webui.BarcodeCtrl = class extends webexpress.webui.Ctrl {
         svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
         svg.setAttribute("width", String(width));
         svg.setAttribute("height", String(height));
-        svg.setAttribute("role", "img");
+        // the host names the picture; the drawing itself is skipped by a reader
+        svg.setAttribute("aria-hidden", "true");
         svg.setAttribute("shape-rendering", "crispEdges");
         svg.classList.add("wx-barcode-graphic");
         return svg;

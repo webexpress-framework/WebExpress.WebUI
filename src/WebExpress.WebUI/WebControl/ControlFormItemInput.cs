@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -89,6 +90,19 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             Name = _ => id;
+        }
+
+        /// <summary>
+        /// Gives the input an id when it was created without one. A label a form group renders
+        /// beside the input can only name it through its id, so an input that has none would be
+        /// left unnamed however clearly it is captioned.
+        /// </summary>
+        public void EnsureId()
+        {
+            if (string.IsNullOrEmpty(Id))
+            {
+                Id = DeterministicId.Create();
+            }
         }
 
         /// <summary>

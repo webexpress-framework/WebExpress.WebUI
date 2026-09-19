@@ -54,7 +54,11 @@
         {
             if ((TypeColor)SystemColor == TypeColor.User)
             {
-                return "background:" + UserColor + ";";
+                // the text on a fill the author chose takes whichever of black and white reads on it;
+                // a text color set beside it comes later in the style and wins
+                var contrast = ContrastColor.On(UserColor);
+
+                return "background:" + UserColor + ";" + (contrast is not null ? "color:" + contrast + ";" : string.Empty);
             }
 
             return null;

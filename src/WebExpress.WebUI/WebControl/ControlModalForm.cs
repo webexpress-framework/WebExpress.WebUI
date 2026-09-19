@@ -337,7 +337,9 @@ namespace WebExpress.WebUI.WebControl
 
             if (formElement is HtmlElementFormForm form && state != TypeFormState.Success)
             {
-                var elements = form.Elements.Where(x => x is not HtmlElementSectionFooter && x is not HtmlElementTextContentDiv);
+                // the footer and the loose button panel are taken apart and rebuilt below; the
+                // body of the form, a plain section since the page owns the main landmark, stays
+                var elements = form.Elements.Where(x => x is not HtmlElementSectionFooter && (x is not HtmlElementTextContentDiv div || div.Class == "wx-form-main"));
                 var buttons = form.Elements.Find(x => x is HtmlElementFieldButton).Select(x => x as HtmlElementFieldButton)
                     .Where(x => x.Type == TypeButton.Submit.ToTypeString() || x.Type == TypeButton.Reset.ToTypeString());
                 var autoShow = state switch

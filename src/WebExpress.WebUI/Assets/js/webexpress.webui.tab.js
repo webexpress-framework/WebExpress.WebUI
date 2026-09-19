@@ -12,6 +12,8 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
 
     // dom nodes
     _navElement = null;
+    _headerElement = null;
+    _toolsElement = null;
     _contentElement = null;
     _toolbarLi = null;
 
@@ -56,6 +58,7 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
 
         this._navElement.className = navClass;
         this._navElement.setAttribute("role", "tablist");
+        this._navElement.addEventListener("keydown", (e) => this._onTabListKeyDown(e));
 
         // create content wrapper
         this._contentElement = document.createElement("div");
@@ -100,23 +103,35 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
             pane.classList.remove("wx-tab-view");
             pane.classList.add("tab-pane", "fade");
             pane.setAttribute("role", "tabpanel");
+            pane.setAttribute("aria-labelledby", id + "-tab");
+            // a panel without a focusable child is otherwise skipped by the tab key
+            if (!pane.hasAttribute("tabindex")) { pane.setAttribute("tabindex", "0"); }
 
             // move pane into content wrapper safely
             this._contentElement.appendChild(pane);
         }
+
+        // the header row holds the tab list and, beside it, the tools that are not tabs: a
+        // tab list may hold nothing but tabs, so the toolbar sits next to it rather than in it
+        this._headerElement = document.createElement("div");
+        this._headerElement.className = "wx-tab-header";
+        this._toolsElement = document.createElement("div");
+        this._toolsElement.className = "wx-tab-tools";
+        this._headerElement.appendChild(this._navElement);
+        this._headerElement.appendChild(this._toolsElement);
 
         // find and append toolbar if it exists
         const toolbarElement = el.querySelector(":scope > .wx-tab-toolbar");
         if (toolbarElement) {
             this._toolbarCtrl = new webexpress.webui.ToolbarCtrl(toolbarElement);
 
-            this._toolbarLi = document.createElement("li");
-            this._toolbarLi.className = "nav-item ms-auto d-flex align-items-center";
+            this._toolbarLi = document.createElement("div");
+            this._toolbarLi.className = "wx-tab-tools-item d-flex align-items-center";
             this._toolbarLi.appendChild(toolbarElement);
-            this._navElement.appendChild(this._toolbarLi);
+            this._toolsElement.appendChild(this._toolbarLi);
         }
 
-        el.appendChild(this._navElement);
+        el.appendChild(this._headerElement);
         el.appendChild(this._contentElement);
     }
 
@@ -133,8 +148,12 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         const btn = document.createElement("button");
         btn.className = "nav-link";
         btn.type = "button";
+        btn.id = tab.id + "-tab";
         btn.setAttribute("role", "tab");
         btn.setAttribute("aria-controls", tab.id);
+        btn.setAttribute("aria-selected", "false");
+        // one tab stop for the list; the arrow keys walk the tabs
+        btn.setAttribute("tabindex", "-1");
         btn.dataset.tabId = tab.id;
 
         // map custom action attributes if present
@@ -209,9 +228,11 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
             if (link.dataset.tabId === tabId) {
                 link.classList.add("active");
                 link.setAttribute("aria-selected", "true");
+                link.setAttribute("tabindex", "0");
             } else {
                 link.classList.remove("active");
                 link.setAttribute("aria-selected", "false");
+                link.setAttribute("tabindex", "-1");
             }
         }
 
@@ -227,6 +248,44 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         }
 
         this._dispatchTabSelectedEvent(tabId);
+    }
+
+    /**
+     * Walks the tabs with the arrow keys and selects the one that receives focus, as a
+     * tab list is expected to; the toolbar sitting in the same list is left to the tab key.
+     * @param {KeyboardEvent} e The key event raised inside the tab list.
+     */
+    _onTabListKeyDown(e) {
+        // only the tabs of the list, not a command a subclass may place among them
+        const tabs = Array.from(this._navElement.querySelectorAll("[role=\"tab\"]")).filter(tab => tab.dataset.tabId);
+        const index = tabs.indexOf(e.target.closest ? e.target.closest("[role=\"tab\"]") : null);
+        if (index < 0 || tabs.length === 0) {
+            return;
+        }
+
+        let next = null;
+        switch (e.key) {
+            case "ArrowRight":
+            case "ArrowDown":
+                next = (index + 1) % tabs.length;
+                break;
+            case "ArrowLeft":
+            case "ArrowUp":
+                next = (index - 1 + tabs.length) % tabs.length;
+                break;
+            case "Home":
+                next = 0;
+                break;
+            case "End":
+                next = tabs.length - 1;
+                break;
+            default:
+                return;
+        }
+
+        e.preventDefault();
+        tabs[next].focus({ preventScroll: true });
+        this.selectTab(tabs[next].dataset.tabId);
     }
 
     /**

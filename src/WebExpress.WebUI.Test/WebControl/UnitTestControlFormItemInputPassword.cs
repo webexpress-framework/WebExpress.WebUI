@@ -182,8 +182,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form password control using item initialization.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-password""></div>*")]
-        [InlineData("secret", @"*<div class=""wx-webui-input-password"" data-value=""secret""></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-password""></div>*")]
+        [InlineData("secret", @"*<div id=""*"" class=""wx-webui-input-password"" data-value=""secret""></div>*")]
         public void ValueItem(string value, string expected)
         {
             // arrange

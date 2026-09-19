@@ -171,7 +171,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<section class=""wx-webui-section"" data-badge=""9"" data-badge-bg-style=""background:gold;"" data-collapsible=""true"" data-expanded=""true"" data-guide=""true"" data-persist=""true""></section>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<section class=""wx-webui-section"" data-badge=""9"" data-badge-bg-style=""background:gold;color:#000;"" data-collapsible=""true"" data-expanded=""true"" data-guide=""true"" data-persist=""true""></section>", html);
         }
 
         /// <summary>

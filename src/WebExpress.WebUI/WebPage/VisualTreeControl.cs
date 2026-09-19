@@ -413,6 +413,8 @@ namespace WebExpress.WebUI.WebPage
         public virtual IHtmlNode Render(IVisualTreeContext context)
         {
             var html = new HtmlElementRootHtml();
+            // assistive technology picks pronunciation rules from the document language
+            html.AddUserAttribute("lang", context.Request?.Culture?.Name);
             html.Head.Title = I18N.Translate(context.Request, Title);
             html.Head.Favicons = Favicons?.Select(x => new Favicon(x.Url, x.Mediatype));
             html.Head.Styles = Styles;

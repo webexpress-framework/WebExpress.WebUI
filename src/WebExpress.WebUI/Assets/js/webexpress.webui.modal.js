@@ -13,7 +13,9 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
     _size = null;
     _autoShow = null;
     _headerDiv = document.createElement("header");
-    _titleH1 = document.createElement("h1");
+    // a second-level heading: a dialog is content of the page it opens on, whose first level
+    // is taken, and a first level here would break the outline of that page
+    _titleHeading = document.createElement("h2");
     _bodyDiv = document.createElement("div");
     _footerDiv = document.createElement("footer");
     _cancelButton = document.createElement("button");
@@ -46,7 +48,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         // create modal elements
         this._bodyDiv.className = "modal-body";
         this._headerDiv.className = "modal-header";
-        this._titleH1.className = "modal-title fs-5 flex-grow-1";
+        this._titleHeading.className = "modal-title fs-5 flex-grow-1";
         this._footerDiv.className = "modal-footer";
 
         this.liftTitle(this._element);
@@ -68,7 +70,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this.liftFooter(this._element);
 
         // create header content
-        this._headerDiv.appendChild(this._titleH1);
+        this._headerDiv.appendChild(this._titleHeading);
 
         if (this._fullscreenMode && this._size !== "modal-fullscreen") {
             // create fullscreen toggle button
@@ -105,8 +107,8 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this._footerDiv.appendChild(this._cancelButton);
 
         this._element.append(this._headerDiv, this._bodyDiv, this._footerDiv);
-        this._titleH1.id = this._element.id + "-title";
-        this._element.setAttribute("aria-labelledby", this._titleH1.id);
+        this._titleHeading.id = this._element.id + "-title";
+        this._element.setAttribute("aria-labelledby", this._titleHeading.id);
         this._element.addEventListener("cancel", (event) => {
             event.preventDefault();
             this.hide();
@@ -135,7 +137,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
      * its own when the subtree declared none.
      */
     liftTitle(root) {
-        return this._lift(root, ".wx-modal-header", "header", this._titleH1);
+        return this._lift(root, ".wx-modal-header", "header", this._titleHeading);
     }
 
     /**

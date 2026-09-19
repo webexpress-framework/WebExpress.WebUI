@@ -83,7 +83,7 @@ namespace WebExpress.WebUI.WebControl
             var message = Message?.Invoke(renderContext);
             var placement = Placement?.Invoke(renderContext) ?? TypePopoverPlacement.Top;
             var trigger = Trigger?.Invoke(renderContext) ?? TypePopoverTrigger.Click;
-            var role = Role?.Invoke(renderContext) ?? "button";
+            var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementFieldButton()
             {

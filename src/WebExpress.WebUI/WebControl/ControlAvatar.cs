@@ -75,7 +75,9 @@ namespace WebExpress.WebUI.WebControl
 
             if (image is not null)
             {
-                img = new HtmlElementMultimediaImg() { Src = image.ToString(), Class = "" };
+                // the picture stands for the person: the name is its text alternative
+                img = new HtmlElementMultimediaImg() { Src = image.ToString(), Class = "", Alt = username };
+                if (string.IsNullOrWhiteSpace(username)) { img.AddUserAttribute("alt"); }
             }
             else if (!string.IsNullOrWhiteSpace(username))
             {
@@ -83,9 +85,11 @@ namespace WebExpress.WebUI.WebControl
                 var i = split[0].FirstOrDefault().ToString();
                 i += split.Length > 1 ? split[1].FirstOrDefault().ToString() : "";
 
+                // the paired utility brings the text color that reads on the info surface;
+                // light text on it falls far short of 4.5:1
                 img = new HtmlElementTextSemanticsB(new HtmlText(i))
                 {
-                    Class = Css.Concatenate("bg-info text-light")
+                    Class = Css.Concatenate("text-bg-info")
                 };
             }
 

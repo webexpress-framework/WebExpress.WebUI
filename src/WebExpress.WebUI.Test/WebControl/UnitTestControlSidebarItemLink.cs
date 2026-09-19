@@ -290,7 +290,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(
-                @"<div class=""wx-sidebar-link"" data-color-style=""color:#111111;"" data-background-color-style=""background:#222222;""></div>",
+                @"<div class=""wx-sidebar-link"" data-color-style=""color:#111111;"" data-background-color-style=""background:#222222;color:#fff;""></div>",
                 html);
         }
 

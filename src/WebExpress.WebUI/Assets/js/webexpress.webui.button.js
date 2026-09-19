@@ -32,6 +32,21 @@ webexpress.webui.ButtonCtrl = class extends webexpress.webui.Ctrl {
             element.classList.add(this._size);
         }
 
+        // a host that is neither a button nor a link - the toolbar hands over a div - is given
+        // what a button has: the role, a place in the tab order and the keys a button answers to
+        if (element.tagName !== "BUTTON" && element.tagName !== "A") {
+            element.setAttribute("role", "button");
+            if (!element.hasAttribute("tabindex")) {
+                element.setAttribute("tabindex", "0");
+            }
+            element.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    element.click();
+                }
+            });
+        }
+
         // render the button ui
         this.render();
 

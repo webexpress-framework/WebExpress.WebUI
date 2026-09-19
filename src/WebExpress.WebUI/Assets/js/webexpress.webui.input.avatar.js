@@ -81,6 +81,8 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
         this._dropzone.setAttribute("role", "button");
         this._dropzone.tabIndex = 0;
         this._element.appendChild(this._dropzone);
+        // the file input the form labelled is hidden; the drop zone is what takes the focus
+        this._adoptFieldLabel(this._dropzone, this._id, this._element);
 
         // hidden file input
         this._fileInput = document.createElement("input");
@@ -129,6 +131,8 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
         this._zoom.max = String(webexpress.webui.InputAvatarCtrl.ZOOM_RESOLUTION);
         this._zoom.step = "1";
         this._zoom.value = "0";
+        this._zoom.id = (this._id || "wx-avatar") + "_zoom";
+        this._zoomLabel.htmlFor = this._zoom.id;
         this._controls.appendChild(this._zoom);
 
         // action buttons

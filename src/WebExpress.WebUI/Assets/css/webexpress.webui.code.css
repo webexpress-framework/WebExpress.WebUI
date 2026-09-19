@@ -139,13 +139,17 @@
             pointer-events: none;
         }
 
+/* the token colors are the emphasis variants of the theme colors: the plain brand colors
+   are tuned for surfaces, not for text, and fall short of the 4.5:1 text contrast on the
+   body background in either theme */
+
 /* keywords, control-flow */
 .wx-code .keyword,
 .wx-code .access,
 .wx-code .type,
 .wx-code .tag,
 .wx-code .heading {
-    color: var(--wx-primary, #006cff);
+    color: var(--wx-primary-text-emphasis, #052c65);
     font-weight: bold;
 }
 
@@ -153,7 +157,7 @@
 .wx-code .string,
 .wx-code .value,
 .wx-code .image {
-    color: var(--wx-danger, #d63384);
+    color: var(--wx-danger-text-emphasis, #58151c);
 }
 
 /* comments */
@@ -163,18 +167,18 @@
 .wx-code .doctype,
 .wx-code .pi,
 .wx-code .cdata {
-    color: var(--wx-success, #198754);
+    color: var(--wx-success-text-emphasis, #0a3622);
     font-style: italic;
 }
 
 .wx-code .number {
-    color: var(--wx-warning, #f3c73a);
+    color: var(--wx-warning-text-emphasis, #664d03);
 }
 
 .wx-code .operator,
 .wx-code .constant,
 .wx-code .separator {
-    color: var(--wx-info, #75b2f5);
+    color: var(--wx-info-text-emphasis, #055160);
 }
 
 .wx-code .bracket,

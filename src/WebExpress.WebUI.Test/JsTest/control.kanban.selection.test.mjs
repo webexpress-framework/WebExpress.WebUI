@@ -56,7 +56,8 @@ test("a click on a card marks it active and announces the selection", () => {
 
     assert.equal(board.ctrl.selectedId, "c1", "the board owns the selected id");
     assert.ok(board.cards()[0].classList.contains("wx-kanban-card-active"), "the card is marked active");
-    assert.equal(board.cards()[0].getAttribute("aria-selected"), "true");
+    // a card is a toggle to the keyboard, so its state is the pressed one
+    assert.equal(board.cards()[0].getAttribute("aria-pressed"), "true");
     assert.equal(events.length, 1, "the selection is announced once");
     assert.equal(events[0].itemId, "c1");
 });
@@ -71,7 +72,7 @@ test("the selected card is the only active one", () => {
     const states = Array.from(board.cards()).map((card) => card.classList.contains("wx-kanban-card-active"));
 
     assert.deepEqual(states, [false, true]);
-    assert.equal(board.cards()[0].getAttribute("aria-selected"), null, "the former selection drops its marker");
+    assert.equal(board.cards()[0].getAttribute("aria-pressed"), "false", "the former selection drops its marker");
 });
 
 test("re-selecting the same card does not announce twice", () => {

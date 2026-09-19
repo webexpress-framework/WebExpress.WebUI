@@ -17,10 +17,63 @@ namespace WebExpress.WebUI.WebMarkdown
         /// </summary>
         /// <param name="document">The document to convert. Cannot be null.</param>
         /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="headingLevel">
+        /// The outline level the first-level heading of the document is read at, when the
+        /// document sits under headings of the page. A markdown document starts its own
+        /// outline at the first level; embedded under a section it continues that section, so
+        /// its headings are spoken from this level on while they keep their look.
+        /// </param>
         /// <returns>An <see cref="IHtmlNode"/> representing the HTML structure of the markdown content.</returns>
-        public static IHtmlNode ConvertToHtml(this MarkdownDocument document, IRenderControlContext renderContext)
+        public static IHtmlNode ConvertToHtml(this MarkdownDocument document, IRenderControlContext renderContext, int? headingLevel = null)
         {
-            return ConvertElement(document?.Elements ?? [], renderContext);
+            var node = ConvertElement(document?.Elements ?? [], renderContext);
+
+            if (headingLevel is > 1)
+            {
+                Outline(node, headingLevel.Value - 1);
+            }
+
+            return node;
+        }
+
+        /// <summary>
+        /// Speaks the headings of a rendered document at an offset level.
+        /// </summary>
+        /// <param name="node">The node to start at.</param>
+        /// <param name="offset">The number of levels the headings step down.</param>
+        private static void Outline(IHtmlNode node, int offset)
+        {
+            if (node is HtmlElement element)
+            {
+                var level = element switch
+                {
+                    HtmlElementSectionH1 => 1,
+                    HtmlElementSectionH2 => 2,
+                    HtmlElementSectionH3 => 3,
+                    HtmlElementSectionH4 => 4,
+                    HtmlElementSectionH5 => 5,
+                    HtmlElementSectionH6 => 6,
+                    _ => 0
+                };
+
+                if (level > 0)
+                {
+                    element.Role = "heading";
+                    element.AddUserAttribute("aria-level", System.Math.Min(6, level + offset).ToString());
+                }
+
+                foreach (var child in element.Elements)
+                {
+                    Outline(child, offset);
+                }
+            }
+            else if (node is HtmlList list)
+            {
+                foreach (var child in list.Elements)
+                {
+                    Outline(child, offset);
+                }
+            }
         }
 
         /// <summary>
@@ -37,8 +90,9 @@ namespace WebExpress.WebUI.WebMarkdown
         private static IHtmlNode ConvertElement(IEnumerable<IMarkdownElement> elements, IRenderControlContext renderContext)
         {
             var list = new HtmlList();
+            var sequence = elements.ToList();
 
-            foreach (var element in elements)
+            foreach (var (element, index) in sequence.Select((x, i) => (x, i)))
             {
                 if (element is MarkdownBlockElementHeader header)
                 {
@@ -136,21 +190,30 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownBlockElementList elementList)
                 {
+                    var items = elementList.Items.Select(item =>
+                        new HtmlElementTextContentLi
+                        (
+                            ConvertElement(item.Content, renderContext)
+                        )
+                    ).ToList();
+
+                    // a nested list continues the item before it, so it sits inside that item:
+                    // a list is no valid child of a list, and a reader would lose the nesting
+                    if (elementList.Child is not null && items.Count > 0)
+                    {
+                        items[^1].Add(ConvertElement([elementList.Child], renderContext));
+                    }
+                    else if (elementList.Child is not null)
+                    {
+                        items.Add(new HtmlElementTextContentLi(ConvertElement([elementList.Child], renderContext)));
+                    }
+
                     if (elementList.Ordered)
                     {
                         var orderedType = elementList.Items.FirstOrDefault()?.OrderedType ?? null;
                         var orderedNumber = elementList.Items.FirstOrDefault()?.OrderedNumber ?? null;
 
-                        list.Add(new HtmlElementTextContentOl
-                        (
-                            elementList.Items.Select(item =>
-                                new HtmlElementTextContentLi
-                                (
-                                    ConvertElement(item.Content, renderContext)
-                                )
-                            )
-                        )
-                            .Add(ConvertElement([elementList.Child], renderContext))
+                        list.Add(new HtmlElementTextContentOl(items)
                             .AddUserAttribute
                             (
                                 "type",
@@ -168,15 +231,7 @@ namespace WebExpress.WebUI.WebMarkdown
                     }
                     else
                     {
-                        list.Add(new HtmlElementTextContentUl
-                        (
-                            elementList.Items.Select(item =>
-                                new HtmlElementTextContentLi
-                                (
-                                    ConvertElement(item.Content, renderContext)
-                                )
-                            )
-                        ).Add(ConvertElement([elementList.Child], renderContext)));
+                        list.Add(new HtmlElementTextContentUl(items));
                     }
                 }
                 else if (element is MarkdownBlockElementTable table)
@@ -230,12 +285,23 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownInlineElementCheckbox checkbox)
                 {
-                    list.Add(new HtmlElementFieldInput()
+                    // a task marker is a picture of a state, not a control anyone can flip, so it
+                    // is disabled; the text that follows it is what it stands for and names it
+                    var caption = string.Concat(sequence.Skip(index + 1).TakeWhile(x => x is MarkdownInlineElementPlainText).Select(x => x.PlainText)).Trim();
+                    var input = new HtmlElementFieldInput()
                     {
                         Type = "checkbox",
                         Class = "form-check-input",
-                        Checked = checkbox.Value == "true" ? true : false
-                    });
+                        Checked = checkbox.Value == "true" ? true : false,
+                        Disabled = true
+                    };
+
+                    if (!string.IsNullOrWhiteSpace(caption))
+                    {
+                        input.AddUserAttribute("aria-label", caption);
+                    }
+
+                    list.Add(input);
                 }
                 else if (element is MarkdownInlineElementFootnote footnote)
                 {

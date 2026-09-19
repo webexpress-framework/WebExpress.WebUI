@@ -15,8 +15,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the quickfilter control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-quickfilter"" role=""filter""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-quickfilter"" role=""filter""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-quickfilter"" role=""group"" aria-label=""Filter""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-quickfilter"" role=""group"" aria-label=""Filter""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -30,6 +30,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -50,7 +51,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"<div class=""wx-webui-quickfilter"" role=""filter""><button type=""button"" class=""wx-quickfilter-button""></button></div>";
+            var expected = @"<div class=""wx-webui-quickfilter"" role=""group"" aria-label=""Filter""><button type=""button"" class=""wx-quickfilter-button""></button></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
@@ -110,7 +111,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"*<button id=""status"" type=""button"" class=""wx-quickfilter-button"" data-badge=""7"" data-badge-style=""background:#7c3aed;"" data-wx-primary-action=""filter"">Status</button>*";
+            var expected = @"*<button id=""status"" type=""button"" class=""wx-quickfilter-button"" data-badge=""7"" data-badge-style=""background:#7c3aed;color:#fff;"" data-wx-primary-action=""filter"">Status</button>*";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

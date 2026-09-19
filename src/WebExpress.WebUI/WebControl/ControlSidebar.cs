@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -167,13 +168,16 @@ namespace WebExpress.WebUI.WebControl
                 return null;
             }
 
-            var html = new HtmlElementTextContentDiv()
+            // the sidebar is the navigation landmark of the page, named so a reader can jump
+            // to it and tell it from the other navigation blocks
+            var html = new HtmlElementSectionNav()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-sidebar", GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
                 Role = role
             }
+                .AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:sidebar.label"))
                 .Add(items.Select(x => x.Render(renderContext, visualTree)))
                 .Add
                 (

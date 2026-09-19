@@ -378,6 +378,8 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn dropdown-toggle";
         btn.type = "button";
+        btn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.textstyle");
+        btn.setAttribute("aria-label", btn.title);
         btn.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("text-height")}"></i>`;
 
 

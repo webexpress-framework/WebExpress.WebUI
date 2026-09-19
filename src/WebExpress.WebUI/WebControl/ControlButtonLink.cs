@@ -42,6 +42,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var text = Text?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
+            var active = Active?.Invoke(renderContext);
 
             text = I18N.Translate(renderContext, text);
 
@@ -54,6 +55,14 @@ namespace WebExpress.WebUI.WebControl
                 Href = Uri?.Invoke(renderContext)?.BindParameters(renderContext.Request.Parameters).ToString(),
                 Title = I18N.Translate(renderContext, Tooltip?.Invoke(renderContext))
             };
+
+            // a link has no disabled attribute, so the state is spoken through aria and the
+            // link leaves the tab order, as a disabled button would
+            if (active == TypeActive.Disabled)
+            {
+                html.AddUserAttribute("aria-disabled", "true");
+                html.AddUserAttribute("tabindex", "-1");
+            }
 
             var icon = Icon?.Invoke(renderContext);
             var primaryAction = PrimaryAction?.Invoke(renderContext);

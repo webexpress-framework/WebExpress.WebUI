@@ -90,7 +90,7 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             // the bars are emptied before the served form's sections are lifted onto them, so
             // nothing of the previously shown form is left behind them
             this._footerDiv.innerHTML = "";
-            this._titleH1.innerHTML = "";
+            this._titleHeading.innerHTML = "";
 
             // a form header names what is being edited, which is what the dialog's title bar is
             // for, and a form footer holds what belongs beside its buttons. Both are lifted by
@@ -113,7 +113,7 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             form.innerHTML = "";
 
             if (!titled) {
-                this._titleH1.textContent = doc.title?.trim() ?? "";
+                this._titleHeading.textContent = doc.title?.trim() ?? "";
             }
 
             buttons.forEach(btn => this._footerDiv.appendChild(btn));
@@ -147,7 +147,7 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             return;
         }
 
-        this._titleH1.textContent = doc.title?.trim() ?? "";
+        this._titleHeading.textContent = doc.title?.trim() ?? "";
 
         // fallback: try to find a wx-content-main
         const contentMain = doc.querySelector("#wx-content-main");

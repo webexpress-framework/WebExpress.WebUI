@@ -120,7 +120,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(null, @"<div class=""wx-webui-date"" data-format=""yyyy-MM-dd""></div>")]
         [InlineData("", @"<div class=""wx-webui-date"" data-format=""yyyy-MM-dd""></div>")]
         [InlineData(" ", @"<div class=""wx-webui-date"" data-format=""yyyy-MM-dd""></div>")]
-        [InlineData("gold", @"<div class=""wx-webui-date"" data-color-style=""background: gold;"" data-format=""yyyy-MM-dd""></div>")]
+        [InlineData("gold", @"<div class=""wx-webui-date"" data-color-style=""background: gold;color: #000;"" data-format=""yyyy-MM-dd""></div>")]
         public void UserColor(string color, string expected)
         {
             // arrange

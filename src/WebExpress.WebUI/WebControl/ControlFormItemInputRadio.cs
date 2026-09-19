@@ -69,14 +69,15 @@ namespace WebExpress.WebUI.WebControl
                 @checked = value == option;
             }
 
+            // the id sits on the input, which is what the label refers to and the form addresses
             var html = new HtmlElementTextContentDiv()
             {
-                Id = Id,
                 Class = Css.Concatenate("form-check", inline ? "form-check-inline" : null, GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
             }
                 .Add(new HtmlElementFieldInput()
                 {
+                    Id = Id,
                     Name = name,
                     Type = "radio",
                     Value = option,

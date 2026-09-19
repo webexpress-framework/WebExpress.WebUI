@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -88,7 +89,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .Add(new HtmlElementTextSemanticsI() { Class = new IconXmark().Class })
                 .AddUserAttribute("data-wx-dismiss", "offcanvas")
-                .AddUserAttribute("aria-label", "close");
+                .AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:modal.close.label"));
 
             var header = new HtmlElementTextContentDiv
             (

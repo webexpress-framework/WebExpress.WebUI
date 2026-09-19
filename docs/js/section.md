@@ -40,7 +40,8 @@ A control that composes its own UI can construct a section directly and hang its
 
 | Accessor        | What it is
 |-----------------|--------------------------------------------------------------------------
-| `headerElement` | The header row. Append a menu button, a badge of your own kind, anything that belongs beside the label.
+| `headerElement` | The header row. Append a menu button, a badge of your own kind, anything that belongs beside the label. It lands beside the toggle, never inside it, so a control of your own does not nest in the section's.
+| `toggleElement` | The button around the label that folds the section, or `null` for a fixed section. It carries `aria-expanded` and `aria-controls`.
 | `titleElement`  | The label element, for restyling or renaming it in place.
 | `bodyElement`   | The body, where the adopted content lives.
 
@@ -81,7 +82,7 @@ The label is set in upper case, which is what makes it read as structure rather 
 - **Accent, not fill**: The accent color is applied to the host, so the label, its icon and the guide line inherit it while the body is reset to the body color — an accented paragraph would say something the author did not mean to say. A filled background is deliberately not offered: it would put back the box the section exists to avoid.
 - **Badge over note**: A badge is a filled pill with a color of its own, read before the label it follows; a note is a quiet trailing line. Use the badge for something that demands attention (`3 overdue`) and the note for something that merely informs (`last updated yesterday`). Both survive folding.
 - **Remembered state**: A reader who folds a section away keeps that view on the next visit. The state is stored under `wx-section:<id>` in `localStorage`; a host that denies storage still gets a working section, just a forgetful one.
-- **Accessible toggle**: A collapsible section renders its label row as a `<button>` carrying `aria-expanded` and `aria-controls`; the chevron is marked `aria-hidden` because it repeats what the button already says.
+- **Accessible toggle**: A collapsible section wraps its label in a `<button>` carrying `aria-expanded` and `aria-controls`; the whole row still folds on a click, but only the label is the control, so a menu a host appends to the row is a sibling of the toggle rather than a control inside a control. The chevron is marked `aria-hidden` because it repeats what the button already says. A section without an id still gets a body id of its own, drawn from a counter, so the reference never points at two bodies.
 - **Overflow-safe folding**: The fold animates a `1fr`/`0fr` grid, which gives it a height to animate that no fixed value could know in advance. The body is clipped only while it moves, so a dropdown or popover inside an open section is free to overflow it. The clip is lifted on `transitionend` and, for hosts where the transition never runs, on a timer.
 
 ### Programmatic Control

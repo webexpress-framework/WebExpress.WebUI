@@ -140,6 +140,9 @@
     margin-top: 0.2em;
     margin-bottom: 0.2em;
     height: 2.2em;
+    /* the target size criterion asks for 24px, which the icon alone falls short of */
+    min-width: 24px;
+    min-height: 24px;
 }
 
 .wx-editor-btn i {
@@ -1076,9 +1079,9 @@
     position: relative;
     min-height: 6rem;
     padding: 1.75rem 0.85rem 0.85rem;
-    border: 1px dashed var(--bs-border-color, #8b9198);
+    border: 1px dashed var(--wx-border-color, #8b9198);
     border-radius: 0.35rem;
-    background: var(--bs-body-bg, #fff);
+    background: var(--wx-body-bg, #fff);
 }
 
 .wx-editor .wx-editor-region::before {
@@ -1086,19 +1089,19 @@
     position: absolute;
     inset-block-start: 0.3rem;
     inset-inline-start: 0.85rem;
-    color: var(--bs-secondary-color, #687078);
+    color: var(--wx-secondary-color, #687078);
     font-size: 0.7rem;
     pointer-events: none;
     user-select: none;
 }
 
 .wx-editor .wx-editor-region:focus-within {
-    border-color: var(--bs-primary, #0d6efd);
-    outline: 2px solid color-mix(in srgb, var(--bs-primary, #0d6efd) 18%, transparent);
+    border-color: var(--wx-primary, #0d6efd);
+    outline: 2px solid color-mix(in srgb, var(--wx-primary, #0d6efd) 18%, transparent);
 }
 
 .wx-editor[aria-disabled="true"] .wx-editor-region {
-    background: var(--bs-tertiary-bg, #f2f3f5);
+    background: var(--wx-tertiary-bg, #f2f3f5);
     opacity: 0.7;
 }
 

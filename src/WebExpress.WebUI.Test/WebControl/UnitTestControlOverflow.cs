@@ -29,6 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -60,6 +61,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -84,6 +86,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -93,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(typeof(ControlText), @"<div class=""wx-webui-overflow""><div></div></div>")]
         [InlineData(typeof(ControlLink), @"<div class=""wx-webui-overflow""><a class=""wx-link""></a></div>")]
-        [InlineData(typeof(ControlImage), @"<div class=""wx-webui-overflow""><img></div>")]
+        [InlineData(typeof(ControlImage), @"<div class=""wx-webui-overflow""><img alt></div>")]
         public void Add(Type child, string expected)
         {
             // arrange
@@ -106,6 +109,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             control.Add(childInstance);
 
+            // validation
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

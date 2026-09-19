@@ -63,6 +63,12 @@ webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
         if (language) {
             codeElement.classList.add(`language-${language}`);
         }
+        // a long line scrolls sideways; the box has to take the focus for the keyboard to scroll
+        // it, and a focusable box is named. a group rather than a region: a page of samples
+        // would otherwise list one landmark per block
+        codeElement.setAttribute("tabindex", "0");
+        codeElement.setAttribute("role", "group");
+        codeElement.setAttribute("aria-label", language || this._i18n("webexpress.webui:code.label", "Code"));
         return codeElement;
     }
 

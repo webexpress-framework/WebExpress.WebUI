@@ -29,6 +29,8 @@ Headings structure a document hierarchically. Markdown offers six levels (# to #
 ### Title 3
 ```
 
+A document opens its own outline at the first level. Placed under the headings of a page - in a `ControlText` with `Format = Markdown` under a section, say - it continues that section: `HeadingLevel` on the control (or the `headingLevel` argument of `ConvertToHtml`) names the level its first-level heading is spoken at, and every deeper heading follows with its own step. The tags keep their look; the level is carried by `role="heading"` and `aria-level`, so a reader walking the outline of the page meets no gap. A task marker (`[x]`) is rendered as a disabled checkbox named by the text that follows it: it pictures a state, it is not a control anyone can flip.
+
 ### Horizontal Line
 A horizontal line serves as a visual separator between content, e.g., between two topic blocks or as the end of a section. It consists of three or more dashes.
 

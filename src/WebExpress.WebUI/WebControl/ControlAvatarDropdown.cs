@@ -150,11 +150,13 @@ namespace WebExpress.WebUI.WebControl
             var size = Size?.Invoke(renderContext) ?? -1;
             var image = Image?.Invoke(renderContext);
 
+            // the host is a plain container: the button the client builds inside it carries the
+            // role, and a role on the host would nest one interactive element in another
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-avatar-dropdown", GetClasses(renderContext)),
-                Role = role ?? "button"
+                Role = role
             }
                 .AddUserAttribute("data-name", I18N.Translate(renderContext, username))
                 .AddUserAttribute("data-src", image?.ToString())

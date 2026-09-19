@@ -39,6 +39,13 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> Fill { get; set; } = _ => false;
 
         /// <summary>
+        /// Gets or sets the outline level of the column titles; the widget titles sit one level
+        /// below them. Fifth by default, so a page that places the dashboard right under a
+        /// shallower heading sets the level that keeps its outline without a gap.
+        /// </summary>
+        public Func<IRenderControlContext, int?> HeadingLevel { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -156,6 +163,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-dashboard", (Fill?.Invoke(renderContext) ?? false) ? "wx-fill" : null, GetClasses(renderContext)),
                 Style = GetStyles(renderContext)
             }
+                .AddUserAttribute("data-heading-level", HeadingLevel?.Invoke(renderContext)?.ToString())
                 .Add(columns.Select(x => x.Render(renderContext, visualTree)))
                 .Add(widgets.Select(x => x.Render(renderContext, visualTree)));
 

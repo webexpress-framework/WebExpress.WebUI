@@ -30,7 +30,7 @@ webexpress.webui.DashboardWidgetSettings = class extends webexpress.webui.ModalC
      * @param {Function} onSave - Invoked after the widget has been updated.
      */
     open(widget, definition, onSave) {
-        this._titleH1.textContent = this._i18n("webexpress.webui:dashboard.settings.title", "Settings");
+        this._titleHeading.textContent = this._i18n("webexpress.webui:dashboard.settings.title", "Settings");
 
         const form = document.createElement("form");
         form.className = "wx-dashboard-settings-form";

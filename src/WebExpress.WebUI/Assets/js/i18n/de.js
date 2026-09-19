@@ -6,6 +6,10 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "calendar": "Kalender",
     "carousel.previous": "Vorherige Folie",
     "carousel.next": "Nächste Folie",
+    "pagination.label": "Seitennavigation",
+    "pagination.previous": "Vorherige Seite",
+    "pagination.next": "Nächste Seite",
+    "pagination.page": "Seite {0}",
     "edit": "Bearbeiten",
     "copy": "Kopieren",
     "remove": "Entfernen",
@@ -15,6 +19,10 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "close": "Schließen",
     "selected": "Ausgewählt",
     "available": "Verfügbar",
+    "move.select": "Auswählen",
+    "move.select.all": "Alle auswählen",
+    "move.deselect": "Abwählen",
+    "move.deselect.all": "Alle abwählen",
     "search": "Suche",
     "rating": "Bewertung",
     "heatmap": "Wärmekarte",
@@ -51,6 +59,10 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "calendar.sat": "Sa",
     "calendar.sun": "So",
     "calendar.today": "Heute",
+    "calendar.previous_year": "Vorheriges Jahr",
+    "calendar.previous_month": "Vorheriger Monat",
+    "calendar.next_month": "Nächster Monat",
+    "calendar.next_year": "Nächstes Jahr",
     "calendar.format": "DD.MM.YYYY",
 
     "selection.placeholder": "Wähle eine Option aus.",
@@ -72,6 +84,8 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "page.contentNotLoaded.details": "Bitte überprüfen Sie Ihre Internetverbindung oder versuchen Sie die Seite erneut zu laden. Falls das Problem weiterhin besteht, könnte die angeforderte Ressource momentan nicht verfügbar sein oder ein technischer Fehler vorliegen. Sie können auch versuchen, die Seite zu aktualisieren oder sich an den technischen Support wenden, falls Unterstützung benötigt wird.",
 
     "table.columns.manage": "Spalten verwalten",
+    "table.row.move": "Zeile verschieben",
+    "table.column": "Spalte {n}",
     "table.moving.item": "Element wird verschoben",
     "table.columns.title": "Spalten",
     "page.table.columns.desc": "Sichtbarkeit umschalten und Reihenfolge per Ziehen ändern.",
@@ -94,6 +108,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "properties": "Eigenschaften",
 
     "dashboard.widget.unavailable": "Widget-Inhalt nicht verfügbar.",
+    "dashboard.widget.move": "Widget verschieben",
     "dashboard.widget.remove.title": "Widget entfernen?",
     "dashboard.widget.remove.message": "Möchten Sie das Widget „{name}“ entfernen? Diese Aktion kann nicht rückgängig gemacht werden.",
     "dashboard.widget.remove.confirm": "Entfernen",
@@ -114,28 +129,37 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "list.handle.title": "Verschieben",
     "list.tree.toggle": "Auf- oder zuklappen",
 
+    "code.label": "Code",
     "barcode": "Strichcode",
     "barcode.invalid": "Der Wert kann nicht kodiert werden.",
 
+    "masterdetail.list": "Einträge",
     "masterdetail.back": "Zurück zur Liste",
     "masterdetail.close": "Detailansicht ausblenden",
 
     "overflow.more": "Weitere Werkzeuge",
     "overflow.submenu": "Untermenü",
 
+    "split.toggle": "Seitenbereich ein- oder ausblenden",
+    "split.separator": "Bereiche verschieben",
+    "toolbar.label": "Werkzeugleiste",
+    "toolbar.combo": "Auswahl",
     "sidebar.toggle": "Seitenleiste umschalten",
 
+    "filelist.file": "Datei",
     "filelist.versions": "Frühere Versionen",
 
     "upload.button": "Dateien hochladen",
     "upload.remove.file": "Datei entfernen",
 
+    "view.switch": "Ansicht wechseln",
     "view.select.item": "Wählen Sie ein Element aus, um Details anzuzeigen.",
 
     "rating.of": "von",
 
     "selection.filter": "Filter",
     "selection.filter.clear": "Filter löschen",
+    "selection.remove": "{0} entfernen",
 
     "dnf.and": "und",
     "dnf.or": "oder",
@@ -157,6 +181,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "fullscreen.toggle": "Vollbild umschalten",
     "fullscreen.exit": "Vollbild verlassen",
 
+    "tile.picker": "Kacheln",
     "tile.close": "Kachel schließen",
 
     "editor.content.label": "Editorinhalt",
@@ -177,6 +202,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "editor.strike": "Durchgestrichen",
     "editor.super": "Hochgestellt",
     "editor.sub": "Tiefgestellt",
+    "editor.textstyle": "Weitere Textformate",
     "editor.clearformat": "Formatierung löschen",
     "editor.formatpainter": "Format übertragen",
     "editor.textcolor": "Textfarbe",
@@ -208,6 +234,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "editor.emoji.search.label": "Emoji suchen",
     "editor.emoji.notfound": "Keine Emojis gefunden",
     "editor.addon.properties": "Eigenschaften",
+    "editor.table": "Tabelle",
     "editor.table.insert.row.above": "Zeile darüber einfügen",
     "editor.table.insert.row.below": "Zeile darunter einfügen",
     "editor.table.insert.col.left": "Spalte links einfügen",
@@ -458,6 +485,8 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "login.failed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Zugangsdaten.",
     "login.error": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
 
+    "slider.minimum": "Minimum",
+    "slider.maximum": "Maximum",
     "slider.invalid": "Ungültiger Wertebereich.",
     "slider.out-of-bounds": "Wertebereich liegt außerhalb der zulässigen Grenzen.",
     "slider.inverted": "Der untere Wert darf den oberen Wert nicht überschreiten.",

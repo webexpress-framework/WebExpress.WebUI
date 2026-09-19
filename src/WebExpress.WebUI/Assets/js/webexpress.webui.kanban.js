@@ -192,12 +192,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
             cardEl.classList.toggle(webexpress.webui.KanbanCtrl.ACTIVE_CLASS, active);
             cardEl.classList.toggle("active", active);
-
-            if (active) {
-                cardEl.setAttribute("aria-selected", "true");
-            } else {
-                cardEl.removeAttribute("aria-selected");
-            }
+            cardEl.setAttribute("aria-pressed", active ? "true" : "false");
         }
     }
 
@@ -1765,12 +1760,21 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         cardEl.className = "wx-kanban-card";
         cardEl.dataset.cardId = card.id;
         cardEl.setAttribute("draggable", "true");
+        // the card is reached by the keyboard: enter and space select it, alt with an arrow
+        // key moves it, because a drag is a pointer gesture only
+        cardEl.setAttribute("tabindex", "0");
+        cardEl.setAttribute("aria-label", card.label || "");
+        if (this._selectable) {
+            cardEl.setAttribute("role", "button");
+            cardEl.setAttribute("aria-pressed", "false");
+        }
+        cardEl.addEventListener("keydown", (e) => this._onCardKeyDown(e, card, cardEl));
 
         // restore the selection state: render() rebuilds every card, so the active
         // marker has to come from the retained id rather than from the old element
         if (this._selectable && this._selectedCardId != null && String(card.id) === this._selectedCardId) {
             cardEl.classList.add("active", webexpress.webui.KanbanCtrl.ACTIVE_CLASS);
-            cardEl.setAttribute("aria-selected", "true");
+            cardEl.setAttribute("aria-pressed", "true");
         }
 
         // map WebExpress colors to hex for the top border highlight
@@ -1909,6 +1913,60 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         });
 
         return cardEl;
+    }
+
+    /**
+     * Selects or moves a card from the keyboard. Enter and space select it; alt with left
+     * or right moves it to the neighbouring column, alt with up or down one place among the
+     * cards of its cell. The focus follows the card through the re-render.
+     * @param {KeyboardEvent} e - The key event on the card.
+     * @param {Object} card - The card model.
+     * @param {HTMLElement} cardEl - The card element.
+     */
+    _onCardKeyDown(e, card, cardEl) {
+        if ((e.key === "Enter" || e.key === " ") && this._selectable && e.target === cardEl) {
+            e.preventDefault();
+            this.selectCard(cardEl.dataset.cardId, e);
+            return;
+        }
+        if (!e.altKey || !["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+            return;
+        }
+        e.preventDefault();
+
+        const oldColId = card.columnId;
+        const oldSwimlaneId = card.swimlaneId;
+        const sourceIndex = this._cards.indexOf(card);
+        if (sourceIndex < 0) {
+            return;
+        }
+
+        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+            const columns = this._columns.map((c) => c.id);
+            const target = columns.indexOf(card.columnId) + (e.key === "ArrowLeft" ? -1 : 1);
+            if (target < 0 || target >= columns.length) {
+                return;
+            }
+            this._cards.splice(sourceIndex, 1);
+            card.columnId = columns[target];
+            this._cards.push(card);
+            this._dispatchMoveEvent(card, oldColId, oldSwimlaneId, card.columnId, card.swimlaneId, this._cards.length - 1);
+        } else {
+            // the neighbours in the same cell, in board order
+            const siblings = this._cards.filter((c) => c.columnId === card.columnId && c.swimlaneId === card.swimlaneId);
+            const position = siblings.indexOf(card) + (e.key === "ArrowUp" ? -1 : 1);
+            if (position < 0 || position >= siblings.length) {
+                return;
+            }
+            const neighbour = siblings[position];
+            this._cards.splice(sourceIndex, 1);
+            const targetIndex = this._cards.indexOf(neighbour) + (e.key === "ArrowUp" ? 0 : 1);
+            this._cards.splice(targetIndex, 0, card);
+            this._dispatchMoveEvent(card, oldColId, oldSwimlaneId, card.columnId, card.swimlaneId, targetIndex);
+        }
+
+        this.render();
+        Array.from(this._element.querySelectorAll(".wx-kanban-card")).find((el) => el.dataset.cardId === String(card.id))?.focus({ preventScroll: true });
     }
 
     /**

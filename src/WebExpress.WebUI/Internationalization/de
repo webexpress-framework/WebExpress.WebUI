@@ -50,3 +50,10 @@ masterdetail.empty.message=Bitte wählen Sie ein Element aus der Liste aus.
 
 carousel.previous=Vorherige Folie
 carousel.next=Nächste Folie
+breadcrumb.label=Brotkrumen-Navigation
+toolbar.label=Werkzeugleiste
+form.actions=Aktionen
+table.actions=Aktionen
+sidebar.label=Seitenleiste
+splitbutton.toggle=Weitere Optionen
+quickfilter.label=Filter

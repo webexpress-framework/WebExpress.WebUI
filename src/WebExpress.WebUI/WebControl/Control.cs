@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the id of the control.
         /// </summary>
-        public string Id { get; private set; }
+        public string Id { get; protected set; }
 
         /// <summary>
         /// Gets or sets the text color.

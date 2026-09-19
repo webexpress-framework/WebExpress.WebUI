@@ -15,6 +15,7 @@
  * - webexpress.webui.Event.ICON_EDIT_EVENT
  */
 webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
+    static _nextGroupId = 0;
     _items = [];
     _resizeObserver = null;
     _hoverExpanded = false;
@@ -418,7 +419,9 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
         if (colorClasses.length) {
             wrapper.classList.add(...colorClasses);
         }
-        const colorStyle = [item.colorStyle, item.backgroundColorStyle].filter(Boolean).join(" ");
+        // the fill first: it brings a text color of its own, which a text color the author set
+        // must be able to override
+        const colorStyle = [item.backgroundColorStyle, item.colorStyle].filter(Boolean).join(" ");
         if (colorStyle) {
             wrapper.style.cssText = colorStyle;
         }
@@ -520,6 +523,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
             options.dataset.icon = this._iconClass("more");
             options.dataset.size = "btn-sm";
             options.dataset.border = "false";
+            options.title = this._i18n("webexpress.webui:table.options.label", "Options");
             wrapper.appendChild(options);
             new webexpress.webui.DropdownCtrl(options).items = item.options;
         }
@@ -533,9 +537,14 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
         // its children under the row so the subtree collapses as a unit
         if (!item.children || item.children.length === 0) {
             if (hierarchical) {
+                // the dot of the icon set, the same glyph the tree marks its leaves with, so a
+                // sidebar link and a sidebar tree read alike and follow the set the page carries
                 const bullet = document.createElement("span");
                 bullet.className = "wx-sidebar-bullet";
                 bullet.setAttribute("aria-hidden", "true");
+                const glyph = document.createElement("i");
+                glyph.className = this._iconClass("dot");
+                bullet.appendChild(glyph);
                 wrapper.prepend(bullet);
             }
             return wrapper;
@@ -565,15 +574,20 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
         caret.className = "wx-sidebar-caret btn";
         caret.setAttribute("aria-label", this._i18n ? this._i18n("webexpress.webui:sidebar.toggle", "Toggle") : "Toggle");
         caret.innerHTML = `<i class="${this._iconClass("chevron-right")}"></i>`;
+        // the caret says whether the group it opens is open, and which one that is
+        caret.setAttribute("aria-expanded", item.expanded ? "true" : "false");
         caret.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
-            group.classList.toggle("wx-expanded");
+            const expanded = group.classList.toggle("wx-expanded");
+            caret.setAttribute("aria-expanded", expanded ? "true" : "false");
         });
         row.prepend(caret);
 
         const childrenWrap = document.createElement("div");
         childrenWrap.className = "wx-sidebar-children";
+        childrenWrap.id = "wx-sidebar-group-" + (++webexpress.webui.SidebarCtrl._nextGroupId);
+        caret.setAttribute("aria-controls", childrenWrap.id);
         for (const child of item.children) {
             // every row below a group is inside the tree by construction, so it
             // is marked whether or not its own level holds a further group
@@ -595,9 +609,9 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
      * @returns {HTMLElement} The constructed icon element.
      */
     _buildIconElement(item) {
+        // the wrapper is not a control: the edit button inside it is what takes the focus
         const iconWrapper = document.createElement("div");
         iconWrapper.className = "wx-sidebar-icon";
-        iconWrapper.setAttribute("tabindex", "0");
 
         // icon presentation
         let iconEl = null;
@@ -608,7 +622,8 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
             iconEl = document.createElement("img");
             iconEl.className = "wx-sidebar-icon-graphic wx-icon";
             iconEl.src = item.iconImg;
-            iconEl.alt = "";
+            // the picture stands for the entry when no text is shown beside it
+            iconEl.alt = item.iconText ? "" : (item.label || "");
         }
         if (iconEl) {
             iconWrapper.appendChild(iconEl);
@@ -679,6 +694,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
             const img = document.createElement("img");
             img.className = "wx-icon";
             img.src = item.iconImg;
+            img.alt = "";
             trigger.appendChild(img);
         }
 
@@ -692,11 +708,22 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
         panel.appendChild(trigger);
         panel.appendChild(contentContainer);
 
-        // bind click for overlay mode
+        // bind click for overlay mode; the trigger is a button to the keyboard as well
         if (item.mode === "overlay") {
-            trigger.addEventListener("click", (e) => {
+            trigger.setAttribute("role", "button");
+            trigger.setAttribute("tabindex", "0");
+            trigger.setAttribute("aria-haspopup", "dialog");
+            if (item.label) { trigger.setAttribute("aria-label", item.label); }
+            const open = () => {
                 if (this._isReduced && item.content) {
                     this._showPanelOverlay(item, trigger);
+                }
+            };
+            trigger.addEventListener("click", open);
+            trigger.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    open();
                 }
             });
         }

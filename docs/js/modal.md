@@ -33,7 +33,7 @@ The configuration and content of the modal are defined directly in the HTML mark
 
 To define the content, the following CSS classes are used within the host element:
 
-- **`.wx-modal-header`**: The content of this element is adopted as the title in the modal's header.
+- **`.wx-modal-header`**: The content of this element is adopted as the title in the modal's header. The title is a second-level heading (`h2.modal-title`): a dialog is content of the page it opens on, whose first level is taken, and a first level here would break the outline of that page.
 - **`.wx-modal-content`**: The content of this element is placed into the main body of the modal.
 - **`.wx-modal-footer`**: The content of this element is inserted into the modal's footer, preceding the default "Close" button.
 

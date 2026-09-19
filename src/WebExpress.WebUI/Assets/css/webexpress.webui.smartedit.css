@@ -114,3 +114,9 @@
 .wx-smart-edit .form-buttons > button:hover { background: var(--wx-tertiary-bg); }
 .wx-smart-edit .form-buttons .wx-smart-edit-save { color: var(--wx-success-text-emphasis); }
 .wx-smart-edit .form-buttons .wx-smart-edit-cancel { color: var(--wx-danger-text-emphasis); }
+
+/* the editor field drops the browser outline, so the focus ring is drawn here */
+.wx-smart-edit-editor:focus-visible {
+    border-color: var(--wx-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--wx-primary-rgb), 0.2);
+}

@@ -49,6 +49,8 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         this._addableColumn = element.dataset.addableColumn === "true";
         this._addableWidget = element.dataset.addableWidget === "true";
         this._configurableWidget = element.dataset.configurableWidget === "true";
+        // the outline level of the column titles; the widget titles sit one level below
+        this._headingLevel = Math.min(6, Math.max(1, parseInt(element.dataset.headingLevel, 10) || 5));
 
         this._parseStaticConfig();
         this.render();
@@ -243,13 +245,18 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             const colTitle = colData.title ?? colData.label ?? "";
             const hasColTools = this._editableColumn || this._movableColumn || this._deletableColumn;
             if (colTitle || hasColTools) {
-                const titleEl = document.createElement("h5");
+                const titleEl = document.createElement("div");
                 titleEl.className = "wx-dashboard-lane-title";
 
+                // the heading is the name alone: the grip, the count and the menu sit beside it
+                // in the row, so a reader that walks the headings hears the lane, not its tools
+                const heading = document.createElement("h" + this._headingLevel);
+                heading.className = "wx-dashboard-lane-heading";
                 const titleText = document.createElement("span");
                 titleText.className = "wx-board-col-title";
                 titleText.textContent = colTitle;
-                titleEl.appendChild(titleText);
+                heading.appendChild(titleText);
+                titleEl.appendChild(heading);
 
                 // optional trailing badge (e.g. the widget count), coloured by a
                 // css class (system color) or an inline style, like the tab badge
@@ -1148,9 +1155,15 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         const isWidgetMovable = widgetData.movable !== false && registeredWidget.movable !== false;
 
         if (isWidgetMovable) {
-            const dragHandle = document.createElement("span");
+            // the grip is a button to the keyboard: the arrow keys move the widget among its
+            // neighbours and across the columns, because a drag is a pointer gesture only
+            const dragHandle = document.createElement("button");
+            dragHandle.type = "button";
             dragHandle.className = "text-muted wx-drag-handle";
+            dragHandle.title = this._i18n("webexpress.webui:dashboard.widget.move", "Move widget");
+            dragHandle.setAttribute("aria-label", dragHandle.title + ": " + (widgetData.title || widgetData.name || ""));
             dragHandle.innerHTML = `<i class="${this._iconClass("drag")}"></i>`;
+            dragHandle.addEventListener("keydown", (e) => this._onHandleKeyDown(e, widgetData, colIdx));
             leftArea.appendChild(dragHandle);
 
             cardEl.setAttribute("draggable", "true");
@@ -1183,8 +1196,12 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             titleArea.appendChild(icon);
         }
 
+        // the widget is a section of its column, so its title is a heading one level below the
+        // column title; the classes keep the look of the bold row it sat in
         const widgetTitle = widgetData.title || widgetData.label || registeredWidget.title || "";
-        const titleText = document.createElement("span");
+        // a widget without a title gets no heading: an empty one is an empty entry in the outline
+        const titleText = document.createElement(widgetTitle ? "h" + Math.min(6, this._headingLevel + 1) : "span");
+        titleText.className = "d-inline m-0 fs-6 fw-bold";
         titleText.textContent = widgetTitle;
         titleArea.appendChild(titleText);
 
@@ -1496,6 +1513,49 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             this.render();
             this._dispatchChangeEvent("reorder");
         }
+    }
+
+    /**
+     * Moves a widget from the keyboard: up and down among the widgets of its column, left
+     * and right into the neighbouring column. The focus follows the grip through the
+     * re-render.
+     * @param {KeyboardEvent} e - The key event on the grip.
+     * @param {Object} widgetData - The widget model.
+     * @param {number} colIdx - The index of the column the widget sits in.
+     */
+    _onHandleKeyDown(e, widgetData, colIdx) {
+        if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+            return;
+        }
+        e.preventDefault();
+
+        const widgets = this._columns[colIdx].widgets;
+        const index = widgets.indexOf(widgetData);
+        if (index < 0) {
+            return;
+        }
+
+        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+            const target = colIdx + (e.key === "ArrowLeft" ? -1 : 1);
+            if (target < 0 || target >= this._columns.length) {
+                return;
+            }
+            widgets.splice(index, 1);
+            this._columns[target].widgets.push(widgetData);
+        } else {
+            const target = index + (e.key === "ArrowUp" ? -1 : 1);
+            if (target < 0 || target >= widgets.length) {
+                return;
+            }
+            widgets.splice(index, 1);
+            widgets.splice(target, 0, widgetData);
+        }
+
+        this.render();
+        this._dispatchChangeEvent("reorder");
+        Array.from(this._element.querySelectorAll(".wx-dashboard-widget-card"))
+            .find((card) => card.dataset.instanceId === String(widgetData.instanceId))
+            ?.querySelector(".wx-drag-handle")?.focus({ preventScroll: true });
     }
 
     /**

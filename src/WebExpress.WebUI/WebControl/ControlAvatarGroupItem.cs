@@ -59,7 +59,10 @@ namespace WebExpress.WebUI.WebControl
 
             if (image is not null)
             {
-                html.Add(new HtmlElementMultimediaImg() { Src = image.ToString(), Class = "wx-avatar-group-img" });
+                // the picture stands for the person: the name is its text alternative
+                var img = new HtmlElementMultimediaImg() { Src = image.ToString(), Class = "wx-avatar-group-img", Alt = name };
+                if (string.IsNullOrWhiteSpace(name)) { img.AddUserAttribute("alt"); }
+                html.Add(img);
             }
             else
             {

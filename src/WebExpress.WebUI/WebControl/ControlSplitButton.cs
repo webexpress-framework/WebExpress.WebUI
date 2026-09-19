@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -215,6 +216,10 @@ namespace WebExpress.WebUI.WebControl
             };
             dropdownButton.AddUserAttribute("popovertarget", menuId);
             dropdownButton.AddUserAttribute("type", "button");
+            // the toggle shows a caret alone: it says what it opens, and which list that is
+            dropdownButton.AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:splitbutton.toggle"));
+            dropdownButton.AddUserAttribute("aria-haspopup", "true");
+            dropdownButton.AddUserAttribute("aria-controls", menuId);
 
             var dropdownElements = new HtmlElementTextContentUl
                 (

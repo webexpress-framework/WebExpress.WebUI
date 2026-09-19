@@ -117,5 +117,11 @@
 }
 }
 
-.wx-search-clear { border: 0; background: transparent; padding: 0; color: var(--wx-secondary-color); }
+.wx-search-clear { border: 0; background: transparent; padding: 0; min-width: 24px; min-height: 24px; color: var(--wx-secondary-color); }
 .wx-search-clear:hover, .wx-search-clear:focus-visible { color: var(--wx-danger); }
+
+/* the text field inside the box has no outline of its own, so the box shows the focus */
+.wx-search:focus-within {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: 2px;
+}

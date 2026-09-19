@@ -112,8 +112,10 @@ dialog.modal > form { display: contents; }
 .carousel-control-prev-icon::before { transform: rotate(90deg); }
 .carousel-control-next-icon::before { transform: rotate(-90deg); }
 .carousel-indicators { position: absolute; inset-inline: 15%; bottom: 0.5rem; z-index: 1; display: flex; justify-content: center; gap: 0.5rem; }
-.carousel-indicators button { width: 1.5rem; height: 0.25rem; padding: 0; border: 0; background: #ffffff80; cursor: pointer; }
-.carousel-indicators button.active { background: #fff; }
+/* the bar stays thin, but the padding grows the hit area to the 24px a pointer target needs */
+.carousel-indicators button { box-sizing: content-box; width: 1.5rem; height: 0.25rem; padding: 10px 0; border: 0; background: #ffffff80; background-clip: content-box; cursor: pointer; }
+/* the color alone: the shorthand would reset the clip and fill the whole hit area */
+.carousel-indicators button.active { background-color: #fff; }
 
 .offcanvas { max-height: 100dvb; height: 100dvb; width: min(25rem, 100dvi); margin: 0; padding: 0; border: 0; color: var(--wx-body-color); background: var(--wx-body-bg); }
 .offcanvas::backdrop { background: #0008; }

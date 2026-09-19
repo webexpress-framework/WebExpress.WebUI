@@ -13,8 +13,10 @@ webexpress.webui.DashboardWidgets.register("widget_stats", {
     render: function (container, data) {
         // build internal markup
         const params = data.params;
-        const heading = document.createElement("h2");
-        heading.className = "text-success";
+        // the figure is the value of the widget, not a section of the page: it keeps the size
+        // of a second-level heading without entering the outline
+        const heading = document.createElement("p");
+        heading.className = "h2 text-success";
         heading.textContent = params.title || webexpress.webui.I18N.translate("webexpress.webui:widget.stats.default.heading");
 
         const paragraph = document.createElement("p");

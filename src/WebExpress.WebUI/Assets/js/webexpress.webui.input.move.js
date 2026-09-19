@@ -82,11 +82,20 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         this._buttonToAvailable.textContent = availableButtonLabel;
         this._buttonToAvailableAll.textContent = availableAllButtonLabel;
 
-        // Assemble the list and button containers
+        // Assemble the list and button containers; each list is a multi-select list box
+        // named by its header, and the arrows spell out what they move where
         selectedContainer.appendChild(selectedHeader);
         selectedContainer.appendChild(this._selectedList);
         availableContainer.appendChild(availableHeader);
         availableContainer.appendChild(this._availableList);
+        this._nameList(this._selectedList, selectedHeader, id ? id + "_selected" : null);
+        this._nameList(this._availableList, availableHeader, id ? id + "_available" : null);
+        this._buttonToSelectedAll.setAttribute("aria-label", this._i18n("webexpress.webui:move.select.all", "Select all"));
+        this._buttonToSelected.setAttribute("aria-label", this._i18n("webexpress.webui:move.select", "Select"));
+        this._buttonToAvailable.setAttribute("aria-label", this._i18n("webexpress.webui:move.deselect", "Deselect"));
+        this._buttonToAvailableAll.setAttribute("aria-label", this._i18n("webexpress.webui:move.deselect.all", "Deselect all"));
+        element.setAttribute("role", "group");
+        this._adoptFieldLabel(element, id, element);
         buttonContainer.appendChild(this._buttonToSelectedAll);
         buttonContainer.appendChild(this._buttonToSelected);
         buttonContainer.appendChild(this._buttonToAvailable);
@@ -122,6 +131,19 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         const ul = document.createElement("ul");
         ul.className = "list-group list-group-flush";
         return ul;
+    }
+
+    /**
+     * Marks a list as a multi-select list box named by its header.
+     * @param {HTMLUListElement} list - The list element.
+     * @param {HTMLElement} header - The header naming the list.
+     * @param {string|null} id - The id the header takes when it has none.
+     */
+    _nameList(list, header, id) {
+        list.setAttribute("role", "listbox");
+        list.setAttribute("aria-multiselectable", "true");
+        header.id ||= id || ("wx-move-" + Math.random().toString(36).slice(2, 8));
+        list.setAttribute("aria-labelledby", header.id);
     }
 
     /**
@@ -282,6 +304,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
          */
         const updateselection = () => {
             this._selectedoptions.forEach((value, key) => {
+                key.setAttribute("aria-selected", value != null ? "true" : "false");
                 if (value != null) {
                     key.classList.add("bg-primary");
                     key.childNodes.forEach(cn => cn.classList && cn.classList.add("text-white"));
@@ -291,6 +314,7 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
                 }
             });
             this._availableoptions.forEach((value, key) => {
+                key.setAttribute("aria-selected", value != null ? "true" : "false");
                 if (value != null) {
                     key.classList.add("bg-primary");
                     key.childNodes.forEach(cn => cn.classList && cn.classList.add("text-white"));
@@ -337,8 +361,10 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
                 this.moveToAvailable();
             });
             // Space key handler for selection
-            li.addEventListener("keyup", event => {
-                if (event.keyCode === 32) {
+            li.addEventListener("keydown", event => {
+                if (event.key === " " || event.key === "Enter") {
+                    // the space would scroll the list instead of picking the entry
+                    event.preventDefault();
                     if (![...this._selectedoptions.keys()].some(el => el === currentValue)) {
                         this._selectedoptions.set(li, currentValue);
                     } else {
@@ -392,8 +418,10 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
                 this.moveToSelected();
             });
             // Space key handler for selection
-            li.addEventListener("keyup", event => {
-                if (event.keyCode === 32) {
+            li.addEventListener("keydown", event => {
+                if (event.key === " " || event.key === "Enter") {
+                    // the space would scroll the list instead of picking the entry
+                    event.preventDefault();
                     if (![...this._availableoptions.keys()].some(el => el === currentValue)) {
                         this._availableoptions.set(li, currentValue);
                     } else {
@@ -435,6 +463,12 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
         const li = document.createElement("li");
         li.className = "list-group-item";
         li.setAttribute("draggable", "true");
+        // an entry is an option of the list box, focusable in its own right
+        li.setAttribute("role", "option");
+        li.setAttribute("aria-selected", "false");
+        li.setAttribute("tabindex", "0");
+        // an entry that shows a picture alone is named by its id, which is all there is to say
+        if (!currentValue.label) { li.setAttribute("aria-label", currentValue.id || ""); }
         // Add icon if specified
         if (currentValue.icon) {
             const icon = document.createElement("i");
@@ -451,13 +485,11 @@ webexpress.webui.InputMoveCtrl = class extends webexpress.webui.Ctrl {
             img.setAttribute("draggable", "false");
             li.appendChild(img);
         }
-        // Add label as link
-        const a = document.createElement("a");
-        a.className = "wx-link";
-        a.setAttribute("href", "javascript:void(0)");
-        a.setAttribute("draggable", "false");
-        a.textContent = currentValue.label;
-        li.appendChild(a);
+        // the label is text; the option itself is what the user picks, not a link
+        const label = document.createElement("span");
+        label.setAttribute("draggable", "false");
+        label.textContent = currentValue.label;
+        li.appendChild(label);
         return li;
     }
 

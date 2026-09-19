@@ -19,9 +19,11 @@ webexpress.webui.PopoverCtrl = class extends webexpress.webui.Ctrl {
         }
         element.removeAttribute("title");
         element.after(this._menu);
-        webexpress.webui.NativeMenu.bind(element, this._menu);
-        this._menu.setAttribute("data-wx-placement", element.getAttribute("data-wx-placement") || "top");
         const triggers = element.getAttribute("data-wx-trigger") || "click";
+        // only a click makes the element an invoker with an expanded state; a hover or focus
+        // popover is a description of the element and is announced as one
+        webexpress.webui.NativeMenu.bind(element, this._menu, triggers.includes("click") ? element : null);
+        this._menu.setAttribute("data-wx-placement", element.getAttribute("data-wx-placement") || "top");
         this._show = () => webexpress.webui.NativeMenu.show(this._menu);
         this._hide = () => webexpress.webui.NativeMenu.hide(this._menu);
         if (triggers.includes("hover")) {
@@ -32,7 +34,10 @@ webexpress.webui.PopoverCtrl = class extends webexpress.webui.Ctrl {
             element.addEventListener("focusin", this._show);
             element.addEventListener("focusout", this._hide);
         }
-        if (!triggers.includes("click")) { element.removeAttribute("popovertarget"); }
+        if (!triggers.includes("click")) {
+            element.removeAttribute("popovertarget");
+            element.setAttribute("aria-describedby", this._menu.id);
+        }
     }
 
     /**

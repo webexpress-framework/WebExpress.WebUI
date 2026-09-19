@@ -116,9 +116,103 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
         // clear host and append fragment
         this._element.innerHTML = "";
         this._element.appendChild(fragment);
+        this._demoteLandmarks(this._element, doc.title || "");
+        this._fitHeadings(this._element);
 
         // execute scripts that were found in the content
         this._executeScripts(scriptsToExecute);
+    }
+
+    /**
+     * Fits the headings of the embedded content into the outline of the host page. The content
+     * starts its own outline at the first level; here it continues the section it is embedded
+     * in, so its headings are read one level below the heading that precedes the frame, with
+     * their own steps kept. The tags stay as they are for the look; the level is spoken.
+     * @param {HTMLElement} root - The host element holding the embedded content.
+     */
+    _fitHeadings(root) {
+        const headings = Array.from(root.querySelectorAll("h1, h2, h3, h4, h5, h6"));
+        if (!headings.length || typeof root.compareDocumentPosition !== "function") {
+            return;
+        }
+
+        // the last heading of the host page before the frame is the section the content continues
+        let hostLevel = 0;
+        for (const h of Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"))) {
+            if (root.contains(h)) {
+                continue;
+            }
+            // 4 is DOCUMENT_POSITION_FOLLOWING: the frame comes after the heading
+            if (h.compareDocumentPosition(root) & 4) {
+                hostLevel = Number(h.tagName.slice(1));
+            }
+        }
+
+        const own = headings.map(h => Number(h.tagName.slice(1)));
+        const top = Math.min(...own);
+        headings.forEach((h, i) => {
+            h.setAttribute("role", "heading");
+            h.setAttribute("aria-level", String(Math.min(6, hostLevel + 1 + own[i] - top)));
+        });
+    }
+
+    /**
+     * Steps the page-level landmarks of the embedded content down. The content came from a
+     * document of its own; inside this page its main, banner and footer are not the page's,
+     * and a second main would be, so they become plain regions, and the named landmarks
+     * carry the title of the document they came from to be told apart from the host page's.
+     * @param {HTMLElement} root - The host element holding the embedded content.
+     * @param {string} title - The title of the embedded document.
+     */
+    _demoteLandmarks(root, title) {
+        const walk = (element, depth) => {
+            const tag = (element.tagName || "").toLowerCase();
+            const role = element.getAttribute("role") || "";
+            const label = element.getAttribute("aria-label");
+
+            if (tag === "main" || role === "main") {
+                // a main element admits no other role, so the element itself is exchanged for a
+                // section that carries its attributes and its content
+                const region = tag === "main" ? this._replaceTag(element, "section") : element;
+                region.setAttribute("role", "region");
+                if (title && !label && !region.hasAttribute("aria-labelledby")) {
+                    region.setAttribute("aria-label", title);
+                }
+                element = region;
+            } else if (role === "banner" || role === "contentinfo" || (depth === 0 && (tag === "header" || tag === "footer"))) {
+                element.setAttribute("role", "group");
+            } else if (title && label && (["nav", "aside", "form"].includes(tag) || ["navigation", "region", "toolbar", "search", "complementary"].includes(role))) {
+                element.setAttribute("aria-label", label + " – " + title);
+            }
+
+            for (const child of Array.from(element.children || [])) {
+                walk(child, depth + 1);
+            }
+        };
+
+        for (const child of Array.from(root.children || [])) {
+            walk(child, 0);
+        }
+    }
+
+    /**
+     * Exchanges an element for one of another tag that keeps its attributes and its content.
+     * @param {HTMLElement} element - The element to exchange.
+     * @param {string} tag - The tag of the replacement.
+     * @returns {HTMLElement} The replacement, in the place of the element.
+     */
+    _replaceTag(element, tag) {
+        const replacement = document.createElement(tag);
+        for (const attribute of Array.from(element.attributes || [])) {
+            replacement.setAttribute(attribute.name, attribute.value);
+        }
+        while (element.firstChild) {
+            replacement.appendChild(element.firstChild);
+        }
+        if (element.parentNode) {
+            element.parentNode.replaceChild(replacement, element);
+        }
+        return replacement;
     }
 
     /**

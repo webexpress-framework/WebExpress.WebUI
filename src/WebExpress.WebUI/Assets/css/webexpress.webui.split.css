@@ -65,6 +65,12 @@
     outline: none;
 }
 
+/* the separator is reached by the keyboard, so its focus has to be seen */
+.wx-split .wx-splitter:focus-visible {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: -2px;
+}
+
 .wx-split .wx-splitter-horizontal {
     width: 6px;
     cursor: col-resize;

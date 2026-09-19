@@ -88,9 +88,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form traffic light control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-traffic-light""></div>*")]
-        [InlineData("", @"*<div class=""wx-webui-input-traffic-light""></div>*")]
-        [InlineData("green", @"*<div class=""wx-webui-input-traffic-light"" data-value=""green""></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-traffic-light""></div>*")]
+        [InlineData("", @"*<div id=""*"" class=""wx-webui-input-traffic-light""></div>*")]
+        [InlineData("green", @"*<div id=""*"" class=""wx-webui-input-traffic-light"" data-value=""green""></div>*")]
         public void Value(string value, string expected)
         {
             // arrange

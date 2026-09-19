@@ -143,14 +143,36 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         const children = Array.from(element.children);
         this._sidePane = children.find(c => c.classList.contains("wx-side-pane")) || children[0];
         this._mainPane = children.find(c => c.classList.contains("wx-main-pane")) || children.find(c => c !== this._sidePane);
+        // a pane is a scroll container of its own; one without a focusable child could not
+        // be scrolled from the keyboard otherwise, while one with such a child is reached
+        // through it and must not become a tab stop of its own
+        for (const pane of [this._sidePane, this._mainPane]) {
+            if (pane && !pane.hasAttribute("tabindex") && !pane.querySelector("a[href], button, input, select, textarea, [tabindex]")) {
+                pane.setAttribute("tabindex", "0");
+            }
+        }
 
         // apply base classes
         element.classList.remove("wx-webui-split");
         element.classList.add("wx-split", `wx-split-${this._orientation}`);
 
-        // create splitter
+        // create splitter; it is the separator between the panes, movable by the keyboard as
+        // well as by a drag, so the split can be changed without a pointer
         this._splitter = document.createElement("div");
         this._splitter.className = `wx-splitter wx-splitter-${this._orientation}`;
+        this._splitter.setAttribute("role", "separator");
+        this._splitter.setAttribute("tabindex", "0");
+        this._splitter.setAttribute("aria-orientation", this._orientation === "vertical" ? "horizontal" : "vertical");
+        // the name travels as the title: a reader takes it from there just the same, and a
+        // separator that sits between two landmarks - the page split between the sidebar and
+        // the main area - is then not counted as content that lies outside every landmark
+        this._splitter.setAttribute("title", this._i18n("webexpress.webui:split.separator", "Resize panes"));
+        if (this._sidePane?.id) { this._splitter.setAttribute("aria-controls", this._sidePane.id); }
+        // a focusable separator is a widget and reports its position: the share of the
+        // container the side pane takes, in percent
+        this._splitter.setAttribute("aria-valuemin", "0");
+        this._splitter.setAttribute("aria-valuemax", "100");
+        this._splitter.setAttribute("aria-valuenow", "0");
 
         const indicator = document.createElement("div");
         indicator.className = `wx-splitter-indicator wx-splitter-indicator-${this._orientation}`;
@@ -341,9 +363,61 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             this._sidePaneCollapsed ? this.expandSidePane() : this.collapseSidePane();
         });
 
+        // the arrow keys move the separator by a step, enter toggles the side pane
+        this._splitter.addEventListener("keydown", (e) => this._onSplitterKeyDown(e));
+
         // resize observer
         this._resizeObserver = new ResizeObserver(() => this._handleResize());
         this._resizeObserver.observe(this._element);
+    }
+
+    /**
+     * Moves the separator with the keyboard: a step per arrow key, the far ends on home
+     * and end, and a toggle of the side pane on enter. The step is a fixed fraction of the
+     * container so a long press crosses it in a reasonable number of presses.
+     * @param {KeyboardEvent} e Key event on the separator.
+     */
+    _onSplitterKeyDown(e) {
+        const isVert = this._axis === "vertical";
+        const isMainSide = this._paneOrder === "main-side";
+        const total = isVert ? this._element.clientHeight : this._element.clientWidth;
+        const step = Math.max(8, Math.round(total / 20));
+        const grow = isVert ? "ArrowDown" : "ArrowRight";
+        const shrink = isVert ? "ArrowUp" : "ArrowLeft";
+        let size = this._sidePaneCollapsed ? 0 : this._sideSize;
+
+        switch (e.key) {
+            case grow:
+                size += isMainSide ? -step : step;
+                break;
+            case shrink:
+                size += isMainSide ? step : -step;
+                break;
+            case "Home":
+                size = this._minSide ?? 0;
+                break;
+            case "End":
+                size = this._maxSide ?? total - this._getSplitterSize();
+                break;
+            case "Enter":
+                e.preventDefault();
+                this.toggleSidePane();
+                return;
+            default:
+                return;
+        }
+
+        e.preventDefault();
+        this._sideRatioMode = false;
+        if (this._minSide !== null) size = Math.max(this._minSide, size);
+        if (this._maxSide !== null) size = Math.min(this._maxSide, size);
+        size = Math.max(0, size);
+        if (this._sidePaneCollapsed) {
+            this.expandSidePane(size);
+            return;
+        }
+        this._setPaneSizes(size, true);
+        this._setStateCookie({ size: size, collapsed: false });
     }
 
     /**
@@ -547,6 +621,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         this._splitter.style.display = "";
 
         this._sideSize = sideSize;
+        this._splitter.setAttribute("aria-valuenow", String(Math.round(sideSize / total * 100)));
 
         if (fireEvent) {
             this._dispatch(webexpress.webui.Event.SIZE_CHANGE_EVENT, {
@@ -577,6 +652,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         // living inside the pane goes down with it, so hiding the splitter too
         // would strand the user with no way to restore the pane
         this._splitter.style.display = "";
+        this._splitter.setAttribute("aria-valuenow", "0");
 
         // persist the size to come back to, not the shrunken one, so a reload of
         // a collapsed split can still expand to what the user had before

@@ -15,8 +15,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// label and the data attributes the client reads.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<button class=""wx-webui-popover"" role=""button"" type=""button"" data-wx-toggle=""popover"" data-wx-trigger=""click"" data-wx-placement=""top"" data-wx-title=""Title"" data-wx-content=""Message"">Info</button>")]
-        [InlineData("id", @"<button id=""id"" class=""wx-webui-popover"" role=""button"" type=""button"" data-wx-toggle=""popover"" data-wx-trigger=""click"" data-wx-placement=""top"" data-wx-title=""Title"" data-wx-content=""Message"">Info</button>")]
+        [InlineData(null, @"<button class=""wx-webui-popover"" type=""button"" data-wx-toggle=""popover"" data-wx-trigger=""click"" data-wx-placement=""top"" data-wx-title=""Title"" data-wx-content=""Message"">Info</button>")]
+        [InlineData("id", @"<button id=""id"" class=""wx-webui-popover"" type=""button"" data-wx-toggle=""popover"" data-wx-trigger=""click"" data-wx-placement=""top"" data-wx-title=""Title"" data-wx-content=""Message"">Info</button>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -33,6 +33,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -59,7 +60,8 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders($@"<button class=""wx-webui-popover"" role=""button"" type=""button"" data-wx-toggle=""popover"" data-wx-trigger=""click"" data-wx-placement=""{expectedValue}"">Info</button>", html);
+            // validation
+            AssertExtensions.EqualWithPlaceholders($@"<button class=""wx-webui-popover"" type=""button"" data-wx-toggle=""popover"" data-wx-trigger=""click"" data-wx-placement=""{expectedValue}"">Info</button>", html);
         }
 
         /// <summary>
@@ -84,7 +86,8 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders($@"<button class=""wx-webui-popover"" role=""button"" type=""button"" data-wx-toggle=""popover"" data-wx-trigger=""{expectedValue}"" data-wx-placement=""top"">Info</button>", html);
+            // validation
+            AssertExtensions.EqualWithPlaceholders($@"<button class=""wx-webui-popover"" type=""button"" data-wx-toggle=""popover"" data-wx-trigger=""{expectedValue}"" data-wx-placement=""top"">Info</button>", html);
         }
     }
 }

@@ -72,7 +72,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(null, @"<template data-type=""tag""></template>")]
         [InlineData("", @"<template data-type=""tag""></template>")]
         [InlineData(" ", @"<template data-type=""tag""></template>")]
-        [InlineData("gold", @"<template data-type=""tag"" data-color-style=""background: gold;""></template>")]
+        [InlineData("gold", @"<template data-type=""tag"" data-color-style=""background: gold;color: #000;""></template>")]
         public void UserColor(string color, string expected)
         {
             // arrange

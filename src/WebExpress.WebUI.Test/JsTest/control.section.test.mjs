@@ -128,12 +128,15 @@ test("a collapsible section gets a button and a chevron, a fixed one does not", 
     const rt = loadRuntime();
 
     const collapsible = section(rt, { id: "s2", header: "Details" });
-    assert.equal(byClass(collapsible, "wx-section-header").tagName, "BUTTON", "the label row is operable");
+    const toggle = byClass(collapsible, "wx-section-toggle");
+    assert.equal(toggle.tagName, "BUTTON", "the label is operable");
+    assert.equal(byClass(collapsible, "wx-section-title").parentNode, toggle, "and it is the label the button wraps");
+    assert.equal(byClass(collapsible, "wx-section-header").tagName, "DIV", "the row itself is no control, so a host can put its own beside the label");
     assert.ok(byClass(collapsible, "wx-section-chevron"), "the chevron announces that it folds");
     assert.equal(collapsible.classList.contains("wx-section-collapsible"), true);
 
     const fixed = section(rt, { id: "s3", header: "Details", collapsible: "false" });
-    assert.equal(byClass(fixed, "wx-section-header").tagName, "DIV", "a fixed section is not a control");
+    assert.equal(byClass(fixed, "wx-section-toggle"), null, "a fixed section is not a control");
     assert.equal(byClass(fixed, "wx-section-chevron"), null, "and offers no chevron");
     assert.equal(fixed.classList.contains("wx-section-collapsible"), false);
     assert.equal(fixed.classList.contains("wx-section-collapsed"), false, "a fixed section is always open");
@@ -230,6 +233,7 @@ test("a host control reaches the header, the label and the body through the publ
     // a badge and a menu off the header, recolors the label and reads the body
     assert.equal(ctrl.headerElement, byClass(host, "wx-section-header"));
     assert.equal(ctrl.titleElement, byClass(host, "wx-section-title"));
+    assert.equal(ctrl.toggleElement, byClass(host, "wx-section-toggle"));
     assert.equal(ctrl.bodyElement, byClass(host, "wx-section-body"));
     assert.equal(payload.parentNode, ctrl.bodyElement);
 
@@ -238,6 +242,7 @@ test("a host control reaches the header, the label and the body through the publ
     badge.classList.add("host-badge");
     ctrl.headerElement.appendChild(badge);
     assert.ok(byClass(host, "host-badge"), "the host affordance sits in the header row");
+    assert.notEqual(badge.parentNode, ctrl.toggleElement, "beside the toggle, not inside it: a control may not hold another");
 });
 
 test("the label carries the classes a host control hangs on it", () => {
@@ -255,11 +260,23 @@ test("the accessible model names the body the label row controls", () => {
     const rt = loadRuntime();
     const host = section(rt, { id: "s9", header: "Details" });
 
-    const header = byClass(host, "wx-section-header");
+    const toggle = byClass(host, "wx-section-toggle");
 
-    assert.equal(header.getAttribute("aria-expanded"), "true");
-    assert.equal(header.getAttribute("aria-controls"), byClass(host, "wx-section-body").id);
+    assert.equal(toggle.getAttribute("aria-expanded"), "true");
+    assert.equal(toggle.getAttribute("aria-controls"), byClass(host, "wx-section-body").id);
     assert.equal(byClass(host, "wx-section-chevron").getAttribute("aria-hidden"), "true", "the chevron is decoration");
+});
+
+test("sections without an id still get bodies of their own for the toggle to point at", () => {
+    const rt = loadRuntime();
+    const first = section(rt, { header: "One" });
+    const second = section(rt, { header: "Two" });
+
+    const a = byClass(first, "wx-section-body").id;
+    const b = byClass(second, "wx-section-body").id;
+    assert.ok(a && b, "each body carries an id");
+    assert.notEqual(a, b, "and no two share one, or the reference would be ambiguous");
+    assert.equal(byClass(first, "wx-section-toggle").getAttribute("aria-controls"), a);
 });
 
 // --------------------------------------------------------------------- folding
@@ -268,16 +285,17 @@ test("a click folds the body away and a second click brings it back", () => {
     const rt = loadRuntime();
     const host = section(rt, { id: "s10", header: "Details" });
     const header = byClass(host, "wx-section-header");
+    const toggle = byClass(host, "wx-section-toggle");
 
     header.click();
 
     assert.equal(host.classList.contains("wx-section-collapsed"), true, "the body folds");
-    assert.equal(header.getAttribute("aria-expanded"), "false", "and says so");
+    assert.equal(toggle.getAttribute("aria-expanded"), "false", "and says so");
 
     header.click();
 
     assert.equal(host.classList.contains("wx-section-collapsed"), false);
-    assert.equal(header.getAttribute("aria-expanded"), "true");
+    assert.equal(toggle.getAttribute("aria-expanded"), "true");
 });
 
 test("folding dispatches the visibility change", () => {
@@ -421,7 +439,7 @@ test("the body is only clipped while folded or moving", () => {
 
 test("an accent colors the label and the guide but not the content", () => {
     assert.match(
-        cssRule(".wx-section-accented > .wx-section-header, .wx-section-accented.wx-section-collapsible > .wx-section-header:hover, .wx-section-accented.wx-section-collapsible > .wx-section-header:focus-visible"),
+        cssRule(".wx-section-accented > .wx-section-header, .wx-section-accented.wx-section-collapsible > .wx-section-header:hover, .wx-section-accented.wx-section-collapsible > .wx-section-header:has(> .wx-section-toggle:focus-visible)"),
         /color:\s*inherit/
     );
     assert.match(cssRule(".wx-section-accented.wx-section-guided > .wx-section-wrapper"), /border-left-color:\s*currentColor/);
@@ -429,7 +447,7 @@ test("an accent colors the label and the guide but not the content", () => {
 });
 
 test("a verbatim label keeps the spelling and the size it was given", () => {
-    const declarations = cssRule(".wx-section-verbatim > .wx-section-header > .wx-section-title");
+    const declarations = cssRule(".wx-section-verbatim > .wx-section-header .wx-section-title");
 
     assert.match(declarations, /text-transform:\s*none/);
     assert.match(declarations, /letter-spacing:\s*0/);

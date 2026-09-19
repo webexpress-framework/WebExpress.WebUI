@@ -7,9 +7,26 @@
     background-color: inherit;
 }
 
+/* the switches are buttons: they inherit the text color and font a link gets for free */
 .wx-pagination .page-link {
     border-radius: 2em;
     font-size: 0.85em;
+    font-family: inherit;
+    color: inherit;
+    cursor: pointer;
+    min-width: 2.2em;
+    min-height: 2.2em;
+    text-align: center;
+}
+
+.wx-pagination .page-item.disabled .page-link {
+    color: var(--wx-secondary-color);
+    cursor: default;
+}
+
+.wx-pagination .page-link:focus-visible {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: 2px;
 }
 
 .wx-pagination .page-item:first-child .page-link {

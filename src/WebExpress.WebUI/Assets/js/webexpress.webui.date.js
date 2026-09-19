@@ -41,7 +41,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
             span.classList.add(colorCss);
         }
         if (colorStyle) {
-            span.style.cssText = colorStyle;
+            webexpress.webui.ContrastColor.paint(span, colorStyle);
         }
         const icon = document.createElement("i");
         icon.className = this._iconClass("calendar");

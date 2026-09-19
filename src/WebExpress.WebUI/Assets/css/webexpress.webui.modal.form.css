@@ -162,3 +162,10 @@
     flex: 1 1 auto;
     min-height: 0;
 }
+
+/* the title field drops the browser outline, so the focus ring is drawn here */
+.modal-header > .modal-title .wx-modal-title-input.form-control:focus-visible,
+.modal-header > .modal-title .wx-modal-title-input:not(.form-control) > .form-control:focus-visible {
+    border-color: var(--wx-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--wx-primary-rgb), 0.2);
+}

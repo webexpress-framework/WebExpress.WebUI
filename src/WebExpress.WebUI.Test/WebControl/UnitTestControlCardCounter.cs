@@ -16,8 +16,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the card counter control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""card-counter""><div><h4></h4><span class=""text-muted""></span></div></span>")]
-        [InlineData("id", @"<span id=""id"" class=""card-counter""><div><h4 id=""id_header""></h4><span class=""text-muted""></span></div></span>")]
+        [InlineData(null, @"<span class=""card-counter""><div><div></div><span class=""text-muted""></span></div></span>")]
+        [InlineData("id", @"<span id=""id"" class=""card-counter""><div><div id=""id_header""></div><span class=""text-muted""></span></div></span>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -39,9 +39,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the card counter control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""card-counter""><div><h4></h4><span class=""text-muted""></span></div></span>")]
-        [InlineData("abc", @"<span class=""card-counter""><div><h4></h4><span class=""text-muted"">abc</span></div></span>")]
-        [InlineData("webexpress.webui:plugin.name", @"<span class=""card-counter""><div><h4></h4><span class=""text-muted"">WebExpress.WebUI</span></div></span>")]
+        [InlineData(null, @"<span class=""card-counter""><div><div></div><span class=""text-muted""></span></div></span>")]
+        [InlineData("abc", @"<span class=""card-counter""><div><div></div><span class=""text-muted"">abc</span></div></span>")]
+        [InlineData("webexpress.webui:plugin.name", @"<span class=""card-counter""><div><div></div><span class=""text-muted"">WebExpress.WebUI</span></div></span>")]
         public void Text(string text, string expected)
         {
             // arrange
@@ -64,7 +64,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the card counter control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""card-counter""><div><h4></h4><span class=""text-muted""></span></div></span>")]
+        [InlineData(null, @"<span class=""card-counter""><div><div></div><span class=""text-muted""></span></div></span>")]
         [InlineData(-10, @"<span class=""card-counter""><div><h4>-10</h4><span class=""text-muted""></span></div></span>")]
         [InlineData(0, @"<span class=""card-counter""><div><h4>0</h4><span class=""text-muted""></span></div></span>")]
         [InlineData(10, @"<span class=""card-counter""><div><h4>10</h4><span class=""text-muted""></span></div></span>")]
@@ -90,9 +90,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the card counter control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""card-counter""><div><h4></h4><span class=""text-muted""></span></div></span>")]
-        [InlineData(0u, @"<span class=""card-counter""><div><h4></h4><span class=""text-muted""></span></div><div class=""progress"" style=""height:10px;""><div role=""progressbar"" class=""progress-bar progress-bar progress-bar-striped"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100""></div></div></span>")]
-        [InlineData(10u, @"<span class=""card-counter""><div><h4></h4><span class=""text-muted""></span></div><div class=""progress"" style=""height:10px;""><div role=""progressbar"" class=""progress-bar progress-bar progress-bar-striped"" style=""width: 10%;"" aria-valuenow=""10"" aria-valuemin=""0"" aria-valuemax=""100""></div></div></span>")]
+        [InlineData(null, @"<span class=""card-counter""><div><div></div><span class=""text-muted""></span></div></span>")]
+        [InlineData(0u, @"<span class=""card-counter""><div><div></div><span class=""text-muted""></span></div><div class=""progress"" style=""height:10px;""><div role=""progressbar"" class=""progress-bar progress-bar progress-bar-striped"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100"" aria-label=""0%""></div></div></span>")]
+        [InlineData(10u, @"<span class=""card-counter""><div><div></div><span class=""text-muted""></span></div><div class=""progress"" style=""height:10px;""><div role=""progressbar"" class=""progress-bar progress-bar progress-bar-striped"" style=""width: 10%;"" aria-valuenow=""10"" aria-valuemin=""0"" aria-valuemax=""100"" aria-label=""10%""></div></div></span>")]
         public void Progress(uint? value, string expected)
         {
             // arrange
@@ -115,8 +115,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the icon property of the card counter control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""card-counter""><div><h4></h4><span class=""text-muted""></span></div></span>")]
-        [InlineData(typeof(IconStar), @"<span class=""card-counter""><i class=""wx-icon-light wx-icon-light-star float-right""></i><div><h4></h4><span class=""text-muted""></span></div></span>")]
+        [InlineData(null, @"<span class=""card-counter""><div><div></div><span class=""text-muted""></span></div></span>")]
+        [InlineData(typeof(IconStar), @"<span class=""card-counter""><i class=""wx-icon-light wx-icon-light-star float-right""></i><div><div></div><span class=""text-muted""></span></div></span>")]
         public void Icon(Type icon, string expected)
         {
             // arrange

@@ -49,6 +49,12 @@ webexpress.webui.InputChoiceCtrl = class extends webexpress.webui.Ctrl {
         this._list = document.createElement("div");
         this._list.className = "wx-choice-options";
         this._list.setAttribute("role", "radiogroup");
+        if (this._required) {
+            this._list.setAttribute("aria-required", "true");
+        }
+        // a radio group is one tab stop; the arrow keys move between and check the options
+        this._list.addEventListener("keydown", (e) => this._onKeyDown(e));
+        this._adoptFieldLabel(this._list, id, element);
 
         element.innerHTML = "";
         element.removeAttribute("id");
@@ -199,10 +205,50 @@ webexpress.webui.InputChoiceCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Moves the check along the options with the arrow keys, as a native radio group does.
+     * @param {KeyboardEvent} e - The key event raised inside the group.
+     */
+    _onKeyDown(e) {
+        const radios = Array.from(this._list.querySelectorAll("[role=\"radio\"]"));
+        const index = radios.indexOf(e.target.closest ? e.target.closest("[role=\"radio\"]") : null);
+        if (index < 0 || this._disabled) {
+            return;
+        }
+
+        let next;
+        switch (e.key) {
+            case "ArrowRight":
+            case "ArrowDown":
+                next = (index + 1) % radios.length;
+                break;
+            case "ArrowLeft":
+            case "ArrowUp":
+                next = (index - 1 + radios.length) % radios.length;
+                break;
+            case " ":
+                next = index;
+                break;
+            default:
+                return;
+        }
+
+        e.preventDefault();
+        const value = radios[next].dataset.value;
+        this.value = value;
+        // the check rebuilt the buttons, so the one to focus is looked up afresh
+        Array.from(this._list.querySelectorAll("[role=\"radio\"]"))
+            .find(radio => radio.dataset.value === value)
+            ?.focus({ preventScroll: true });
+    }
+
+    /**
      * Rebuilds the option buttons.
      */
     render() {
         this._list.innerHTML = "";
+        // the checked option is the tab stop, or the first one while nothing is checked
+        let stop = this._options.find(o => o.value === this._value && this._matchesFilter(o))
+            || this._options.find(o => this._matchesFilter(o));
 
         for (const option of this._options) {
             if (!this._matchesFilter(option)) {
@@ -214,6 +260,7 @@ webexpress.webui.InputChoiceCtrl = class extends webexpress.webui.Ctrl {
             button.className = "wx-choice-option";
             button.dataset.value = option.value;
             button.setAttribute("role", "radio");
+            button.setAttribute("tabindex", option === stop ? "0" : "-1");
             button.disabled = this._disabled;
 
             if (option.description) {

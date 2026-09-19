@@ -21,9 +21,9 @@ webexpress.webui.ModalConfirm = class extends webexpress.webui.ModalCtrl {
         super(document.createElement("dialog"));
 
         const id = "wx-confirm-" + (++webexpress.webui.ModalConfirm._nextId);
-        this._titleH1.id = id + "-title";
+        this._titleHeading.id = id + "-title";
         this._bodyDiv.id = id + "-body";
-        this._element.setAttribute("aria-labelledby", this._titleH1.id);
+        this._element.setAttribute("aria-labelledby", this._titleHeading.id);
         this._element.setAttribute("aria-describedby", this._bodyDiv.id);
 
         this._confirmButton.type = "button";
@@ -78,7 +78,7 @@ webexpress.webui.ModalConfirm = class extends webexpress.webui.ModalCtrl {
         this._confirmButton.textContent = options.confirmLabel || this._i18n("webexpress.webui:confirm", "Confirm");
         this._confirmButton.disabled = false;
         this._cancelButton.disabled = false;
-        this._titleH1.textContent = this._i18n(header, header || "Confirmation");
+        this._titleHeading.textContent = this._i18n(header, header || "Confirmation");
 
         const paragraph = document.createElement("p");
         paragraph.textContent = message;

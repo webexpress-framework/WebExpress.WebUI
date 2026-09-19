@@ -23,7 +23,19 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
         element.innerHTML = "";
         element.removeAttribute("data-page");
         element.removeAttribute("data-pagecount");
-        element.classList.add("pagination", "wx-pagination");
+        // a page switcher with a name of its own is a navigation landmark; one named only by
+        // the generic word is a group, because two identically named landmarks on a page
+        // cannot be told apart
+        if (!element.hasAttribute("role")) {
+            element.setAttribute("role", element.hasAttribute("aria-label") ? "navigation" : "group");
+        }
+        if (!element.hasAttribute("aria-label")) {
+            element.setAttribute("aria-label", this._i18n("webexpress.webui:pagination.label", "Pagination"));
+        }
+        // the items are list items and need a list to sit in
+        this._list = document.createElement("ul");
+        this._list.className = "pagination wx-pagination";
+        element.appendChild(this._list);
 
         this._initEvents();
         this.render();
@@ -70,49 +82,53 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
      * Updates the DOM element based on the current properties.
      */
     render() {
-        // Remove all children from the pagination element
-        while (this._element.firstChild) {
-            this._element.removeChild(this._element.firstChild);
-        }
+        this._list.replaceChildren();
 
         if (this._count <= 0) {
             return;
         }
 
         // add predecessor button
-        const predecessor = this._createPageItem("<span class='wx-icon-light wx-icon-light-angle-left'></span>", Math.max(this._page - 1, 0));
+        const predecessor = this._createPageItem(`<span class="${this._iconClass("angle-left")}"></span>`, Math.max(this._page - 1, 0),
+            this._i18n("webexpress.webui:pagination.previous", "Previous page"));
         if (this._page === 0) {
-            predecessor.classList.add("disabled");
+            this._disablePageItem(predecessor);
         }
-        this._element.appendChild(predecessor);
+        this._list.appendChild(predecessor);
 
         // add page items
         this._addPageItems();
 
         // add successor button
-        const successor = this._createPageItem("<span class='wx-icon-light wx-icon-light-angle-right'></span>", Math.min(this._page + 1, this._count - 1));
+        const successor = this._createPageItem(`<span class="${this._iconClass("angle-right")}"></span>`, Math.min(this._page + 1, this._count - 1),
+            this._i18n("webexpress.webui:pagination.next", "Next page"));
         if (this._page === this._count - 1) {
-            successor.classList.add("disabled");
+            this._disablePageItem(successor);
         }
-        this._element.appendChild(successor);
+        this._list.appendChild(successor);
     }
 
     /**
-     * Helper to create a page item.
+     * Helper to create a page item. The switch is a command, not a location, so it is a
+     * button; the icon-only ends carry their name as a label.
      * @param {string} content - The HTML content of the item.
      * @param {number} page - The page number associated with the item.
+     * @param {string} [label] - The accessible name when the content does not spell one.
      * @returns {HTMLElement} The page item element.
      */
-    _createPageItem(content, page) {
+    _createPageItem(content, page, label = null) {
         // create list item
         const li = document.createElement("li");
         li.className = "page-item";
-        // create anchor
-        const a = document.createElement("a");
-        a.className = "page-link";
-        a.href = "javascript:void(0)";
-        a.innerHTML = content;
-        li.appendChild(a);
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "page-link";
+        button.innerHTML = content;
+        if (label) {
+            button.setAttribute("aria-label", label);
+            button.title = label;
+        }
+        li.appendChild(button);
 
         // add click handler
         li.addEventListener("click", (e) => {
@@ -129,6 +145,19 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
         });
 
         return li;
+    }
+
+    /**
+     * A disabled end stays in the tab order as a real disabled control instead of a link
+     * that swallows the activation.
+     * @param {HTMLElement} li - The page item element.
+     */
+    _disablePageItem(li) {
+        li.classList.add("disabled");
+        const button = li.querySelector("button");
+        if (button) {
+            button.disabled = true;
+        }
     }
 
     /**
@@ -168,25 +197,27 @@ webexpress.webui.PaginationCtrl = class extends webexpress.webui.Ctrl {
      * @param {boolean} isActive - Whether the page item is active.
      */
     _appendPageItem(page, isActive) {
-        const pageItem = this._createPageItem((page + 1).toString(), page);
+        const pageItem = this._createPageItem((page + 1).toString(), page,
+            this._i18n("webexpress.webui:pagination.page", "Page {0}").replace("{0}", () => String(page + 1)));
         if (isActive) {
             pageItem.classList.add("active");
+            pageItem.querySelector("button").setAttribute("aria-current", "page");
         }
-        this._element.appendChild(pageItem);
+        this._list.appendChild(pageItem);
     }
 
     /**
-     * Helper to append an ellipsis item.
+     * Helper to append an ellipsis item. The gap is decoration, not a target.
      */
     _appendEllipsis() {
         const li = document.createElement("li");
         li.className = "page-item disabled";
-        const a = document.createElement("a");
-        a.className = "page-link";
-        a.href = "javascript:void(0)";
-        a.textContent = "…";
-        li.appendChild(a);
-        this._element.appendChild(li);
+        const gap = document.createElement("span");
+        gap.className = "page-link";
+        gap.textContent = "…";
+        gap.setAttribute("aria-hidden", "true");
+        li.appendChild(gap);
+        this._list.appendChild(li);
     }
 
     /**

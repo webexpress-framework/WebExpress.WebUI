@@ -16,8 +16,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the navigation item dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-dropdown"" role=""button""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-dropdown""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-dropdown""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -39,15 +39,15 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the color property of the navigation item dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorButton.Default, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData(TypeColorButton.Primary, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-primary""></div>")]
-        [InlineData(TypeColorButton.Secondary, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-secondary""></div>")]
-        [InlineData(TypeColorButton.Info, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-info""></div>")]
-        [InlineData(TypeColorButton.Warning, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-warning""></div>")]
-        [InlineData(TypeColorButton.Danger, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-danger""></div>")]
-        [InlineData(TypeColorButton.Light, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-light""></div>")]
-        [InlineData(TypeColorButton.Highlight, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-highlight""></div>")]
-        [InlineData(TypeColorButton.Dark, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-dark""></div>")]
+        [InlineData(TypeColorButton.Default, @"<div class=""wx-webui-dropdown""></div>")]
+        [InlineData(TypeColorButton.Primary, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-primary""></div>")]
+        [InlineData(TypeColorButton.Secondary, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-secondary""></div>")]
+        [InlineData(TypeColorButton.Info, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-info""></div>")]
+        [InlineData(TypeColorButton.Warning, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-warning""></div>")]
+        [InlineData(TypeColorButton.Danger, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-danger""></div>")]
+        [InlineData(TypeColorButton.Light, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-light""></div>")]
+        [InlineData(TypeColorButton.Highlight, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-highlight""></div>")]
+        [InlineData(TypeColorButton.Dark, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-dark""></div>")]
         public void Color(TypeColorButton color, string expected)
         {
             // arrange
@@ -70,9 +70,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the size property of the navigation item dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(TypeSizeButton.Default, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData(TypeSizeButton.Small, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-sm""></div>")]
-        [InlineData(TypeSizeButton.Large, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-lg""></div>")]
+        [InlineData(TypeSizeButton.Default, @"<div class=""wx-webui-dropdown""></div>")]
+        [InlineData(TypeSizeButton.Small, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-sm""></div>")]
+        [InlineData(TypeSizeButton.Large, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-lg""></div>")]
         public void Size(TypeSizeButton size, string expected)
         {
             // arrange
@@ -95,8 +95,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the outline property of the navigation item dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-primary""></div>")]
-        [InlineData(true, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-outline-primary""></div>")]
+        [InlineData(false, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-primary""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-outline-primary""></div>")]
         public void Outline(bool outline, string expected)
         {
             // arrange
@@ -120,8 +120,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the block property of the navigation item dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(TypeBlockButton.None, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData(TypeBlockButton.Block, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""btn-block""></div>")]
+        [InlineData(TypeBlockButton.None, @"<div class=""wx-webui-dropdown""></div>")]
+        [InlineData(TypeBlockButton.Block, @"<div class=""wx-webui-dropdown"" data-buttonCss=""btn-block""></div>")]
         public void Block(TypeBlockButton block, string expected)
         {
             // arrange
@@ -144,8 +144,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the toogle property of the navigation item dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(TypeToggleDropdown.None, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData(TypeToggleDropdown.Toggle, @"<div class=""wx-webui-dropdown"" role=""button"" data-buttonCss=""dropdown-toggle""></div>")]
+        [InlineData(TypeToggleDropdown.None, @"<div class=""wx-webui-dropdown""></div>")]
+        [InlineData(TypeToggleDropdown.Toggle, @"<div class=""wx-webui-dropdown"" data-buttonCss=""dropdown-toggle""></div>")]
         public void Toogle(TypeToggleDropdown toogle, string expected)
         {
             // arrange
@@ -168,9 +168,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the navigation item dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-dropdown"" role=""button"" data-label=""abc""></div>")]
-        [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-webui-dropdown"" role=""button"" data-label=""WebExpress.WebUI""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-dropdown""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-dropdown"" data-label=""abc""></div>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-webui-dropdown"" data-label=""WebExpress.WebUI""></div>")]
         public void Text(string text, string expected)
         {
             // arrange
@@ -193,9 +193,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the tooltip property of the navigation item dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-dropdown""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-dropdown"" title=""abc""></div>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<div class=""wx-webui-dropdown"" title=""WebExpress.WebUI""></div>")]
         public void Tooltip(string tooltip, string expected)
         {
             // arrange
@@ -218,8 +218,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the icon property of the navigation item dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData(typeof(IconStar), @"<div class=""wx-webui-dropdown"" role=""button"" data-icon=""wx-icon-light wx-icon-light-star""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-dropdown""></div>")]
+        [InlineData(typeof(IconStar), @"<div class=""wx-webui-dropdown"" data-icon=""wx-icon-light wx-icon-light-star""></div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -242,9 +242,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the active property of the navigation item dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(TypeActive.None, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData(TypeActive.Active, @"<div class=""wx-webui-dropdown"" role=""button"" active></div>")]
-        [InlineData(TypeActive.Disabled, @"<div class=""wx-webui-dropdown"" role=""button"" disabled></div>")]
+        [InlineData(TypeActive.None, @"<div class=""wx-webui-dropdown""></div>")]
+        [InlineData(TypeActive.Active, @"<div class=""wx-webui-dropdown"" active></div>")]
+        [InlineData(TypeActive.Disabled, @"<div class=""wx-webui-dropdown"" disabled></div>")]
         public void Active(TypeActive active, string expected)
         {
             // arrange
@@ -267,8 +267,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the alignment menu property of the navigation item dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(TypeAlignmentDropdownMenu.Default, @"<div class=""wx-webui-dropdown"" role=""button""></div>")]
-        [InlineData(TypeAlignmentDropdownMenu.Right, @"<div class=""wx-webui-dropdown"" role=""button"" data-menuCss=""dropdown-menu-end""></div>")]
+        [InlineData(TypeAlignmentDropdownMenu.Default, @"<div class=""wx-webui-dropdown""></div>")]
+        [InlineData(TypeAlignmentDropdownMenu.Right, @"<div class=""wx-webui-dropdown"" data-menuCss=""dropdown-menu-end""></div>")]
         public void AlignmentMenu(TypeAlignmentDropdownMenu alignmentMenu, string expected)
         {
             // arrange
@@ -305,7 +305,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree);
 
             // validation
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-dropdown"" role=""button""><div class=""wx-dropdown-item"">abc</div></div>", html.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-dropdown""><div class=""wx-dropdown-item"">abc</div></div>", html.Trim());
         }
     }
 }

@@ -117,7 +117,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// as an inline style declaration.
         /// </summary>
         [Theory]
-        [InlineData(true, @"<div class=""wx-schedule-item"" data-color-style=""background:#ff8800;""></div>")]
+        [InlineData(true, @"<div class=""wx-schedule-item"" data-color-style=""background:#ff8800;color:#000;""></div>")]
         [InlineData(false, @"<div class=""wx-schedule-item"" data-color-css=""bg-success""></div>")]
         public void Color(bool userColor, string expected)
         {

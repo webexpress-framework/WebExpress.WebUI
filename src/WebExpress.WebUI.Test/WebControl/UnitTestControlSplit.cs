@@ -29,6 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -54,6 +55,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -86,6 +88,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -98,7 +101,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(null, typeof(ControlText), @"<div></div>")]
         [InlineData(typeof(ControlText), typeof(ControlText), @"<div class=""wx-webui-split"" data-orientation=""horizontal""><div id=""-p1"" class=""wx-side-pane""><div></div></div><div id=""-p2"" class=""wx-main-pane""><div></div></div></div>")]
         [InlineData(typeof(ControlLink), typeof(ControlLink), @"<div class=""wx-webui-split"" data-orientation=""horizontal""><div id=""-p1"" class=""wx-side-pane""><a class=""wx-link""></a></div><div id=""-p2"" class=""wx-main-pane""><a class=""wx-link""></a></div></div>")]
-        [InlineData(typeof(ControlImage), typeof(ControlImage), @"<div class=""wx-webui-split"" data-orientation=""horizontal""><div id=""-p1"" class=""wx-side-pane""><img></div><div id=""-p2"" class=""wx-main-pane""><img></div></div>")]
+        [InlineData(typeof(ControlImage), typeof(ControlImage), @"<div class=""wx-webui-split"" data-orientation=""horizontal""><div id=""-p1"" class=""wx-side-pane""><img alt></div><div id=""-p2"" class=""wx-main-pane""><img alt></div></div>")]
         public void Add(Type child1, Type child2, string expected)
         {
             // arrange
@@ -120,6 +123,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 control.AddMainPanel(childInstance2);
             }
 
+            // validation
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
@@ -148,6 +152,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -174,6 +179,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -200,6 +206,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -226,6 +233,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -252,6 +260,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -278,6 +287,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -306,6 +316,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -332,6 +343,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }

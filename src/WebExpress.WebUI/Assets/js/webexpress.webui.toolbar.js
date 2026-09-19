@@ -4,6 +4,31 @@
  * Overflow handling is delegated to OverflowCtrl.
  */
 webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
+    static _nextComboId = 0;
+
+    /**
+     * Names a tool that shows an icon or a picture and nothing else: the hover text when there
+     * is one, else the word the icon or the picture file is named by, so a reader is not left
+     * with an unnamed button.
+     * @param {object} item The toolbar item, or any object with title, label, icon and image.
+     * @returns {string} The name, or an empty string when nothing can be read off the item.
+     */
+    static _fallbackName(item) {
+        if (item.title || item.label) {
+            return item.title || item.label;
+        }
+        const classes = String(item.icon || "").split(/\s+/).filter(Boolean);
+        // the most specific class carries the icon name, e.g. wx-icon-light-house -> house
+        const last = classes[classes.length - 1] || "";
+        const fromIcon = last.replace(/^(wx-icon-(?:light|solid|regular)-|wx-icon-|fa-|bi-)/, "").replace(/-/g, " ");
+        if (fromIcon) {
+            return fromIcon;
+        }
+        // a picture is named by its file, e.g. /assets/img/webexpress.svg -> webexpress
+        const file = String(item.image || "").split(/[?#]/)[0].split("/").pop() || "";
+        return file.replace(/\.[a-z0-9]+$/i, "").replace(/[-_]+/g, " ");
+    }
+
     _resizeObserver = null;
     _overflowCtrl = null;
     _items = [];
@@ -444,11 +469,19 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         spring.style.pointerEvents = "none";
         spring.dataset.overflow = "never";
 
-        // create flex root
+        // create flex root; it is the toolbar to the reader, the host being either a plain
+        // wrapper or - for the page-level toolbar - a landmark of its own that keeps its name
         const overflowRoot = document.createElement("div");
         overflowRoot.className = "wx-overflow";
         overflowRoot.style.width = "100%";
         overflowRoot.dataset.overflowCutoff = "false";
+        overflowRoot.setAttribute("role", "toolbar");
+        const label = container.getAttribute("aria-label") || this._i18n("webexpress.webui:toolbar.label", "Toolbar");
+        overflowRoot.setAttribute("aria-label", label);
+        if (container.getAttribute("role") === "toolbar") {
+            container.removeAttribute("role");
+            container.removeAttribute("aria-label");
+        }
 
         // append left items
         this._items.filter((i) => { return i.align !== "right"; }).forEach((item) => {
@@ -583,6 +616,10 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 span.className = "wx-toolbar-button-label";
                 span.textContent = item.label;
                 item.element.appendChild(span);
+                // the caption may be folded away when space runs short; the name stays
+                item.element.setAttribute("aria-label", item.label);
+            } else if (webexpress.webui.ToolbarCtrl._fallbackName(item)) {
+                item.element.setAttribute("aria-label", webexpress.webui.ToolbarCtrl._fallbackName(item));
             }
             if (item.colorCss) {
                 item.element.classList.add(item.colorCss);
@@ -626,6 +663,8 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 const img = document.createElement("img");
                 img.className = "wx-icon";
                 img.src = item.image;
+                // the picture stands for the tool; the button carries the name
+                img.alt = "";
                 item.element.appendChild(img);
                 hasIconOrImage = true;
             }
@@ -640,6 +679,10 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 span.className = "wx-toolbar-button-label";
                 span.textContent = item.label;
                 item.element.appendChild(span);
+                // the caption may be folded away when space runs short; the name stays
+                item.element.setAttribute("aria-label", item.label);
+            } else if (webexpress.webui.ToolbarCtrl._fallbackName(item)) {
+                item.element.setAttribute("aria-label", webexpress.webui.ToolbarCtrl._fallbackName(item));
             }
 
             item.element.dataset.hasIcon = hasIconOrImage ? "true" : "false";
@@ -676,6 +719,9 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 return item.element;
             }
             const dropdownCtrl = new webexpress.webui.DropdownCtrl(item.element);
+            // an absent css string must not turn into the word null on the button
+            dropdownCtrl._buttonCss = dropdownCtrl._buttonCss || "";
+            dropdownCtrl._buttonStyle = dropdownCtrl._buttonStyle || "";
             if (item.toggle) {
                 dropdownCtrl._buttonCss += " dropdown-toggle";
             }
@@ -691,8 +737,11 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             if (item.colorStyle) {
                 dropdownCtrl._buttonStyle += ` ${item.colorStyle}`;
             }
-            if (item.title) {
-                dropdownCtrl._element.title = item.title;
+            // the hover text is the name of a button that shows an icon alone; the icon and the
+            // picture are read by the dropdown itself, so they are asked of it
+            const name = webexpress.webui.ToolbarCtrl._fallbackName({ title: item.title, label: dropdownCtrl._label, icon: dropdownCtrl._icon, image: dropdownCtrl._image });
+            if (name) {
+                dropdownCtrl._title = name;
             }
 
             // apply action attributes
@@ -719,6 +768,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 const img = document.createElement("img");
                 img.className = "wx-icon";
                 img.src = item.image;
+                img.alt = "";
                 combo.appendChild(img);
                 if (item.disabled) {
                     img.classList.add("disabled");
@@ -760,6 +810,14 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
             }
             const select = document.createElement("select");
             select.className = "form-select";
+            // the caption beside the box names it; without one the hover text does
+            const label = combo.querySelector("label");
+            if (label) {
+                select.id = select.id || "wx-toolbar-combo-" + (++webexpress.webui.ToolbarCtrl._nextComboId);
+                label.htmlFor = select.id;
+            } else {
+                select.setAttribute("aria-label", item.title || this._i18n("webexpress.webui:toolbar.combo", "Selection"));
+            }
             if (item.disabled) {
                 select.setAttribute("disabled", true);
             }
@@ -899,6 +957,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
         dropdownContainer.className = "wx-toolbar-more";
         const dropdownCtrl = new webexpress.webui.DropdownCtrl(dropdownContainer);
         dropdownCtrl.label = null;
+        dropdownCtrl._title = this._i18n("webexpress.webui:overflow.more", "More tools");
         dropdownCtrl.icon = this._iconClass("more");
         dropdownCtrl.menuCSS = "wx-toolbar-more-menu";
         dropdownCtrl.buttonCss = "btn";
@@ -987,9 +1046,10 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
     _hideButtonLabel(buttonEl) {
         const span = this._findLabelSpan(buttonEl);
         if (span) {
-            // hide only the label span
+            // hide only the label span; the hover text takes over the visible word
             span.style.display = "none";
             buttonEl.dataset.labelHidden = "true";
+            if (!buttonEl.title) { buttonEl.title = span.textContent; }
         }
     }
 

@@ -86,8 +86,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form color control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-color""></div>*")]
-        [InlineData("red", @"*<div class=""wx-webui-input-color"" data-value=""red""></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-color""></div>*")]
+        [InlineData("red", @"*<div id=""*"" class=""wx-webui-input-color"" data-value=""red""></div>*")]
         public void ValueForm(string value, string expected)
         {
             // arrange
@@ -111,8 +111,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form color control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-color""></div>*")]
-        [InlineData("red", @"*<div class=""wx-webui-input-color"" data-value=""red""></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-color""></div>*")]
+        [InlineData("red", @"*<div id=""*"" class=""wx-webui-input-color"" data-value=""red""></div>*")]
         public void ValueItem(string value, string expected)
         {
             // arrange

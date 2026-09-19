@@ -36,6 +36,31 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the active property of the buttonlink control. A link cannot carry a disabled
+        /// attribute, so the disabled state is spoken through aria and the link leaves the tab order.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeActive.None, @"<a class=""btn""></a>")]
+        [InlineData(TypeActive.Active, @"<a class=""btn active""></a>")]
+        [InlineData(TypeActive.Disabled, @"<a class=""btn disabled"" aria-disabled=""true"" tabindex=""-1""></a>")]
+        public void Active(TypeActive active, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlButtonLink()
+            {
+                Active = _ => active
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            Assert.Equal(expected, html.Trim());
+        }
+
+        /// <summary>
         /// Tests the text property of the buttonlink control.
         /// </summary>
         [Theory]

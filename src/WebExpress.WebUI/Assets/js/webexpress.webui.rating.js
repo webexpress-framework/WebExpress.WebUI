@@ -21,7 +21,8 @@ webexpress.webui.RatingCtrl = class extends webexpress.webui.Ctrl {
 
         // base classes and attributes
         element.classList.add("wx-rating-view");
-        element.setAttribute("aria-readonly", "true");
+        // the stars are a picture of the value; the label spells the value out
+        element.setAttribute("role", "img");
         if (!element.getAttribute("aria-label")) {
             element.setAttribute("aria-label", `${this._i18n("webexpress.webui:rating")}: ${this._value} / ${this._total}`);
         }

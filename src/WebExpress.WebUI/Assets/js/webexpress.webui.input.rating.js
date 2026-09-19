@@ -35,7 +35,11 @@ webexpress.webui.InputRatingCtrl = class extends webexpress.webui.Ctrl {
         this._container = document.createElement("div");
         this._container.className = "wx-rating-container";
         this._container.setAttribute("role", "radiogroup");
-        this._container.setAttribute("aria-label", element.getAttribute("aria-label") || this._i18n("webexpress.webui:rating"));
+        // the field label names the group where the form rendered one, the generic name is the fallback
+        this._adoptFieldLabel(this._container, this._id, element);
+        if (!this._container.hasAttribute("aria-labelledby") && !this._container.hasAttribute("aria-label")) {
+            this._container.setAttribute("aria-label", this._i18n("webexpress.webui:rating"));
+        }
 
         element.innerHTML = "";
         element.appendChild(this._hidden);

@@ -92,7 +92,7 @@ test("the dialog frames the login plain and takes its submit button onto the foo
     assert.equal(ctrl.login, rt.wx.Controller.getInstanceByElement(login));
 
     // the title bar names the dialog, so the login draws neither its card nor its heading
-    assert.match(ctrl._titleH1.textContent, /Login/);
+    assert.match(ctrl._titleHeading.textContent, /Login/);
     assert.ok(login.classList.contains("wx-login-plain"), "the host is marked as framed");
     assert.equal(login.classList.contains("wx-login"), false, "and not as the page card");
     assert.equal(ctrl._bodyDiv.querySelector(".card"), null, "no card inside the dialog");

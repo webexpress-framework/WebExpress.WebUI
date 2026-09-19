@@ -23,7 +23,8 @@
 .wx-heatmap-row-label,
 .wx-heatmap-col-label {
   font-size: 0.72rem;
-  color: #607d8b;
+  /* the muted text color follows the theme; a fixed gray falls short of 4.5:1 on dark */
+  color: var(--wx-secondary-color, #607d8b);
   white-space: nowrap;
 }
 

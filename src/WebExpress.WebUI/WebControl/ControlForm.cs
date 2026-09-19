@@ -422,7 +422,9 @@ namespace WebExpress.WebUI.WebControl
                 form.Add(item.Render(renderContext, visualTree));
             }
 
-            var main = new HtmlElementSectionMain();
+            // the page owns the main landmark; a second one inside the form would nest
+            // landmarks and leave a reader with two "main" regions to choose from
+            var main = new HtmlElementTextContentDiv() { Class = "wx-form-main" };
             var group = default(ControlFormItemGroup);
 
             group = itemLayout switch

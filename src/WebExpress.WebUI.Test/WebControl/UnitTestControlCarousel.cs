@@ -103,7 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(typeof(ControlText), @"<div id=""carousel"" class=""wx-webui-carousel carousel"">*<div></div>*</div>")]
         [InlineData(typeof(ControlLink), @"<div id=""carousel"" class=""wx-webui-carousel carousel"">*<a class=""wx-link""></a>*</div>")]
-        [InlineData(typeof(ControlImage), @"<div id=""carousel"" class=""wx-webui-carousel carousel"">*<img>*</div>")]
+        [InlineData(typeof(ControlImage), @"<div id=""carousel"" class=""wx-webui-carousel carousel"">*<img alt>*</div>")]
         public void Add(Type child, string expected)
         {
             // arrange

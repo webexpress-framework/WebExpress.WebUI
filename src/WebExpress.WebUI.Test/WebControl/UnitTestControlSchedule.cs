@@ -15,8 +15,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the schedule control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-schedule"" role=""region""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-schedule"" role=""region""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-schedule"" role=""group""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-schedule"" role=""group""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -39,10 +39,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// when they differ from the client default.
         /// </summary>
         [Theory]
-        [InlineData(TypeViewSchedule.Default, null, @"<div class=""wx-webui-schedule"" role=""region""></div>")]
-        [InlineData(TypeViewSchedule.Agenda, null, @"<div class=""wx-webui-schedule"" role=""region"" data-view=""agenda""></div>")]
-        [InlineData(TypeViewSchedule.Week, "week,month", @"<div class=""wx-webui-schedule"" role=""region"" data-view=""week"" data-views=""week,month""></div>")]
-        [InlineData(TypeViewSchedule.Month, null, @"<div class=""wx-webui-schedule"" role=""region"" data-view=""month""></div>")]
+        [InlineData(TypeViewSchedule.Default, null, @"<div class=""wx-webui-schedule"" role=""group""></div>")]
+        [InlineData(TypeViewSchedule.Agenda, null, @"<div class=""wx-webui-schedule"" role=""group"" data-view=""agenda""></div>")]
+        [InlineData(TypeViewSchedule.Week, "week,month", @"<div class=""wx-webui-schedule"" role=""group"" data-view=""week"" data-views=""week,month""></div>")]
+        [InlineData(TypeViewSchedule.Month, null, @"<div class=""wx-webui-schedule"" role=""group"" data-view=""month""></div>")]
         public void View(TypeViewSchedule view, string views, string expected)
         {
             // arrange
@@ -66,10 +66,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the agenda grouping of the schedule control.
         /// </summary>
         [Theory]
-        [InlineData(TypeGroupingScheduleAgenda.Default, @"<div class=""wx-webui-schedule"" role=""region""></div>")]
-        [InlineData(TypeGroupingScheduleAgenda.Day, @"<div class=""wx-webui-schedule"" role=""region"" data-agenda-grouping=""day""></div>")]
-        [InlineData(TypeGroupingScheduleAgenda.Week, @"<div class=""wx-webui-schedule"" role=""region"" data-agenda-grouping=""week""></div>")]
-        [InlineData(TypeGroupingScheduleAgenda.Month, @"<div class=""wx-webui-schedule"" role=""region"" data-agenda-grouping=""month""></div>")]
+        [InlineData(TypeGroupingScheduleAgenda.Default, @"<div class=""wx-webui-schedule"" role=""group""></div>")]
+        [InlineData(TypeGroupingScheduleAgenda.Day, @"<div class=""wx-webui-schedule"" role=""group"" data-agenda-grouping=""day""></div>")]
+        [InlineData(TypeGroupingScheduleAgenda.Week, @"<div class=""wx-webui-schedule"" role=""group"" data-agenda-grouping=""week""></div>")]
+        [InlineData(TypeGroupingScheduleAgenda.Month, @"<div class=""wx-webui-schedule"" role=""group"" data-agenda-grouping=""month""></div>")]
         public void AgendaGrouping(TypeGroupingScheduleAgenda grouping, string expected)
         {
             // arrange
@@ -93,11 +93,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// start and the ISO week numbering.
         /// </summary>
         [Theory]
-        [InlineData(null, null, false, @"<div class=""wx-webui-schedule"" role=""region""></div>")]
-        [InlineData("de-DE", null, false, @"<div class=""wx-webui-schedule"" role=""region"" data-culture=""de-DE""></div>")]
-        [InlineData("en-US", DayOfWeek.Sunday, false, @"<div class=""wx-webui-schedule"" role=""region"" data-culture=""en-US"" data-week-start=""0""></div>")]
-        [InlineData("de-DE", DayOfWeek.Monday, true, @"<div class=""wx-webui-schedule"" role=""region"" data-culture=""de-DE"" data-week-start=""1"" data-iso-week=""true""></div>")]
-        [InlineData("th-TH-u-ca-buddhist", DayOfWeek.Saturday, false, @"<div class=""wx-webui-schedule"" role=""region"" data-culture=""th-TH-u-ca-buddhist"" data-week-start=""6""></div>")]
+        [InlineData(null, null, false, @"<div class=""wx-webui-schedule"" role=""group""></div>")]
+        [InlineData("de-DE", null, false, @"<div class=""wx-webui-schedule"" role=""group"" data-culture=""de-DE""></div>")]
+        [InlineData("en-US", DayOfWeek.Sunday, false, @"<div class=""wx-webui-schedule"" role=""group"" data-culture=""en-US"" data-week-start=""0""></div>")]
+        [InlineData("de-DE", DayOfWeek.Monday, true, @"<div class=""wx-webui-schedule"" role=""group"" data-culture=""de-DE"" data-week-start=""1"" data-iso-week=""true""></div>")]
+        [InlineData("th-TH-u-ca-buddhist", DayOfWeek.Saturday, false, @"<div class=""wx-webui-schedule"" role=""group"" data-culture=""th-TH-u-ca-buddhist"" data-week-start=""6""></div>")]
         public void CalendarCulture(string culture, DayOfWeek? weekStart, bool isoWeek, string expected)
         {
             // arrange
@@ -123,9 +123,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// because the client marks them unless it reads an explicit "false".
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-schedule"" role=""region""></div>")]
-        [InlineData(true, @"<div class=""wx-webui-schedule"" role=""region""></div>")]
-        [InlineData(false, @"<div class=""wx-webui-schedule"" role=""region"" data-show-holidays=""false""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-schedule"" role=""group""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-schedule"" role=""group""></div>")]
+        [InlineData(false, @"<div class=""wx-webui-schedule"" role=""group"" data-show-holidays=""false""></div>")]
         public void ShowHolidays(bool? show, string expected)
         {
             // arrange
@@ -149,9 +149,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// axis bounds are carried when they narrow it.
         /// </summary>
         [Theory]
-        [InlineData(null, null, null, @"<div class=""wx-webui-schedule"" role=""region""></div>")]
-        [InlineData(true, 8, 20, @"<div class=""wx-webui-schedule"" role=""region"" data-hour-start=""8"" data-hour-end=""20""></div>")]
-        [InlineData(false, null, null, @"<div class=""wx-webui-schedule"" role=""region"" data-time-axis=""false""></div>")]
+        [InlineData(null, null, null, @"<div class=""wx-webui-schedule"" role=""group""></div>")]
+        [InlineData(true, 8, 20, @"<div class=""wx-webui-schedule"" role=""group"" data-hour-start=""8"" data-hour-end=""20""></div>")]
+        [InlineData(false, null, null, @"<div class=""wx-webui-schedule"" role=""group"" data-time-axis=""false""></div>")]
         public void TimeAxis(bool? axis, int? hourStart, int? hourEnd, string expected)
         {
             // arrange
@@ -177,11 +177,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// mini calendar and the editable items.
         /// </summary>
         [Theory]
-        [InlineData(false, false, false, @"<div class=""wx-webui-schedule"" role=""region""></div>")]
-        [InlineData(true, false, false, @"<div class=""wx-webui-schedule"" role=""region"" data-week-numbers=""true""></div>")]
-        [InlineData(false, true, false, @"<div class=""wx-webui-schedule"" role=""region"" data-mini-calendar=""true""></div>")]
-        [InlineData(false, false, true, @"<div class=""wx-webui-schedule"" role=""region"" data-editable=""true""></div>")]
-        [InlineData(true, true, true, @"<div class=""wx-webui-schedule"" role=""region"" data-week-numbers=""true"" data-mini-calendar=""true"" data-editable=""true""></div>")]
+        [InlineData(false, false, false, @"<div class=""wx-webui-schedule"" role=""group""></div>")]
+        [InlineData(true, false, false, @"<div class=""wx-webui-schedule"" role=""group"" data-week-numbers=""true""></div>")]
+        [InlineData(false, true, false, @"<div class=""wx-webui-schedule"" role=""group"" data-mini-calendar=""true""></div>")]
+        [InlineData(false, false, true, @"<div class=""wx-webui-schedule"" role=""group"" data-editable=""true""></div>")]
+        [InlineData(true, true, true, @"<div class=""wx-webui-schedule"" role=""group"" data-week-numbers=""true"" data-mini-calendar=""true"" data-editable=""true""></div>")]
         public void Affordances(bool weekNumbers, bool miniCalendar, bool editable, string expected)
         {
             // arrange
@@ -207,8 +207,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// hand a height down to the calendar instead of letting it grow.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<div class=""wx-webui-schedule"" role=""region""></div>")]
-        [InlineData(true, @"<div class=""wx-webui-schedule wx-fill"" role=""region""></div>")]
+        [InlineData(false, @"<div class=""wx-webui-schedule"" role=""group""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-schedule wx-fill"" role=""group""></div>")]
         public void Fill(bool fill, string expected)
         {
             // arrange
@@ -247,7 +247,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(
-                @"<div class=""wx-webui-schedule"" role=""region"" data-date=""2026-08-15""></div>", html);
+                @"<div class=""wx-webui-schedule"" role=""group"" data-date=""2026-08-15""></div>", html);
         }
 
         /// <summary>
@@ -281,7 +281,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(
-                @"<div id=""s"" class=""wx-webui-schedule"" role=""region"">"
+                @"<div id=""s"" class=""wx-webui-schedule"" role=""group"">"
                 + @"<div id=""a"" class=""wx-schedule-item"" data-title=""Quest"" data-start=""2026-08-12T10:00:00"" data-end=""2026-08-12T11:00:00""></div>"
                 + @"<div class=""wx-schedule-holiday"" data-date=""2026-08-15"" data-name=""Assumption Day""></div>"
                 + @"</div>", html);

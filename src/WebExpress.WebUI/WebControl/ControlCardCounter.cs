@@ -72,10 +72,12 @@ namespace WebExpress.WebUI.WebControl
                 }.Render(renderContext, visualTree));
             }
 
+            // a counter without a value has nothing to head: a heading with no text is an empty
+            // entry in the outline, so the slot stays a plain block until a value arrives
             var textCtrl = new ControlText(string.IsNullOrWhiteSpace(Id) ? null : Id + "_header")
             {
                 Text = _ => value.HasValue ? value.Value.ToString() : null,
-                Format = _ => TypeFormatText.H4
+                Format = _ => value.HasValue ? TypeFormatText.H4 : TypeFormatText.Default
             };
 
             var info = new ControlText()

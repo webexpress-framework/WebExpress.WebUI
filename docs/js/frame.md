@@ -18,6 +18,7 @@ Additional behavior:
 - Requests use `fetch()` with `credentials: "same-origin"`.
 - While loading **into an empty frame**, a skeleton placeholder is inserted (`placeholder`, `placeholder-glow`, and other utility classes). A frame that already holds content shows no placeholder: the outgoing content stays until its replacement is ready, so a swap from one page to the next is a single exchange instead of a flash through an empty frame.
 - In case of errors, a collapsible error box is shown via [`SectionCtrl`](section.md) with internationalized texts.
+- The embedded content came from a document of its own, so its page-level landmarks step down once it sits inside this page: a `<main>` becomes a region named after the embedded document's title, a banner or footer a plain group, and every named landmark (`nav`, `aside`, toolbars, regions) carries the embedded title as a suffix, so a reader can tell it from the host page's. Its headings are spoken one level below the heading that precedes the frame, with their own steps kept (`role="heading"` + `aria-level`); the tags stay as they are for the look.
 
 ## Functionality
 

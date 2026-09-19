@@ -1236,6 +1236,17 @@ webexpress.webui.Syntax = new class {
     }
 
     /**
+     * Escapes the text of a source line for the markup a highlighter builds. The highlighters
+     * assemble html from the source, so a source that contains markup of its own - a sample
+     * that shows a button - would otherwise be rendered rather than shown.
+     * @param {string} text - The source text.
+     * @returns {string} The text with the characters that open markup replaced.
+     */
+    escape(text) {
+        return String(text ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    /**
      * Retrieves the syntax configuration for a specific language.
      * @param {string} language - The language code (e.g., "csharp").
      * @returns {object|null} The syntax configuration for the language, or null if not registered.
@@ -2198,6 +2209,42 @@ webexpress.webui.Ctrl = class {
     _iconClass(icon) {
         return webexpress.webui.IconSet.resolve(icon);
     }
+
+    /**
+     * Hands the name and the description of a form field to the element that actually
+     * takes the focus. A custom input keeps the host id on a hidden field for the form
+     * post, which strands the label the form rendered for that id, and a help text
+     * referenced on the host never reaches the control inside it. The label is looked
+     * up in the enclosing form group first, because a page may render the same sample
+     * twice with identical ids.
+     *
+     * @param {HTMLElement} target - The focusable element that stands for the field.
+     * @param {string|null} id - The host id the form addressed the field by.
+     * @param {HTMLElement} [host] - The host element carrying aria-* set by the server.
+     * @param {HTMLElement[]} [valueParts] - Elements whose text completes the name, such as
+     *     the box showing the chosen value; they are read after the label.
+     * @returns {HTMLElement|null} The label the field was named by, if one was found.
+     */
+    _adoptFieldLabel(target, id, host = this._element, valueParts = []) {
+        if (!target) { return null; }
+        const group = host?.closest?.("fieldset, .wx-form-group");
+        const escaped = id && window.CSS?.escape ? CSS.escape(id) : id;
+        const selector = id ? `label[for="${escaped}"]` : null;
+        const label = selector ? (group?.querySelector(selector) || document.querySelector(selector)) : null;
+        if (label) { label.id ||= id + "_label"; }
+        const parts = [label, ...valueParts].filter(Boolean).map((part, index) => {
+            part.id ||= (id || "wx-field") + "_name" + index;
+            return part.id;
+        });
+        if (parts.length && !target.hasAttribute("aria-label") && !target.hasAttribute("aria-labelledby")) {
+            target.setAttribute("aria-labelledby", parts.join(" "));
+        }
+        for (const name of ["aria-describedby", "aria-required", "aria-invalid", "aria-label"]) {
+            const value = host?.getAttribute?.(name);
+            if (value && !target.hasAttribute(name)) { target.setAttribute(name, value); }
+        }
+        return label;
+    }
 }
 
 /**
@@ -2438,6 +2485,124 @@ webexpress.webui.Transport = new class {
 };
 
 /**
+ * Picks the text color that reads on a fill an author chose at run time. A control that
+ * paints an element in a color it only learns from data cannot have a stylesheet rule for
+ * it, so it asks here whether black or white keeps the better contrast on that fill.
+ */
+webexpress.webui.ContrastColor = class {
+    /**
+     * Parses a css color in hex or rgb notation into its channels.
+     * @param {string} raw The color as written.
+     * @returns {number[]|null} The [r, g, b] triple, or null when the notation is not one of the two.
+     */
+    static parse(raw) {
+        const value = String(raw || "").trim();
+        const rgb = value.match(/^rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/i);
+        if (rgb) {
+            return [Number(rgb[1]), Number(rgb[2]), Number(rgb[3])];
+        }
+        let hex = value.charAt(0) === "#" ? value.slice(1) : "";
+        if (hex.length === 3 || hex.length === 4) {
+            hex = hex.slice(0, 3).split("").map(c => c + c).join("");
+        } else if (hex.length === 8) {
+            hex = hex.slice(0, 6);
+        }
+        if (hex.length !== 6 || /[^0-9a-f]/i.test(hex)) {
+            return null;
+        }
+        return [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)];
+    }
+
+    /**
+     * Returns the relative luminance as WCAG defines it.
+     * @param {number[]} rgb The [r, g, b] triple.
+     * @returns {number} The luminance between 0 and 1.
+     */
+    static luminance(rgb) {
+        const [r, g, b] = rgb.map(c => {
+            const s = c / 255;
+            return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+    /**
+     * Resolves any css color the browser understands into its channels: the two notations are
+     * read directly, everything else - a named color, hsl - is asked of the browser.
+     * @param {string} raw The color as written.
+     * @returns {number[]|null} The [r, g, b] triple, or null when the browser rejects the color too.
+     */
+    static resolve(raw) {
+        const direct = this.parse(raw);
+        if (direct || typeof document === "undefined" || !document.body || typeof getComputedStyle !== "function") {
+            return direct;
+        }
+        const probe = document.createElement("span");
+        probe.style.color = raw;
+        // a value the browser refuses leaves the property empty
+        if (!probe.style.color) {
+            return null;
+        }
+        document.body.appendChild(probe);
+        const computed = getComputedStyle(probe).color;
+        probe.remove();
+        return this.parse(computed);
+    }
+
+    /**
+     * Picks black or white, whichever keeps the higher contrast ratio on the fill.
+     * @param {string} fill The fill color as written.
+     * @returns {string|null} "#000" or "#fff", or null when the fill cannot be resolved.
+     */
+    static on(fill) {
+        const rgb = this.resolve(fill);
+        if (!rgb) {
+            return null;
+        }
+        const l = this.luminance(rgb);
+        // (l + 0.05) / 0.05 is the ratio against black, 1.05 / (l + 0.05) the one against white
+        return (l + 0.05) / 0.05 >= 1.05 / (l + 0.05) ? "#000" : "#fff";
+    }
+
+    /**
+     * Reads the background a style declaration paints, when it paints one.
+     * @param {string} cssText The declarations, as they would sit in a style attribute.
+     * @returns {string|null} The background color, or null when the declarations set none.
+     */
+    static background(cssText) {
+        const m = String(cssText || "").match(/(?:^|;)\s*background(?:-color)?\s*:\s*([^;]+)/i);
+        return m ? m[1].trim() : null;
+    }
+
+    /**
+     * Paints an element with the declarations an author supplied and, when they fill it without
+     * saying what reads on the fill, adds the text color that does.
+     * @param {HTMLElement} element The element to paint.
+     * @param {string} cssText The declarations, as they would sit in a style attribute.
+     */
+    static paint(element, cssText) {
+        element.style.cssText = cssText || "";
+        const fill = this.background(cssText);
+        if (!fill || this.setsColor(cssText)) {
+            return;
+        }
+        const text = this.on(fill);
+        if (text) {
+            element.style.color = text;
+        }
+    }
+
+    /**
+     * Tells whether a style declaration sets the text color itself.
+     * @param {string} cssText The declarations.
+     * @returns {boolean}
+     */
+    static setsColor(cssText) {
+        return /(?:^|;)\s*color\s*:/i.test(String(cssText || ""));
+    }
+};
+
+/**
  * Connects top-layer menus to their invokers while CSS owns all placement decisions.
  */
 webexpress.webui.NativeMenu = class {
@@ -2465,6 +2630,26 @@ webexpress.webui.NativeMenu = class {
                 invoker.appendChild(caret);
             }
         }
+        // popovertarget implies the popup state only for buttons and only in browsers that map
+        // it; a link or a widget row invoking a menu says nothing, so the state is written out.
+        // the kind is read at toggle time because a control assigns the menu role after binding
+        if (invoker?.matches("button, a, [role], [tabindex]")) {
+            const kinds = ["menu", "listbox", "tree", "grid", "dialog"];
+            const describe = () => {
+                const role = menu.getAttribute("role");
+                invoker.setAttribute("aria-haspopup", kinds.includes(role) ? role : "true");
+                invoker.setAttribute("aria-expanded", menu.matches(":popover-open") ? "true" : "false");
+            };
+            invoker.setAttribute("aria-controls", menu.id);
+            describe();
+            menu.addEventListener("toggle", (event) => { if (event.target === menu) { describe(); } });
+        }
+        // tabbing out of a menu leaves it open behind the focus otherwise; a null relatedTarget
+        // is a click on a non-focusable spot inside the menu, not a departure
+        menu.addEventListener("focusout", (event) => {
+            const next = event.relatedTarget;
+            if (next && !menu.contains(next) && next !== invoker && !invoker?.contains(next)) { this.hide(menu); }
+        });
         menu.addEventListener("click", (event) => {
             const item = event.target.closest(".dropdown-item");
             if (item && !item.classList.contains("disabled") && !menu.hasAttribute("data-wx-keep-open")) {

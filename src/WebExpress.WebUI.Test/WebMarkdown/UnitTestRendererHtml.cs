@@ -30,8 +30,9 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("![alt](http://example.com)", @"<p><img src=""http://example.com"" alt=""alt"" style=""max-width: 100%;""></p>")]
         [InlineData("[text](http://example.com)", @"<p><a href=""http://example.com"">text</a></p>")]
         [InlineData("<span style=\"color: red;\">red text</span>", @"<p><span style=""color: red;"">red text</span></p>")]
-        [InlineData("[X]", @"<p><input type=""checkbox"" class=""form-check-input"" checked></p>")]
-        [InlineData("[ ]", @"<p><input type=""checkbox"" class=""form-check-input""></p>")]
+        [InlineData("[X]", @"<p><input type=""checkbox"" class=""form-check-input"" checked disabled></p>")]
+        [InlineData("[ ]", @"<p><input type=""checkbox"" class=""form-check-input"" disabled></p>")]
+        [InlineData("[x] Learn markdown", @"<p><input type=""checkbox"" class=""form-check-input"" checked disabled aria-label=""Learn markdown""> Learn markdown</p>")]
         [InlineData("Text[^1]", @"<p>Text <sup>1</sup></p>")]
         public void ConvertInlineElements(string markdown, string expectedHtml)
         {
@@ -50,6 +51,30 @@ namespace WebExpress.WebUI.Test.WebMarkdown
                 .Replace("\t", "");
 
             var cleaned = Regex.Replace(htmlString, @">\s+<", "><");
+
+            AssertExtensions.EqualWithPlaceholders(expectedHtml, cleaned);
+        }
+
+        /// <summary>
+        /// Tests that a document placed under the headings of a page speaks its own headings from
+        /// the level it was given, keeping its steps, while the tags keep their look.
+        /// </summary>
+        [Theory]
+        [InlineData("# Title\n## Part", 4, @"<h1 role=""heading"" aria-level=""4"">Title</h1><h2 role=""heading"" aria-level=""5"">Part</h2>")]
+        [InlineData("# Title\n###### Deep", 3, @"<h1 role=""heading"" aria-level=""3"">Title</h1><h6 role=""heading"" aria-level=""6"">Deep</h6>")]
+        [InlineData("# Title", 1, @"<h1>Title</h1>")]
+        public void ConvertHeadingsAtLevel(string markdown, int level, string expectedHtml)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
+            var document = MarkdownParser.Parse(markdown);
+
+            // act
+            var html = document.ConvertToHtml(renderContext, level);
+
+            // validation
+            var cleaned = Regex.Replace(html.ToString().Replace("\r", "").Replace("\n", "").Replace("\t", ""), @">\s+<", "><");
 
             AssertExtensions.EqualWithPlaceholders(expectedHtml, cleaned);
         }
@@ -229,17 +254,17 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         /// </summary>
         [Theory]
         [InlineData("- Point A", @"<ul><li><p>Point A</p></li></ul>")]
-        [InlineData("- Point A\n  - Sub", @"<ul><li><p>Point A</p></li><ul><li><p>Sub</p></li></ul></ul>")]
+        [InlineData("- Point A\n  - Sub", @"<ul><li><p>Point A</p><ul><li><p>Sub</p></li></ul></li></ul>")]
         [InlineData("* Point A", @"<ul><li><p>Point A</p></li></ul>")]
         [InlineData("+ Point A", @"<ul><li><p>Point A</p></li></ul>")]
-        [InlineData("- Point A\n  1. Sub", @"<ul><li><p>Point A</p></li><ol><li><p>Sub</p></li></ol></ul>")]
+        [InlineData("- Point A\n  1. Sub", @"<ul><li><p>Point A</p><ol><li><p>Sub</p></li></ol></li></ul>")]
         [InlineData("1. First", @"<ol><li><p>First</p></li></ol>")]
         [InlineData("2. Second", @"<ol start=""2""><li><p>Second</p></li></ol>")]
-        [InlineData("1. First\n  1. Sub", @"<ol><li><p>First</p></li><ol><li><p>Sub</p></li></ol></ol>")]
-        [InlineData("I. First\n  - Sub", @"<ol type=""I""><li><p>First</p></li><ul><li><p>Sub</p></li></ul></ol>")]
-        [InlineData("i. First\n  - Sub", @"<ol type=""i""><li><p>First</p></li><ul><li><p>Sub</p></li></ul></ol>")]
-        [InlineData("A. First\n  - Sub", @"<ol type=""A""><li><p>First</p></li><ul><li><p>Sub</p></li></ul></ol>")]
-        [InlineData("a. First\n  - Sub", @"<ol type=""a""><li><p>First</p></li><ul><li><p>Sub</p></li></ul></ol>")]
+        [InlineData("1. First\n  1. Sub", @"<ol><li><p>First</p><ol><li><p>Sub</p></li></ol></li></ol>")]
+        [InlineData("I. First\n  - Sub", @"<ol type=""I""><li><p>First</p><ul><li><p>Sub</p></li></ul></li></ol>")]
+        [InlineData("i. First\n  - Sub", @"<ol type=""i""><li><p>First</p><ul><li><p>Sub</p></li></ul></li></ol>")]
+        [InlineData("A. First\n  - Sub", @"<ol type=""A""><li><p>First</p><ul><li><p>Sub</p></li></ul></li></ol>")]
+        [InlineData("a. First\n  - Sub", @"<ol type=""a""><li><p>First</p><ul><li><p>Sub</p></li></ul></li></ol>")]
         public void ConvertList(string markdown, string expectedHtml)
         {
             // arrange

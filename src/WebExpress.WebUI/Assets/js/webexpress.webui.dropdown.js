@@ -23,6 +23,8 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         this._buttonCss = element.dataset.buttoncss || null;
         this._buttonStyle = element.dataset.buttonstyle || null;
         this._buttonColor = element.dataset.color || null;
+        // an icon-only button has no text to be announced by, so the hover text doubles as its name
+        this._title = element.getAttribute("title") || element.dataset.title || null;
         this._active = element.hasAttribute("active") ? "active" : null;
         this._disabled = element.hasAttribute("disabled") ? "disabled" : null;
 
@@ -36,7 +38,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         [
             "data-label", "data-icon", "data-image", "data-color", "data-menucss",
             "data-block", "data-toggle", "data-size", "data-border", "data-buttoncss",
-            "data-buttonstyle", "disabled", "active"
+            "data-buttonstyle", "data-title", "title", "disabled", "active"
         ].forEach(attr => element.removeAttribute(attr));
         element.classList.add("wx-dropdown");
 
@@ -121,6 +123,8 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
      */
     _createMenuItem(item) {
         const li = document.createElement("li");
+        // the list item is markup only; the menu semantics sit on the menu and its entries
+        li.setAttribute("role", item.type === "divider" ? "separator" : "none");
 
         if (item.type === "header") {
             // create a header item with optional icon
@@ -154,7 +158,8 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 if (item.image) {
                     const img = document.createElement("img");
                     img.src = item.image;
-                    img.alt = item.text;
+                    // the entry text follows the picture; a repeated alt reads the name twice
+                    img.alt = "";
                     img.className = "wx-icon";
                     link.appendChild(img);
                 }
@@ -167,7 +172,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 span.textContent = item.text;
                 link.appendChild(span);
 
-                if (item.role) { link.setAttribute("role", item.role); }
+                link.setAttribute("role", item.role || "menuitem");
                 // apply all data-* attributes
                 item.data?.forEach(([key, value]) => {
                     link.setAttribute(key, value);
@@ -189,6 +194,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
                 // create a disabled menu item
                 const disabledItem = document.createElement("span");
                 disabledItem.className = "dropdown-item text-muted disabled";
+                disabledItem.setAttribute("role", item.role || "menuitem");
                 disabledItem.setAttribute("aria-disabled", "true");
                 if (item.icon) {
                     const icon = document.createElement("i");
@@ -219,12 +225,15 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         if (this._buttonColor) button.classList.add(this._buttonColor);
         if (this._active) button.setAttribute("active", "true");
         if (this._disabled) button.disabled = true;
-        if (this._buttonStyle) button.setAttribute("style", this._buttonStyle);
+        // a fill the author chose brings the text color that reads on it
+        if (this._buttonStyle) webexpress.webui.ContrastColor.paint(button, this._buttonStyle);
 
         if (this._image) {
             const img = document.createElement("img");
             img.className = "wx-icon";
             img.src = this._image;
+            // the label or the hover text names the button; the picture must not be read twice
+            img.alt = "";
             button.appendChild(img);
         }
         if (this._icon) {
@@ -238,10 +247,15 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
             span.textContent = this._label || "";
             button.appendChild(span);
         }
+        if (this._title) {
+            button.title = this._title;
+            if (!this._label) { button.setAttribute("aria-label", this._title); }
+        }
 
         // create the dropdown menu list
         const ul = document.createElement("ul");
         ul.className = "dropdown-menu";
+        ul.setAttribute("role", "menu");
         if (this._menuCss) ul.classList.add(...this._menuCss.split(" "));
 
         // add all menu items

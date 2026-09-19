@@ -44,10 +44,14 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
         }
         this._element.classList.add("wx-upload");
 
-        // create dropzone
+        // create dropzone; the file input behind it is hidden, so the zone is the control
+        // the keyboard reaches and the form label names
         this._dropzone = document.createElement("div");
         this._dropzone.className = "wx-upload-dropzone";
         this._dropzone.textContent = this._placeholder;
+        this._dropzone.setAttribute("role", "button");
+        this._dropzone.tabIndex = 0;
+        this._adoptFieldLabel(this._dropzone, this._id, this._element);
 
         // create a file input for triggering the file dialog
         this._fileInput = document.createElement("input");
@@ -68,6 +72,7 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
 
         // create upload button for manual uploads
         this._uploadButton = document.createElement("button");
+        this._uploadButton.type = "button";
         this._uploadButton.textContent = this._i18n("webexpress.webui:upload.button", "Upload Files");
         this._uploadButton.className = "btn btn-primary mt-2";
         this._uploadButton.style.display = "none";
@@ -106,8 +111,14 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
             this._handleFiles(e.dataTransfer.files);
         });
 
-        // open file picker on click
+        // open file picker on click or on the keys a button answers to
         this._dropzone.addEventListener("click", () => this._fileInput.click());
+        this._dropzone.addEventListener("keydown", e => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                this._fileInput.click();
+            }
+        });
 
         // handle selected files from the file picker
         this._fileInput.addEventListener("change", () => {
@@ -179,8 +190,10 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
         previewElement.appendChild(text);
 
         const removeBtn = document.createElement("button");
+        removeBtn.type = "button";
         removeBtn.className = this._iconClass("xmark");
-        removeBtn.title = this._i18n("webexpress.webui:upload.remove.file", "Remove file");
+        removeBtn.title = this._i18n("webexpress.webui:upload.remove.file", "Remove file") + ": " + file.name;
+        removeBtn.setAttribute("aria-label", removeBtn.title);
         removeBtn.onclick = (e) => {
             e.stopPropagation();
             this.files = this.files.filter(f => f.name !== file.name);

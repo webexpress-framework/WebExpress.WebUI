@@ -29,6 +29,7 @@ webexpress.webui.Syntax.register("json", null, (code) => {
   // line-by-line formatting
   return code
     .split("\n")
-    .map(line => `<span class="line">${highlightJSON(line.trimEnd())}</span>`)
+    // escaped first: no json token holds one of the escaped characters, so the marks still land
+    .map(line => `<span class="line">${highlightJSON(webexpress.webui.Syntax.escape(line.trimEnd()))}</span>`)
     .join("");
 });

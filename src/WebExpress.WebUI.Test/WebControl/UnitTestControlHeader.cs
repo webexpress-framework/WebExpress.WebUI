@@ -29,6 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -55,6 +56,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -79,6 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -103,6 +106,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -126,6 +130,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -150,6 +155,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -159,7 +165,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [Theory]
         [InlineData(typeof(ControlText), @"<header><div></div></header>")]
         [InlineData(typeof(ControlLink), @"<header><a class=""wx-link""></a></header>")]
-        [InlineData(typeof(ControlImage), @"<header><img></header>")]
+        [InlineData(typeof(ControlImage), @"<header><img alt></header>")]
         public void Add(Type child, string expected)
         {
             // arrange
@@ -172,6 +178,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             control.Add(childInstance);
 
+            // validation
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);

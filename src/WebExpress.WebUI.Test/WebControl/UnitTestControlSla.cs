@@ -54,6 +54,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -76,6 +77,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders
             (
                 @"<div id=""sla"" class=""wx-sla wx-webui-sla wx-sla-fulfilled"" role=""group"" " +
@@ -84,7 +86,7 @@ namespace WebExpress.WebUI.Test.WebControl
                 @"data-warning-threshold=""0.8"" data-cycle=""1"" data-cycles=""1"" data-deadline=""2026-08-01T12:00:00"">" +
                 @"<div class=""wx-sla-header""><span class=""wx-sla-label"">Response time</span>" +
                 @"<span class=""wx-sla-status"" role=""status"" aria-live=""polite"">Fulfilled</span></div>" +
-                @"<div class=""wx-sla-meter"" role=""progressbar"" aria-valuemin=""0"" aria-valuemax=""100"" " +
+                @"<div class=""wx-sla-meter"" role=""progressbar"" aria-label=""Response time"" aria-valuemin=""0"" aria-valuemax=""100"" " +
                 @"aria-valuenow=""25"" aria-valuetext=""25% - 3 h""><div class=""wx-sla-meter-track"">" +
                 @"<div class=""wx-sla-meter-value"" style=""width: 25%;""></div></div></div>" +
                 @"<div class=""wx-sla-footer""><time class=""wx-sla-remaining"" datetime=""PT3H0M0S"">3 h</time></div></div>",
@@ -111,7 +113,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains(expectedClass, html);
             Assert.Contains($@"data-status=""{expectedValue}""", html);
             Assert.Contains($@">{expectedText}</span>", html);
@@ -134,7 +136,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains("wx-sla-paused", html);
             Assert.Contains(@"data-paused=""true""", html);
             Assert.Contains(@"data-remaining=""10800""", html);
@@ -160,7 +162,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains(@"data-recurrence=""daily""", html);
             Assert.Contains(@"data-period=""86400""", html);
             Assert.Contains(@"data-cycle=""3""", html);
@@ -186,7 +188,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains("wx-sla-fulfilled", html);
             Assert.Contains(@"data-settled=""true""", html);
             Assert.Contains(@"data-fulfilled=""2026-08-01T10:00:00""", html);
@@ -209,7 +211,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains(@"data-remaining=""-8100""", html);
             Assert.Contains(@"<time class=""wx-sla-remaining"" datetime=""-PT2H15M0S"">-2 h 15 min</time>", html);
         }
@@ -230,7 +232,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains(@"<div class=""wx-sla-actions"">", html);
             Assert.Contains(@"aria-label=""Pause"" data-wx-sla-action=""pause""", html);
             Assert.Contains(@"aria-label=""Resume"" data-wx-sla-action=""resume""", html);
@@ -255,7 +257,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.DoesNotContain("wx-sla-actions", html);
         }
 
@@ -276,7 +278,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains(@"data-live=""false""", html);
         }
 
@@ -296,7 +298,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains(@"<div class=""wx-sla-description"">First response to a premium ticket</div>", html);
         }
 
@@ -325,7 +327,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains(@"data-recurrence=""weekly""", html);
             Assert.Contains(@"data-cycles=""4""", html);
             Assert.Contains(@"data-paused=""true""", html);
@@ -351,7 +353,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains(@"<div id=""panel"" class=""wx-sla-group wx-webui-sla-group wx-sla-fulfilled"" role=""group"" aria-label=""Support"">", html);
             Assert.Contains(@"<span class=""wx-sla-group-label"">Support</span>", html);
             Assert.Contains(@"<div class=""wx-sla-group-items"">", html);
@@ -378,7 +380,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains(@"<span class=""wx-sla-summary"" role=""status"" aria-live=""polite"">1 violated, 1 at risk, 1 paused, 2 fulfilled</span>", html);
         }
 
@@ -407,7 +409,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains($@"wx-webui-sla-group {expected}""", html);
         }
 
@@ -431,7 +433,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var mixed = new ControlSla("a", CreateControl("a"), one).Render(context, visualTree).ToString();
             var all = new ControlSla("b", other, one).Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.Contains(@"wx-webui-sla-group wx-sla-fulfilled""", mixed);
             Assert.Contains(@"wx-webui-sla-group wx-sla-paused""", all);
         }
@@ -456,7 +458,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree).ToString();
 
-            // assert
+            // validation
             Assert.DoesNotContain("wx-sla-summary", html);
         }
     }

@@ -30,6 +30,13 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeFormatText> Format { get; set; }
 
         /// <summary>
+        /// Gets or sets the outline level a markdown text starts at. A markdown document opens
+        /// its own outline at the first level; placed under the headings of a page it continues
+        /// the section it sits in, so its headings are spoken from this level on.
+        /// </summary>
+        public Func<IRenderControlContext, int?> HeadingLevel { get; set; }
+
+        /// <summary>
         /// Gets or sets the size of the text.
         /// </summary>
         public Func<IRenderControlContext, PropertySizeText> Size
@@ -328,7 +335,7 @@ namespace WebExpress.WebUI.WebControl
                     };
                     break;
                 case TypeFormatText.Markdown:
-                    return MarkdownParser.Parse(text).ConvertToHtml(renderContext);
+                    return MarkdownParser.Parse(text).ConvertToHtml(renderContext, HeadingLevel?.Invoke(renderContext));
                 case TypeFormatText.Raw:
                     return new HtmlText(text);
                 default:

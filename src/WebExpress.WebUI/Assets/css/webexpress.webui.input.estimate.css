@@ -48,3 +48,10 @@
     color: var(--wx-body-color, #dee2e6);
 }
 }
+
+/* a chip of a colored scale takes the text that reads on its fill, in either theme: the body
+   color of the theme is not it on a red or green ground. the container in the selector lifts
+   the rule over the theme rule above, which a scoped rule of equal specificity would beat */
+.wx-estimate-container .wx-estimate-chip[class*="bg-"] {
+    color: var(--wx-on-surface);
+}

@@ -34,6 +34,12 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         element.innerHTML = "";
         element.classList.add("wx-tree");
         element.appendChild(this._container);
+        // a tree is one tab stop; the arrow keys walk, open and close the items
+        this._container.addEventListener("keydown", (event) => this._onKeyDown(event));
+        this._container.addEventListener("focusin", (event) => {
+            const item = event.target.closest?.("[role=\"treeitem\"]");
+            if (item) { this._setTabStop(item); }
+        });
 
         // create the drag indicator element (hidden initially)
         this._dragIndicator = document.createElement("div");
@@ -312,19 +318,24 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
      * @param {Array} nodes - The tree node data to render.
      */
     _renderTree(container, nodes) {
-        // clear existing content
+        // clear existing content; only the root list is the tree, a nested list is the group
+        // of its item and keeps the role the item gave it
         container.innerHTML = "";
-        container.setAttribute("role", "tree");
+        if (container === this._container) {
+            container.setAttribute("role", "tree");
+        }
 
         nodes.forEach((node) => {
             const img = document.createElement("img");
             const icon = document.createElement("i");
             const li = document.createElement("li");
             li.id = node.id || "";
-            li.setAttribute("role", "treeitem");
-            li.setAttribute("aria-expanded", node.expand ? "true" : "false");
-            li.setAttribute("aria-level", this._getNodeLevel(node));
+            // the list item is markup only: the tree item is the link or button that takes
+            // the focus, so no interactive element is nested inside another one
+            li.setAttribute("role", "none");
             img.className = "wx-icon";
+            // the picture repeats the label beside it
+            img.alt = "";
 
             // add layout-specific classes
             switch (this._layout) {
@@ -343,16 +354,25 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 }
             }
 
-            // add aria-selected if selectable
-            if (node.selectable) {
-                li.setAttribute("aria-selected", node.selected ? "true" : "false");
-            }
-
             // create the label container (button or link)
             const labelContainer = node.url ? document.createElement("a") : document.createElement("button");
             labelContainer.className = String(node.color || "") + " wx-tree-label-container";
             if (node.active) {
                 labelContainer.className = "wx-tree-label-container active";
+            }
+            if (!node.url) { labelContainer.type = "button"; }
+            labelContainer.setAttribute("role", "treeitem");
+            labelContainer.setAttribute("aria-level", this._getNodeLevel(node));
+            // only the first item is a tab stop until a focus moves the stop along
+            labelContainer.setAttribute("tabindex", "-1");
+            if (node.children && node.children.length > 0) {
+                labelContainer.setAttribute("aria-expanded", node.expand ? "true" : "false");
+            }
+            if (node.selectable) {
+                labelContainer.setAttribute("aria-selected", node.selected ? "true" : "false");
+            }
+            if (node.active) {
+                labelContainer.setAttribute("aria-current", node.url ? "page" : "true");
             }
 
             // click handler for node selection
@@ -360,17 +380,22 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 this._dispatch(webexpress.webui.Event.CLICK_EVENT, { node: node.id });
             });
 
-            // add indicator and expansion/collapse logic if necessary
+            // add indicator and expansion/collapse logic if necessary; the one toggle serves
+            // the pointer on the indicator, the double click and the arrow keys on the item,
+            // and keeps the announced state in step with the drawn one
             let indicator;
+            let ul = null;
+            const toggle = () => {
+                this._toggleNode(node, ul, icon, img, indicator);
+                labelContainer.setAttribute("aria-expanded", node.expand ? "true" : "false");
+            };
             if (this._showIndicator && node.children && node.children.length > 0) {
                 indicator = document.createElement("i");
                 indicator.className = "wx-tree-indicator-angle " + this._iconClass("angle-down");
-                indicator.addEventListener("click", () => {
-                    this._toggleNode(node, ul, icon, img, indicator);
-                });
-                labelContainer.addEventListener("dblclick", () => {
-                    this._toggleNode(node, ul, icon, img, indicator);
-                });
+                // the pointer target is decoration for the reader: the arrow keys on the item do the same
+                indicator.setAttribute("aria-hidden", "true");
+                indicator.addEventListener("click", toggle);
+                labelContainer.addEventListener("dblclick", toggle);
                 if (node.expand) {
                     indicator.classList.add("wx-tree-expand");
                     if (node.iconOpen && icon) {
@@ -430,7 +455,6 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
             li.appendChild(div);
 
             // render child nodes if present and expanded
-            let ul = null;
             if (node.children && node.children.length > 0) {
                 ul = document.createElement("ul");
                 const layoutClasses = this._getLayoutClasses();
@@ -438,11 +462,16 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                     ul.className = layoutClasses;
                 }
                 ul.setAttribute("role", "group");
+                // the group is a sibling of the item in the markup, so the item claims it
+                ul.id = (node.id || "wx-tree-" + Math.random().toString(36).slice(2, 8)) + "-group";
+                labelContainer.setAttribute("aria-owns", ul.id);
                 if (node.expand) {
                     this._renderTree(ul, node.children);
                 }
                 li.appendChild(ul);
             }
+            // the toggle is reached from the item as well, for the keyboard
+            labelContainer._wxToggle = ul ? toggle : null;
 
             // add the node to the container
             container.appendChild(li);
@@ -452,6 +481,91 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
                 this._enableDragAndDrop(labelContainer, node);
             }
         });
+
+        // the first item of the tree is the tab stop when none was set yet
+        if (container === this._container) {
+            const first = container.querySelector("[role=\"treeitem\"]");
+            if (first && !container.querySelector("[role=\"treeitem\"][tabindex=\"0\"]")) {
+                first.setAttribute("tabindex", "0");
+            }
+        }
+    }
+
+    /**
+     * Makes one item the tab stop of the tree, so leaving and re-entering the tree returns
+     * to where the user was.
+     * @private
+     * @param {HTMLElement} item - The tree item element.
+     */
+    _setTabStop(item) {
+        this._container.querySelectorAll("[role=\"treeitem\"]").forEach((other) => {
+            other.setAttribute("tabindex", other === item ? "0" : "-1");
+        });
+    }
+
+    /**
+     * Returns the tree items in reading order, which are the ones inside open groups only.
+     * @private
+     * @returns {HTMLElement[]} The visible tree items.
+     */
+    _visibleItems() {
+        return Array.from(this._container.querySelectorAll("[role=\"treeitem\"]"));
+    }
+
+    /**
+     * Walks, opens and closes the items with the keys a tree answers to. Enter and space
+     * are left to the link or button the item is, so activation stays native.
+     * @private
+     * @param {KeyboardEvent} event - The key event raised inside the tree.
+     */
+    _onKeyDown(event) {
+        const item = event.target.closest ? event.target.closest("[role=\"treeitem\"]") : null;
+        if (!item || event.defaultPrevented) {
+            return;
+        }
+        const items = this._visibleItems();
+        const index = items.indexOf(item);
+        const expanded = item.getAttribute("aria-expanded");
+        let next = null;
+
+        switch (event.key) {
+            case "ArrowDown":
+                next = items[index + 1] || null;
+                break;
+            case "ArrowUp":
+                next = items[index - 1] || null;
+                break;
+            case "Home":
+                next = items[0];
+                break;
+            case "End":
+                next = items[items.length - 1];
+                break;
+            case "ArrowRight":
+                if (expanded === "false") {
+                    item._wxToggle?.();
+                } else if (expanded === "true") {
+                    next = this._visibleItems()[index + 1] || null;
+                }
+                break;
+            case "ArrowLeft":
+                if (expanded === "true") {
+                    item._wxToggle?.();
+                } else {
+                    // the parent item owns the group the item sits in
+                    const group = item.closest("[role=\"group\"]");
+                    next = group ? this._container.querySelector(`[aria-owns="${group.id}"]`) : null;
+                }
+                break;
+            default:
+                return;
+        }
+
+        event.preventDefault();
+        if (next) {
+            this._setTabStop(next);
+            next.focus({ preventScroll: true });
+        }
     }
 
     /**

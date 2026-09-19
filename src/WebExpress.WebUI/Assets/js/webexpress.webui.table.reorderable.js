@@ -135,15 +135,21 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
 
         const headRow = document.createElement("div");
         headRow.className = "wx-grid-row wx-grid-head-row";
-        headRow.setAttribute("role", "row");
+        // a header the table does without is layout only, see the base table
+        headRow.setAttribute("role", this._suppressHeaders ? "presentation" : "row");
+        this._head.setAttribute("role", this._suppressHeaders ? "presentation" : "rowgroup");
         headFragment.appendChild(headRow);
 
         if (!this._suppressHeaders) {
             if (this._movableRow) {
+                // the grip column is named, but the name need not be seen
                 const th = document.createElement("div");
                 th.className = "wx-table-drag-column";
                 th.setAttribute("role", "columnheader");
-                th.setAttribute("aria-hidden", "true");
+                const caption = document.createElement("span");
+                caption.className = "visually-hidden";
+                caption.textContent = this._i18n("webexpress.webui:table.row.move", "Move row");
+                th.appendChild(caption);
                 headRow.appendChild(th);
             }
 
@@ -157,6 +163,9 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
                 th.setAttribute("role", "columnheader");
                 th.className = "wx-grid-header-cell wx-col-header";
                 th.style.position = "relative"; // vital for drag indicator positioning
+                // a click on the header sorts, so the keyboard reaches it and reads the order
+                th.setAttribute("tabindex", "0");
+                th.setAttribute("aria-sort", col.sort === "asc" ? "ascending" : col.sort === "desc" ? "descending" : "none");
 
                 if (col.color) {
                     th.classList.add(col.color);
@@ -177,6 +186,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
                     const img = document.createElement("img");
                     img.className = "wx-icon";
                     img.src = col.image;
+                    img.alt = "";
                     inner.appendChild(img);
                 }
                 inner.appendChild(document.createTextNode(col.label));
@@ -583,14 +593,18 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
         row._depth = depth;
 
         if (this._movableRow) {
+            // the cell stays a cell of the row; the grip inside it is the button
             const tdDrag = document.createElement("div");
             tdDrag.className = "wx-grid-cell wx-table-drag-handle";
-            tdDrag.setAttribute("role", "gridcell");
-            tdDrag.textContent = "⠿";
-            tdDrag.tabIndex = 0;
-            tdDrag.setAttribute("role", "button");
-            tdDrag.style.cursor = "grab";
-            tdDrag.style.userSelect = "none";
+            tdDrag.setAttribute("role", this._cellRole);
+            const grip = document.createElement("span");
+            grip.textContent = "⠿";
+            grip.tabIndex = 0;
+            grip.setAttribute("role", "button");
+            grip.setAttribute("aria-label", this._i18n("webexpress.webui:table.row.move", "Move row"));
+            grip.style.cursor = "grab";
+            grip.style.userSelect = "none";
+            tdDrag.appendChild(grip);
             tr.appendChild(tdDrag);
         }
 
@@ -605,7 +619,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
 
             const td = document.createElement("div");
             td.className = "wx-grid-cell";
-            td.setAttribute("role", "gridcell");
+            td.setAttribute("role", this._cellRole);
 
             const cell = row.cells[i];
 
@@ -642,6 +656,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
                         const img = document.createElement("img");
                         img.className = "wx-icon wx-icon-large";
                         img.src = row.image;
+                        img.alt = "";
                         wrap.appendChild(img);
                     }
                     if (content instanceof Node) {
@@ -669,7 +684,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
         if (this._hasOptions || this._allowColumnRemove) {
             const tdOpt = document.createElement("div");
             tdOpt.className = "wx-grid-cell wx-table-actions";
-            tdOpt.setAttribute("role", "gridcell");
+            tdOpt.setAttribute("role", this._cellRole);
 
             const effectiveOptions = (row.options && row.options.length) ? row.options : this._options;
 
@@ -678,6 +693,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
                 div.dataset.icon = this._iconClass("more");
                 div.dataset.size = "btn-sm";
                 div.dataset.border = "false";
+                div.title = this._i18n("webexpress.webui:table.options.label", "Options");
                 tdOpt.appendChild(div);
                 new webexpress.webui.DropdownCtrl(div).items = effectiveOptions;
             }
@@ -793,7 +809,52 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
             document.addEventListener("mouseup", onUp);
         });
 
+        // the grip is a pointer gesture; the arrow keys on it move the row among its
+        // siblings so the order can be changed without a mouse
+        this._body.addEventListener("keydown", (e) => {
+            if (e.key !== "ArrowUp" && e.key !== "ArrowDown") {
+                return;
+            }
+            const grip = e.target.closest ? e.target.closest(".wx-table-drag-handle [role=\"button\"]") : null;
+            const tr = grip ? grip.closest(".wx-grid-row") : null;
+            if (!tr || !tr._dataRowRef) {
+                return;
+            }
+            e.preventDefault();
+            this._moveRowByStep(tr._dataRowRef, e.key === "ArrowUp" ? -1 : 1);
+        });
+
         this._rowHandlesBound = true;
+    }
+
+    /**
+     * Moves a row one place up or down among its siblings and puts the focus back on its
+     * grip, which the re-render has rebuilt.
+     * @param {Object} row - The row to move.
+     * @param {number} delta - -1 for up, +1 for down.
+     */
+    _moveRowByStep(row, delta) {
+        const siblings = row.parent ? row.parent.children : this._rows;
+        const index = siblings.indexOf(row);
+        const target = index + delta;
+        if (index < 0 || target < 0 || target >= siblings.length) {
+            return;
+        }
+
+        siblings.splice(index, 1);
+        siblings.splice(target, 0, row);
+
+        this._dispatch(webexpress.webui.Event.ROW_REORDER_EVENT, {
+            sender: this._element,
+            newOrder: siblings,
+            parentId: row.parent ? row.parent.id : null,
+            rowId: row.id,
+            toIndex: target
+        });
+
+        this._schedulePersist();
+        this.render();
+        row._anchorTr?.querySelector(".wx-table-drag-handle [role=\"button\"]")?.focus({ preventScroll: true });
     }
 
     /**

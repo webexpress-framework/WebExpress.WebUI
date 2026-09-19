@@ -334,8 +334,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form text control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input type=""text"" class=""form-control"">*")]
-        [InlineData("abc", @"*<input value=""abc"" type=""text"" class=""form-control"">*")]
+        [InlineData(null, @"*<input id=""*"" type=""text"" class=""form-control"">*")]
+        [InlineData("abc", @"*<input id=""*"" value=""abc"" type=""text"" class=""form-control"">*")]
         public void ValueForm(string value, string expected)
         {
             // arrange
@@ -362,8 +362,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form text control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input type=""text"" class=""form-control"">*")]
-        [InlineData("abc", @"*<input value=""abc"" type=""text"" class=""form-control"">*")]
+        [InlineData(null, @"*<input id=""*"" type=""text"" class=""form-control"">*")]
+        [InlineData("abc", @"*<input id=""*"" value=""abc"" type=""text"" class=""form-control"">*")]
         public void ValueItem(string value, string expected)
         {
             // arrange

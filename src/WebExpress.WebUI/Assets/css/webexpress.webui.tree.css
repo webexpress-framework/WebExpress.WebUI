@@ -56,6 +56,7 @@
     cursor: pointer;
 }
 
+/* a row is a pointer target: it keeps the 24px the target size criterion asks for */
 .wx-tree-label-container {
     display: inline-flex;
     align-items: center;
@@ -64,18 +65,26 @@
     padding-right: 0.4em;
     padding-top: 0.2em;
     padding-bottom: 0.2em;
+    min-height: 24px;
     background: 0 0;
     border: 0;
     color: var(--wx-link-color);
     text-decoration: none;
 }
 
+.wx-tree-label-container:focus-visible {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: -2px;
+    border-radius: var(--wx-border-radius);
+}
+
 .wx-tree-label-container > div:hover {
     color: var(--wx-link-hover-color);
 }
 
+/* pure white on the primary surface is the pairing that still reaches 4.5:1 */
 .wx-tree-label-container.active {
-    color: var(--wx-light);
+    color: var(--wx-primary-contrast);
     background-color: var(--wx-primary);
     border-radius: var(--wx-border-radius);
 }

@@ -151,7 +151,8 @@
 .wx-upload-avatar .wx-upload-avatar-dropzone {
     padding: 0.75rem 1rem;
     text-align: center;
-    color: #666;
+    /* the muted text color of the theme: a fixed gray falls under 4.5:1 on the dark body */
+    color: var(--wx-secondary-color, #666);
     cursor: pointer;
     user-select: none;
 }

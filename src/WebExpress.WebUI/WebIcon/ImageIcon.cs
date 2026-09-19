@@ -106,6 +106,8 @@ namespace WebExpress.WebUI.WebIcon
             };
 
             html.AddUserAttribute("title", description);
+            // an icon without a description is decoration and is skipped by a reader
+            if (string.IsNullOrWhiteSpace(description)) { html.AddUserAttribute("alt"); } else { html.Alt = description; }
 
             return html;
         }

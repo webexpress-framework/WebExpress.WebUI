@@ -189,6 +189,8 @@ pre {
     background-color: var(--wx-tertiary-bg);
 }
 
+/* links carry no underline by design; the hover and the focus ring are their cue, and a
+   link set in running text is expected to be told apart by its color and context */
 .wx-link {
     color: rgba(var(--wx-link-color-rgb), var(--wx-link-opacity, 1));
     text-decoration: none;
@@ -270,10 +272,15 @@ img.wx-icon-large {
     gap: 0.5em;
 }
 
+/* a crumb is a pointer target: it keeps the 24px the target size criterion asks for */
 .wx-breadcrumb > li > a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
     text-decoration: none;
     cursor: pointer;
-    color: var(--wx-link-color);
+    /* on a colored trail the link takes the color that reads on that surface */
+    color: var(--wx-on-surface, var(--wx-link-color));
 }
 
 .wx-breadcrumb > li > img {
@@ -549,10 +556,12 @@ img.wx-icon-large {
     color: var(--wx-highlight-contrast);
 }
 
+/* a quarter of the highlight over the page stays close to the page, so the text that reads
+   on it is the body text of the theme, not the text that reads on the full highlight */
 .alert-highlight {
     background-color: rgba(var(--wx-highlight-rgb), 0.25);
     border-color: rgba(var(--wx-highlight-rgb), 0.6);
-    color: var(--wx-highlight-contrast);
+    color: var(--wx-body-color);
 }
 
 .navbar-highlight {
@@ -562,7 +571,7 @@ img.wx-icon-large {
 
 .table-highlight {
     --wx-table-bg: rgba(var(--wx-highlight-rgb), 0.25);
-    --wx-table-color: var(--wx-highlight-contrast);
+    --wx-table-color: var(--wx-body-color);
     --wx-table-border-color: rgba(var(--wx-highlight-rgb), 0.6);
     color: var(--wx-highlight-contrast);
     background-color: rgba(var(--wx-highlight-rgb), 0.25);
@@ -575,7 +584,7 @@ img.wx-icon-large {
 
 .wx-tag-highlight {
     background-color: rgba(var(--wx-highlight-rgb), 0.25);
-    color: var(--wx-highlight-contrast);
+    color: var(--wx-body-color);
     border-color: var(--wx-highlight);
 }
 
@@ -841,6 +850,19 @@ img.wx-icon-large {
     --wx-btn-focus-shadow-rgb: var(--wx-dark-rgb);
     --wx-btn-disabled-color: var(--wx-dark);
     --wx-btn-disabled-border-color: var(--wx-dark);
+}
+
+/* the label of a hollow button sits on the body background, where the surface colors of
+   info and warning fall short of 4.5:1 in either theme and every brand color does on the
+   dark body; the emphasis variant of the hue is the readable one. the frame keeps the hue */
+.btn-outline-info { --wx-btn-color: var(--wx-info-text-emphasis); }
+.btn-outline-warning { --wx-btn-color: var(--wx-warning-text-emphasis); }
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .btn-outline-primary { --wx-btn-color: var(--wx-primary-text-emphasis); }
+:scope .btn-outline-secondary { --wx-btn-color: var(--wx-secondary-text-emphasis); }
+:scope .btn-outline-success { --wx-btn-color: var(--wx-success-text-emphasis); }
+:scope .btn-outline-danger { --wx-btn-color: var(--wx-danger-text-emphasis); }
+:scope .btn-outline-dark { --wx-btn-color: var(--wx-dark-text-emphasis); --wx-btn-border-color: var(--wx-dark-text-emphasis); }
 }
 
 /* .text-bg-* backgrounds already resolve through --wx-*-rgb; only the

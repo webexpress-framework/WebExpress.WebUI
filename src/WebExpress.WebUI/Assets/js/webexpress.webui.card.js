@@ -13,6 +13,13 @@ webexpress.webui.CardCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
+        // a fill the server could not name a text color for (a named color) is answered here,
+        // where the browser resolves every color
+        const hostStyle = element.getAttribute("style");
+        if (hostStyle) {
+            webexpress.webui.ContrastColor.paint(element, hostStyle);
+        }
+
         // configuration from data-* attributes
         this._header = element.dataset.header || "";
         this._headerIconCss = element.dataset.headerIconCss || null;

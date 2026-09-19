@@ -114,7 +114,17 @@
     margin: 0;
     padding-bottom: 0.5rem;
     border-bottom: 2px solid var(--wx-border-color, #dee2e6);
-    color: var(--wx-heading-color, #495057);
+    color: var(--wx-heading-color, var(--wx-body-color));
+}
+
+/* the heading inside the row takes the row typography, so the name reads as before; it stays
+   a box of its own rather than display: contents, which some readers drop from the tree */
+.wx-dashboard-lane-heading {
+    display: flex;
+    min-width: 0;
+    margin: 0;
+    font: inherit;
+    line-height: inherit;
 }
 
 .wx-board-col-title {
@@ -152,14 +162,19 @@
 .wx-dashboard-lane-title .wx-dashboard-menu-btn,
 .wx-dashboard-widget-card .wx-dashboard-menu-btn,
 .wx-dashboard-widget-card .wx-drag-handle {
-    visibility: hidden;
+    /* faded rather than hidden: a hidden button cannot take the focus, so the keyboard
+       could never reach the menu or the grip */
+    opacity: 0;
 }
 
 .wx-dashboard-lane-title:hover .wx-dashboard-menu-btn,
+.wx-dashboard-lane-title:focus-within .wx-dashboard-menu-btn,
 .wx-dashboard-widget-card:hover .wx-dashboard-menu-btn,
 .wx-dashboard-widget-card:hover .wx-drag-handle,
+.wx-dashboard-widget-card:focus-within .wx-dashboard-menu-btn,
+.wx-dashboard-widget-card:focus-within .wx-drag-handle,
 .wx-dashboard-menu.wx-menu-open .wx-dashboard-menu-btn {
-    visibility: visible;
+    opacity: 1;
 }
 
 /* column drag: dim the dragged header and mark the side the column would land
@@ -283,6 +298,10 @@
 
 .wx-drag-handle {
     cursor: grab;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: inherit;
 }
 
 .wx-drag-handle:active {
@@ -323,7 +342,8 @@
     vertical-align: middle;
     line-height: 1;
     color: var(--wx-secondary-color, #6c757d);
-    visibility: hidden;
+    /* faded rather than hidden: a hidden control cannot take the focus */
+    opacity: 0;
 }
 
 .wx-board-col-grip:active {
@@ -341,7 +361,7 @@
     font-size: 0.85em;
     cursor: pointer;
     color: var(--wx-secondary-color, #6c757d);
-    visibility: hidden;
+    opacity: 0;
 }
 
 .wx-board-col-grip:hover,
@@ -352,8 +372,11 @@
 
 .wx-board-col-header:hover .wx-board-col-grip,
 .wx-board-col-header:hover .wx-board-col-edit,
-.wx-board-col-header:hover .wx-board-col-delete {
-    visibility: visible;
+.wx-board-col-header:hover .wx-board-col-delete,
+.wx-board-col-header:focus-within .wx-board-col-grip,
+.wx-board-col-header:focus-within .wx-board-col-edit,
+.wx-board-col-header:focus-within .wx-board-col-delete {
+    opacity: 1;
 }
 
 .wx-board-col-header.wx-board-col-dragging {

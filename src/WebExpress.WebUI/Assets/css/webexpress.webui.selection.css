@@ -27,8 +27,11 @@
     white-space: nowrap;
 }
 
-.wx-selection > ul > span {
-    color: var(--wx-secondary);
+.wx-selection > ul > span,
+.wx-selection > ul > li.wx-selection-placeholder {
+    /* the placeholder is an entry of the list, but drawn as the hint it is */
+    color: var(--wx-secondary-color);
+    padding: 0;
 }
 
 .wx-selection > ul > li > span {
@@ -72,8 +75,10 @@
     gap: 0.2em;
 }
 
-.wx-selection > div:nth-child(2) > ul > span {
-    color: var(--wx-secondary);
+.wx-selection > div:nth-child(2) > ul > span,
+.wx-selection > div:nth-child(2) > ul > li.wx-selection-placeholder {
+    color: var(--wx-secondary-color);
+    padding: 0;
 }
 
 .wx-selection > div:nth-child(2) > ul > li > span {
@@ -88,14 +93,27 @@
 .wx-selection > div:nth-child(2) > ul > li > span > img {
 }
 
-.wx-selection > div:nth-child(2) > ul > li > a {
-    margin-right: 0.2em;
+/* the remove button spans the pointer target size the guideline asks for; the negative
+   vertical margin keeps the chip as high as its text */
+.wx-selection > div:nth-child(2) > ul > li > a,
+.wx-selection > div:nth-child(2) > ul > li > .wx-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
+    margin: -0.3em 0 -0.3em 0;
     text-decoration: none;
     font-size: 0.8em;
     color: var(--wx-secondary);
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
 }
 
-.wx-selection > div:nth-child(2) > ul > li > a:hover {
+.wx-selection > div:nth-child(2) > ul > li > a:hover,
+.wx-selection > div:nth-child(2) > ul > li > .wx-chip-remove:hover {
     color: var(--wx-danger);
 }
 
@@ -151,6 +169,8 @@
     font-size: 1em;
     text-decoration: none;
     margin-right: 0.2em;
+    min-width: 24px;
+    min-height: 24px;
 }
 
 .wx-selection > .dropdown-menu > div:nth-child(1) > .wx-selection-clear:hover {
@@ -220,45 +240,47 @@
 }
 }
 
+/* the text on a brand fill is the contrast color of that fill, pure white on the dark ones: the
+   off-white of the light tone falls just under 4.5:1 on success, danger and secondary */
 .wx-selection-primary {
     color: var(--wx-white);
     background-color: var(--wx-primary);
     border: 1px solid var(--wx-primary);
 }
 
-.wx-selection-primary > a {
+.wx-selection-primary > a, .wx-selection-primary > .wx-chip-remove {
     color: var(--wx-white)!important;
 }
 
-.wx-selection-primary > a:hover {
+.wx-selection-primary > a:hover, .wx-selection-primary > .wx-chip-remove:hover {
     color: var(--wx-danger) !important;
 }
 
 .wx-selection-secondary {
-    color: var(--wx-light);
+    color: var(--wx-secondary-contrast, var(--wx-white));
     background-color: var(--wx-secondary);
     border: 1px solid var(--wx-secondary);
 }
 
-.wx-selection-secondary > a {
+.wx-selection-secondary > a, .wx-selection-secondary > .wx-chip-remove {
     color: var(--wx-white)!important;
 }
 
-.wx-selection-secondary > a:hover {
+.wx-selection-secondary > a:hover, .wx-selection-secondary > .wx-chip-remove:hover {
     color: var(--wx-danger) !important;
 }
 
 .wx-selection-success {
-    color: var(--wx-light);
+    color: var(--wx-success-contrast, var(--wx-white));
     background-color: var(--wx-success);
     border: 1px solid var(--wx-success);
 }
 
-.wx-selection-success > a {
+.wx-selection-success > a, .wx-selection-success > .wx-chip-remove {
     color: var(--wx-white) !important;
 }
 
-.wx-selection-success > a:hover {
+.wx-selection-success > a:hover, .wx-selection-success > .wx-chip-remove:hover {
     color: var(--wx-danger) !important;
 }
 
@@ -268,11 +290,11 @@
     border: 1px solid var(--wx-info);
 }
 
-.wx-selection-info > a {
+.wx-selection-info > a, .wx-selection-info > .wx-chip-remove {
     color: var(--wx-dark) !important;
 }
 
-.wx-selection-info > a:hover {
+.wx-selection-info > a:hover, .wx-selection-info > .wx-chip-remove:hover {
     color: var(--wx-danger) !important;
 }
 
@@ -282,25 +304,25 @@
     border: 1px solid var(--wx-warning);
 }
 
-.wx-selection-warning > a {
+.wx-selection-warning > a, .wx-selection-warning > .wx-chip-remove {
     color: var(--wx-dark) !important;
 }
 
-.wx-selection-warning > a:hover {
+.wx-selection-warning > a:hover, .wx-selection-warning > .wx-chip-remove:hover {
     color: var(--wx-danger) !important;
 }
 
 .wx-selection-danger {
-    color: var(--wx-light);
+    color: var(--wx-danger-contrast, var(--wx-white));
     background-color: var(--wx-danger);
     border: 1px solid var(--wx-danger);
 }
 
-.wx-selection-danger > a {
+.wx-selection-danger > a, .wx-selection-danger > .wx-chip-remove {
     color: var(--wx-white) !important;
 }
 
-.wx-selection-danger > a:hover {
+.wx-selection-danger > a:hover, .wx-selection-danger > .wx-chip-remove:hover {
     color: var(--wx-dark) !important;
 }
 
@@ -310,25 +332,25 @@
     border: 1px solid var(--wx-light);
 }
 
-.wx-selection-light > a {
+.wx-selection-light > a, .wx-selection-light > .wx-chip-remove {
     color: var(--wx-dark) !important;
 }
 
-.wx-selection-light > a:hover {
+.wx-selection-light > a:hover, .wx-selection-light > .wx-chip-remove:hover {
     color: var(--wx-danger) !important;
 }
 
 .wx-selection-dark {
-    color: var(--wx-light);
+    color: var(--wx-dark-contrast, var(--wx-white));
     background-color: var(--wx-dark);
     border: 1px solid var(--wx-dark);
 }
 
-.wx-selection-dark > a {
+.wx-selection-dark > a, .wx-selection-dark > .wx-chip-remove {
     color: var(--wx-white) !important;
 }
 
-.wx-selection-dark > a:hover {
+.wx-selection-dark > a:hover, .wx-selection-dark > .wx-chip-remove:hover {
     color: var(--wx-danger) !important;
 }
 

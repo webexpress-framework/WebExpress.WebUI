@@ -56,7 +56,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the marker color of a timeline entry.
         /// </summary>
         [Theory]
-        [InlineData(true, @"<div class=""wx-timeline-item""><span class=""wx-timeline-marker"" style=""background:#ff8800;""></span>*</div>")]
+        [InlineData(true, @"<div class=""wx-timeline-item""><span class=""wx-timeline-marker"" style=""background:#ff8800;color:#000;""></span>*</div>")]
         [InlineData(false, @"<div class=""wx-timeline-item""><span class=""wx-timeline-marker bg-success""></span>*</div>")]
         public void Color(bool userColor, string expected)
         {

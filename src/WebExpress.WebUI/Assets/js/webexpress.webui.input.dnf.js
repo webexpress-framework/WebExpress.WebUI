@@ -49,6 +49,10 @@ webexpress.webui.InputDnfCtrl = class extends webexpress.webui.Ctrl {
         this._hidden = this._createHiddenInput(id, name);
         this._list = document.createElement("div");
         this._list.className = "wx-dnf-list";
+        // the field label names the expression as a whole; each conjunction inside
+        // names itself by what it shows
+        this._list.setAttribute("role", "group");
+        this._adoptFieldLabel(this._list, id, element);
         this._addButton = this._createAddButton();
 
         // the declared options were markup for this control to read, not content
@@ -300,6 +304,7 @@ webexpress.webui.InputDnfCtrl = class extends webexpress.webui.Ctrl {
             group.close.title = index === 0
                 ? this._i18n("webexpress.webui:dnf.clear", "Clear expression")
                 : this._i18n("webexpress.webui:dnf.remove", "Remove expression");
+            group.close.setAttribute("aria-label", group.close.title);
 
             if (index === 0) {
                 return;

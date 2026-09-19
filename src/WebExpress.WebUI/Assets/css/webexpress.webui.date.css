@@ -10,7 +10,7 @@
 
 .wx-date > span {
     font-weight: bold;
-    color: var(--wx-body-color);
+    color: var(--wx-on-surface, var(--wx-body-color));
     background-color: var(--wx-secondary-bg);
     padding: 0.2em 0.5em;
     border-radius: 0.2em;
@@ -42,12 +42,18 @@
     position: relative;
 }
 
-/* Highlight on focus */
-.wx-date .form-control:focus,
+/* Highlight on focus: the box is a wrapper, so the focus of the text field inside it
+   has to be caught with focus-within; the field itself carries no outline of its own */
+.wx-date .form-control:focus-within,
 .wx-date .form-control:active {
     outline: none;
     box-shadow: 0 0 0 0.15rem var(--wx-primary-bg-subtle, rgba(13,110,253,.25));
     border-color: var(--wx-primary, #0d6efd);
+}
+
+.wx-date .form-control:has(.wx-date-calendar-icon:focus-visible) {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: 2px;
 }
 
 /* Calendar icon at the end of the input */

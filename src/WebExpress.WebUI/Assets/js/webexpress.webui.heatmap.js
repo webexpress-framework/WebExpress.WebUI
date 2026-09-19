@@ -32,7 +32,6 @@ webexpress.webui.HeatMapCtrl = class extends webexpress.webui.Ctrl {
         // the host rather than per cell
         element.classList.add("wx-heatmap");
         element.setAttribute("role", "img");
-        element.setAttribute("aria-readonly", "true");
 
         this._render();
     }

@@ -109,6 +109,8 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
      */
     _createMenuItem(item) {
         const li = document.createElement("li");
+        // the list item is markup only; the menu semantics sit on the menu and its entries
+        li.setAttribute("role", item.type === "divider" ? "separator" : "none");
 
         if (item.type === "header") {
             const header = document.createElement("span");
@@ -151,7 +153,8 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
                 if (item.image) {
                     const img = document.createElement("img");
                     img.src = item.image;
-                    img.alt = item.text;
+                    // the entry text follows the picture; a repeated alt reads the name twice
+                    img.alt = "";
                     img.className = "wx-icon";
                     link.appendChild(img);
                 }
@@ -164,7 +167,7 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
                 span.textContent = item.text;
                 link.appendChild(span);
 
-                if (item.role) link.setAttribute("role", item.role);
+                link.setAttribute("role", item.role || "menuitem");
                 item.data?.forEach(([key, value]) => {
                     link.setAttribute(key, value);
                 });
@@ -182,6 +185,7 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
             } else {
                 const disabledItem = document.createElement("span");
                 disabledItem.className = "dropdown-item text-muted disabled";
+                disabledItem.setAttribute("role", item.role || "menuitem");
                 disabledItem.setAttribute("aria-disabled", "true");
                 if (item.icon) {
                     const icon = document.createElement("i");
@@ -259,6 +263,7 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
         // dropdown menu
         const ul = document.createElement("ul");
         ul.className = "dropdown-menu";
+        ul.setAttribute("role", "menu");
         if (this._menuCss) ul.classList.add(...this._menuCss.split(/\s+/).filter(Boolean));
 
         this._items.forEach(item => {

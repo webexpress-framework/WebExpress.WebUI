@@ -6,6 +6,10 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "calendar": "Calendar",
     "carousel.previous": "Previous slide",
     "carousel.next": "Next slide",
+    "pagination.label": "Pagination",
+    "pagination.previous": "Previous page",
+    "pagination.next": "Next page",
+    "pagination.page": "Page {0}",
     "edit": "Edit",
     "copy": "Copy",
     "remove": "Remove",
@@ -15,6 +19,10 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "close": "Close",
     "selected": "Selected",
     "available": "Available",
+    "move.select": "Select",
+    "move.select.all": "Select all",
+    "move.deselect": "Deselect",
+    "move.deselect.all": "Deselect all",
     "search": "Search",
     "rating": "Rating",
     "heatmap": "Heat map",
@@ -51,6 +59,10 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "calendar.sat": "Sat",
     "calendar.sun": "Sun",
     "calendar.today": "Today",
+    "calendar.previous_year": "Previous year",
+    "calendar.previous_month": "Previous month",
+    "calendar.next_month": "Next month",
+    "calendar.next_year": "Next year",
     "calendar.format": "M/D/YYYY",
 
     "selection.placeholder": "Select an option",
@@ -72,6 +84,8 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "page.contentNotLoaded.details": "Please check your internet connection or try reloading the page. If the problem persists, the requested resource may be temporarily unavailable or a technical error may have occurred. You may also try refreshing the page or contact technical support if you need assistance.",
 
     "table.columns.manage": "Manage columns",
+    "table.row.move": "Move row",
+    "table.column": "Column {n}",
     "table.moving.item": "Moving item",
     "table.columns.title": "Columns",
     "page.table.columns.desc": "Toggle visibility and drag to reorder columns.",
@@ -94,6 +108,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "properties": "Properties",
 
     "dashboard.widget.unavailable": "Widget content not available.",
+    "dashboard.widget.move": "Move widget",
     "dashboard.widget.remove.title": "Remove widget?",
     "dashboard.widget.remove.message": "Remove widget “{name}”? This action cannot be undone.",
     "dashboard.widget.remove.confirm": "Remove",
@@ -114,28 +129,37 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "list.handle.title": "Move",
     "list.tree.toggle": "Expand or collapse",
 
+    "code.label": "Code",
     "barcode": "Barcode",
     "barcode.invalid": "The value cannot be encoded.",
 
+    "masterdetail.list": "Entries",
     "masterdetail.back": "Back to the list",
     "masterdetail.close": "Hide the detail view",
 
     "overflow.more": "More tools",
     "overflow.submenu": "Submenu",
 
+    "split.separator": "Resize panes",
+    "split.toggle": "Show or hide the side pane",
+    "toolbar.label": "Toolbar",
+    "toolbar.combo": "Selection",
     "sidebar.toggle": "Toggle sidebar",
 
     "filelist.versions": "Earlier versions",
+    "filelist.file": "File",
 
     "upload.button": "Upload Files",
     "upload.remove.file": "Remove file",
 
+    "view.switch": "Switch view",
     "view.select.item": "Select an item to view details.",
 
     "rating.of": "of",
 
     "selection.filter": "Filter",
     "selection.filter.clear": "Clear Filter",
+    "selection.remove": "Remove {0}",
 
     "dnf.and": "and",
     "dnf.or": "or",
@@ -157,6 +181,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "fullscreen.toggle": "Toggle Fullscreen",
     "fullscreen.exit": "Exit Fullscreen",
 
+    "tile.picker": "Tiles",
     "tile.close": "Close tile",
 
     "editor.content.label": "Editor content",
@@ -177,6 +202,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "editor.strike": "Strike",
     "editor.super": "Super",
     "editor.sub": "Sub",
+    "editor.textstyle": "More text formats",
     "editor.clearformat": "Clear Format",
     "editor.formatpainter": "Format Painter",
     "editor.textcolor": "Text Color",
@@ -208,6 +234,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "editor.emoji.search.label": "Search emoji",
     "editor.emoji.notfound": "No emojis found",
     "editor.addon.properties": "Properties",
+    "editor.table": "Table",
     "editor.table.insert.row.above": "Insert Row Above",
     "editor.table.insert.row.below": "Insert Row Below",
     "editor.table.insert.col.left": "Insert Column Left",
@@ -458,6 +485,8 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "login.failed": "Login failed. Please check your credentials.",
     "login.error": "An error occurred. Please try again.",
 
+    "slider.minimum": "Minimum",
+    "slider.maximum": "Maximum",
     "slider.invalid": "Invalid range.",
     "slider.out-of-bounds": "Range is out of bounds.",
     "slider.inverted": "Lower bound must not exceed upper bound.",

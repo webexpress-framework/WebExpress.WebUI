@@ -745,8 +745,10 @@ webexpress.webui.TableTemplates.register("markdown", (val, table, row, cell, nam
 
         const heading = line.match(/^(#{1,6})\s+(.*)$/);
         if (heading) {
+            // a cell is data, not a section of the page: the heading keeps its look through the
+            // size class but stays out of the outline a reader walks
             const level = heading[1].length;
-            out.push("<h" + level + ">" + inline(heading[2]) + "</h" + level + ">");
+            out.push("<p class=\"h" + level + " wx-table-markdown-heading\">" + inline(heading[2]) + "</p>");
             continue;
         }
         if (line.trim() === "") {

@@ -109,7 +109,12 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.MenuCtrl {
         if (name) searchInput.name = name;
         if (placeholder) {
             searchInput.placeholder = placeholder;
-            searchInput.setAttribute("aria-label", placeholder);
+        }
+        // the field is named by the form label where there is one, else by its placeholder,
+        // and as a last resort by what it is
+        this._adoptFieldLabel(searchInput, this._element.id, this._element);
+        if (!searchInput.hasAttribute("aria-labelledby") && !searchInput.hasAttribute("aria-label")) {
+            searchInput.setAttribute("aria-label", placeholder || this._i18n("webexpress.webui:search", "Search"));
         }
         searchInput.value = this._value;
 

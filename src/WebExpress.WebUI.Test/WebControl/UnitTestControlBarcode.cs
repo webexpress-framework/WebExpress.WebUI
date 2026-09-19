@@ -210,7 +210,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             AssertExtensions.EqualWithPlaceholders
             (
-                @"<div * data-color-style=""color:#0d6efd;"" data-bgcolor-style=""background:#fff8e1;""></div>",
+                @"<div * data-color-style=""color:#0d6efd;"" data-bgcolor-style=""background:#fff8e1;color:#000;""></div>",
                 html
             );
         }

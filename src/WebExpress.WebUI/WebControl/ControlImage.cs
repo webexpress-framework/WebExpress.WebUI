@@ -31,6 +31,12 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, string> Tooltip { get; set; }
 
         /// <summary>
+        /// Gets or sets the text alternative a reader is given in place of the picture. It
+        /// defaults to the tooltip; a picture with neither is announced as decoration.
+        /// </summary>
+        public Func<IRenderControlContext, string> Alt { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -52,6 +58,7 @@ namespace WebExpress.WebUI.WebControl
             var role = Role?.Invoke(renderContext);
             var uri = Uri?.Invoke(renderContext);
             var tooltip = Tooltip?.Invoke(renderContext);
+            var alt = Alt?.Invoke(renderContext) ?? tooltip;
             var width = Width?.Invoke(renderContext) ?? 0;
             var height = Height?.Invoke(renderContext) ?? 0;
 
@@ -61,9 +68,16 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate(horizontalAlignment?.ToClass(), GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
                 Role = role,
-                Alt = tooltip,
+                Alt = alt,
                 Src = uri?.ToString(),
             };
+
+            // a picture without a text alternative is marked as decoration rather than left to
+            // be read out by its file name
+            if (string.IsNullOrWhiteSpace(alt))
+            {
+                html.AddUserAttribute("alt");
+            }
 
             if (!string.IsNullOrWhiteSpace(tooltip))
             {

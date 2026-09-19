@@ -56,11 +56,13 @@ namespace WebExpress.WebUI.WebControl
             var imageWidth = ImageWidth?.Invoke(renderContext);
             var imageHeight = ImageHeight?.Invoke(renderContext);
 
+            // the heading beside the picture names it; the picture itself is decoration
             var img = new HtmlElementMultimediaImg()
             {
                 Src = image?.ToString(),
                 Class = "me-3 mt-3 " // rounded-circle
             };
+            img.AddUserAttribute("alt");
 
             if (imageWidth.HasValue)
             {

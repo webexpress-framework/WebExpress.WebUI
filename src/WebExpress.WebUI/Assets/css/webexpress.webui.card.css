@@ -21,7 +21,7 @@
     --wx-card-border-radius: var(--wx-border-radius);
     --wx-card-inner-radius: calc(var(--wx-border-radius) - var(--wx-border-width));
     --wx-card-bg: var(--wx-body-bg);
-    --wx-card-color: var(--wx-body-color);
+    --wx-card-color: var(--wx-on-surface, var(--wx-body-color));
 
     position: relative;
     display: flex;
@@ -93,10 +93,11 @@
     flex-shrink: 0;
 }
 
-/* dark theme: keep cap and body backgrounds in sync with the body palette */
+/* dark theme: keep cap and body backgrounds in sync with the body palette. the cap darkens
+   rather than lightens, so the light text of a colored card keeps its contrast in the cap */
 @scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
 :scope .wx-card {
     --wx-card-bg: var(--wx-dark);
-    --wx-card-cap-bg: rgba(255, 255, 255, 0.05);
+    --wx-card-cap-bg: rgba(0, 0, 0, 0.12);
 }
 }

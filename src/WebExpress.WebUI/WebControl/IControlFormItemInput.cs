@@ -32,6 +32,12 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, bool> Required { get; }
 
         /// <summary>
+        /// Gives the input an id when it was created without one, so the label a form group
+        /// renders beside it can point at it.
+        /// </summary>
+        void EnsureId();
+
+        /// <summary>
         /// Gets the elements that are displayed in front of the control.
         /// </summary>
         IEnumerable<IControl> Prepend { get; }

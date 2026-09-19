@@ -99,6 +99,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            EnsureInputIds();
+
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);
             var layout = Layout?.Invoke(renderContext) ?? TypeLayoutTab.Default;
             var role = Role?.Invoke(renderContext);

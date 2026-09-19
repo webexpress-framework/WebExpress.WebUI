@@ -18,11 +18,11 @@ test("confirmation treats titles and messages as text and preserves the modal he
     const { modal } = setup();
     const value = '<img src=x onerror="bad()"> & <b>Tab</b>';
     modal.confirmation(value, value, () => {});
-    assert.equal(modal._titleH1.textContent, value);
-    assert.equal(modal._titleH1.parentNode, modal._headerDiv);
+    assert.equal(modal._titleHeading.textContent, value);
+    assert.equal(modal._titleHeading.parentNode, modal._headerDiv);
     assert.equal(modal._bodyDiv.querySelector("p").textContent, value);
     assert.equal(modal._headerDiv.querySelectorAll("button").length, 2);
-    assert.equal(modal._element.getAttribute("aria-labelledby"), modal._titleH1.id);
+    assert.equal(modal._element.getAttribute("aria-labelledby"), modal._titleHeading.id);
 });
 
 test("confirmation waits for async success and ignores duplicate clicks and dismissal while pending", async () => {

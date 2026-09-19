@@ -65,6 +65,13 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
             span.textContent = this._label;
             this._element.appendChild(span);
         }
+
+        // a button that shows an icon alone is named by what it does, and says which way the
+        // pane it toggles is at the moment
+        if (!this._label) {
+            this._element.setAttribute("aria-label", this._i18n("webexpress.webui:split.toggle", "Show or hide the side pane"));
+        }
+        this._element.setAttribute("aria-expanded", this._collapsed ? "false" : "true");
     }
 
     /**

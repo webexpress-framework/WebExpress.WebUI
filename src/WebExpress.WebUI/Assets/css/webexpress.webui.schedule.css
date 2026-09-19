@@ -273,9 +273,10 @@
     background: color-mix(in srgb, var(--wx-info) 8%, var(--wx-body-bg));
 }
 
+/* the emphasis shades keep the small names readable on either body background */
 .wx-schedule-holiday-name {
     font-size: 0.6875rem;
-    color: var(--wx-danger);
+    color: var(--wx-danger-text-emphasis, var(--wx-danger));
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
@@ -284,7 +285,7 @@
 
 .wx-schedule-holiday-name[data-type="observance"],
 .wx-schedule-holiday-name[data-type="school"] {
-    color: var(--wx-info);
+    color: var(--wx-info-text-emphasis, var(--wx-info));
 }
 
 /* entries ---------------------------------------------------------------- */
@@ -297,12 +298,18 @@
     line-height: 1.3;
     border-radius: 3px;
     padding: 0.05rem 0.25rem;
-    background: var(--wx-primary);
-    color: #fff;
     text-decoration: none;
     cursor: pointer;
     min-width: 0;
     overflow: hidden;
+}
+
+/* the colors sit at zero specificity: a color class the item carries (bg-warning and the
+   like) then wins together with the text color that reads on it, instead of leaving white
+   text on a light ground */
+:where(.wx-schedule-entry) {
+    background: var(--wx-primary);
+    color: var(--wx-primary-contrast, #fff);
 }
 
 .wx-schedule-entry:hover {
@@ -316,9 +323,9 @@
     min-width: 0;
 }
 
+/* the time is small white text on a colored chip: any dimming drops it under 4.5:1 */
 .wx-schedule-entry-time {
     font-variant-numeric: tabular-nums;
-    opacity: 0.85;
     flex: 0 0 auto;
 }
 

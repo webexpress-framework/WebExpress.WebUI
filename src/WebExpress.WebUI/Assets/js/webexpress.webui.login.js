@@ -27,6 +27,8 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
         // read potential prefilled data
         this._prefilledUsername = element.dataset.username || "";
         this._title = element.dataset.title || this._i18n("webexpress.webui:login.title", "Login");
+        // the outline level of the title: second level on a page of its own, deeper when embedded
+        this._headingLevel = Math.min(6, Math.max(1, parseInt(element.dataset.headingLevel, 10) || 2));
         this._plain = !!element.closest(webexpress.webui.LoginCtrl.DIALOG_BODY_SELECTOR);
 
         // the form and its fields are addressed by id - the labels point at the fields, a
@@ -46,6 +48,7 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
         element.classList.add(this._plain ? "wx-login-plain" : "wx-login");
         element.removeAttribute("data-username");
         element.removeAttribute("data-title");
+        element.removeAttribute("data-heading-level");
 
         this._buildDom();
         this._attachEventHandlers();
@@ -73,9 +76,9 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
         const cardBody = document.createElement("div");
         cardBody.className = "card-body p-4";
 
-        // create heading
-        const heading = document.createElement("h2");
-        heading.className = "card-title text-center mb-4";
+        // create heading; the h2 class keeps the look whatever level the outline asks for
+        const heading = document.createElement("h" + this._headingLevel);
+        heading.className = "card-title h2 text-center mb-4";
         heading.textContent = this._title;
 
         // assemble dialog
@@ -123,8 +126,10 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
         passLabel.setAttribute("for", this._id + "-password");
         passLabel.textContent = this._i18n("webexpress.webui:login.password", "Password");
 
+        // a plain field, not the marker of the password control: on a bare input the control
+        // would strip the id and the name, and with them the label the field is named by
         this._passwordInput = document.createElement("input");
-        this._passwordInput.className = "form-control wx-webui-input-password";
+        this._passwordInput.className = "form-control";
         this._passwordInput.type = "password";
         this._passwordInput.id = this._id + "-password";
         this._passwordInput.name = "password";

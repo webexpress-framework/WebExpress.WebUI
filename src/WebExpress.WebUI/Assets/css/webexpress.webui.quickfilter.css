@@ -23,9 +23,10 @@
    hue - primary by default, swapped by a color class or an inline value - so
    every state rule below follows a colored chip automatically */
 .wx-quickfilter-btn-chip {
-    outline: none;
     background: transparent;
-    color: var(--wx-quickfilter-accent, var(--wx-primary));
+    /* the text of a hollow chip sits on the body background, where the accent surface
+       color falls short of 4.5:1; the emphasis variant of the hue is the readable one */
+    color: var(--wx-quickfilter-text, var(--wx-primary-text-emphasis));
     font-size: 0.85em;
     font-weight: 500;
     border-radius: 20px;
@@ -41,7 +42,16 @@
 .wx-quickfilter-btn-chip:is(.btn-primary, .btn-secondary, .btn-success, .btn-info, .btn-warning, .btn-danger, .btn-light, .btn-dark, .btn-highlight) {
     --wx-quickfilter-accent: var(--wx-btn-bg);
     --wx-quickfilter-contrast: var(--wx-btn-color);
+    --wx-quickfilter-text: var(--wx-btn-bg);
 }
+
+/* the hue of a colored chip has an emphasis variant that reads on the body background */
+.wx-quickfilter-btn-chip.btn-primary { --wx-quickfilter-text: var(--wx-primary-text-emphasis); }
+.wx-quickfilter-btn-chip.btn-secondary { --wx-quickfilter-text: var(--wx-secondary-text-emphasis); }
+.wx-quickfilter-btn-chip.btn-success { --wx-quickfilter-text: var(--wx-success-text-emphasis); }
+.wx-quickfilter-btn-chip.btn-info { --wx-quickfilter-text: var(--wx-info-text-emphasis); }
+.wx-quickfilter-btn-chip.btn-warning { --wx-quickfilter-text: var(--wx-warning-text-emphasis); }
+.wx-quickfilter-btn-chip.btn-danger { --wx-quickfilter-text: var(--wx-danger-text-emphasis); }
 
 /* chip button active state */
 .wx-quickfilter-btn-chip.active,
@@ -54,7 +64,7 @@
 /* chip button hover (not active) */
 .wx-quickfilter-btn-chip:hover {
     background: var(--wx-tertiary-bg);
-    color: var(--wx-quickfilter-accent, var(--wx-primary));
+    color: var(--wx-quickfilter-text, var(--wx-primary-text-emphasis));
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 

@@ -95,6 +95,9 @@ webexpress.webui.InputSliderCtrl = class extends webexpress.webui.Ctrl {
             element.appendChild(this._labelMin);
             element.appendChild(this._labelMax);
         }
+        // each handle is named by the field label and by the bound it moves
+        this._nameHandle(this._handleMin, this._i18n("webexpress.webui:slider.minimum", "Minimum"), element);
+        this._nameHandle(this._handleMax, this._i18n("webexpress.webui:slider.maximum", "Maximum"), element);
 
         // re-render labels/handles on resize so percentages stay accurate
         window.addEventListener("resize", () => this.render());
@@ -134,6 +137,21 @@ webexpress.webui.InputSliderCtrl = class extends webexpress.webui.Ctrl {
             hidden.disabled = true;
         }
         return hidden;
+    }
+
+    /**
+     * Names a handle after the field and the bound it stands for, so two sliders on a
+     * page and two handles on a slider are told apart.
+     * @param {HTMLElement} handle The handle element.
+     * @param {string} bound The bound the handle moves, spelled out.
+     * @param {HTMLElement} host The host element carrying the server-set attributes.
+     */
+    _nameHandle(handle, bound, host) {
+        const text = document.createElement("span");
+        text.className = "visually-hidden";
+        text.textContent = bound;
+        handle.appendChild(text);
+        this._adoptFieldLabel(handle, this._id, host, [text]);
     }
 
     /**

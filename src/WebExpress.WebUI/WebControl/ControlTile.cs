@@ -35,6 +35,13 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> LargeIcon { get; set; }
 
         /// <summary>
+        /// Gets or sets the outline level of the card titles. A card title is a fifth-level
+        /// heading by default; a page that places the tiles right under a shallower heading
+        /// sets the level that keeps its outline without a gap.
+        /// </summary>
+        public Func<IRenderControlContext, int?> HeadingLevel { get; set; }
+
+        /// <summary>
         /// Gets or sets whether the tiles take the height their host offers
         /// instead of growing with their number.
         /// </summary>
@@ -113,6 +120,7 @@ namespace WebExpress.WebUI.WebControl
             var movable = Movable?.Invoke(renderContext) ?? false;
             var allowRemove = AllowRemove?.Invoke(renderContext) ?? false;
             var largeIcon = LargeIcon?.Invoke(renderContext) ?? false;
+            var headingLevel = HeadingLevel?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
@@ -125,6 +133,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-movable", movable ? "true" : null)
                 .AddUserAttribute("data-allow-remove", allowRemove ? "true" : null)
                 .AddUserAttribute("data-large-icon", largeIcon ? "true" : null)
+                .AddUserAttribute("data-heading-level", headingLevel?.ToString())
                 .Add
                 (
                     _items.Select

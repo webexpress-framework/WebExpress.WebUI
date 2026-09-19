@@ -15,8 +15,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the avatar dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-avatar-dropdown"" role=""button""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-avatar-dropdown"" role=""button""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-avatar-dropdown""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-avatar-dropdown""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -37,8 +37,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the name property of the avatar dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-avatar-dropdown"" role=""button""></div>")]
-        [InlineData("Max Mustermann", @"<div class=""wx-webui-avatar-dropdown"" role=""button"" data-name=""Max Mustermann""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-avatar-dropdown""></div>")]
+        [InlineData("Max Mustermann", @"<div class=""wx-webui-avatar-dropdown"" data-name=""Max Mustermann""></div>")]
         public void Name(string name, string expected)
         {
             // arrange
@@ -60,8 +60,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the image property of the avatar dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-avatar-dropdown"" role=""button""></div>")]
-        [InlineData("http://example.com/avatar.png", @"<div class=""wx-webui-avatar-dropdown"" role=""button"" data-src=""http://example.com/avatar.png""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-avatar-dropdown""></div>")]
+        [InlineData("http://example.com/avatar.png", @"<div class=""wx-webui-avatar-dropdown"" data-src=""http://example.com/avatar.png""></div>")]
         public void Image(string uri, string expected)
         {
             // arrange
@@ -83,8 +83,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the initials property of the avatar dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-avatar-dropdown"" role=""button""></div>")]
-        [InlineData("MM", @"<div class=""wx-webui-avatar-dropdown"" role=""button"" data-initials=""MM""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-avatar-dropdown""></div>")]
+        [InlineData("MM", @"<div class=""wx-webui-avatar-dropdown"" data-initials=""MM""></div>")]
         public void Initials(string initials, string expected)
         {
             // arrange
@@ -106,8 +106,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the shape property of the avatar dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(TypeShapeAvatar.Circle, @"<div class=""wx-webui-avatar-dropdown"" role=""button""></div>")]
-        [InlineData(TypeShapeAvatar.Rect, @"<div class=""wx-webui-avatar-dropdown"" role=""button"" data-shape=""rect""></div>")]
+        [InlineData(TypeShapeAvatar.Circle, @"<div class=""wx-webui-avatar-dropdown""></div>")]
+        [InlineData(TypeShapeAvatar.Rect, @"<div class=""wx-webui-avatar-dropdown"" data-shape=""rect""></div>")]
         public void Shape(TypeShapeAvatar shape, string expected)
         {
             // arrange
@@ -129,8 +129,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the size property of the avatar dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(-1, @"<div class=""wx-webui-avatar-dropdown"" role=""button""></div>")]
-        [InlineData(48, @"<div class=""wx-webui-avatar-dropdown"" role=""button"" data-size=""48""></div>")]
+        [InlineData(-1, @"<div class=""wx-webui-avatar-dropdown""></div>")]
+        [InlineData(48, @"<div class=""wx-webui-avatar-dropdown"" data-size=""48""></div>")]
         public void Size(int size, string expected)
         {
             // arrange
@@ -152,9 +152,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the color property of the avatar dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorButton.Default, @"<div class=""wx-webui-avatar-dropdown"" role=""button""></div>")]
-        [InlineData(TypeColorButton.Primary, @"<div class=""wx-webui-avatar-dropdown"" role=""button"" data-color=""btn-primary""></div>")]
-        [InlineData(TypeColorButton.Secondary, @"<div class=""wx-webui-avatar-dropdown"" role=""button"" data-color=""btn-secondary""></div>")]
+        [InlineData(TypeColorButton.Default, @"<div class=""wx-webui-avatar-dropdown""></div>")]
+        [InlineData(TypeColorButton.Primary, @"<div class=""wx-webui-avatar-dropdown"" data-color=""btn-primary""></div>")]
+        [InlineData(TypeColorButton.Secondary, @"<div class=""wx-webui-avatar-dropdown"" data-color=""btn-secondary""></div>")]
         public void Color(TypeColorButton color, string expected)
         {
             // arrange
@@ -176,8 +176,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the alignment menu property of the avatar dropdown control.
         /// </summary>
         [Theory]
-        [InlineData(TypeAlignmentDropdownMenu.Default, @"<div class=""wx-webui-avatar-dropdown"" role=""button""></div>")]
-        [InlineData(TypeAlignmentDropdownMenu.Right, @"<div class=""wx-webui-avatar-dropdown"" role=""button"" data-menuCss=""dropdown-menu-end""></div>")]
+        [InlineData(TypeAlignmentDropdownMenu.Default, @"<div class=""wx-webui-avatar-dropdown""></div>")]
+        [InlineData(TypeAlignmentDropdownMenu.Right, @"<div class=""wx-webui-avatar-dropdown"" data-menuCss=""dropdown-menu-end""></div>")]
         public void AlignmentMenu(TypeAlignmentDropdownMenu alignmentMenu, string expected)
         {
             // arrange
@@ -212,7 +212,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-avatar-dropdown"" role=""button""><div class=""wx-dropdown-item"">abc</div></div>", html.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-avatar-dropdown""><div class=""wx-dropdown-item"">abc</div></div>", html.Trim());
         }
 
         /// <summary>
@@ -232,7 +232,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-avatar-dropdown"" role=""button""><div class=""wx-dropdown-divider"" role=""separator""></div></div>", html.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-avatar-dropdown""><div class=""wx-dropdown-divider"" role=""separator""></div></div>", html.Trim());
         }
 
         /// <summary>
@@ -252,7 +252,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-avatar-dropdown"" role=""button""><div class=""wx-dropdown-header"" role=""heading"">Settings</div></div>", html.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-avatar-dropdown""><div class=""wx-dropdown-header"" role=""heading"">Settings</div></div>", html.Trim());
         }
 
         /// <summary>
@@ -274,7 +274,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-avatar-dropdown"" role=""button"" data-name=""Max Mustermann"" data-src=""http://example.com/avatar.png""></div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-avatar-dropdown"" data-name=""Max Mustermann"" data-src=""http://example.com/avatar.png""></div>", html);
         }
 
         /// <summary>
@@ -300,7 +300,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-avatar-dropdown"" role=""button"" data-name=""Max Mustermann"" data-initials=""MM"" data-shape=""rect"" data-size=""48""><div class=""wx-dropdown-item"">Profile</div></div>", html.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-avatar-dropdown"" data-name=""Max Mustermann"" data-initials=""MM"" data-shape=""rect"" data-size=""48""><div class=""wx-dropdown-item"">Profile</div></div>", html.Trim());
         }
 
         /// <summary>
@@ -322,7 +322,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-avatar-dropdown"" role=""button""></div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-avatar-dropdown""></div>", html);
         }
     }
 }

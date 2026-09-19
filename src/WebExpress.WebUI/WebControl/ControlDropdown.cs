@@ -207,6 +207,7 @@ namespace WebExpress.WebUI.WebControl
             var icon = Icon?.Invoke(renderContext);
             var image = Image?.Invoke(renderContext);
             var text = Text?.Invoke(renderContext);
+            var tooltip = Tooltip?.Invoke(renderContext);
             var active = Active?.Invoke(renderContext);
 
             if (color is not null)
@@ -235,13 +236,16 @@ namespace WebExpress.WebUI.WebControl
                 menuCss = Css.Concatenate(alignmentMenu?.ToClass(), menuCss);
             }
 
+            // the host is a plain container: the button the client builds inside it carries the
+            // role, and a role on the host would nest one interactive element in another
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-dropdown", GetClasses(renderContext)),
-                Role = role ?? "button"
+                Role = role
             }
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, text))
+                .AddUserAttribute("title", I18N.Translate(renderContext, tooltip))
                 .AddUserAttribute("data-icon", (icon as Icon)?.Class)
                 .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-buttonCss", buttonCss)

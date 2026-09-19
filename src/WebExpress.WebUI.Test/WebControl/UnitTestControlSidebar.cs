@@ -15,9 +15,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the sidebar control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-sidebar""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-sidebar""></div>")]
-        [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<div id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C"" class=""wx-webui-sidebar""></div>")]
+        [InlineData(null, @"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar""></nav>")]
+        [InlineData("id", @"<nav id=""id"" class=""wx-webui-sidebar"" aria-label=""Sidebar""></nav>")]
+        [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<nav id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C"" class=""wx-webui-sidebar"" aria-label=""Sidebar""></nav>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -31,6 +31,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -38,18 +39,18 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the background color property of the sidebar control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorBackground.Default, @"<div class=""wx-webui-sidebar""></div>")]
-        [InlineData(TypeColorBackground.Primary, @"<div class=""wx-webui-sidebar bg-primary""></div>")]
-        [InlineData(TypeColorBackground.Info, @"<div class=""wx-webui-sidebar bg-info""></div>")]
-        [InlineData(TypeColorBackground.Success, @"<div class=""wx-webui-sidebar bg-success""></div>")]
-        [InlineData(TypeColorBackground.Secondary, @"<div class=""wx-webui-sidebar bg-secondary""></div>")]
-        [InlineData(TypeColorBackground.Warning, @"<div class=""wx-webui-sidebar bg-warning""></div>")]
-        [InlineData(TypeColorBackground.Danger, @"<div class=""wx-webui-sidebar bg-danger""></div>")]
-        [InlineData(TypeColorBackground.Dark, @"<div class=""wx-webui-sidebar bg-dark""></div>")]
-        [InlineData(TypeColorBackground.Light, @"<div class=""wx-webui-sidebar bg-light""></div>")]
-        [InlineData(TypeColorBackground.Highlight, @"<div class=""wx-webui-sidebar bg-highlight""></div>")]
-        [InlineData(TypeColorBackground.White, @"<div class=""wx-webui-sidebar bg-white""></div>")]
-        [InlineData(TypeColorBackground.Transparent, @"<div class=""wx-webui-sidebar bg-transparent""></div>")]
+        [InlineData(TypeColorBackground.Default, @"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar""></nav>")]
+        [InlineData(TypeColorBackground.Primary, @"<nav class=""wx-webui-sidebar bg-primary"" aria-label=""Sidebar""></nav>")]
+        [InlineData(TypeColorBackground.Info, @"<nav class=""wx-webui-sidebar bg-info"" aria-label=""Sidebar""></nav>")]
+        [InlineData(TypeColorBackground.Success, @"<nav class=""wx-webui-sidebar bg-success"" aria-label=""Sidebar""></nav>")]
+        [InlineData(TypeColorBackground.Secondary, @"<nav class=""wx-webui-sidebar bg-secondary"" aria-label=""Sidebar""></nav>")]
+        [InlineData(TypeColorBackground.Warning, @"<nav class=""wx-webui-sidebar bg-warning"" aria-label=""Sidebar""></nav>")]
+        [InlineData(TypeColorBackground.Danger, @"<nav class=""wx-webui-sidebar bg-danger"" aria-label=""Sidebar""></nav>")]
+        [InlineData(TypeColorBackground.Dark, @"<nav class=""wx-webui-sidebar bg-dark"" aria-label=""Sidebar""></nav>")]
+        [InlineData(TypeColorBackground.Light, @"<nav class=""wx-webui-sidebar bg-light"" aria-label=""Sidebar""></nav>")]
+        [InlineData(TypeColorBackground.Highlight, @"<nav class=""wx-webui-sidebar bg-highlight"" aria-label=""Sidebar""></nav>")]
+        [InlineData(TypeColorBackground.White, @"<nav class=""wx-webui-sidebar bg-white"" aria-label=""Sidebar""></nav>")]
+        [InlineData(TypeColorBackground.Transparent, @"<nav class=""wx-webui-sidebar bg-transparent"" aria-label=""Sidebar""></nav>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
             // arrange
@@ -64,6 +65,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -71,10 +73,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the breakpoint property of the sidebar control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-sidebar""></div>")]
-        [InlineData(-1, @"<div class=""wx-webui-sidebar""></div>")]
-        [InlineData(0, @"<div class=""wx-webui-sidebar"" data-breakpoint=""0""></div>")]
-        [InlineData(100, @"<div class=""wx-webui-sidebar"" data-breakpoint=""100""></div>")]
+        [InlineData(null, @"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar""></nav>")]
+        [InlineData(-1, @"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar""></nav>")]
+        [InlineData(0, @"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar"" data-breakpoint=""0""></nav>")]
+        [InlineData(100, @"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar"" data-breakpoint=""100""></nav>")]
         public void Breakpoint(int? breakpoint, string expected)
         {
             // arrange
@@ -91,6 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -99,9 +102,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// flyout by default, so only the opt-out (false) is expected to emit an attribute.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-sidebar""></div>")]
-        [InlineData(true, @"<div class=""wx-webui-sidebar""></div>")]
-        [InlineData(false, @"<div class=""wx-webui-sidebar"" data-hover-expanded=""false""></div>")]
+        [InlineData(null, @"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar""></nav>")]
+        [InlineData(true, @"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar""></nav>")]
+        [InlineData(false, @"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar"" data-hover-expanded=""false""></nav>")]
         public void HoverExpanded(bool? hoverExpanded, string expected)
         {
             // arrange
@@ -118,6 +121,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -126,9 +130,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// active item into view by default, so only the opt-out (false) emits an attribute.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-sidebar""></div>")]
-        [InlineData(true, @"<div class=""wx-webui-sidebar""></div>")]
-        [InlineData(false, @"<div class=""wx-webui-sidebar"" data-scroll-active=""false""></div>")]
+        [InlineData(null, @"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar""></nav>")]
+        [InlineData(true, @"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar""></nav>")]
+        [InlineData(false, @"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar"" data-scroll-active=""false""></nav>")]
         public void ScrollActiveIntoView(bool? scrollActiveIntoView, string expected)
         {
             // arrange
@@ -145,6 +149,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -167,7 +172,8 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-sidebar""><div class=""wx-sidebar-link"" data-label=""abc""></div></div>", html);
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar""><div class=""wx-sidebar-link"" data-label=""abc""></div></nav>", html);
         }
 
         /// <summary>
@@ -189,7 +195,8 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-sidebar""><div class=""wx-sidebar-toolbar""><div class=""wx-toolbar-button"" data-label=""abc""></div></div></div>", html);
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<nav class=""wx-webui-sidebar"" aria-label=""Sidebar""><div class=""wx-sidebar-toolbar""><div class=""wx-toolbar-button"" data-label=""abc""></div></div></nav>", html);
         }
     }
 }

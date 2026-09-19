@@ -372,6 +372,19 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
      * Setup event delegation for static list events (like delete).
      */
     _setupEventDelegation() {
+        // the keys a button answers to select a plain row the way a click does
+        this._list.addEventListener("keydown", (e) => {
+            if ((e.key !== "Enter" && e.key !== " ") || !this._selectable) {
+                return;
+            }
+            const body = e.target.closest ? e.target.closest(".wx-list-body[role=\"button\"]") : null;
+            const item = body?.closest("li")?._dataItemRef;
+            if (body && item) {
+                e.preventDefault();
+                this._handleSelectionChange(item, e);
+            }
+        });
+
         this._list.addEventListener("click", (e) => {
             const target = e.target;
 
@@ -423,7 +436,8 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         // remove active class from previous
         if (this._selectedItem && this._selectedItem._anchorLi) {
             this._selectedItem._anchorLi.classList.remove("active", "wx-list-item-active");
-            this._selectedItem._anchorLi.removeAttribute("aria-selected");
+            this._selectedItem._anchorLi.removeAttribute("aria-current");
+            this._selectedItem._anchorLi.querySelector(":scope > .wx-list-body[role=\"button\"]")?.setAttribute("aria-pressed", "false");
         }
 
         this._selectedItem = item;
@@ -431,7 +445,8 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         // add active class and highlight border to new selection
         if (this._selectedItem && this._selectedItem._anchorLi) {
             this._selectedItem._anchorLi.classList.add("active", "wx-list-item-active");
-            this._selectedItem._anchorLi.setAttribute("aria-selected", "true");
+            this._selectedItem._anchorLi.setAttribute("aria-current", "true");
+            this._selectedItem._anchorLi.querySelector(":scope > .wx-list-body[role=\"button\"]")?.setAttribute("aria-pressed", "true");
         }
 
         if (dispatch) {
@@ -899,7 +914,8 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             btn.setAttribute("aria-label", this._i18n("webexpress.webui:list.tree.toggle", "Expand or collapse"));
 
             const icon = document.createElement("span");
-            icon.className = "wx-tree-indicator-angle" + (it.expanded ? " wx-tree-expand" : "");
+            // the chevron is a drawing of the icon set: the class alone is a mask without a shape
+            icon.className = "wx-tree-indicator-angle " + this._iconClass("angle-down") + (it.expanded ? " wx-tree-expand" : "");
             btn.appendChild(icon);
 
             btn.addEventListener("click", (e) => {
@@ -945,7 +961,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             // restore selection state
             if (this._selectedItem === it) {
                 li.classList.add("active", "wx-list-item-active");
-                li.setAttribute("aria-selected", "true");
+                li.setAttribute("aria-current", "true");
             }
 
             if (it.colorCss) {
@@ -1081,6 +1097,15 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 li.appendChild(actionEl);
             } else {
                 li.appendChild(body);
+                // a plain row of a selectable list is chosen by clicking it; the keyboard reaches
+                // its body as a toggle, while a row with its own link or button is reached through
+                // that. the body rather than the row, so the option and delete buttons beside it
+                // are not nested inside the toggle
+                if (this._selectable) {
+                    body.setAttribute("role", "button");
+                    body.setAttribute("tabindex", "0");
+                    body.setAttribute("aria-pressed", this._selectedItem === it ? "true" : "false");
+                }
             }
 
             // options or delete button
@@ -1089,6 +1114,8 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 opt.dataset.icon = this._iconClass("cog");
                 opt.dataset.size = "btn-sm";
                 opt.dataset.border = "false";
+                // the menu shows an icon alone, so it says what it is
+                opt.title = this._i18n("webexpress.webui:table.options.label", "Options");
                 new webexpress.webui.DropdownCtrl(opt).items = it.options;
                 li.appendChild(opt);
             } else if (this._deletable) {

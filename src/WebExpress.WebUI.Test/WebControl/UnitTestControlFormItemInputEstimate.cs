@@ -88,9 +88,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form estimate control.
         /// </summary>
         [Theory]
-        [InlineData(uint.MaxValue, @"*<div class=""wx-webui-input-estimate""></div>*")]
-        [InlineData(0, @"*<div class=""wx-webui-input-estimate"" data-value=""0""></div>*")]
-        [InlineData(8, @"*<div class=""wx-webui-input-estimate"" data-value=""8""></div>*")]
+        [InlineData(uint.MaxValue, @"*<div id=""*"" class=""wx-webui-input-estimate""></div>*")]
+        [InlineData(0, @"*<div id=""*"" class=""wx-webui-input-estimate"" data-value=""0""></div>*")]
+        [InlineData(8, @"*<div id=""*"" class=""wx-webui-input-estimate"" data-value=""8""></div>*")]
         public void Value(uint value, string expected)
         {
             // arrange
@@ -185,7 +185,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree);
 
             // validation
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-input-estimate"" data-colors-css=""bg-success|"" data-colors-style=""|background:#ff0000;""></div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-input-estimate"" data-colors-css=""bg-success|"" data-colors-style=""|background:#ff0000;color:#000;""></div>", html);
         }
 
         /// <summary>

@@ -71,10 +71,18 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
         element.appendChild(dropdownMenu);
 
         // attach native popover behavior for the dropdown menu
-        this._initializeMenu(dropdown, dropdownMenu, dropdown.querySelector("button"));
+        const trigger = dropdown.querySelector("button");
+        this._initializeMenu(dropdown, dropdownMenu, trigger);
         dropdownMenu.addEventListener("toggle", (event) => {
             if (event.newState === "open") { this._filterInput.focus({ preventScroll: true }); }
         });
+        // the trigger is named by the field label and by the box that shows what is chosen,
+        // so it reads as "Country: Germany" rather than as a bare arrow
+        this._adoptFieldLabel(trigger, id, element, [this._selection]);
+        if (!trigger.hasAttribute("aria-labelledby") && !trigger.hasAttribute("aria-label")) {
+            trigger.setAttribute("aria-label", this._placeholder);
+        }
+        dropdownMenu.setAttribute("aria-label", this._placeholder);
 
         // follow the field this selection depends on, if it names one. this has to happen
         // after the value was applied: the initial value may itself be one the dependency
@@ -118,7 +126,6 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
 
         const expandIcon = document.createElement("button");
         expandIcon.type = "button";
-        expandIcon.setAttribute("aria-label", this._placeholder);
         expandIcon.className = "wx-selection-trigger";
         const drawing = document.createElement("i");
         drawing.className = this._iconClass("angle-down");
@@ -566,9 +573,10 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
                 li.appendChild(span);
 
                 if (!isStickyActive) {
-                    const closeButton = document.createElement("a");
-                    closeButton.className = this._iconClass("xmark");
-                    closeButton.style.cursor = "pointer";
+                    const closeButton = document.createElement("button");
+                    closeButton.type = "button";
+                    closeButton.className = "wx-chip-remove " + this._iconClass("xmark");
+                    closeButton.setAttribute("aria-label", this._i18n("webexpress.webui:selection.remove", "Remove {0}").replace("{0}", () => item.label));
                     closeButton.addEventListener("click", (e) => {
                         e.stopPropagation();
                         this.value = this._values.filter((v) => { return v !== value; });
@@ -580,12 +588,16 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
             }
         });
 
-        // show placeholder if nothing is selected
+        // show placeholder if nothing is selected; as an entry of the list, since a list
+        // holds nothing but entries
         if (this._values.length === 0) {
+            const li = document.createElement("li");
+            li.className = "wx-selection-placeholder";
             const span = document.createElement("span");
             span.textContent = this._placeholder;
+            li.appendChild(span);
             this._selection.innerHTML = "";
-            this._selection.appendChild(span);
+            this._selection.appendChild(li);
         }
 
         // update the value of the hidden input

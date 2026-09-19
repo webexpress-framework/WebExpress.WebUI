@@ -44,12 +44,13 @@
     font-weight: 600;
 }
 
+/* the emphasis shades: the raw tints fall short of 4.5:1 on the dark body */
 .wx-stat-up {
-    color: var(--wx-success, #198754);
+    color: var(--wx-success-text-emphasis, #0a3622);
 }
 
 .wx-stat-down {
-    color: var(--wx-danger, #dc3545);
+    color: var(--wx-danger-text-emphasis, #58151c);
 }
 
 .wx-stat-neutral {
