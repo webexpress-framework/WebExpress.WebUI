@@ -9,7 +9,7 @@ The file `webexpress.webui.js` is the core of the WebExpress.WebUI JavaScript fr
 |Class / Singleton                   |Type      |Description
 |------------------------------------|----------|----------------------------------------------------------
 |`webexpress.webui.Controller`       |Singleton |Central controller that monitors the DOM, manages control instances, and delegates actions.
-|`webexpress.webui.FilterRegistry`   |Singleton |Manages client-side quick-filter state with group constraints and cookie persistence.
+|`webexpress.webui.FilterRegistry`   |Singleton |Manages client-side quick-filter state with group constraints and localStorage persistence.
 |`webexpress.webui.I18N`             |Singleton |Internationalization helper for translations with automatic language detection.
 |`webexpress.webui.Syntax`           |Singleton |Registry for language-specific syntax-highlighting configurations.
 |`webexpress.webui.Actions`          |Singleton |Dynamic registry for action plugins that can be extended from external files.
@@ -397,14 +397,14 @@ webexpress.webui.Actions.register("redirect", {
 
 ## FilterRegistry
 
-The `FilterRegistry` singleton manages client-side quick-filter state. It supports group constraints, exclusive filters, reset filters, and persists state to cookies.
+The `FilterRegistry` singleton manages client-side quick-filter state. It supports group constraints, exclusive filters, reset filters, and persists state to localStorage.
 
 ### Methods
 
 |Method                     |Description
 |---------------------------|--------------------------------------------------------------
 |`registerFilters(filters)` |Registers an array of filter definitions.
-|`init()`                   |Initializes state from the cookie and broadcasts the initial state.
+|`init()`                   |Initializes state from localStorage and broadcasts the initial state.
 |`activate(id)`             |Activates a filter by ID, enforcing group exclusivity constraints.
 |`deactivate(id)`           |Deactivates a filter by ID.
 |`toggle(id)`               |Toggles the state of a filter.
@@ -806,3 +806,36 @@ document.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, (e) => {
 // dispatch an event from a control
 this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: selectedItem });
 ```
+
+
+## Browser UI preferences
+
+`webexpress.webui.LocalStorage` provides `getItem(key)`, `setItem(key, value)`,
+`getJson(key)` and `setJson(key, value)` for optional UI preferences. Reads return
+`null` when storage is blocked, absent or (for JSON) malformed. Failed writes
+leave the UI usable. A null or empty key disables persistence. Structured state
+is plain JSON, without URI encoding. Controls validate the values they restore.
+
+Preferences remain on the current origin across browser sessions until the user
+clears site storage. They are never sent as UI cookies. Existing UI cookies are
+not read or migrated; the next interaction records the preference in localStorage.
+Authentication cookies and application-owned server theme selection are independent.
+
+| State | localStorage key |
+| --- | --- |
+| Light/dark scheme | `wx_darkmode` |
+| Active quickfilter identifiers | `wx_quickfilters` (JSON array) |
+| Splitter size and collapsed state | `wx-split-{id}` |
+| Active view | `data-persist-key` or `wx_view_state_{id}` |
+| Active tab | `data-persist-key` or `wx-tab:{id}` |
+| Calendar presentation | `data-persist-key` or `wx-schedule-view:{id}` |
+| List order, tile order/visibility, table layout | `data-persist-key` or the control id |
+| Section folding | `wx-section:{id}` (honors `data-persist="false"`) |
+| WebApp file presentation | `data-persist-key` or `wx_file_view_{id}` |
+| WebApp AdvancedSearch mode | `data-persist-key` or `wx_search_mode_{id}` |
+| WebApp comment sort direction | `wx_comment_sort_dir` |
+
+Give controls stable, unique ids across page loads, or an explicit stable
+`data-persist-key` where supported. Controls without either do not share a fallback
+key. The color scheme, quickfilters and comment sort direction are origin-wide.
+Stored selections that no longer exist fall back to the declared defaults.

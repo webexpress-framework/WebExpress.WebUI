@@ -4,7 +4,7 @@
 
 The Quickfilter component provides a highly responsive, client-side filtering system designed to manage and synchronize filter states across multiple UI elements without triggering immediate REST API calls. By centralizing the filter state within a dedicated browser registry (`webexpress.webui.FilterRegistry`), the system ensures that complex group rules—such as exclusive radio-button-like selections or multi-select combinations—are strictly enforced. 
 
-Display components bind to this registry and react autonomously to state changes. Whether a component re-renders local data or decides to fetch new data from the server is entirely up to the consuming element. To ensure a persistent user experience, the registry automatically serializes the active filters and stores them safely in a debounced cookie. Upon initialization, the registry reads this cookie, validates the entries against a known list of allowed filters, and broadcasts the initial state so all UI components start consistently.
+Display components bind to this registry and react autonomously to state changes. Whether a component re-renders local data or decides to fetch new data from the server is entirely up to the consuming element. To ensure a persistent user experience, the registry automatically serializes the active filters and stores them safely in a debounced localStorage write. Upon initialization, the registry reads this localStorage entry, validates the entries against a known list of allowed filters, and broadcasts the initial state so all UI components start consistently.
 
 ```
    ┌────────────────────────────────────────────────────────┐
@@ -44,7 +44,7 @@ Other components on the page that need to react to filter changes use an extensi
 
 ## Functionality
 
-When a user interacts with a Quickfilter button, the action delegates the request to the central filter registry. The registry updates its internal state, applying group exclusivity rules if necessary, and immediately writes the new state to the browser cookie. 
+When a user interacts with a Quickfilter button, the action delegates the request to the central filter registry. The registry updates its internal state, applying group exclusivity rules if necessary, and schedules a debounced write of the new state to localStorage.
 
 Once the state is updated, the registry dispatches a global `webexpress.webui.Event.CHANGE_FILTER_EVENT`. The `QuickFilterCtrl` listens to this event and completely re-renders its content. During the render cycle, it first recreates all predefined static buttons, automatically highlighting them as active if their corresponding filter is enabled (or if they serve as a reset button for a currently empty group). Afterwards, it generates removable chips for any active filters that are not already represented by a static button. These chips feature a close icon that directly triggers the deactivation of the respective filter.
 

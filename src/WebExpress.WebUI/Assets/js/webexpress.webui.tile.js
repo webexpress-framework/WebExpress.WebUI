@@ -807,26 +807,25 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
                 order: this._tiles.map(t => t.id),
                 visible: this._tiles.filter(t => t.visible).map(t => t.id)
             };
-            const json = encodeURIComponent(JSON.stringify(state));
-            document.cookie = `${this._persistKey}=${json}; path=/; SameSite=Lax`;
+            webexpress.webui.LocalStorage.setJson(this._persistKey, state);
         } catch (_) {
             // ignore
         }
     }
 
     /**
-     * Loads persisted state from cookie.
+     * Loads persisted state from localStorage.
      */
     _loadState() {
         if (!this._persistKey) {
             return;
         }
-        const raw = this._readCookie(this._persistKey);
+        const raw = webexpress.webui.LocalStorage.getJson(this._persistKey);
         if (!raw) {
             return;
         }
         try {
-            const obj = JSON.parse(decodeURIComponent(raw));
+            const obj = raw;
             if (!obj || obj.v !== 1) {
                 return;
             }
@@ -836,6 +835,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
                 for (const id of obj.order) {
                     if (map.has(id)) {
                         reordered.push(map.get(id));
+                        map.delete(id);
                     }
                 }
                 for (const t of this._tiles) {
@@ -847,33 +847,17 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             }
             if (Array.isArray(obj.visible)) {
                 const vis = new Set(obj.visible);
+                const known = new Set(Array.isArray(obj.order) ? obj.order : obj.visible);
                 for (const t of this._tiles) {
-                    t.visible = t.id ? vis.has(t.id) : t.visible;
+                    t.visible = t.id && known.has(t.id) ? vis.has(t.id) : t.visible;
                 }
             }
             this._markSearchDirty();
         } catch (_) {
-            // ignore malformed cookie
+            // ignore malformed localStorage
         }
     }
 
-    /**
-     * Reads a cookie by name.
-     * @param {string} name - Cookie name.
-     * @returns {string|null} Value.
-     */
-    _readCookie(name) {
-        if (!name) {
-            return null;
-        }
-        const parts = document.cookie.split(";").map(s => s.trim());
-        for (const p of parts) {
-            if (p.startsWith(name + "=")) {
-                return p.substring(name.length + 1);
-            }
-        }
-        return null;
-    }
 };
 
 // register controller class

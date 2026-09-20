@@ -27,11 +27,13 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
+        this._storageKey = element.dataset.persistKey || (element.id ? `wx-tab:${element.id}` : null);
         this._initTabs();
 
         // set initial active tab
         if (this._tabs.length > 0) {
-            this.selectTab(this._tabs[0].id);
+            const stored = webexpress.webui.LocalStorage.getItem(this._storageKey);
+            this.selectTab(this._tabs.some(tab => tab.id === stored) ? stored : this._tabs[0].id);
         }
     }
 
@@ -213,11 +215,12 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
      */
     selectTab(tabId) {
         // prevent redundant updates
-        if (this._activeTabId === tabId) {
+        if (this._activeTabId === tabId || !this._tabs.some(tab => tab.id === tabId)) {
             return;
         }
 
         this._activeTabId = tabId;
+        webexpress.webui.LocalStorage.setItem(this._storageKey, tabId);
 
         // update active state on navigation links
         const navLinks = this._navElement.querySelectorAll(".nav-link");

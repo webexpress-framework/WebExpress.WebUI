@@ -289,16 +289,49 @@ test("a stacked split leaves the side size on record for the side-by-side layout
 
     // a drag while side by side is what puts a size on record
     s.ctrl._setPaneSizes(320, true);
-    s.ctrl._setStateCookie({ size: 320, collapsed: false });
+    s.ctrl._persistState({ size: 320, collapsed: false });
 
     s.stack(true);
     s.ctrl._handleResize();
 
     // a drag on the stacked axis reports an extent measured top to bottom,
-    // which means nothing to the side-by-side layout the cookie is read back in
-    s.ctrl._setStateCookie({ size: 240, collapsed: true });
+    // which means nothing to the side-by-side layout the preference is read back in
+    s.ctrl._persistState({ size: 240, collapsed: true });
 
-    const state = s.ctrl._getStateFromCookie();
+    const state = s.ctrl._readState();
     assert.equal(state.size, 320, "the width from the side-by-side layout survives");
     assert.equal(state.collapsed, true, "the collapse itself is axis-independent and is kept");
+});
+
+test("split size and collapse survive a new page without cookies", () => {
+    const first = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.split.js"] });
+    const split = makeSplit(first, { id: "navigation", size: 200, width: 800 });
+    split.ctrl._splitter.dispatchEvent({ type: "keydown", key: "ArrowRight", preventDefault() {} });
+    split.ctrl.collapseSidePane();
+    assert.deepEqual(JSON.parse(first.sandbox.localStorage.getItem("wx-split-navigation")), { v: 1, size: 240, collapsed: true });
+    assert.equal(first.document.cookie, "");
+
+    const next = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.split.js"], globals: { localStorage: first.sandbox.localStorage } });
+    const restored = makeSplit(next, { id: "navigation", size: 200, width: 800 });
+    assert.equal(restored.ctrl._sidePaneCollapsed, true);
+    restored.ctrl.expandSidePane();
+    assert.equal(restored.side.style.width, "240px");
+});
+
+test("invalid splitter sizes fall back to the configured size", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.split.js"] });
+    for (const value of ["{", '{"v":1,"size":-1,"collapsed":false}', '{"v":1,"size":"300","collapsed":false}']) {
+        rt.sandbox.localStorage.setItem("wx-split-navigation", value);
+        const split = makeSplit(rt, { id: "navigation", size: 200, width: 800 });
+        assert.equal(split.side.style.width, "200px");
+    }
+});
+
+test("a remembered splitter size wins over a percentage default after resize", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.split.js"] });
+    rt.sandbox.localStorage.setItem("wx-split-navigation", JSON.stringify({ v: 1, size: 240, collapsed: false }));
+    const split = makeSplit(rt, { id: "navigation", size: 50, unit: "%", width: 800 });
+    split.show(1000);
+    split.ctrl._handleResize();
+    assert.equal(split.side.style.width, "240px");
 });

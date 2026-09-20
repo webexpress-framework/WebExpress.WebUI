@@ -133,3 +133,8 @@ The following example illustrates a complete declarative setup for a tab control
 
 </div>
 ```
+
+
+## UI persistence
+
+The active tab is remembered in localStorage under `wx-tab:{id}` or an explicit `data-persist-key`. Stable tab ids survive a changed tab order. A missing tab falls back to the first available one. The WebApp REST tab applies this preference after its data arrives.

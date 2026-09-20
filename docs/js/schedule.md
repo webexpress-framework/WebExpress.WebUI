@@ -295,3 +295,8 @@ new ControlSchedule("calendar")
         Type = _ => TypeHolidaySchedule.Public
     });
 ```
+
+
+## UI persistence
+
+The chosen calendar presentation (month, week or agenda) is remembered in localStorage under `wx-schedule-view:{id}` or `data-persist-key`. It must still be offered by `data-views`; otherwise the configured default applies. This also applies to WebApp schedules. Dates and appointment content are not stored as UI preferences.

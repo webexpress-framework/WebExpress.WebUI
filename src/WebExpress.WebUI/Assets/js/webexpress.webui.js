@@ -593,8 +593,64 @@ webexpress.webui.Controller = new class {
 };
 
 /**
+ * Keeps optional UI preferences on the client without making controls depend
+ * on storage access, which browsers may deny or exhaust independently of the UI.
+ */
+webexpress.webui.LocalStorage = class {
+    /**
+     * Returns a preference when storage is available, otherwise the default.
+     * @param {string|null} key - A stable preference key, or null to disable persistence.
+     * @returns {string|null} The stored value, or null.
+     */
+    static getItem(key) {
+        if (!key) return null;
+        try {
+            return localStorage.getItem(key);
+        } catch {
+            return null;
+        }
+    }
+
+    /**
+     * Remembers a preference without interrupting an interaction when storage is unavailable.
+     * @param {string|null} key - A stable preference key, or null to disable persistence.
+     * @param {string} value - The preference to retain across visits.
+     */
+    static setItem(key, value) {
+        if (!key) return;
+        try {
+            localStorage.setItem(key, value);
+        } catch {
+            // storage is optional; the control still keeps its current state
+        }
+    }
+
+    /**
+     * Treats damaged JSON as a missing preference so controls can use their defaults.
+     * @param {string|null} key - A stable preference key.
+     * @returns {*} The stored JSON value, or null.
+     */
+    static getJson(key) {
+        try {
+            return JSON.parse(this.getItem(key));
+        } catch {
+            return null;
+        }
+    }
+
+    /**
+     * Retains structured UI state as JSON for subsequent visits.
+     * @param {string|null} key - A stable preference key.
+     * @param {*} value - JSON-serializable UI state.
+     */
+    static setJson(key, value) {
+        this.setItem(key, JSON.stringify(value));
+    }
+};
+
+/**
  * Central registry for managing client-side quick filters.
- * Handles state, enforces group exclusivity, persists to cookies, and notifies observers.
+ * Handles state, enforces group exclusivity, persists to localStorage, and notifies observers.
  */
 webexpress.webui.FilterRegistry = new class {
     /**
@@ -603,7 +659,7 @@ webexpress.webui.FilterRegistry = new class {
     constructor() {
         this._knownFilters = new Map();
         this._activeFilters = new Set();
-        this._cookieName = "wx_quickfilters";
+        this._storageKey = "wx_quickfilters";
         this._saveTimer = null;
         this._debounceTime = 300;
     }
@@ -655,7 +711,7 @@ webexpress.webui.FilterRegistry = new class {
         this._activeFilters.delete(id);
         this._knownFilters.delete(id);
         this._updateResetStates();
-        this._scheduleCookieSave();
+        this._scheduleSave();
         this._notifyDefinitionListeners(id, origin);
         this._notifyListeners();
     }
@@ -686,14 +742,14 @@ webexpress.webui.FilterRegistry = new class {
     }
 
     /**
-     * Initializes the state from the cookie and broadcasts the initial state.
+     * Initializes the state from localStorage and broadcasts the initial state.
      */
     init() {
-        const savedData = this._readCookie();
+        const savedData = this._readState();
         let changed = false;
 
-        if (savedData) {
-            const parsedIds = savedData.split(",");
+        if (savedData.length) {
+            const parsedIds = savedData;
             for (let i = 0; i < parsedIds.length; i++) {
                 const id = parsedIds[i].trim();
                 // validate against known filters to prevent manipulation
@@ -716,9 +772,9 @@ webexpress.webui.FilterRegistry = new class {
         // update reset visual states based on initially active filters
         this._updateResetStates();
 
-        // if unknown filters were dropped, update the cookie immediately
+        // if unknown filters were dropped, update localStorage immediately
         if (changed) {
-            this._scheduleCookieSave();
+            this._scheduleSave();
         }
 
         this._notifyListeners();
@@ -763,7 +819,7 @@ webexpress.webui.FilterRegistry = new class {
         if (!this._activeFilters.has(id)) {
             this._activeFilters.add(id);
             this._updateResetStates();
-            this._scheduleCookieSave();
+            this._scheduleSave();
             this._notifyListeners();
             const el = document.getElementById(id);
             if (el) {
@@ -780,7 +836,7 @@ webexpress.webui.FilterRegistry = new class {
         if (this._activeFilters.has(id)) {
             this._activeFilters.delete(id);
             this._updateResetStates();
-            this._scheduleCookieSave();
+            this._scheduleSave();
             this._notifyListeners();
             const el = document.getElementById(id);
             if (el) {
@@ -829,7 +885,7 @@ webexpress.webui.FilterRegistry = new class {
 
         if (changed) {
             this._updateResetStates();
-            this._scheduleCookieSave();
+            this._scheduleSave();
             this._notifyListeners();
         }
     }
@@ -848,7 +904,7 @@ webexpress.webui.FilterRegistry = new class {
             }
             this._activeFilters.clear();
             this._updateResetStates();
-            this._scheduleCookieSave();
+            this._scheduleSave();
             this._notifyListeners();
         }
     }
@@ -913,47 +969,31 @@ webexpress.webui.FilterRegistry = new class {
     }
 
     /**
-     * Schedules a debounced write operation to the cookie.
+     * Debounces filter changes to avoid repeated synchronous storage writes.
      */
-    _scheduleCookieSave() {
+    _scheduleSave() {
         if (this._saveTimer) {
             clearTimeout(this._saveTimer);
         }
         this._saveTimer = setTimeout(() => {
-            this._writeCookie();
+            this._persistState();
         }, this._debounceTime);
     }
 
     /**
-     * Serializes the active filters and writes them to a document cookie.
+     * Remembers active filters across visits without sending them with HTTP requests.
      */
-    _writeCookie() {
-        const val = encodeURIComponent(Array.from(this._activeFilters).join(","));
-        // set cookie valid for 30 days with secure attributes
-        const date = new Date();
-        date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
-        const expires = "expires=" + date.toUTCString();
-        document.cookie = this._cookieName + "=" + val + ";" + expires + ";path=/;SameSite=Strict";
+    _persistState() {
+        webexpress.webui.LocalStorage.setJson(this._storageKey, Array.from(this._activeFilters));
     }
 
     /**
-     * Reads and decodes the filter state from the document cookie.
-     * @returns {string} The decoded cookie value or empty string.
+     * Ignores damaged preferences so filter initialization can use its defaults.
+     * @returns {Array<string>} The remembered filter identifiers.
      */
-    _readCookie() {
-        const nameEq = this._cookieName + "=";
-        const ca = document.cookie.split(";");
-
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === " ") {
-                c = c.substring(1, c.length);
-            }
-            if (c.indexOf(nameEq) === 0) {
-                return decodeURIComponent(c.substring(nameEq.length, c.length));
-            }
-        }
-        return "";
+    _readState() {
+        const value = webexpress.webui.LocalStorage.getJson(this._storageKey);
+        return Array.isArray(value) ? value.filter(id => typeof id === "string") : [];
     }
 
     /**
@@ -992,7 +1032,7 @@ webexpress.webui.FilterRegistry = new class {
 
 /**
  * Central singleton that tracks the current color scheme (light or dark),
- * persists it to a cookie, applies it to the root element via
+ * persists it to localStorage, applies it to the root element via
  * <c>data-wx-theme</c>, and notifies observers via
  * <c>webexpress.webui.Event.CHANGE_DARKMODE_EVENT</c>.
  */
@@ -1001,11 +1041,10 @@ webexpress.webui.DarkMode = new class {
      * Creates a new instance of the class.
      */
     constructor() {
-        this._cookieName = "wx_darkmode";
-        this._cookieMaxAgeDays = 365;
+        this._storageKey = "wx_darkmode";
         this._current = this._resolveInitialMode();
 
-        // apply the resolved mode so the cookie wins over the server-rendered default
+        // apply the resolved mode so localStorage wins over the server-rendered default
         this._apply(this._current);
     }
 
@@ -1019,7 +1058,7 @@ webexpress.webui.DarkMode = new class {
 
     /**
      * Sets the current color mode, updates the root element, persists the
-     * cookie and notifies observers. A no-op if the mode is unchanged.
+     * preference and notifies observers. A no-op if the mode is unchanged.
      * @param {"light"|"dark"} mode - The mode to switch to.
      */
     set current(mode) {
@@ -1029,7 +1068,7 @@ webexpress.webui.DarkMode = new class {
         }
         this._current = normalized;
         this._apply(normalized);
-        this._writeCookie(normalized);
+        this._persistState(normalized);
         this._notify(normalized);
     }
 
@@ -1043,14 +1082,14 @@ webexpress.webui.DarkMode = new class {
     }
 
     /**
-     * Determines the initial mode: cookie first, then the server-rendered
+     * Determines the initial mode: localStorage first, then the server-rendered
      * attribute on the root element, then falling back to "light".
      * @returns {"light"|"dark"} The initial mode.
      */
     _resolveInitialMode() {
-        const fromCookie = this._readCookie();
-        if (fromCookie === "dark" || fromCookie === "light") {
-            return fromCookie;
+        const fromStorage = this._readState();
+        if (fromStorage === "dark" || fromStorage === "light") {
+            return fromStorage;
         }
         const attr = document.documentElement.getAttribute("data-wx-theme");
         return attr === "dark" ? "dark" : "light";
@@ -1076,33 +1115,19 @@ webexpress.webui.DarkMode = new class {
     }
 
     /**
-     * Persists the given mode to the document cookie.
-     * @param {"light"|"dark"} mode - The mode to persist.
+     * Retains the chosen scheme across visits on this origin.
+     * @param {"light"|"dark"} mode - The selected scheme.
      */
-    _writeCookie(mode) {
-        const date = new Date();
-        date.setTime(date.getTime() + (this._cookieMaxAgeDays * 24 * 60 * 60 * 1000));
-        const expires = "expires=" + date.toUTCString();
-        document.cookie = this._cookieName + "=" + encodeURIComponent(mode) + ";" + expires + ";path=/;SameSite=Strict";
+    _persistState(mode) {
+        webexpress.webui.LocalStorage.setItem(this._storageKey, mode);
     }
 
     /**
-     * Reads the persisted mode from the document cookie.
-     * @returns {string} The decoded cookie value or an empty string.
+     * Allows the server default to apply when there is no saved preference.
+     * @returns {string|null} The remembered scheme.
      */
-    _readCookie() {
-        const nameEq = this._cookieName + "=";
-        const ca = document.cookie.split(";");
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === " ") {
-                c = c.substring(1, c.length);
-            }
-            if (c.indexOf(nameEq) === 0) {
-                return decodeURIComponent(c.substring(nameEq.length, c.length));
-            }
-        }
-        return "";
+    _readState() {
+        return webexpress.webui.LocalStorage.getItem(this._storageKey);
     }
 };
 

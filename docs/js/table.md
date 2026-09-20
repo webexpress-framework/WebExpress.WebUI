@@ -145,7 +145,7 @@ Beyond its core functionality, the table control component offers a range of adv
 - **Column Drag & Drop:** CTRL+drag header to move columns; indicator visualizes destination.
 - **Column Modal:** Button in rightmost header cell opens a column management modal (reorder, show/hide, resize, sort). Can use an external DialogPanel via key `table-columns`.
 - **Column Visibility Management:** Easily hide or show columns via modal; modal can search/filter columns.
-- **Persistence:** View state (columns, widths, tree collapsed/expanded, sort) is saved in a cookie using `data-persist-key` and restored on initialization.
+- **Persistence:** View state (columns, widths, tree collapsed/expanded, sort) is saved in localStorage using `data-persist-key` and restored on initialization.
 - **Row Reordering:** Drag handle (`≡`) in leftmost column when `data-movable-row="true"`; support for hierarchical drag and drop including reparenting.
 - **Auto-Expand on Row Hover:** When dragging a row, hovering for >2 seconds over a collapsed parent with children auto-expands the parent to enable dropping as a child.
 - **Action/Options Column:** Automatically handled; supports per-row or global action dropdowns for contextual table actions.

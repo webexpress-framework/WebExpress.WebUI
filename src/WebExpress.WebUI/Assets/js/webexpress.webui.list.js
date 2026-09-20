@@ -89,7 +89,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         this._items = this._parseItems(element.querySelectorAll(":scope > .wx-list-item, :scope > .wx-list-item-link, :scope > .wx-list-item-button"));
 
         // load persisted state (order by id)
-        this._loadStateFromCookie();
+        this._loadState();
 
         // cleanup attributes
         this._cleanupAttributes(element, [
@@ -308,7 +308,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         }
         this._items = this._normalizeItems(items);
         this._selectedItem = null; // reset selection on full update
-        this._schedulePersist();
+        this._loadState();
         this.render();
     }
 
@@ -1559,7 +1559,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Persists state to cookie (order by id if all items have id).
+     * Persists state to localStorage (order by id if all items have id).
      */
     _persistState() {
         if (!this._persistKey) {
@@ -1573,20 +1573,19 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             order: allHaveIds ? this._items.map(it => it.id) : null
         };
 
-        const json = encodeURIComponent(JSON.stringify(state));
-        this._setCookie(this._persistKey, json, 365);
+        webexpress.webui.LocalStorage.setJson(this._persistKey, state);
     }
 
     /**
-     * Loads persisted state from cookie.
+     * Loads persisted state from localStorage.
      */
-    _loadStateFromCookie() {
-        const raw = this._getCookie(this._persistKey);
+    _loadState() {
+        const raw = webexpress.webui.LocalStorage.getJson(this._persistKey);
         if (!raw) {
             return;
         }
         try {
-            const obj = JSON.parse(decodeURIComponent(raw));
+            const obj = raw;
             if (!obj || obj.v !== 1) {
                 return;
             }
@@ -1609,40 +1608,9 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 this._items = reordered;
             }
         } catch (e) {
-            // silent fail on cookie parse error
+            // silent fail on localStorage parse error
             console.debug("Failed to load list state", e);
         }
-    }
-
-    /**
-     * Retrieves cookie value.
-     * @param {string} name Cookie name.
-     * @returns {string|null} Value.
-     */
-    _getCookie(name) {
-        if (!name) {
-            return null;
-        }
-        const matches = document.cookie.match(new RegExp(
-            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, "\\$1") + "=([^;]*)"
-        ));
-        return matches ? decodeURIComponent(matches[1]) : null;
-    }
-
-    /**
-     * Sets a cookie (SameSite=Lax).
-     * @param {string} name Name.
-     * @param {string} value Value.
-     * @param {number} days Days to expire.
-     */
-    _setCookie(name, value, days) {
-        let expires = "";
-        if (days) {
-            const d = new Date();
-            d.setTime(d.getTime() + (days * 86400000));
-            expires = "; expires=" + d.toUTCString();
-        }
-        document.cookie = `${name}=${value || ""}${expires}; path=/; SameSite=Lax`;
     }
 
     /**

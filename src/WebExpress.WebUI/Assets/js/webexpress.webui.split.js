@@ -1,10 +1,10 @@
 /**
  * A split control for resizable container panels.
- * Persists side size and collapsed state via a single cookie (when the element has an id).
+ * Persists side size and collapsed state via localStorage (when the element has an id).
  *
  * Features:
  * - Supports horizontal and vertical orientation.
- * - Persistent state via cookies.
+ * - Persistent state via localStorage.
  * - Min/Max constraints.
  * - Collapsible side pane (double click or drag beyond threshold).
  * - Automatic resizing via ResizeObserver.
@@ -46,7 +46,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     _dragging = false;
     _sideRatioMode = false;
     _initialRatio = null;
-    _cookieName = null;
+    _storageKey = null;
 
     // elements
     _sidePane = null;
@@ -122,8 +122,8 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             }
         }
 
-        // determine cookie name
-        this._cookieName = element.id ? `wx-split-${element.id}` : null;
+        // determine storage key
+        this._storageKey = element.id ? `wx-split-${element.id}` : null;
 
         // cleanup attributes
         const attrs = [
@@ -243,7 +243,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         this._clearPaneSizes();
         this._applyAxisClasses();
 
-        const recorded = this._getStateFromCookie();
+        const recorded = this._readState();
         const size = (recorded && typeof recorded.size === "number")
             ? recorded.size
             : this._parseInitialSideSize(this._initialSideAttr);
@@ -312,11 +312,14 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Restore state from cookie or calculate initial values.
+     * Restore state from localStorage or calculate initial values.
      * @param {HTMLElement} element Host element.
      */
     _restoreState(element) {
-        const state = this._getStateFromCookie();
+        const state = this._readState();
+        if (state) {
+            this._sideRatioMode = false;
+        }
 
         let initialSide = (state && typeof state.size === "number")
             ? state.size
@@ -417,7 +420,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
         this._setPaneSizes(size, true);
-        this._setStateCookie({ size: size, collapsed: false });
+        this._persistState({ size: size, collapsed: false });
     }
 
     /**
@@ -502,7 +505,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
             if (this._maxSide !== null) newSideSize = Math.min(this._maxSide, newSideSize);
 
             this._setPaneSizes(Math.max(0, newSideSize), true);
-            this._setStateCookie({ size: this._sideSize, collapsed: false });
+            this._persistState({ size: this._sideSize, collapsed: false });
             return;
         }
 
@@ -533,7 +536,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         newSideSize = Math.max(0, newSideSize);
 
         this._setPaneSizes(newSideSize, true);
-        this._setStateCookie({ size: newSideSize, collapsed: false });
+        this._persistState({ size: newSideSize, collapsed: false });
     }
 
     /**
@@ -641,7 +644,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         const isVert = this._axis === "vertical";
         if (!this._dragging) {
             // a drag already recorded the pre-drag size at its start
-            this._sidePanePrevSize = this._sidePane[isVert ? "offsetHeight" : "offsetWidth"];
+            this._sidePanePrevSize = this._sidePane[isVert ? "offsetHeight" : "offsetWidth"] || this._sideSize;
         }
         this._sidePaneCollapsed = true;
 
@@ -656,7 +659,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
 
         // persist the size to come back to, not the shrunken one, so a reload of
         // a collapsed split can still expand to what the user had before
-        this._setStateCookie({ size: this._sidePanePrevSize || this._sideSize, collapsed: true });
+        this._persistState({ size: this._sidePanePrevSize || this._sideSize, collapsed: true });
         this._dispatch(webexpress.webui.Event.HIDE_EVENT, {});
     }
 
@@ -689,7 +692,7 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         this._sidePaneCollapsed = false;
         this._setPaneSizes(targetSize, true);
 
-        this._setStateCookie({ size: targetSize, collapsed: false });
+        this._persistState({ size: targetSize, collapsed: false });
         this._dispatch(webexpress.webui.Event.SHOW_EVENT, {});
     }
 
@@ -803,29 +806,20 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Cookie read helper.
+     * Rejects invalid dimensions so a damaged preference cannot break the layout.
+     * @returns {Object|null} The remembered size and collapsed flag.
      */
-    _getStateFromCookie() {
-        if (!this._cookieName) return null;
-        const nameEQ = this._cookieName + "=";
-        const cookies = document.cookie.split(";");
-        for (let i = 0; i < cookies.length; i++) {
-            let c = cookies[i].trim();
-            if (c.indexOf(nameEQ) === 0) {
-                try {
-                    const obj = JSON.parse(decodeURIComponent(c.substring(nameEQ.length)));
-                    if (obj && obj.v === 1) return obj;
-                } catch (e) { /* ignore */ }
-            }
-        }
-        return null;
+    _readState() {
+        const state = webexpress.webui.LocalStorage.getJson(this._storageKey);
+        return state && state.v === 1 && Number.isFinite(state.size) && state.size >= 0
+            && typeof state.collapsed === "boolean" ? state : null;
     }
 
     /**
-     * Cookie write helper.
+     * Retains the side-by-side size while allowing collapse in either orientation.
      */
-    _setStateCookie(state) {
-        if (!this._cookieName) return;
+    _persistState(state) {
+        if (!this._storageKey) return;
 
         // while a stylesheet stacks the split, the side extent is measured on
         // the other axis; storing it would come back as a nonsensical width the
@@ -833,16 +827,14 @@ webexpress.webui.SplitCtrl = class extends webexpress.webui.Ctrl {
         // record is therefore left alone and only the collapsed flag, which is
         // axis-independent, follows the stacked layout.
         const stacked = this._axis !== this._orientation;
-        const size = stacked ? (this._getStateFromCookie()?.size ?? state.size) : state.size;
+        const size = stacked ? (this._readState()?.size ?? state.size) : state.size;
 
         const payload = {
             v: 1,
             size: Math.round(size),
             collapsed: !!state.collapsed
         };
-        const date = new Date();
-        date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
-        document.cookie = `${this._cookieName}=${encodeURIComponent(JSON.stringify(payload))}; expires=${date.toUTCString()}; path=/; SameSite=Lax`;
+        webexpress.webui.LocalStorage.setJson(this._storageKey, payload);
     }
 
     /**

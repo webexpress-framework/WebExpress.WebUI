@@ -10,15 +10,7 @@
  */
 webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl {
 
-    // config properties
-    _movableRow = false;
-    _allowColumnRemove = false;
-    _persistKey = null;
-    _treeEnabled = true;
-    _treeMoveEnabled = true;
-
     // drag state
-    _dragColumnIndicator = null;
     _draggedColumn = null;
     _rowMoveActive = false;
     _rowMoveSourceRow = null;
@@ -36,7 +28,8 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
      */
     constructor(element) {
         super(element);
-        this._loadStateFromCookie();
+        this._loadState();
+        this.render();
     }
 
     /**
@@ -307,7 +300,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
 
             orderedIds.forEach(id => {
                 const col = map.get(id);
-                if (col) newOrder.push(col);
+                if (col && !newOrder.includes(col)) newOrder.push(col);
             });
 
             // append any missing columns (sanity check)
@@ -1153,7 +1146,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
     }
 
     /**
-     * Persists the current table state into a cookie.
+     * Persists the current table state into localStorage.
      */
     _persistState() {
         const collapsed = [];
@@ -1177,21 +1170,20 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
             tree: { collapsed }
         };
 
-        // SameSite=Lax is standard, max-age 1 year
-        document.cookie = `${this._persistKey}=${encodeURIComponent(JSON.stringify(state))}; path=/; SameSite=Lax; max-age=31536000`;
+        webexpress.webui.LocalStorage.setJson(this._persistKey, state);
     }
 
     /**
-     * Loads a previously persisted table state from a cookie.
+     * Loads a previously persisted table state from localStorage.
      */
-    _loadStateFromCookie() {
+    _loadState() {
         if (!this._persistKey) return;
 
-        const match = document.cookie.match(new RegExp(`(^| )${this._persistKey}=([^;]+)`));
-        if (!match) return;
+        const stored = webexpress.webui.LocalStorage.getJson(this._persistKey);
+        if (!stored) return;
 
         try {
-            const obj = JSON.parse(decodeURIComponent(match[2]));
+            const obj = stored;
             if (!obj || obj.v !== 1) return;
 
             const colMap = new Map(this._columns.map(c => [c.id, c]));
@@ -1201,22 +1193,34 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
                 const newOrder = [];
                 obj.order.forEach(id => {
                     const col = colMap.get(id);
-                    if (col) newOrder.push(col);
+                    if (col && !newOrder.includes(col)) newOrder.push(col);
                 });
                 // append unknown new columns
                 this._columns.forEach(c => {
                     if (!newOrder.includes(c)) newOrder.push(c);
                 });
+                // cells are positional, so their order must follow the restored columns
+                const oldIndexById = new Map(this._columns.map((column, index) => [column.id, index]));
+                const rows = [...this._rows];
+                while (rows.length) {
+                    const row = rows.pop();
+                    row.cells = newOrder.map(column => row.cells[oldIndexById.get(column.id)] || { content: "" });
+                    if (row.children) rows.push(...row.children);
+                }
+                if (this._footer.length) {
+                    this._footer = newOrder.map(column => this._footer[oldIndexById.get(column.id)] ?? "");
+                }
                 this._columns = newOrder;
             }
 
             // Restore Settings (visibility, width)
-            if (obj.cols) {
+            if (Array.isArray(obj.cols)) {
                 obj.cols.forEach(s => {
-                    const c = colMap.get(s.id);
+                    const c = s && colMap.get(s.id);
                     if (c) {
                         if (typeof s.visible === "boolean") c.visible = s.visible;
-                        if (s.width) c.width = parseInt(s.width, 10);
+                        const width = parseInt(s.width, 10);
+                        if (Number.isFinite(width) && width > 0) c.width = width;
                     }
                 });
             }
@@ -1224,11 +1228,11 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
             // Restore Sort
             if (obj.sort?.id) {
                 const c = colMap.get(obj.sort.id);
-                if (c) c.sort = obj.sort.dir;
+                if (c && ["asc", "desc"].includes(obj.sort.dir)) c.sort = obj.sort.dir;
             }
 
             // Restore Tree state
-            if (obj.tree?.collapsed) {
+            if (Array.isArray(obj.tree?.collapsed)) {
                 const set = new Set(obj.tree.collapsed);
                 const stack = [...this._rows];
                 while (stack.length) {

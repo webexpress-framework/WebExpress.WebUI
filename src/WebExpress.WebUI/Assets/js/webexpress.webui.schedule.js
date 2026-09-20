@@ -101,7 +101,10 @@ webexpress.webui.ScheduleCtrl = class extends webexpress.webui.Ctrl {
 
         this._culture = data.culture || undefined;
         this._views = this._parseViews(data.views);
-        this._view = this._views.includes(data.view) ? data.view : (this._views[0] || webexpress.webui.ScheduleCtrl.DEFAULT_VIEW);
+        this._storageKey = data.persistKey || (element.id ? `wx-schedule-view:${element.id}` : null);
+        const storedView = webexpress.webui.LocalStorage.getItem(this._storageKey);
+        this._view = this._views.includes(storedView) ? storedView
+            : this._views.includes(data.view) ? data.view : (this._views[0] || webexpress.webui.ScheduleCtrl.DEFAULT_VIEW);
         this._grouping = ["day", "week", "month"].includes(data.agendaGrouping)
             ? data.agendaGrouping
             : webexpress.webui.ScheduleCtrl.DEFAULT_GROUPING;
@@ -733,6 +736,7 @@ webexpress.webui.ScheduleCtrl = class extends webexpress.webui.Ctrl {
         }
 
         this._view = value;
+        webexpress.webui.LocalStorage.setItem(this._storageKey, value);
         this.render();
         this._dispatchNavigation();
     }

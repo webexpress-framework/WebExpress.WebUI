@@ -388,37 +388,22 @@ webexpress.webui.SectionCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Reads the remembered state.
-     * @returns {boolean|null} The remembered state, or null when there is none.
+     * Uses the declared state when storage is absent or contains an invalid value.
+     * @returns {boolean|null} The remembered state, or null.
      */
     _read() {
-        if (!this._persist) {
-            return null;
-        }
-
-        try {
-            const value = localStorage.getItem(webexpress.webui.SectionCtrl.STORAGE_PREFIX + this._element.id);
-            return value === null ? null : value === "true";
-        } catch {
-            // a host that denies storage still gets a working section, just a forgetful one
-            return null;
-        }
+        if (!this._persist) return null;
+        const value = webexpress.webui.LocalStorage.getItem(webexpress.webui.SectionCtrl.STORAGE_PREFIX + this._element.id);
+        return value === "true" ? true : value === "false" ? false : null;
     }
 
     /**
-     * Remembers the state.
+     * Retains the reader's folding preference across visits.
      * @param {boolean} value - The state to remember.
      */
     _write(value) {
-        if (!this._persist) {
-            return;
-        }
-
-        try {
-            localStorage.setItem(webexpress.webui.SectionCtrl.STORAGE_PREFIX + this._element.id, value ? "true" : "false");
-        } catch {
-            // see _read
-        }
+        if (!this._persist) return;
+        webexpress.webui.LocalStorage.setItem(webexpress.webui.SectionCtrl.STORAGE_PREFIX + this._element.id, String(value));
     }
 };
 

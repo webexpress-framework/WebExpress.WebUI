@@ -59,8 +59,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // generate storage key based on element id or fallback
-        const baseId = element.id || "wx-view-ctrl";
-        this._storageKey = `wx_view_state_${baseId}`;
+        this._storageKey = element.dataset.persistKey || (element.id ? `wx_view_state_${element.id}` : null);
 
         // resolve layout (default | togglegroup)
         const rawLayout = (element.dataset.layout || "default").trim().toLowerCase();
@@ -72,10 +71,10 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         // determine initial view: saved state > first view
         let initialIndex = 0;
-        const savedIndex = this._getCookie(this._storageKey);
+        const savedIndex = webexpress.webui.LocalStorage.getItem(this._storageKey);
         if (savedIndex !== null) {
-            const idx = parseInt(savedIndex, 10);
-            if (!isNaN(idx) && idx >= 0) {
+            const idx = Number(savedIndex);
+            if (Number.isInteger(idx) && idx >= 0) {
                 initialIndex = idx;
             }
         }
@@ -483,12 +482,11 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
      * @param {number} index - Target view index
      */
     switchView(index) {
-        if (index < 0 || index >= this._viewsConfig.length) {
+        if (!Number.isInteger(index) || index < 0 || index >= this._viewsConfig.length) {
             return;
         }
 
-        // save to cookie
-        this._setCookie(this._storageKey, index.toString(), 30);
+        webexpress.webui.LocalStorage.setItem(this._storageKey, String(index));
 
         if (this._activeViewIndex >= 0) {
             const oldCfg = this._viewsConfig[this._activeViewIndex];
@@ -559,41 +557,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
-    /**
-     * Sets a cookie with the given name, value, and expiration days.
-     * @param {string} name - Name of the cookie.
-     * @param {string} value - Value of the cookie.
-     * @param {number} days - Expiration in days.
-     */
-    _setCookie(name, value, days) {
-        let expires = "";
-        if (days) {
-            const date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax";
-    }
-
-    /**
-     * Gets the value of a cookie by name.
-     * @param {string} name - Name of the cookie.
-     * @returns {string|null} The cookie value or null if not found.
-     */
-    _getCookie(name) {
-        const nameEQ = name + "=";
-        const ca = document.cookie.split(";");
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === " ") {
-                c = c.substring(1, c.length);
-            }
-            if (c.indexOf(nameEQ) === 0) {
-                return c.substring(nameEQ.length, c.length);
-            }
-        }
-        return null;
-    }
 };
 
 // register the class with the controller

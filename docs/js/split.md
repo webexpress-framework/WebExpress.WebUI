@@ -4,7 +4,7 @@
 
 The `SplitCtrl` is a powerful UI component for creating customizable, split views (Split Panes). It divides a container into two areas—a main pane (`.wx-main-pane`) and a side pane (`.wx-side-pane`)—separated by a draggable divider (splitter). Users can interactively adjust the size of the panes by dragging the splitter.
 
-The component is highly configurable and supports both horizontal and vertical orientations, minimum and maximum size constraints, a customizable order of the panes, as well as the persistence of the set size via cookies.
+The component is highly configurable and supports both horizontal and vertical orientations, minimum and maximum size constraints, a customizable order of the panes, as well as the persistence of the set size via localStorage.
 
 ```
    // Horizontal
@@ -55,7 +55,7 @@ The `SplitCtrl` is designed as a self-contained component that manages its own u
 
 During initialization, the component identifies the two child elements `.wx-main-pane` and `.wx-side-pane`. It dynamically creates a splitter element and arranges these three elements within the host container based on `data-order`. The core logic for resizing is located in the `_setPaneSizes` method, which calculates the size of the main pane based on the total size of the container, the size of the side pane, and the size of the splitter.
 
-Interaction occurs by dragging the splitter (`mousedown` and `mousemove`), where the new size is applied in real-time, respecting `min-` and `max-` limits. A double-click on the splitter toggles the side pane: it is either collapsed to `data-collapse-to` (0 by default) or restored to its previous size. The splitter itself survives a collapse, so it stays available as the handle that brings the pane back. A split marked `data-collapsible="false"` skips the collapse path entirely and clamps the drag to `data-min-side`, so its side pane always stays on screen. If the host element has an `id`, the component automatically saves the size of the side pane in a cookie to maintain the user's setting on future visits. Communication is handled via global custom events to ensure loose coupling.
+Interaction occurs by dragging the splitter (`mousedown` and `mousemove`), where the new size is applied in real-time, respecting `min-` and `max-` limits. A double-click on the splitter toggles the side pane: it is either collapsed to `data-collapse-to` (0 by default) or restored to its previous size. The splitter itself survives a collapse, so it stays available as the handle that brings the pane back. A split marked `data-collapsible="false"` skips the collapse path entirely and clamps the drag to `data-min-side`, so its side pane always stays on screen. If the host element has an `id`, the component automatically saves the size of the side pane in localStorage to maintain the user's setting on future visits. Communication is handled via global custom events to ensure loose coupling.
 
 ## Responsive Stacking
 
@@ -131,7 +131,7 @@ The component dispatches three main events to inform the application logic about
 <!--
     A vertical split container. The side pane is on top
     and has an initial size of 25% of the container height.
-    Its size is persisted via a cookie named "wx-split-size-editor-layout".
+    Its size is persisted in localStorage under "wx-split-editor-layout".
 -->
 <div id="editor-layout"
      class="wx-webui-split"

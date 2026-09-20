@@ -72,7 +72,7 @@ Attributes on the `.wx-view` elements control the appearance and behavior:
 
 - **Dynamic Layout**: The controller restructures the DOM, moving `.wx-view` contents into a managed container structure (`.wx-main-pane`).
 - **View Switching**: Only one view is visible at a time. Switching is instant and preserves the DOM state of the hidden views.
-- **State Persistence**: The index of the active view is stored in a cookie (Key: `wx_view_state_{elementId}`). On reload, the last active view is restored.
+- **State Persistence**: The index of the active view is stored in localStorage (Key: `wx_view_state_{elementId}`). On reload, the last active view is restored.
 - **External Integration**: If `.wx-header` or `.wx-footer` elements are provided, they are preserved and placed outside the scrollable view area, ensuring they remain visible.
 
 ## Programmatic Control
