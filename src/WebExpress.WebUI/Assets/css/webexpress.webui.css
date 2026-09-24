@@ -262,6 +262,7 @@ img.wx-icon-large {
     list-style: none;
     align-items: center;
     justify-content: flex-start;
+    margin: 0;
     padding-left: 1em;
     gap: clamp(0.2em, 0.5vw, 0.5em);
 }

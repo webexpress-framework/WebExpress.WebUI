@@ -47,6 +47,10 @@ The items within the dropdown menu are defined by child elements inside the main
 
 Individual items can be configured with their own `data-` attributes, such as `data-icon`, `data-image`, or the `disabled` attribute.
 
+### Scroll Region
+
+A menu is capped at `min(24rem, viewport height)`. By default the whole menu scrolls once its entries exceed that. A menu that carries a direct child `li.wx-dropdown-scroll` (holding a nested `ul role="group"`) scrolls only that region instead: the entries above and below it keep their place. The data dropdowns of WebExpress.WebApp (`wx-webapp-dropdown`, `wx-webapp-avatar-dropdown`) put their loaded items there, so the search field and the static entries - "new ...", "manage ..." - stay reachable however long the list grows. Arrow-key navigation scrolls a focused entry of the region into view.
+
 ## Programmatic Control
 
 After initialization, the properties of the component can be accessed programmatically.

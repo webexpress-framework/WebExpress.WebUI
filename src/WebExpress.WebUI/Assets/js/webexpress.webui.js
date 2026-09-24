@@ -2694,6 +2694,9 @@ webexpress.webui.NativeMenu = class {
             index = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1
                 : (index + (event.key === "ArrowUp" ? -1 : 1) + items.length) % items.length;
             items[index]?.focus({ preventScroll: true });
+            // the page must not jump, but an entry inside the menu's own scroll region has to
+            // come into view, or the focus walks on below the visible part of the list
+            items[index]?.closest(".wx-dropdown-scroll") && items[index].scrollIntoView?.({ block: "nearest" });
         };
         invoker?.addEventListener("keydown", navigate);
         menu.addEventListener("keydown", navigate);

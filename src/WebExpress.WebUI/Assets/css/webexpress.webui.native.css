@@ -26,6 +26,14 @@
 .wx-native-menu-field[popover] { min-inline-size: anchor-size(inline); }
 .wx-native-menu-field[popover]:popover-open { display: flex; flex-direction: column; }
 .wx-native-menu[popover]:not(:popover-open) { display: none; }
+/* a menu that marks a scroll region scrolls only that region: the search field above it and
+   the fixed entries below it keep their place, so "new ..." and "manage ..." stay reachable
+   however long the loaded list grows. min-block-size: 0 lets the region give up the height
+   the menu's max-block-size takes away; everything else keeps its own height */
+.wx-native-menu[popover]:has(> .wx-dropdown-scroll):popover-open { display: flex; flex-direction: column; overflow: hidden; }
+.wx-native-menu[popover] > :not(.wx-dropdown-scroll) { flex: none; }
+.wx-native-menu[popover] > .wx-dropdown-scroll { flex: 0 1 auto; min-block-size: 0; overflow-y: auto; overscroll-behavior: contain; }
+.wx-dropdown-scroll > ul { list-style: none; margin: 0; padding: 0; }
 .wx-native-menu[data-wx-placement="top"] { position-area: block-start; }
 .wx-native-menu[data-wx-placement="bottom"] { position-area: block-end; }
 .wx-native-menu[data-wx-placement="left"] { position-area: inline-start; }
