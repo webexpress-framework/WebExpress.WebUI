@@ -98,7 +98,7 @@ test("editor palettes bind the outer menu and close the chosen editor's menu", (
 });
 
 test("native foundation distinguishes open accordions, growing spinners and the last visible split button", () => {
-    const css = fs.readFileSync(webuiAsset("../css/webexpress.webui.base.css"), "utf8");
+    const css = fs.readFileSync(webuiAsset("../css/webexpress.webui.css"), "utf8");
     assert.match(css, /\.accordion-item\[open\] > \.accordion-button > \.wx-accordion-caret\s*\{\s*transform: none/);
     assert.match(css, /\.btn-group > \.btn:has\(~ \.btn\)/);
     assert.doesNotMatch(css, /\.btn-group > \.btn:not\(:last-child\)/);
@@ -216,7 +216,7 @@ test("color hover is stable and slider, canvas and smart-edit surfaces follow th
     assert.doesNotMatch(sheet("color"), /scale\(1\.15\)/);
     assert.match(sheet("slider"), /--wx-slider-track-bg: var\(--wx-secondary-bg\)/);
     assert.match(sheet("slider"), /--wx-slider-label-color: var\(--wx-body-color\)/);
-    assert.match(sheet("base"), /\.wx-canvas[^}]*var\(--wx-tertiary-bg\)/);
+    assert.match(fs.readFileSync(webuiAsset("../css/webexpress.webui.css"), "utf8"), /\.wx-canvas[^}]*var\(--wx-tertiary-bg\)/);
     assert.match(sheet("smartedit"), /wx-smart-edit-save[^}]*var\(--wx-success-text-emphasis\)/);
     assert.match(sheet("smartedit"), /wx-smart-edit-cancel[^}]*var\(--wx-danger-text-emphasis\)/);
     assert.match(sheet("overflow"), /wx-toolbar-button-label[^}]*display: inline !important/);

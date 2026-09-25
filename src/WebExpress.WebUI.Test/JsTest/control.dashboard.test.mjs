@@ -225,7 +225,7 @@ test("the widget settings open as a native dialog in the top layer, not as a blo
 });
 
 test("a check box outside a .form-check keeps its place in the row", () => {
-    const css = fs.readFileSync(webuiAsset("../css/webexpress.webui.base.css"), "utf8");
+    const css = fs.readFileSync(webuiAsset("../css/webexpress.webui.css"), "utf8");
 
     const standalone = css.match(/^\.form-check-input\s*\{([^}]*)\}/m);
     assert.ok(standalone, "the plain check box rule exists");
@@ -247,7 +247,7 @@ test("the widget header sits on the card surface without a fill, a rule or a cla
     assert.doesNotMatch(css, /\.dropdown-menu\.show/, "menus open as popovers, not through a class");
 
     // the widget relies on the card classes the framework stylesheet provides
-    const base = fs.readFileSync(webuiAsset("../css/webexpress.webui.base.css"), "utf8");
+    const base = fs.readFileSync(webuiAsset("../css/webexpress.webui.css"), "utf8");
     for (const rule of [/^\.card\s*\{/m, /^\.card-body\s*\{/m, /\.card-header[^{]*\{/, /^\.shadow-sm\s*\{/m]) {
         assert.match(base, rule);
     }

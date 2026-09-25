@@ -28,9 +28,19 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlToolbarItem> ToolbarItems => _toolbarItems;
 
         /// <summary>
-        /// Gets or sets the highlight color for the active tab (used in Underline layout).
+        /// Gets or sets the color of the active tab: the text of the underline layout, whose
+        /// line follows it unless <see cref="UnderlineColor"/> is set, or the fill of the pill
+        /// layout. The other layouts mark the active tab without a color of its own and
+        /// ignore it.
         /// </summary>
-        public Func<IRenderControlContext, PropertyColorText> HighlightColor { get; set; } = _ => new PropertyColorText();
+        public Func<IRenderControlContext, PropertyColorText> Color { get; set; } = _ => new PropertyColorText();
+
+        /// <summary>
+        /// Gets or sets the color of the line under the active tab in the underline layout,
+        /// so the line can stand out from the text. When not set, the line takes the text
+        /// color. The other layouts draw no such line and ignore it.
+        /// </summary>
+        public Func<IRenderControlContext, PropertyColorBorder> UnderlineColor { get; set; }
 
         /// <summary>
         /// Gets or sets the layout.
@@ -180,25 +190,10 @@ namespace WebExpress.WebUI.WebControl
             html.Add(viewPrimary.Select(x => x.Render(renderContext, visualTree)));
             html.Add(viewSecondary.Select(x => x.Render(renderContext, visualTree)));
 
-            html.AddUserAttribute("data-layout", (Layout?.Invoke(renderContext) ?? TypeLayoutTab.Default).ToString().ToLower());
+            var layout = Layout?.Invoke(renderContext) ?? TypeLayoutTab.Default;
 
-            if ((Layout?.Invoke(renderContext) ?? TypeLayoutTab.Default) == TypeLayoutTab.Underline && HighlightColor?.Invoke(renderContext) != null)
-            {
-                if ((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor == TypeColor.User && !string.IsNullOrWhiteSpace(HighlightColor?.Invoke(renderContext).UserColor))
-                {
-                    html.AddStyle($"--wx-nav-underline-border-color: {HighlightColor?.Invoke(renderContext).UserColor};", $"--wx-nav-underline-link-active-color: {HighlightColor?.Invoke(renderContext).UserColor};");
-                }
-                else if ((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor == TypeColor.Highlight)
-                {
-                    var colorVar = "var(--wx-highlight)";
-                    html.AddStyle($"--wx-nav-underline-border-color: {colorVar};", $"--wx-nav-underline-link-active-color: {colorVar};");
-                }
-                else if ((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor != TypeColor.Default)
-                {
-                    var colorVar = $"var(--wx-{((TypeColor)HighlightColor?.Invoke(renderContext).SystemColor).ToClass()})";
-                    html.AddStyle($"--wx-nav-underline-border-color: {colorVar};", $"--wx-nav-underline-link-active-color: {colorVar};");
-                }
-            }
+            html.AddUserAttribute("data-layout", layout.ToString().ToLower());
+            html.AddStyle(GetColorStyles(layout, Color?.Invoke(renderContext), UnderlineColor?.Invoke(renderContext)));
 
             // Get toolbar fragments
             var toolbarPreferences = WebEx.ComponentHub.FragmentManager.GetFragments<IFragmentControlToolbarItem, SectionTabToolbarPreferences>
@@ -234,6 +229,69 @@ namespace WebExpress.WebUI.WebControl
             }
 
             return html;
+        }
+
+        /// <summary>
+        /// Translates the color of the active tab into the css variables the navigation
+        /// reads. The navigation is built on the client inside the host element, so the
+        /// color reaches it only as inherited variables, and they take a color value,
+        /// not the class a system color would otherwise emit.
+        /// </summary>
+        /// <param name="layout">The layout of the tab headers.</param>
+        /// <param name="color">The color of the active tab, or null when none is set.</param>
+        /// <param name="underlineColor">The color of the underline, or null when it follows the text.</param>
+        /// <returns>The style declarations, empty when the default color applies.</returns>
+        private static string[] GetColorStyles(TypeLayoutTab layout, PropertyColorText color, PropertyColorBorder underlineColor)
+        {
+            var (value, contrast) = ResolveColor((TypeColor)(color?.SystemColor ?? TypeColorText.Default), color?.UserColor);
+
+            switch (layout)
+            {
+                case TypeLayoutTab.Underline:
+                    // the line is drawn in currentColor, so it follows the text color
+                    // unless a color of its own is set
+                    var (line, _) = ResolveColor((TypeColor)(underlineColor?.SystemColor ?? TypeColorBorder.Default), underlineColor?.UserColor);
+
+                    return new[]
+                    {
+                        value == null ? null : $"--wx-nav-underline-link-active-color: {value};",
+                        line == null ? null : $"--wx-nav-underline-border-color: {line};"
+                    }
+                        .Where(x => x != null)
+                        .ToArray();
+                case TypeLayoutTab.Pill when value != null:
+                    return contrast == null
+                        ? [$"--wx-nav-pills-link-active-bg: {value};"]
+                        :
+                        [
+                            $"--wx-nav-pills-link-active-bg: {value};",
+                            $"--wx-nav-pills-link-active-color: {contrast};"
+                        ];
+                default:
+                    return [];
+            }
+        }
+
+        /// <summary>
+        /// Resolves a color into a css color value and the text color that reads on it.
+        /// The variables of the navigation take a color, not a class, so a system color is
+        /// mapped onto its css variable instead of onto the class it would otherwise emit.
+        /// </summary>
+        /// <param name="systemColor">The system color, or the marker of a user color.</param>
+        /// <param name="userColor">The user-defined color.</param>
+        /// <returns>The color and its contrast color, both null when the default color applies.</returns>
+        private static (string Value, string Contrast) ResolveColor(TypeColor systemColor, string userColor)
+        {
+            return systemColor switch
+            {
+                TypeColor.Default => (null, null),
+                TypeColor.User when string.IsNullOrWhiteSpace(userColor) => (null, null),
+                // an author's color has no contrast variable, so the text on the pill is
+                // picked here; an unparsable notation keeps the text color of the theme
+                TypeColor.User => (userColor, ContrastColor.On(userColor)),
+                // white has no contrast variable of its own; the body color keeps it legible
+                _ => ($"var(--wx-{systemColor.ToClass()})", $"var(--wx-{systemColor.ToClass()}-contrast, var(--wx-body-color))")
+            };
         }
     }
 }

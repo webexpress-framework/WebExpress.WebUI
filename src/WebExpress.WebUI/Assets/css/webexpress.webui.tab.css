@@ -45,6 +45,13 @@
     display: none;
 }
 
+/* a toolbar taller than the tabs stretches the list, but not the tabs in it; bordered
+   tabs have to sit on the bottom edge, or the active one no longer covers the list
+   border and a line runs through its open side */
+.wx-tab-header > ul.nav-tabs {
+    align-items: flex-end;
+}
+
 .wx-tab-header:has(> .nav-tabs) > .wx-tab-tools {
     border-bottom: 1px solid var(--wx-border-color);
 }
