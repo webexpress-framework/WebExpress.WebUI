@@ -20,9 +20,9 @@ export function tableCases(test, assert, loadEditor) {
         const r = loadEditor({ html: fixture });
         r.editor.dispatch({ type: "table", command: "mergeCells", ids: cells(r).map(e => e.node.id) });
         let entry = cells(r)[0]; assert.equal(cells(r).length, 1); assert.equal(entry.node.attrs.rowspan, 2); assert.equal(entry.node.attrs.colspan, 2);
-        assert.equal(r.root.textContent, "onetwothreefour");
+        assert.equal(r.root.querySelector("table").textContent, "onetwothreefour");
         r.editor.dispatch({ type: "table", command: "splitCell", ids: [entry.node.id] });
-        assert.equal(cells(r).length, 4); assert.equal(r.root.textContent, "onetwothreefour");
+        assert.equal(cells(r).length, 4); assert.equal(r.root.querySelector("table").textContent, "onetwothreefour");
     });
     test("incomplete rectangles and cross-section merges are rejected without a history entry", () => {
         const r = loadEditor({ html: fixture }); const before = r.editor.value, entries = cells(r);
@@ -35,7 +35,7 @@ export function tableCases(test, assert, loadEditor) {
     test("deleting a row through a vertical merge rehomes the spanning cell", () => {
         const r = loadEditor({ html: '<table><tbody><tr><td rowspan="2">span</td><td>a</td></tr><tr><td>b</td></tr></tbody></table>' });
         r.editor.dispatch({ type: "table", command: "deleteRow", ids: [cells(r)[0].node.id] });
-        assert.equal(r.root.textContent, "spanb"); assert.equal(cells(r)[0].node.attrs.rowspan, 1);
+        assert.equal(r.root.querySelector("table").textContent, "spanb"); assert.equal(cells(r)[0].node.attrs.rowspan, 1);
     });
     test("cell background and column widths are model attributes with undo", () => {
         const r = loadEditor({ html: fixture });

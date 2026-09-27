@@ -8,8 +8,6 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
     _propModal: null,
     _currentEditor: null,
     _activeAddonNode: null,
-    _draggedNode: null,
-    _dropMarker: null,
     _backupRange: null,
 
     /**
@@ -83,40 +81,10 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
             const button = e.target.closest?.(".wx-addon-settings-btn");
             if (button) { e.preventDefault(); this._openSettingsForNode(editor, button.closest("[data-addon-id]")); }
         });
-        this._initDragEvents(root, editor);
         return () => {
-            this._removeDropMarker();
             for (const key of ["_propModal", "_selectionModal"]) this[key]?.remove();
             this._propModalCtrl?.destroy?.();
         };
-    },
-
-    /**
-     * Initializes drag and drop event listeners on the editor element.
-     * Manages the draggable state of frames to allow text selection vs. moving.
-     * @param {HTMLElement} editorElem -The content editable element.
-     * @param {object} editor -The editor instance.
-     */
-    _initDragEvents: function(root, editor) {
-        editor.listen(root, "dragstart", e => {
-            if (editor.disabled) { e.preventDefault(); return; }
-            const frame = e.target.closest?.("[data-addon-id]");
-            if (!frame) return;
-            this._draggedId = editor.nodeId(frame);
-            e.dataTransfer.setData("application/x-webexpress-editor-node", this._draggedId);
-        });
-        editor.listen(root, "dragover", e => { if (this._draggedId && !editor.disabled) e.preventDefault(); });
-        editor.listen(root, "drop", e => {
-            if (!this._draggedId || editor.disabled) return;
-            const range = this._getRangeFromEvent(e);
-            if (!range) return;
-            const position = editor._view.index(range.startContainer, range.startOffset);
-            if (position === null) return;
-            e.preventDefault(); e.stopPropagation();
-            editor.dispatch({ type: "moveNode", id: this._draggedId, position });
-            this._draggedId = null;
-        });
-        editor.listen(root, "dragend", () => { this._draggedId = null; });
     },
 
     /**
@@ -606,7 +574,7 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
                 ? `<span class="wx-addon-settings-btn" title="Settings"><i class="${webexpress.webui.IconSet.resolve("cog")}"></i></span>`
                 : "";
 
-            const dragHandle = `<span class="wx-addon-drag-handle"><i class="${webexpress.webui.IconSet.resolve("grip-lines-vertical")}"></i></span>`;
+            const dragHandle = `<span class="wx-addon-drag-handle" contenteditable="false" draggable="true">⠿</span>`;
 
             const bodyEditable = isContainer ? "true" : "false";
             const bodyClass = isContainer ? "wx-addon-body-container" : "wx-addon-body-widget";
@@ -634,51 +602,6 @@ webexpress.webui.EditorPlugins.register("addons", 4000, {
                         ${contentHtml}
                     </div>
                 </div><p><br></p>`;
-        }
-    },
-
-    /**
-     * Calculates the caret range from a mouse event (Cross-browser).
-     * @param {MouseEvent} e -Mouse event.
-     * @returns {Range | null} The calculated range.
-     */
-    _getRangeFromEvent: function(e) {
-        if (document.caretRangeFromPoint) {
-            return document.caretRangeFromPoint(e.clientX, e.clientY);
-        } else if (document.caretPositionFromPoint) {
-            const pos = document.caretPositionFromPoint(e.clientX, e.clientY);
-            if (pos) {
-                const range = document.createRange();
-                range.setStart(pos.offsetNode, pos.offset);
-                range.collapse(true);
-                return range;
-            }
-        }
-        return null;
-    },
-
-    /**
-     * Moves the drop marker to the current drop position.
-     * @param {Range} range -The current drop range.
-     */
-    _updateDropMarker: function(range) {
-        if (!this._dropMarker) {
-            this._dropMarker = document.createElement("span");
-            this._dropMarker.className = "wx-drop-marker";
-        }
-        try {
-            range.insertNode(this._dropMarker);
-        } catch (err) {
-            // ignore range errors
-        }
-    },
-
-    /**
-     * Removes the drop marker from the DOM.
-     */
-    _removeDropMarker: function() {
-        if (this._dropMarker && this._dropMarker.parentNode) {
-            this._dropMarker.parentNode.removeChild(this._dropMarker);
         }
     }
 });

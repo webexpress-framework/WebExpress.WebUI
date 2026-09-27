@@ -454,7 +454,12 @@ webexpress.webui.EditorModel = class {
         });
     }
 
-    /** Each reducer invocation describes exactly one undoable user intention. */
+    /**
+     * Keeps each user intention in one validated, undoable transaction.
+     * @param {object} previous - The immutable state before the action.
+     * @param {object} action - The requested content or layout operation.
+     * @returns {object} The validated result, or the unchanged state for rejected actions.
+     */
     static reduce(previous, action) {
         const state = this.clone(previous);
         if (action.selection) state.selection = this.clone(action.selection);
@@ -496,7 +501,16 @@ webexpress.webui.EditorModel = class {
             }
             case "moveNode": {
                 const e = this.find(state.doc, action.id);
-                if (e?.parent && (action.position < e.start || action.position > e.end)) {
+                const target = action.targetId && this.find(state.doc, action.targetId);
+                if (e?.parent && target?.parent && e.node !== target.node && !target.ancestors.includes(e.node) &&
+                    ["region", "addon"].includes(target.parent.type) && !["row", "region"].includes(e.node.type)) {
+                    e.parent.children.splice(e.index, 1);
+                    const index = target.parent.children.indexOf(target.node) + (action.after ? 1 : 0);
+                    target.parent.children.splice(index, 0, e.node);
+                    const position = this.find(state.doc, e.node.id).start;
+                    state.selection = { anchor: position, focus: position };
+                    state.storedMarks = null;
+                } else if (!action.targetId && e?.parent && (action.position < e.start || action.position > e.end)) {
                     const pos = action.position > e.end ? action.position - this.size(e.node) : action.position;
                     e.parent.children.splice(e.index, 1);
                     state.selection = { anchor: pos, focus: pos };
@@ -511,7 +525,11 @@ webexpress.webui.EditorModel = class {
         return this.validate(state);
     }
 
-    /** Layout edits keep structural chrome outside the editable document regions. */
+    /**
+     * Preserves region identity and bounded row structure during layout changes.
+     * @param {object} state - The transaction state that owns the regions.
+     * @param {object} action - The layout command and its source or destination identifiers.
+     */
     static layout(state, action) {
         const region = action.regionId ? this.find(state.doc, action.regionId) : this.region(state.doc, state.selection.focus);
         if (!region || region.node.type !== "region") return;
@@ -532,6 +550,22 @@ webexpress.webui.EditorModel = class {
             target = row.node.children[Math.min(region.index, row.node.children.length - 1)] ?? state.doc.children[Math.min(row.index, state.doc.children.length - 1)].children[0];
         } else if (action.command === "resizeRegion") {
             target.attrs.weight = Math.max(1, Math.min(12, Number(action.weight) || 1));
+        } else if (action.command === "moveRegion") {
+            const destination = this.find(state.doc, action.targetId);
+            if (!destination || destination.node.type !== "region" || destination.node === target) return;
+            const separateRow = ["above", "below"].includes(action.placement);
+            if (!separateRow && !["before", "after"].includes(action.placement)) return;
+            if (!separateRow && destination.parent !== row.node && destination.parent.children.length >= 6) return;
+            if (separateRow && row.node.children.length > 1 && state.doc.children.length >= 100) return;
+            row.node.children.splice(region.index, 1);
+            if (!row.node.children.length) state.doc.children.splice(row.index, 1);
+            if (separateRow) {
+                const index = state.doc.children.indexOf(destination.parent) + (action.placement === "below" ? 1 : 0);
+                state.doc.children.splice(index, 0, this.node("row", [target]));
+            } else {
+                const index = destination.parent.children.indexOf(destination.node) + (action.placement === "after" ? 1 : 0);
+                destination.parent.children.splice(index, 0, target);
+            }
         } else return;
         const position = this.find(state.doc, target.id).start;
         state.selection = { anchor: position, focus: position };

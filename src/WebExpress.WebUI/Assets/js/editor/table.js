@@ -246,7 +246,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
     },
 
     /**
-     * Upgrades raw html tables to framed editor tables and binds resize events.
+     * Adds resize and menu interactions to the tables projected by the editor view.
      * @param {object} editor - Editor instance.
      */
     _upgradeRawTables: function(editor) {
@@ -254,7 +254,62 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         root.querySelectorAll("table").forEach(table => {
             table._wxEditor = editor;
             this._attachColumnResizersToTable(table);
+            this._attachFrameOptions(editor, table);
         });
+    },
+
+    /**
+     * Exposes cell actions in the frame without stealing the current cell selection.
+     * @param {object} editor - The owner of the table transaction and selection.
+     * @param {HTMLTableElement} table - The projected table whose header receives options.
+     */
+    _attachFrameOptions: function(editor, table) {
+        const header = table.closest(".wx-editor-table-frame")?.querySelector(".wx-addon-header");
+        if (!header || header.querySelector(".wx-editor-table-options")) return;
+        const button = document.createElement("button");
+        button.className = "wx-editor-btn wx-editor-table-options dropdown-toggle";
+        button.type = "button"; button.textContent = "⋯";
+        button.title = webexpress.webui.I18N.translate("webexpress.webui:editor.frame.options");
+        button.setAttribute("aria-label", button.title);
+        const menu = document.createElement("div"); menu.className = "dropdown-menu";
+        button.addEventListener("mousedown", event => { editor._saveCurrentSelection(); event.preventDefault(); });
+        menu.addEventListener("beforetoggle", event => {
+            if (event.target !== menu || event.newState !== "open" || editor.disabled) return;
+            const selected = this._getSelectedCells(editor).find(cell => cell.closest("table") === table);
+            const cell = selected || table.querySelector("td,th");
+            if (!cell) return;
+            menu.innerHTML = "";
+            this._fillOptionsMenu(menu, this.getContextMenuItems(editor, cell));
+        });
+        header.appendChild(button); header.appendChild(menu);
+        webexpress.webui.NativeMenu.bind(button, menu);
+    },
+
+    /**
+     * Reuses table action descriptors so frame and selection menus stay consistent.
+     * @param {HTMLElement} menu - The popup receiving the action controls.
+     * @param {Array<object>} items - The current table action descriptors.
+     */
+    _fillOptionsMenu: function(menu, items) {
+        for (const item of items) {
+            if (item.separator) {
+                const separator = document.createElement("hr"); separator.className = "dropdown-divider";
+                menu.appendChild(separator); continue;
+            }
+            if (item.element) { menu.appendChild(item.element); continue; }
+            const button = document.createElement("button");
+            button.type = "button"; button.className = "dropdown-item";
+            button.textContent = item.label || item.value;
+            if (item.type === "color") button.style.color = item.value;
+            menu.appendChild(button);
+            if (item.submenu) {
+                button.classList.add("dropdown-toggle");
+                const submenu = document.createElement("div"); submenu.className = "dropdown-menu";
+                menu.appendChild(submenu); this._fillOptionsMenu(submenu, item.submenu);
+                webexpress.webui.NativeMenu.bind(button, submenu);
+                button.addEventListener("click", event => event.stopPropagation());
+            } else button.addEventListener("click", () => item.action?.());
+        }
     },
 
     /**
@@ -668,31 +723,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         }
         tableHtml += "</tbody></table>";
 
-        const uniqueId = "table-" + Date.now();
-        const dragHandle = `<span class="wx-addon-drag-handle" contenteditable="false"><i class="${webexpress.webui.IconSet.resolve("grip-lines-vertical")}"></i></span>`;
-
-        const frameHtml = `
-            <div class="wx-addon-frame card my-3 shadow-sm"
-                 contenteditable="false"
-                 draggable="false"
-                 data-addon-id="${uniqueId}"
-                 data-type="table">
-
-                <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center" contenteditable="false">
-                    <div class="small text-muted fw-bold d-flex align-items-center">
-                        ${dragHandle}
-                        <i class="${webexpress.webui.IconSet.resolve("table")} me-2"></i>
-                        <span>Table</span>
-                    </div>
-                </div>
-
-                <div class="card-body p-2 wx-addon-body-container"
-                     contenteditable="false">
-                    ${tableHtml}
-                </div>
-            </div>`;
-
-        editor.insertHtmlAtCursor(frameHtml);
+        editor.insertHtmlAtCursor(tableHtml);
     },
 
     /**

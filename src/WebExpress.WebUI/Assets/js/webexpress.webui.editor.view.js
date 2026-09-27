@@ -22,8 +22,13 @@ webexpress.webui.EditorHtml = class {
         while (fragment.firstChild) result.appendChild(fragment.firstChild);
         return result;
     }
-    /** Parses in an inert template; scripts, controls and event attributes never enter state. */
-    static read(html) {
+    /**
+     * Parses inert HTML so only supported document data reaches transactions.
+     * @param {string} html - The HTML received at an input boundary.
+     * @param {object} [options={}] - Import policy, including clipboard normalization.
+     * @returns {object} The validated document and insertion nodes.
+     */
+    static read(html, options = {}) {
         const Model = webexpress.webui.EditorModel;
         if (typeof html !== "string" || html.length > Model.MAX_TEXT * 4) throw new RangeError("Invalid editor HTML input.");
         const template = document.createElement("template");
@@ -36,7 +41,7 @@ webexpress.webui.EditorHtml = class {
             if (node.nodeType !== 1) return [];
             const tag = node.tagName.toLowerCase();
             if (["script", "style", "iframe", "object", "embed", "svg", "math", "template", "noscript", "input", "textarea", "select", "button", "form", "meta", "link", "base"].includes(tag)) return [];
-            if (node.hasAttribute("data-wx-caret") || node.matches(".wx-editor-placeholder,.wx-drop-marker,.wx-col-resizer,.wx-addon-drag-handle,.wx-addon-settings-btn,.wx-editor-toolbar,.wx-editor-status")) return [];
+            if (node.hasAttribute("data-wx-caret") || node.matches(".wx-editor-placeholder,.wx-drop-marker,.wx-col-resizer,.wx-addon-drag-handle,.wx-addon-settings-btn,.wx-editor-region-handle,.wx-editor-toolbar,.wx-editor-status")) return [];
             if (node.matches(".wx-addon-frame,.wx-addon-inline-frame") && node.getAttribute("data-type") === "table") {
                 const table = node.querySelector("table");
                 return table ? read(table, marks, depth + 1) : [];
@@ -56,7 +61,7 @@ webexpress.webui.EditorHtml = class {
             const kind = node.matches(".wx-editor-instruction") ? "instruction" : node.matches(".wx-mention") ? "mention" : node.matches(".wx-editor-date,.wx-webui-date,.wx-date") ? "date" : null;
             if (kind) return [Model.node("atom", [], { kind, text: node.textContent, value: node.getAttribute("data-value") || node.getAttribute("data-id") || "", format: node.getAttribute("data-format") || "" })];
             const inherited = { ...marks };
-            const mark = { b: "bold", strong: "bold", i: "italic", em: "italic", u: "underline", s: "strikethrough", strike: "strikethrough", sup: "superscript", sub: "subscript", code: "code" }[tag];
+            const mark = { b: "bold", strong: "bold", i: "italic", em: "italic", u: "underline", ins: "underline", s: "strikethrough", strike: "strikethrough", del: "strikethrough", sup: "superscript", sub: "subscript", code: "code", kbd: "code", samp: "code" }[tag];
             if (mark) inherited[mark] = true;
             if (tag === "a") inherited.link = { href: node.getAttribute("href"), target: node.getAttribute("target") };
             const style = node.style || {};
@@ -64,13 +69,18 @@ webexpress.webui.EditorHtml = class {
             if (style.fontStyle === "italic") inherited.italic = true;
             if ((style.textDecoration || style.textDecorationLine || "").includes("underline")) inherited.underline = true;
             if ((style.textDecoration || style.textDecorationLine || "").includes("line-through")) inherited.strikethrough = true;
-            for (const [prop, name] of [["color", "color"], ["backgroundColor", "background"], ["fontFamily", "font"], ["fontSize", "size"]]) if (style[prop]) inherited[name] = style[prop];
+            if (style.verticalAlign === "super") inherited.superscript = true;
+            if (style.verticalAlign === "sub") inherited.subscript = true;
+            for (const [prop, name] of [["color", "color"], ["backgroundColor", "background"], ["fontFamily", "font"], ["fontSize", "size"]]) {
+                if (style[prop] && (!options.clipboard || name === "color")) inherited[name] = style[prop];
+            }
+            if (options.clipboard && tag === "font" && node.getAttribute("color")) inherited.color = node.getAttribute("color");
             if (tag === "img") return [Model.node("image", [], { src: node.getAttribute("src"), alt: node.getAttribute("alt"), width: style.width || node.getAttribute("width"), height: style.height || node.getAttribute("height"), align: style.display === "block" ? style.marginLeft === "auto" ? style.marginRight === "auto" ? "center" : "right" : "left" : "inline", link: inherited.link })];
             if (["br", "hr"].includes(tag)) return [Model.node(tag)];
             const children = Array.from(node.childNodes).flatMap(n => read(n, inherited, depth + 1));
             if (node.matches(".wx-editor-row")) return [Model.node("row", children)];
             if (node.matches(".wx-editor-region")) return [Model.node("region", children, { weight: Number(node.getAttribute("data-weight")) || 1 })];
-            const attrs = { align: style.textAlign, dir: node.getAttribute("dir"), indent: Math.round((parseFloat(style.marginLeft) || 0) / 40), background: style.backgroundColor };
+            const attrs = { align: style.textAlign, dir: node.getAttribute("dir"), indent: Math.round((parseFloat(style.marginLeft) || 0) / 40), background: options.clipboard ? "" : style.backgroundColor };
             if (["td", "th"].includes(tag)) Object.assign(attrs, { colspan: Number(node.getAttribute("colspan")), rowspan: Number(node.getAttribute("rowspan")), scope: node.getAttribute("scope") });
             if (tag === "ol") attrs.start = Number(node.getAttribute("start"));
             if (tag === "table") attrs.widths = Array.from(node.querySelectorAll("col")).map(col => parseFloat(col.style.width) || 100);
@@ -97,9 +107,16 @@ webexpress.webui.EditorHtml = class {
 webexpress.webui.EditorView = class {
     constructor(editor) { this.editor = editor; this.map = new WeakMap(); this.points = []; }
 
-    /** Rebuilds the projection only after a model transaction has completed. */
+    /**
+     * Rebuilds the projection after a transaction while excluding chrome from exports.
+     * @param {object} state - The validated document to project.
+     * @param {HTMLElement} root - The element receiving the projected document.
+     * @param {boolean} [exporting=false] - Whether the projection is for HTML interchange.
+     */
     render(state, root, exporting = false) {
         this.map = new WeakMap(); this.points = []; this._regionNumber = 0;
+        this._multipleRegions = state.doc.children.reduce((count, row) => count + (row.type === "row" ? row.children.length : 0), 0) > 1;
+        if (!exporting) root.classList.toggle("wx-editor-multiple-regions", this._multipleRegions);
         const fragment = document.createDocumentFragment();
         let pos = 0;
         for (const node of state.doc.children) { fragment.appendChild(this._node(node, pos, exporting)); pos += webexpress.webui.EditorModel.size(node); }
@@ -108,6 +125,13 @@ webexpress.webui.EditorView = class {
         this.map.set(root, { start: 0, end: pos, id: state.doc.id, node: state.doc });
     }
 
+    /**
+     * Maps content and editable islands to stable model positions independently of chrome.
+     * @param {object} node - The model node to render.
+     * @param {number} start - The node's first model position.
+     * @param {boolean} exporting - Whether to omit editor-only controls.
+     * @returns {Node} The node's DOM projection.
+     */
     _node(node, start, exporting) {
         const Model = webexpress.webui.EditorModel, end = start + Model.size(node);
         let element;
@@ -167,6 +191,7 @@ webexpress.webui.EditorView = class {
                     element.setAttribute("aria-multiline", "true");
                     element.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.region.label"));
                     element.setAttribute("data-region-label", webexpress.webui.I18N.translate("webexpress.webui:editor.region.label") + " " + (++this._regionNumber));
+                    if (this._multipleRegions) element.appendChild(this._dragHandle("wx-editor-region-handle", "editor.region.move"));
                 }
             }
             if (attrs.align) element.style.textAlign = attrs.align;
@@ -176,6 +201,10 @@ webexpress.webui.EditorView = class {
             for (const key of ["colspan", "rowspan", "scope", "start"]) if (attrs[key]) element.setAttribute(key, attrs[key]);
             if (node.type === "table") {
                 element.className = "table table-striped table-bordered wx-native-table";
+                if (!exporting) {
+                    element.setAttribute("contenteditable", this.editor?.disabled ? "false" : "true");
+                    element.setAttribute("data-wx-editor-owned", "true");
+                }
                 if (attrs.widths?.length) {
                     const cols = document.createElement("colgroup");
                     attrs.widths.forEach(w => { const col = document.createElement("col"); col.style.width = w + "px"; cols.appendChild(col); });
@@ -194,6 +223,17 @@ webexpress.webui.EditorView = class {
             }
         }
         this.map.set(element, { start, end, id: node.id, node });
+        if (node.type === "table" && !exporting) {
+            const frame = document.createElement("div");
+            frame.className = "wx-addon-frame wx-editor-table-frame card my-3 shadow-sm";
+            frame.setAttribute("data-type", "table");
+            frame.setAttribute("contenteditable", "false");
+            frame.appendChild(this._frameHeader(webexpress.webui.I18N.translate("webexpress.webui:editor.table")));
+            const body = document.createElement("div");
+            body.className = "card-body p-2 wx-addon-body-container";
+            body.appendChild(element); frame.appendChild(body); element = frame;
+            this.map.set(frame, { start, end, id: node.id, node });
+        }
         if (Model.atomic(node)) this.points.push({ start, end, atom: element });
         return element;
     }
@@ -206,6 +246,13 @@ webexpress.webui.EditorView = class {
         return link;
     }
 
+    /**
+     * Separates configurable add-on frames from their editable or application-owned bodies.
+     * @param {object} node - The validated add-on configuration and child content.
+     * @param {number} start - The first model position of the add-on.
+     * @param {boolean} exporting - Whether to omit movement and settings controls.
+     * @returns {HTMLElement} The projected add-on frame.
+     */
     _addon(node, start, exporting) {
         const def = webexpress.webui.EditorAddOns?.get(node.attrs.name);
         const frame = document.createElement(node.attrs.inline ? "span" : "div");
@@ -226,15 +273,49 @@ webexpress.webui.EditorView = class {
             body.appendChild(webexpress.webui.EditorHtml.widget(def, node.attrs.data));
         }
         if (!exporting && !node.attrs.inline) {
-            const header = document.createElement("div"); header.className = "card-header";
-            const handle = document.createElement("span"); handle.className = "wx-addon-drag-handle"; handle.textContent = "↕";
-            handle.setAttribute("draggable", "true"); header.appendChild(handle);
-            const label = document.createElement("span"); label.textContent = def?.label || node.attrs.name; header.appendChild(label);
-            if (def?.properties?.length) { const settings = document.createElement("button"); settings.type = "button"; settings.className = "wx-addon-settings-btn"; settings.textContent = "⚙"; header.appendChild(settings); }
+            const header = this._frameHeader(def?.label || node.attrs.name);
+            if (def?.properties?.length) {
+                const settings = document.createElement("button"); settings.type = "button";
+                settings.className = "wx-addon-settings-btn"; settings.textContent = "⚙";
+                settings.title = webexpress.webui.I18N.translate("webexpress.webui:editor.frame.options");
+                settings.setAttribute("aria-label", settings.title); header.appendChild(settings);
+            }
             frame.appendChild(header);
         }
+        if (!exporting && node.attrs.inline) frame.setAttribute("draggable", "true");
         frame.appendChild(body);
         return frame;
+    }
+
+    /**
+     * Keeps movement controls outside editable text and identifies their purpose.
+     * @param {string} className - The handle class used by delegated drag events.
+     * @param {string} label - The translation key describing the movable item.
+     * @returns {HTMLElement} The noneditable drag handle.
+     */
+    _dragHandle(className, label) {
+        const handle = document.createElement("span");
+        handle.className = className; handle.textContent = "⠿";
+        handle.setAttribute("contenteditable", "false");
+        handle.setAttribute("draggable", "true");
+        handle.title = webexpress.webui.I18N.translate("webexpress.webui:" + label);
+        handle.setAttribute("aria-label", handle.title);
+        return handle;
+    }
+
+    /**
+     * Gives tables and add-ons the same movable frame with trailing options.
+     * @param {string} title - The visible frame title.
+     * @returns {HTMLElement} The noneditable frame header.
+     */
+    _frameHeader(title) {
+        const header = document.createElement("div");
+        header.className = "card-header wx-addon-header";
+        header.setAttribute("contenteditable", "false");
+        header.appendChild(this._dragHandle("wx-addon-drag-handle", "editor.frame.move"));
+        const label = document.createElement("span");
+        label.className = "wx-addon-title"; label.textContent = title; header.appendChild(label);
+        return header;
     }
 
     /** Resolves any descendant of a rendered node to its persistent model key. */

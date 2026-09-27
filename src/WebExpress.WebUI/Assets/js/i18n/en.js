@@ -346,10 +346,14 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "editor.mention.title": "Mention",
 
     // undo / redo (already in core, fallback only)
+    "editor.region.menu": "Regions",
+    "editor.region.move": "Move region",
+    "editor.frame.move": "Move item",
+    "editor.frame.options": "Options",
     "editor.region.label": "Region",
-    "editor.region.addrow": "Add row",
-    "editor.region.addcolumn": "Add column",
-    "editor.region.remove": "Remove region",
+    "editor.region.addrow": "Add region",
+    "editor.region.addcolumn": "Split region",
+    "editor.region.remove": "Delete region",
     "editor.state.invalid": "Invalid editor content.",
     "editor.undo": "Undo (Ctrl+Z)",
     "editor.redo": "Redo (Ctrl+Y)",

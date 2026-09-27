@@ -106,7 +106,7 @@ The editor provides a tool to insert instruction texts (Anweisungstexte) for aut
 
 ## Reading view
 
-The value the editor stores is its whole working surface, not a document: add-on frames keep the header that names and configures them, tables keep their column resizers, and non-editable blocks are fenced by the empty paragraphs the caret needs. To publish that value, hand it to the [content control](content.md), which strips the editing scaffolding and renders the document itself. It is the same view SmartEdit and the `editor` cell template show when the editor is not active.
+The editor value contains the validated JSON document model. Frame titles, drag handles, column resizers and selection indicators belong to the editing view and are excluded from that value. The [content control](content.md) renders the document for reading. HTML interchange is available through `exportHtml()`, which also omits the editing controls.
 
 ```javascript
 editorElement.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, (e) => {
@@ -264,7 +264,21 @@ Typing and the following formatting command are separate undo steps. Undo
 restores the selection used for the command; operations without content changes
 preserve redo.
 
+### Editing regions
+
+The Regions dropdown contains Add region, Split region and Delete region. Adding creates a row below the current row, splitting adds an empty region beside the selected region, and deletion removes the selected region with its content. The final region cannot be deleted. A document with one region has no region border, label or drag handle. These indicators appear when the document contains multiple regions and follow loading, deletion and undo.
+
+The region handle `⠿` moves a complete region with its content and relative width. Dropping near the left or right side of another region places it before or after that region in the same row. Dropping near the upper or lower edge creates a separate row above or below the target. Empty source rows are removed. A row accepts at most six regions, and each completed move is one undoable transaction.
+
+### Pasting content
+
+The clipboard import removes text, paragraph and table background colors together with foreign font families and font sizes. Unsupported presentation falls back to the editor styles. Supported headings, lists, links, alignment, text colors and inline emphasis remain available. Equivalent HTML and CSS formatting becomes native editor marks, including bold, italic, underline, strikethrough, code, superscript and subscript.
+
+The cleanup applies to clipboard HTML and external HTML drops. Loading a saved document and calling `insertHtmlAtCursor()` retain supported explicit formatting, including highlights. A paste is one undoable transaction, so undo and redo restore the complete content change.
+
 ### Editing tables
+
+The table frame uses the same `⠿` movement handle as block add-ons. Its title remains outside the editable cells, and optional action controls sit at the far right of the header. The table options menu exposes the same structural and color actions as the cell menu. Tables can be moved between blocks and regions without losing cells, formatting or column widths. Frames are recreated after loading or undo and are excluded from the exported table HTML.
 
 Drag from one cell into another, or Shift-click another cell, to select a rectangle.
 Dragging within a single cell still selects text. The rectangle remains selected

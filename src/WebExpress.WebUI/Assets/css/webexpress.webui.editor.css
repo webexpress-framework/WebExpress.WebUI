@@ -286,13 +286,22 @@
 }
 
 .wx-addon-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
     user-select: none;
-    cursor: grab;
+    cursor: default;
     background-color: #f8f9fa;
 }
 
-.wx-addon-header:active {
+.wx-addon-drag-handle:active,
+.wx-editor-region-handle:active {
     cursor: grabbing;
+}
+
+.wx-addon-title {
+    flex: 1;
+    min-width: 0;
 }
 
 .wx-addon-body-container,
@@ -339,9 +348,10 @@
     margin-right: 0.5rem;
 }
 
-.wx-addon-settings-btn {
-    cursor: pointer;
-    margin-left: 0.5rem;
+.wx-addon-settings-btn,
+.wx-editor-table-options {
+    cursor: default;
+    margin-inline-start: auto;
 }
 
 .wx-addon-drag-handle:hover,
@@ -1078,13 +1088,19 @@
 .wx-editor .wx-editor-region {
     position: relative;
     min-height: 6rem;
+    padding: 0;
+    border: 0;
+    outline: none;
+}
+
+.wx-editor .wx-editor-multiple-regions .wx-editor-region {
     padding: 1.75rem 0.85rem 0.85rem;
     border: 1px dashed var(--wx-border-color, #8b9198);
     border-radius: 0.35rem;
     background: var(--wx-body-bg, #fff);
 }
 
-.wx-editor .wx-editor-region::before {
+.wx-editor .wx-editor-multiple-regions .wx-editor-region::before {
     content: attr(data-region-label);
     position: absolute;
     inset-block-start: 0.3rem;
@@ -1095,10 +1111,25 @@
     user-select: none;
 }
 
-.wx-editor .wx-editor-region:focus-within {
+.wx-editor .wx-editor-multiple-regions .wx-editor-region:focus-within {
     border-color: var(--wx-primary, #0d6efd);
     outline: 2px solid color-mix(in srgb, var(--wx-primary, #0d6efd) 18%, transparent);
 }
+
+.wx-editor-region-handle {
+    position: absolute;
+    inset-block-start: 0.1rem;
+    inset-inline-end: 0.5rem;
+    cursor: grab;
+    user-select: none;
+    line-height: 1.4;
+    color: var(--wx-secondary-color, #687078);
+}
+
+.wx-editor [data-wx-drop="above"] { box-shadow: 0 -3px var(--wx-primary, #0d6efd); }
+.wx-editor [data-wx-drop="below"] { box-shadow: 0 3px var(--wx-primary, #0d6efd); }
+.wx-editor [data-wx-drop="before"] { box-shadow: -3px 0 var(--wx-primary, #0d6efd); }
+.wx-editor [data-wx-drop="after"] { box-shadow: 3px 0 var(--wx-primary, #0d6efd); }
 
 .wx-editor[aria-disabled="true"] .wx-editor-region {
     background: var(--wx-tertiary-bg, #f2f3f5);
@@ -1110,6 +1141,10 @@
     align-items: center;
     gap: 0.3rem;
     width: auto;
+}
+
+.wx-editor-regions-toolbar .dropdown-item {
+    width: 100%;
 }
 
 @media (max-width: 600px) {

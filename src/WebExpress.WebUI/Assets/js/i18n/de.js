@@ -346,10 +346,14 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "editor.mention.title": "Erwähnen",
 
     // undo / redo (already in core, fallback only)
+    "editor.region.menu": "Bereiche",
+    "editor.region.move": "Bereich verschieben",
+    "editor.frame.move": "Element verschieben",
+    "editor.frame.options": "Optionen",
     "editor.region.label": "Bereich",
-    "editor.region.addrow": "Zeile hinzufügen",
-    "editor.region.addcolumn": "Bereich daneben",
-    "editor.region.remove": "Bereich entfernen",
+    "editor.region.addrow": "Bereich hinzufügen",
+    "editor.region.addcolumn": "Bereich unterteilen",
+    "editor.region.remove": "Bereich löschen",
     "editor.state.invalid": "Ungültiger Editor-Inhalt.",
     "editor.undo": "Rückgängig (Strg+Z)",
     "editor.redo": "Wiederherstellen (Strg+Y)",

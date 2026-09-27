@@ -56,6 +56,9 @@ export function loadEditor(options = {}) {
     };
     const sandbox = vm.createContext({ console, ...globals, Intl, navigator: { language: "en" }, MutationObserver, setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); }, webexpress: { webui: wx } });
     const load = name => vm.runInContext(fs.readFileSync(webuiAsset(name), "utf8"), sandbox, { filename: name });
+    const core = fs.readFileSync(webuiAsset("webexpress.webui.js"), "utf8");
+    const menuStart = core.indexOf("webexpress.webui.NativeMenu = class");
+    vm.runInContext(core.slice(menuStart, core.indexOf("\n};", menuStart) + 3), sandbox, { filename: "NativeMenu" });
     ["webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js", "webexpress.webui.editor.js", ...(options.files || [])].forEach(load);
     if (options.addons) Object.entries(options.addons).forEach(([id, def]) => wx.EditorAddOns.register(id, def));
     const form = document.createElement("form"), host = document.createElement("div");

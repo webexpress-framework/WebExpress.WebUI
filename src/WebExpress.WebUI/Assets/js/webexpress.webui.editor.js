@@ -228,6 +228,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this.listen(root, "copy", e => this._onCopy(e, false));
         this.listen(root, "cut", e => this._onCopy(e, true));
         this.listen(root, "drop", e => this._onDrop(e));
+        this.listen(root, "dragstart", e => this._onDragStart(e));
+        this.listen(root, "dragenter", e => this._onDragOver(e));
+        this.listen(root, "dragover", e => this._onDragOver(e));
+        this.listen(root, "dragend", () => this._clearDrag());
         this.listen(root, "compositionstart", e => {
             if (!this.ownsInput(e) || e.defaultPrevented) return;
             this._saveCurrentSelection(); this._compositionSelection = { ...this._state.selection }; this._composing = true;
@@ -290,10 +294,16 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (!this.ownsInput(e) || e.defaultPrevented) return;
         e.preventDefault(); this._saveCurrentSelection(); if (e.clipboardData) this._insertTransfer(e.clipboardData);
     }
+    /**
+     * Normalizes external clipboard presentation without changing saved document imports.
+     * @param {DataTransfer} transfer - The clipboard or external drop payload.
+     */
     _insertTransfer(transfer) {
         const html = transfer.getData("text/html");
-        if (html) this.insertHtmlAtCursor(html);
-        else {
+        if (html) {
+            const input = webexpress.webui.EditorHtml.read(html, { clipboard: true });
+            this.dispatch({ type: "insertNodes", nodes: input.nodes, source: "paste" });
+        } else {
             const lines = transfer.getData("text/plain").replace(/\r\n?/g, "\n").split("\n");
             if (lines.length === 1) this.dispatch({ type: "insertText", text: lines[0] });
             else this.dispatch({ type: "insertNodes", nodes: lines.map(text => webexpress.webui.EditorModel.node("p", [{ type: "text", text, marks: {} }])) });
@@ -312,14 +322,103 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         e.clipboardData.setData("text/plain", blocks.map(b => Model.leaves(b).map(n => n.type === "text" ? n.text : n.type === "br" ? "\n" : n.attrs?.text || "").join("")).join("\n"));
         if (cut) this.dispatch({ type: "delete", source: "cut" });
     }
+    /**
+     * Commits local movement or imports an external payload at its caret position.
+     * @param {DragEvent} e - The browser drop event within this editor.
+     */
     _onDrop(e) {
+        if (this._draggedId) {
+            e.preventDefault();
+            const action = !this.disabled && this._dragAction(e);
+            this._clearDrag();
+            if (action) this.dispatch(action);
+            return;
+        }
         if (!this.ownsInput(e) || e.defaultPrevented || !e.dataTransfer) return;
-        if (e.dataTransfer.types?.includes("application/x-webexpress-editor-node")) return;
+        if (e.dataTransfer.types?.includes("application/x-webexpress-editor-node")) { e.preventDefault(); return; }
         const position = document.caretPositionFromPoint?.(e.clientX, e.clientY);
         const range = !position && document.caretRangeFromPoint?.(e.clientX, e.clientY);
         const index = position ? this._view.index(position.offsetNode, position.offset) : range ? this._view.index(range.startContainer, range.startOffset) : null;
         if (index === null) return;
         e.preventDefault(); this._state.selection = { anchor: index, focus: index }; this._insertTransfer(e.dataTransfer);
+    }
+
+    /**
+     * Starts structural movement only from a handle, preserving normal text dragging.
+     * @param {DragEvent} event - The browser drag event from this editor.
+     */
+    _onDragStart(event) {
+        const handle = event.target.closest?.(".wx-editor-region-handle,.wx-addon-drag-handle,.wx-addon-inline-frame");
+        if (!handle || !this._editorElement.contains(handle)) return;
+        if (this.disabled || this._composing || !event.dataTransfer) { event.preventDefault(); return; }
+        this._saveCurrentSelection();
+        this._draggedId = this.nodeId(handle);
+        event.dataTransfer.setData("application/x-webexpress-editor-node", this._draggedId);
+        event.dataTransfer.effectAllowed = "move";
+    }
+
+    /**
+     * Projects a drop into a layout or block transaction without changing live content.
+     * @param {DragEvent} event - The pointer location and candidate target.
+     * @returns {object|null} An action for a valid target inside the owning editor.
+     */
+    _dragAction(event) {
+        const Model = webexpress.webui.EditorModel;
+        const source = Model.find(this._state.doc, this._draggedId);
+        const element = event.target.nodeType === 3 ? event.target.parentElement : event.target;
+        if (!source || !this._editorElement.contains(element)) return null;
+        const region = element.closest(".wx-editor-region");
+        if (!region) return null;
+        if (source.node.type === "addon" && source.node.attrs.inline) {
+            const caret = document.caretPositionFromPoint?.(event.clientX, event.clientY);
+            const range = !caret && document.caretRangeFromPoint?.(event.clientX, event.clientY);
+            const node = caret?.offsetNode || range?.startContainer;
+            if (!node || !this._editorElement.contains(node) || !webexpress.webui.EditorSelection.isEditable(node, this._editorElement)) return null;
+            const position = this._view.index(node, caret ? caret.offset : range.startOffset);
+            return position === null ? null : { type: "moveNode", id: source.node.id, position };
+        }
+        if (source.node.type === "region") {
+            if (this.nodeId(region) === source.node.id) return null;
+            const box = region.getBoundingClientRect();
+            const placement = event.clientY < box.top + box.height / 4 ? "above"
+                : event.clientY > box.bottom - box.height / 4 ? "below"
+                : event.clientX < box.left + box.width / 2 ? "before" : "after";
+            return { type: "layout", command: "moveRegion", regionId: source.node.id, targetId: this.nodeId(region), placement };
+        }
+        let target = this._view.entry(element);
+        if (!target || target.node.type === "region") {
+            const node = Model.find(this._state.doc, this.nodeId(region)).node.children.at(-1);
+            target = Model.find(this._state.doc, node.id);
+        } else target = target.node.type === "text" ? Model.block(this._state.doc, target.start) : Model.find(this._state.doc, target.id || target.node.id);
+        while (target?.parent && !["region", "addon"].includes(target.parent.type)) target = Model.find(this._state.doc, target.parent.id);
+        if (!target?.parent || target.node.id === source.node.id || target.ancestors.includes(source.node)) return null;
+        let block = element;
+        while (block.parentElement && block !== region && this._view.map.get(block)?.id !== target.node.id) block = block.parentElement;
+        while (block.parentElement && block.parentElement !== region && this.nodeId(block.parentElement) === target.node.id) block = block.parentElement;
+        const box = block.getBoundingClientRect();
+        return { type: "moveNode", id: source.node.id, targetId: target.node.id, after: element === region || event.clientY >= box.top + box.height / 2 };
+    }
+
+    /**
+     * Advertises valid destinations while keeping the drag local to its editor.
+     * @param {DragEvent} event - The current pointer position.
+     */
+    _onDragOver(event) {
+        this._editorElement.querySelectorAll("[data-wx-drop]").forEach(node => node.removeAttribute("data-wx-drop"));
+        if (!this._draggedId || this.disabled) return;
+        const action = this._dragAction(event);
+        if (!action) return;
+        event.preventDefault(); event.dataTransfer.dropEffect = "move";
+        if (!action.targetId) return;
+        const target = Array.from(this._editorElement.querySelectorAll(".wx-editor-region,.wx-addon-frame,p,h1,h2,h3,h4,h5,h6,pre,ul,ol,blockquote"))
+            .find(node => this.nodeId(node) === action.targetId);
+        target?.setAttribute("data-wx-drop", action.placement || (action.after ? "below" : "above"));
+    }
+
+    /** Clears transient drag chrome after a drop or cancellation. */
+    _clearDrag() {
+        this._draggedId = null;
+        this._editorElement.querySelectorAll("[data-wx-drop]").forEach(node => node.removeAttribute("data-wx-drop"));
     }
 
     _saveCurrentSelection() {
@@ -374,12 +473,14 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
 
     get disabled() { return this._disabled || !!this._uiContainer.closest("fieldset[disabled]"); }
     set disabled(value) { this._disabled = !!value; this._applyDisabled(); }
+    /** Keeps editing hosts and optional frame controls consistent with form ownership. */
     _applyDisabled() {
         const disabled = this.disabled;
         this._uiContainer.setAttribute("aria-disabled", String(disabled));
         this._editorElement.setAttribute("contenteditable", "false");
         this._editorElement.setAttribute("aria-disabled", String(disabled));
         this._editorElement.querySelectorAll("[data-wx-editor-owned]").forEach(el => el.setAttribute("contenteditable", String(!disabled)));
+        this._editorElement.querySelectorAll(".wx-addon-settings-btn,.wx-editor-table-options").forEach(el => { el.disabled = disabled; });
         const toolbar = this._uiContainer.querySelector(".wx-editor-toolbar");
         toolbar.setAttribute("aria-disabled", String(disabled)); toolbar.inert = disabled;
         toolbar.querySelectorAll("button,input,select,textarea").forEach(el => { el.disabled = disabled; });
@@ -412,6 +513,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     destroy() {
         if (this._destroyed) return;
         this._destroyed = true; this._composing = false;
+        this._clearDrag();
         this._history.destroy(); this._fieldsetObserver.disconnect();
         this._listeners.splice(0).forEach(cleanup => cleanup());
         this._timers.forEach(timer => clearTimeout(timer)); this._timers.clear();
@@ -422,6 +524,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (this._formInput) this._formInput.disabled = true;
         super.destroy();
     }
+    /**
+     * Groups layout actions in one menu alongside plugin and history controls.
+     * @param {HTMLElement} element - The editor host receiving the toolbar.
+     */
     _createToolbar(element) {
         const toolbar = document.createElement("div");
         toolbar.classList.add("wx-editor-toolbar");
@@ -439,17 +545,28 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         const historyGroup = this._createHistoryGroup();
         const regions = document.createElement("div");
         regions.className = "wx-editor-btn-group wx-editor-regions-toolbar";
+        const toggle = document.createElement("button");
+        toggle.type = "button"; toggle.className = "wx-editor-btn dropdown-toggle";
+        toggle.title = webexpress.webui.I18N.translate("webexpress.webui:editor.region.menu");
+        toggle.setAttribute("aria-label", toggle.title);
+        const layoutIcon = document.createElement("i");
+        layoutIcon.className = webexpress.webui.IconSet.resolve("ui-layout");
+        layoutIcon.setAttribute("aria-hidden", "true");
+        toggle.appendChild(layoutIcon);
+        const menu = document.createElement("div"); menu.className = "dropdown-menu";
         for (const [command, icon, label] of [["addRow", "plus", "addrow"], ["addColumn", "plus", "addcolumn"], ["removeRegion", "trash", "remove"]]) {
             const button = document.createElement("button");
-            button.type = "button"; button.className = "wx-editor-btn";
+            button.type = "button"; button.className = "dropdown-item";
             button.title = webexpress.webui.I18N.translate("webexpress.webui:editor.region." + label);
             button.setAttribute("aria-label", button.title);
             button.dataset.layoutCommand = command;
             const drawing = document.createElement("i"); drawing.className = webexpress.webui.IconSet.resolve(icon); button.appendChild(drawing);
             const text = document.createElement("span"); text.textContent = button.title; button.appendChild(text);
             this.listen(button, "click", () => this.dispatch({ type: "layout", command }));
-            regions.appendChild(button);
+            menu.appendChild(button);
         }
+        regions.appendChild(toggle); regions.appendChild(menu);
+        webexpress.webui.NativeMenu.bind(toggle, menu);
         toolbar.appendChild(regions);
         toolbar.appendChild(historyGroup);
         element.appendChild(toolbar);

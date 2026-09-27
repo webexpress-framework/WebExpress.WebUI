@@ -37,6 +37,18 @@ function toKebab(name) {
 function createStyle(owner) {
     const target = {
         _map: new Map(),
+        /**
+         * Exposes custom properties used by native popup anchors.
+         * @param {string} name - The CSS property name.
+         * @returns {string} The stored value, or an empty string.
+         */
+        getPropertyValue(name) { return this._map.get(name) || ""; },
+        /**
+         * Retains popup anchor declarations through style serialization.
+         * @param {string} name - The CSS property name.
+         * @param {string} value - The CSS property value.
+         */
+        setProperty(name, value) { this._map.set(name, String(value)); },
         get cssText() {
             return serializeStyle(this._map);
         },
@@ -46,7 +58,7 @@ function createStyle(owner) {
     };
     return new Proxy(target, {
         get(t, prop) {
-            if (prop === "cssText" || prop === "_map") {
+            if (prop === "cssText" || prop === "_map" || prop === "getPropertyValue" || prop === "setProperty") {
                 return t[prop];
             }
             if (typeof prop !== "string") {
