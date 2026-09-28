@@ -1934,109 +1934,81 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         }
         e.preventDefault();
 
-        const oldColId = card.columnId;
-        const oldSwimlaneId = card.swimlaneId;
-        const sourceIndex = this._cards.indexOf(card);
-        if (sourceIndex < 0) {
-            return;
-        }
-
         if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
-            const columns = this._columns.map((c) => c.id);
-            const target = columns.indexOf(card.columnId) + (e.key === "ArrowLeft" ? -1 : 1);
-            if (target < 0 || target >= columns.length) {
-                return;
+            const target = this._columns.findIndex((column) => column.id === card.columnId)
+                + (e.key === "ArrowLeft" ? -1 : 1);
+            if (target >= 0 && target < this._columns.length) {
+                this._moveCard(card, this._columns[target].id, card.swimlaneId);
             }
-            this._cards.splice(sourceIndex, 1);
-            card.columnId = columns[target];
-            this._cards.push(card);
-            this._dispatchMoveEvent(card, oldColId, oldSwimlaneId, card.columnId, card.swimlaneId, this._cards.length - 1);
         } else {
-            // the neighbours in the same cell, in board order
-            const siblings = this._cards.filter((c) => c.columnId === card.columnId && c.swimlaneId === card.swimlaneId);
+            const siblings = this._cards.filter((item) => item.columnId === card.columnId && item.swimlaneId === card.swimlaneId);
             const position = siblings.indexOf(card) + (e.key === "ArrowUp" ? -1 : 1);
-            if (position < 0 || position >= siblings.length) {
-                return;
+            if (position >= 0 && position < siblings.length) {
+                this._moveCard(card, card.columnId, card.swimlaneId, siblings[position], e.key === "ArrowUp");
             }
-            const neighbour = siblings[position];
-            this._cards.splice(sourceIndex, 1);
-            const targetIndex = this._cards.indexOf(neighbour) + (e.key === "ArrowUp" ? 0 : 1);
-            this._cards.splice(targetIndex, 0, card);
-            this._dispatchMoveEvent(card, oldColId, oldSwimlaneId, card.columnId, card.swimlaneId, targetIndex);
         }
-
-        this.render();
-        Array.from(this._element.querySelectorAll(".wx-kanban-card")).find((el) => el.dataset.cardId === String(card.id))?.focus({ preventScroll: true });
     }
 
     /**
-     * Handles dropping a card directly into an empty cell area.
+     * Routes an empty-cell drop through the same move boundary as keyboard moves.
+     * @param {DragEvent} e - The drop event.
+     * @param {string} colId - The destination column identifier.
+     * @param {string|null} swimlaneId - The destination swimlane identifier.
+     * @param {HTMLElement} cell - The destination cell.
      */
     _onDropCell(e, colId, swimlaneId, cell) {
         e.preventDefault();
         this._clearDropTargets();
-
-        if (!this._dragCard) {
-            return;
-        }
-
-        const sourceIndex = this._cards.findIndex((c) => {
-            return c.id === this._dragCard.id;
-        });
-
-        if (sourceIndex > -1) {
-            const oldColId = this._dragCard.columnId;
-            const oldSwimlaneId = this._dragCard.swimlaneId;
-
-            const [moved] = this._cards.splice(sourceIndex, 1);
-            moved.columnId = colId;
-            moved.swimlaneId = swimlaneId;
-
-            // append card at the end of the array
-            this._cards.push(moved);
-
-            this._dispatchMoveEvent(moved, oldColId, oldSwimlaneId, colId, swimlaneId, this._cards.length - 1);
-            this.render();
+        const card = this._dragCard;
+        this._dragCard = null;
+        if (card) {
+            this._moveCard(card, colId, swimlaneId);
         }
     }
 
     /**
-     * Handles dropping a card onto another existing card to reorder.
+     * Routes a card-relative drop through the common move boundary.
+     * @param {DragEvent} e - The drop event.
+     * @param {object} targetCard - The card defining the insertion position.
+     * @param {string} colId - The destination column identifier.
+     * @param {string|null} swimlaneId - The destination swimlane identifier.
+     * @param {boolean} isTopHalf - Whether to insert before the target card.
      */
     _onDropWidget(e, targetCard, colId, swimlaneId, isTopHalf) {
         e.preventDefault();
         this._clearDropTargets();
+        const card = this._dragCard;
+        this._dragCard = null;
+        if (card && card.id !== targetCard.id) {
+            this._moveCard(card, colId, swimlaneId, targetCard, isTopHalf);
+        }
+    }
 
-        if (!this._dragCard || this._dragCard.id === targetCard.id) {
+    /**
+     * Commits a move after derived controls have resolved application constraints.
+     * @param {object} card - The current card instance.
+     * @param {string} colId - The destination column identifier.
+     * @param {string|null} swimlaneId - The destination swimlane identifier.
+     * @param {object|null} [targetCard=null] - The insertion anchor, or null to append.
+     * @param {boolean} [before=true] - Whether to insert before the anchor.
+     */
+    _moveCard(card, colId, swimlaneId, targetCard = null, before = true) {
+        const sourceIndex = this._cards.indexOf(card);
+        if (sourceIndex < 0 || !this._columns.some((column) => column.id === colId)
+            || (targetCard && (targetCard === card || !this._cards.includes(targetCard)))) {
             return;
         }
-
-        const sourceIndex = this._cards.findIndex((c) => {
-            return c.id === this._dragCard.id;
-        });
-
-        if (sourceIndex > -1) {
-            const oldColId = this._dragCard.columnId;
-            const oldSwimlaneId = this._dragCard.swimlaneId;
-
-            const [moved] = this._cards.splice(sourceIndex, 1);
-            moved.columnId = colId;
-            moved.swimlaneId = swimlaneId;
-
-            // find the new target index based on the modified array
-            let targetIndex = this._cards.findIndex((c) => {
-                return c.id === targetCard.id;
-            });
-
-            if (!isTopHalf) {
-                targetIndex += 1;
-            }
-
-            this._cards.splice(targetIndex, 0, moved);
-
-            this._dispatchMoveEvent(moved, oldColId, oldSwimlaneId, colId, swimlaneId, targetIndex);
-            this.render();
-        }
+        const oldColId = card.columnId;
+        const oldSwimlaneId = card.swimlaneId;
+        this._cards.splice(sourceIndex, 1);
+        card.columnId = colId;
+        card.swimlaneId = swimlaneId;
+        const targetIndex = targetCard ? this._cards.indexOf(targetCard) + (before ? 0 : 1) : this._cards.length;
+        this._cards.splice(targetIndex, 0, card);
+        this._dispatchMoveEvent(card, oldColId, oldSwimlaneId, colId, swimlaneId, targetIndex);
+        this.render();
+        Array.from(this._element.querySelectorAll(".wx-kanban-card"))
+            .find((element) => element.dataset.cardId === String(card.id))?.focus({ preventScroll: true });
     }
 
     /**
@@ -2050,7 +2022,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Dispatches custom events when a card is moved.
+     * Announces the committed position and optional workflow status to persistence listeners.
+     * @param {object} card - The moved card.
+     * @param {string} oldColId - The previous column identifier.
+     * @param {string|null} oldSwimlaneId - The previous swimlane identifier.
+     * @param {string} newColId - The committed column identifier.
+     * @param {string|null} newSwimlaneId - The committed swimlane identifier.
+     * @param {number} newIndex - The committed position in board order.
      */
     _dispatchMoveEvent(card, oldColId, oldSwimlaneId, newColId, newSwimlaneId, newIndex) {
         const layout = this._cards.map((c) => {
@@ -2063,6 +2041,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         this._dispatch(webexpress.webui.Event.MOVE_EVENT, {
             cardId: card.id,
+            ...(card.statusId !== undefined ? { statusId: card.statusId } : {}),
             oldColumnId: oldColId,
             oldSwimlaneId: oldSwimlaneId,
             columnId: newColId,

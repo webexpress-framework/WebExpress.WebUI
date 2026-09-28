@@ -575,7 +575,12 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
                 if (!isStickyActive) {
                     const closeButton = document.createElement("button");
                     closeButton.type = "button";
-                    closeButton.className = "wx-chip-remove " + this._iconClass("xmark");
+                    closeButton.className = "wx-chip-remove";
+                    // the glyph needs its own background because the button remains transparent
+                    const closeIcon = document.createElement("i");
+                    closeIcon.className = this._iconClass("xmark");
+                    closeIcon.setAttribute("aria-hidden", "true");
+                    closeButton.appendChild(closeIcon);
                     closeButton.setAttribute("aria-label", this._i18n("webexpress.webui:selection.remove", "Remove {0}").replace("{0}", () => item.label));
                     closeButton.addEventListener("click", (e) => {
                         e.stopPropagation();

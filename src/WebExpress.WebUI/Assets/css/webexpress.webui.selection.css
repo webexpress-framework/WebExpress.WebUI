@@ -361,7 +361,8 @@
     padding: 0.25rem 0.5rem; border: 0; background: transparent;
 }
 .wx-selection > .form-control > ul { position: relative; z-index: 1; pointer-events: none; }
-.wx-selection > .form-control > ul a { pointer-events: auto; }
+.wx-selection > .form-control > ul a,
+.wx-selection > .form-control > ul .wx-chip-remove { pointer-events: auto; }
 .wx-selection-clear { border: 0; padding: 0.25rem; background: transparent; }
 .wx-selection-clear:hover, .wx-selection-clear:focus-visible { color: var(--wx-danger); }
 .wx-selection > .dropdown-menu { min-block-size: min(19rem, calc(100dvb - 1rem)); }
