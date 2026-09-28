@@ -312,6 +312,15 @@ pointing at it. It therefore checks whether the event belongs to this editor bef
   graphs and arbitrary other forms without a shortcut crossing over;
 - a torn-down editor ignores keys entirely.
 
+## Alignment
+
+During pointer dragging, nodes align their left, center and right references and their top,
+center and bottom references with surrounding nodes and edge routes. Waypoints align with
+the same references, including other waypoints and segment centers. Dashed guide lines show
+the active horizontal and vertical alignment until the gesture ends. The snap tolerance is
+six screen pixels at every zoom level. Alignment takes priority over the optional grid;
+outside that tolerance the configured grid behavior remains active.
+
 ## Undo History
 
 Every structural change pushes a deep snapshot of the model. A drag pushes its pre-drag

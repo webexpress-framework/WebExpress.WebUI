@@ -35,6 +35,9 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     // how far a rounded corner reaches into the two segments meeting at a waypoint
     static CORNER_RADIUS = 12;
 
+    // svg fragment references share the document even across separate canvases
+    static _nextMarkerId = 0;
+
     /**
      * Creates a new GraphViewer instance.
      * @param {HTMLElement} element - The host element.
@@ -463,6 +466,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Ensures the arrow marker exists and returns its URL reference.
+     * @param {string} [color] - The explicit edge color, or the theme default.
      * @returns {string} The marker URL reference.
      */
     _ensureArrowMarker(color) {
@@ -475,26 +479,27 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         // a marker cannot inherit the stroke of the path that references it, so
         // an arrowhead that is to match its edge needs its own marker per colour
         const safeColor = String(color || "").replace(/[^a-zA-Z0-9]/g, "");
-        const markerId = safeColor ? `wx-graph-viewer-arrow-${safeColor}` : "wx-graph-viewer-arrow";
+        if (!this._arrowMarkerPrefix) {
+            this._arrowMarkerPrefix = `wx-graph-arrow-${++webexpress.webui.GraphViewerCtrl._nextMarkerId}`;
+        }
+        const markerId = `${this._arrowMarkerPrefix}-${safeColor || "default"}`;
 
         let marker = defs.querySelector("#" + markerId);
         if (!marker) {
             marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
             marker.classList.add("wx-graph-edge-arrow");
             marker.setAttribute("id", markerId);
-            marker.setAttribute("viewBox", "0 0 12 12");
+            marker.setAttribute("viewBox", "0 0 10 10");
             marker.setAttribute("refX", "10");
-            marker.setAttribute("refY", "7");
-            marker.setAttribute("markerWidth", "12");
-            marker.setAttribute("markerHeight", "12");
-            marker.setAttribute("markerUnits", "strokeWidth");
+            marker.setAttribute("refY", "5");
+            marker.setAttribute("markerWidth", "10");
+            marker.setAttribute("markerHeight", "10");
+            marker.setAttribute("markerUnits", "userSpaceOnUse");
             marker.setAttribute("orient", "auto-start-reverse");
 
             const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("d", "M 0 2 L 12 7 L 0 12 Z");
-            if (color) {
-                path.setAttribute("fill", color);
-            }
+            path.setAttribute("d", "M 0 0 L 10 5 L 0 10 Z");
+            this._applyPaint(path, "fill", color);
             marker.appendChild(path);
             defs.appendChild(marker);
         }
@@ -2010,7 +2015,9 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 el.setAttribute("d", this._generatePathData(pts));
 
                 el.setAttribute("data-label", t.label || "");
-                el.className.baseVal = ["wx-graph-viewer-edge", t.colorCss || ""].filter(Boolean).join(" ");
+                el.className.baseVal = ["wx-graph-viewer-edge",
+                    el.classList.contains("wx-workflow-edge") ? "wx-workflow-edge" : "",
+                    t.colorCss || ""].filter(Boolean).join(" ");
                 this._applyPaint(el, "stroke", t.color);
                 // the arrowhead is a separate element, so a recoloured edge needs
                 // to be pointed at the marker matching its new colour

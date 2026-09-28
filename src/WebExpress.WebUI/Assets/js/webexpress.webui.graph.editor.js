@@ -14,6 +14,9 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
     // how many model snapshots the undo history retains
     static HISTORY_LIMIT = 50;
 
+    // a screen-space tolerance keeps alignment equally usable at every zoom
+    static ALIGNMENT_TOLERANCE = 6;
+
     static ARROW_DIRECTIONS = {
         ArrowLeft: { x: -1, y: 0 },
         ArrowRight: { x: 1, y: 0 },
@@ -32,11 +35,6 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         // here would win over every stylesheet and leave a host that embeds the
         // editor no way to give it a height of its own
         element.classList.add("wx-graph-editor");
-
-        // cache for per-color arrow markers (may already exist from early render)
-        if (!this._arrowMarkers) {
-            this._arrowMarkers = {};
-        }
 
         // toolbar
         this._toolbarContainer = document.createElement("div");
@@ -171,82 +169,6 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
 
         // re-render now that the editor is fully initialized
         this.render();
-    }
-
-    /**
-     * Returns the defs element of the SVG, creating it if necessary.
-     * @returns {SVGDefsElement|null} the defs element, or null if svg is not ready
-     */
-    _ensureDefs() {
-        if (!this._svg) {
-            return null;
-        }
-        let defs = this._svg.querySelector("defs");
-        if (!defs) {
-            defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-            this._svg.insertBefore(defs, this._svg.firstChild);
-        }
-        return defs;
-    }
-
-    /**
-     * Returns a marker-end url reference for an arrow marker in the given color.
-     * Creates the marker in the SVG defs if it does not yet exist.
-     * Uses markerUnits="userSpaceOnUse" so the arrow size is independent
-     * of the edge stroke-width.
-     * @param {string} color - the fill color for the arrowhead
-     * @returns {string} url reference, e.g. "url(#wx-arrow-ff6600)"
-     */
-    _getArrowMarkerUrl(color) {
-        // lazy-initialize the cache in case this is called during super() construction
-        if (!this._arrowMarkers) {
-            this._arrowMarkers = {};
-        }
-
-        // normalize color to a safe id suffix
-        const safeColor = color.replace(/[^a-zA-Z0-9]/g, "");
-        const markerId = "wx-arrow-" + safeColor;
-
-        if (this._arrowMarkers[markerId]) {
-            return "url(#" + markerId + ")";
-        }
-
-        const defs = this._ensureDefs();
-        if (!defs) {
-            // svg not yet available, return a reference that will resolve later
-            return "url(#" + markerId + ")";
-        }
-
-        // check if the marker already exists in the DOM (e.g. from a previous instance)
-        if (!defs.querySelector("#" + markerId)) {
-            const marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-            marker.setAttribute("id", markerId);
-            marker.setAttribute("viewBox", "0 0 10 10");
-            marker.setAttribute("refX", "10");
-            marker.setAttribute("refY", "5");
-            marker.setAttribute("markerWidth", "10");
-            marker.setAttribute("markerHeight", "10");
-            marker.setAttribute("markerUnits", "userSpaceOnUse");
-            marker.setAttribute("orient", "auto-start-reverse");
-
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("d", "M 0 0 L 10 5 L 0 10 z");
-            path.setAttribute("fill", color);
-
-            marker.appendChild(path);
-            defs.appendChild(marker);
-        }
-
-        this._arrowMarkers[markerId] = true;
-        return "url(#" + markerId + ")";
-    }
-
-    /**
-     * Returns a default arrow marker url for edges without an explicit color.
-     * @returns {string} url reference for the default black arrow
-     */
-    _getDefaultArrowMarkerUrl() {
-        return this._getArrowMarkerUrl("#000000");
     }
 
     /**
@@ -1117,7 +1039,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         const svgClone = this._svg.cloneNode(true);
         svgClone.setAttribute("xmlns", "http://www.w3.org/2000/svg");
         const toRemove = svgClone.querySelectorAll(
-            "[data-layer='markers'], [data-layer='handles'], [data-layer='waypoints'], [data-layer='preview']"
+            "[data-layer='markers'], [data-layer='handles'], [data-layer='waypoints'], [data-layer='preview'], [data-layer='alignment']"
         );
         toRemove.forEach(el => {
             el.remove();
@@ -1165,6 +1087,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
 
         this._endpointDrag = null;
         this._dragSnapshot = null;
+        this._clearAlignmentGuides();
 
         // the base teardown releases the recorded listeners (including the ones
         // registered above) and the frame loop, so it has to run unconditionally
@@ -1224,7 +1147,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
                 if (!path) {
                     path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                     path.setAttribute("class", "wx-graph-preview-edge");
-                    path.setAttribute("marker-end", this._getArrowMarkerUrl("#ffc107"));
+                    path.setAttribute("marker-end", this._ensureArrowMarker("#ffc107"));
                     path.setAttribute("fill", "none");
                     this._previewLayer.appendChild(path);
                 }
@@ -1726,6 +1649,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         this._waypointLayer.innerHTML = "";
         this._nodeLayer.innerHTML = "";
         this._handleLayer.innerHTML = "";
+        this._clearAlignmentGuides();
 
         this._renderEdges();
         this._renderNodes();
@@ -1747,9 +1671,9 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             const isSelected = (edgeId === this._selectedEdgeId);
 
             // determine the effective edge color
-            const edgeColor = t.color || "#000000";
+            const edgeColor = t.color || "";
             // get a color-matched arrow marker
-            const markerUrl = this._getArrowMarkerUrl(edgeColor);
+            const markerUrl = this._ensureArrowMarker(edgeColor);
 
             let pts;
 
@@ -1786,7 +1710,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             // routed through the configured edge style, so the editor draws the
             // same shape the viewer will
             poly.setAttribute("d", this._generatePathData(pts));
-            poly.setAttribute("class", "wx-workflow-edge");
+            poly.setAttribute("class", "wx-graph-viewer-edge wx-workflow-edge");
             if (isSelected) {
                 poly.setAttribute("data-selected", "true");
             }
@@ -2075,6 +1999,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
      * @param {SVGElement} target - the element being dragged
      */
     _attachDragListeners(target) {
+        const alignmentTargets = this._collectAlignmentTargets();
         const move = (e) => {
             if (!this._drag) {
                 return;
@@ -2089,18 +2014,24 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             if (this._drag.type === "node") {
                 const node = this._nodes.find(n => n.id === this._drag.id);
                 if (node) {
-                    // snapping applies to the model corner, which is what the
-                    // grid lines mark, not to the simulated centre
-                    node.x = this._snapToGrid(this._drag.nodeStartX + dx - node.width / 2) + node.width / 2;
-                    node.y = this._snapToGrid(this._drag.nodeStartY + dy - node.height / 2) + node.height / 2;
+                    const position = this._alignDragPosition({
+                        x: this._drag.nodeStartX + dx,
+                        y: this._drag.nodeStartY + dy
+                    }, node.width, node.height, alignmentTargets);
+                    node.x = position.x;
+                    node.y = position.y;
                     this._syncModelPosition(node);
                     this._updateGeometry();
                 }
             } else if (this._drag.type === "waypoint") {
                 const tr = this._model.edges.find(t => (t.id || "") === this._drag.edgeId);
                 if (tr && tr.waypoints && tr.waypoints[this._drag.index]) {
-                    tr.waypoints[this._drag.index].x = this._snapToGrid(this._drag.wpStartX + dx);
-                    tr.waypoints[this._drag.index].y = this._snapToGrid(this._drag.wpStartY + dy);
+                    const position = this._alignDragPosition({
+                        x: this._drag.wpStartX + dx,
+                        y: this._drag.wpStartY + dy
+                    }, 0, 0, alignmentTargets);
+                    tr.waypoints[this._drag.index].x = position.x;
+                    tr.waypoints[this._drag.index].y = position.y;
                     this._updateGeometry();
                 }
             }
@@ -2130,13 +2061,116 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
 
             this._dragSnapshot = null;
             this._drag = null;
+            this._clearAlignmentGuides();
             this._removeWindowListener("pointermove", move);
             this._removeWindowListener("pointerup", up);
+            this._removeWindowListener("pointercancel", up);
             this._emitChangeSafe();
         };
 
         this._addWindowListener("pointermove", move);
         this._addWindowListener("pointerup", up);
+        this._addWindowListener("pointercancel", up);
+    }
+
+    /**
+     * Captures stationary alignment references so moving geometry cannot attract itself.
+     * @returns {{x: object[], y: object[]}} Node bounds and edge routing references by axis.
+     */
+    _collectAlignmentTargets() {
+        const targets = { x: [], y: [] };
+        for (const node of this._nodes) {
+            if (this._drag.type === "node" && node.id === this._drag.id) {
+                continue;
+            }
+            for (const offset of [-0.5, 0, 0.5]) {
+                targets.x.push({ value: node.x + node.width * offset, start: node.y - node.height / 2, end: node.y + node.height / 2 });
+                targets.y.push({ value: node.y + node.height * offset, start: node.x - node.width / 2, end: node.x + node.width / 2 });
+            }
+        }
+        for (const edge of this._model.edges) {
+            if (this._drag.type === "node" && (edge.from === this._drag.id || edge.to === this._drag.id)) {
+                continue;
+            }
+            const points = this._edgePoints(edge);
+            const movingIndex = this._drag.type === "waypoint" && edge.id === this._drag.edgeId
+                ? this._drag.index + 1 : -1;
+            points.forEach((point, index) => {
+                if (index === movingIndex) {
+                    return;
+                }
+                targets.x.push({ value: point.x, start: point.y, end: point.y });
+                targets.y.push({ value: point.y, start: point.x, end: point.x });
+                const next = points[index + 1];
+                if (next && index + 1 !== movingIndex) {
+                    targets.x.push({ value: (point.x + next.x) / 2, start: Math.min(point.y, next.y), end: Math.max(point.y, next.y) });
+                    targets.y.push({ value: (point.y + next.y) / 2, start: Math.min(point.x, next.x), end: Math.max(point.x, next.x) });
+                }
+            });
+        }
+        return targets;
+    }
+
+    /**
+     * Aligns a dragged node or waypoint and draws the references that caused it to snap.
+     * @param {{x: number, y: number}} position - The unsnapped center in graph coordinates.
+     * @param {number} width - The node width, or zero for a waypoint.
+     * @param {number} height - The node height, or zero for a waypoint.
+     * @param {{x: object[], y: object[]}} targets - Stationary references captured at drag start.
+     * @returns {{x: number, y: number}} The aligned position, falling back to the configured grid.
+     */
+    _alignDragPosition(position, width, height, targets) {
+        const tolerance = webexpress.webui.GraphEditorCtrl.ALIGNMENT_TOLERANCE / (this._scale || 1);
+        const size = { x: width, y: height };
+        const result = {};
+        const matches = {};
+        this._clearAlignmentGuides();
+        for (const axis of ["x", "y"]) {
+            let distance = tolerance;
+            for (const offset of size[axis] ? [0, -size[axis] / 2, size[axis] / 2] : [0]) {
+                for (const target of targets[axis]) {
+                    const delta = target.value - position[axis] - offset;
+                    if (Math.abs(delta) <= distance) {
+                        distance = Math.abs(delta);
+                        matches[axis] = { target, value: position[axis] + delta };
+                    }
+                }
+            }
+            // grid coordinates refer to the stored top-left corner of a node
+            result[axis] = matches[axis] ? matches[axis].value
+                : this._snapToGrid(position[axis] - size[axis] / 2) + size[axis] / 2;
+        }
+        if (!this._alignmentLayer) {
+            this._alignmentLayer = this._createGroup("alignment");
+            this._alignmentLayer.setAttribute("pointer-events", "none");
+            this._alignmentLayer.setAttribute("aria-hidden", "true");
+            this._viewport.appendChild(this._alignmentLayer);
+        }
+        for (const axis of ["x", "y"]) {
+            if (!matches[axis]) {
+                continue;
+            }
+            const other = axis === "x" ? "y" : "x";
+            const target = matches[axis].target;
+            const padding = 12 / (this._scale || 1);
+            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("class", "wx-graph-alignment-guide");
+            line.setAttribute(axis + "1", target.value);
+            line.setAttribute(axis + "2", target.value);
+            line.setAttribute(other + "1", Math.min(target.start, result[other] - size[other] / 2) - padding);
+            line.setAttribute(other + "2", Math.max(target.end, result[other] + size[other] / 2) + padding);
+            this._alignmentLayer.appendChild(line);
+        }
+        return result;
+    }
+
+    /**
+     * Removes transient references when the pointer leaves alignment or the gesture ends.
+     */
+    _clearAlignmentGuides() {
+        if (this._alignmentLayer) {
+            this._alignmentLayer.innerHTML = "";
+        }
     }
 
     /**

@@ -92,7 +92,17 @@
 }
 
 .wx-graph-edge-arrow path {
-    fill: var(--wx-secondary);
+    fill: var(--wx-body-color);
+    stroke: none;
+}
+
+.wx-graph-alignment-guide {
+    fill: none;
+    stroke: var(--wx-primary);
+    stroke-width: 1px;
+    stroke-dasharray: 4 4;
+    vector-effect: non-scaling-stroke;
+    pointer-events: none;
 }
 
 /* --- Graph Elements: Nodes --- */

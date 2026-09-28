@@ -344,7 +344,25 @@ test("the arrowhead is coloured like the edge it terminates", () => {
     // resolve the marker the edge actually references, not just any marker
     const markerId = marker.replace(/^url\(#/, "").replace(/\)$/, "");
     const head = ctrl._svg.querySelector("#" + markerId).querySelector("path");
-    assert.equal(head.getAttribute("fill"), "#ff6600", "the arrowhead carries the edge colour");
+    assert.equal(head.style.fill, "#ff6600", "the arrowhead colour outranks the theme stylesheet");
+    const definition = head.parentNode;
+    assert.equal(definition.getAttribute("markerUnits"), "userSpaceOnUse", "selection weight cannot resize the tip");
+    assert.equal(definition.getAttribute("refX"), "10", "the triangle tip meets the edge endpoint");
+    assert.equal(definition.getAttribute("refY"), "5", "the triangle is centered on the edge");
+});
+
+test("arrow markers remain local to each graph on a shared page", () => {
+    const { rt, ctrl } = createViewer(TWO_NODES);
+    const otherHost = rt.document.createElement("div");
+    rt.document.body.appendChild(otherHost);
+    const other = new rt.wx.GraphViewerCtrl(otherHost);
+    other.model = TWO_NODES;
+    assert.notEqual(renderedEdges(ctrl)[0].getAttribute("marker-end"),
+        renderedEdges(other)[0].getAttribute("marker-end"),
+        "a hidden or removed graph cannot own another graph's arrowheads");
+    ctrl.destroy();
+    assert.ok(other._svg.querySelector("marker"));
+    other.destroy();
 });
 
 test("the grid stays off unless it is asked for", () => {
