@@ -3871,6 +3871,11 @@
     mask-image: url("../icons/satellite-dish.svg");
 }
 
+.wx-icon-light-scale {
+    -webkit-mask-image: url("../icons/scale.svg");
+    mask-image: url("../icons/scale.svg");
+}
+
 .wx-icon-light-screwdriver {
     -webkit-mask-image: url("../icons/screwdriver.svg");
     mask-image: url("../icons/screwdriver.svg");
