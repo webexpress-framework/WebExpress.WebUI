@@ -118,6 +118,9 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
 
         const searchInput = document.createElement("input");
         searchInput.type = "text";
+        // an id rather than a name: the toolbar sits inside the form, and a named field would be posted with it
+        searchInput.id = editor._uiContainer.id + "-emoji-search";
+        searchInput.autocomplete = "off";
         searchInput.className = "wx-emoji-search";
         searchInput.placeholder = webexpress.webui.I18N.translate("webexpress.webui:editor.emoji.search");
         searchInput.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.emoji.search.label"));

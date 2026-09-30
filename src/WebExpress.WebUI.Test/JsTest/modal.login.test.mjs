@@ -183,3 +183,17 @@ test("a login host carrying an id lends it to its form and fields", () => {
     assert.equal(ctrl._passwordInput.id, "signin-password");
     assert.equal(ctrl._loginBtn.id, "signin-submit");
 });
+
+test("the credential fields tell autofill and password managers what they hold", () => {
+    const rt = load();
+
+    const host = rt.createElement("div");
+    host.classList.add("wx-webui-login");
+    rt.document.body.appendChild(host);
+    rt.wx.Controller.createInstances(host);
+
+    const ctrl = rt.wx.Controller.getInstanceByElement(host);
+
+    assert.equal(ctrl._usernameInput.autocomplete, "username");
+    assert.equal(ctrl._passwordInput.autocomplete, "current-password");
+});

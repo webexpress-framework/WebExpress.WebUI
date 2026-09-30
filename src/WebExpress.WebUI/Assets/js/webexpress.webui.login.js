@@ -111,6 +111,7 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
         this._usernameInput.type = "text";
         this._usernameInput.id = this._id + "-username";
         this._usernameInput.name = "username";
+        this._usernameInput.autocomplete = "username";
         this._usernameInput.required = true;
         this._usernameInput.value = this._prefilledUsername;
 
@@ -133,6 +134,7 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
         this._passwordInput.type = "password";
         this._passwordInput.id = this._id + "-password";
         this._passwordInput.name = "password";
+        this._passwordInput.autocomplete = "current-password";
         this._passwordInput.required = true;
 
         passGroup.appendChild(passLabel);

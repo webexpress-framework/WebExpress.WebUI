@@ -73,12 +73,15 @@ export function loadEditor(options = {}) {
     if (options.disabled) host.setAttribute("disabled", "disabled");
     // the group the host sits in, so a case can disable the surface the way a form does
     const fieldset = document.createElement("fieldset");
+    // the label a form group renders for the field, pointing at the host by its id
+    const label = options.label ? document.createElement("label") : null;
+    if (label) { host.id = "field"; label.setAttribute("for", "field"); label.textContent = options.label; fieldset.appendChild(label); }
     fieldset.appendChild(host); form.appendChild(fieldset); document.body.appendChild(form);
     const editor = new wx.EditorCtrl(host);
     instances.set(host, editor);
     const root = editor.getEditorElement();
     return {
-        wx, editor, root, host, form, fieldset, observers, document, window, selection, plugins, panels, timers, sandbox, load,
+        wx, editor, root, host, form, fieldset, label, observers, document, window, selection, plugins, panels, timers, sandbox, load,
         select(anchor, focus = anchor) { editor.selection = { anchor, focus }; },
         input(inputType, data, extra = {}) {
             const event = { type: "beforeinput", target: root.querySelector(".wx-editor-region"), inputType, data, cancelable: true, defaultPrevented: false,

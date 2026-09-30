@@ -1,12 +1,35 @@
-/** Selection helpers shared by view plugins; model indices own persistence. */
+/**
+ * Selection helpers shared by the view plugins. The live DOM selection is only a transient
+ * projection of the model; persistence always belongs to the model indices.
+ */
 webexpress.webui.EditorSelection = class {
+    /**
+     * Returns the current selection range only when it lies wholly inside the editor, so a
+     * selection in a dialog or in another editor is never taken for this one.
+     * @param {HTMLElement} root - The editing surface the range must belong to.
+     * @returns {Range|null} The live range, or null if there is none inside the root.
+     */
     static getRange(root) {
         const selection = window.getSelection();
         if (!selection?.rangeCount) return null;
         const range = selection.getRangeAt(0);
         return root?.contains(range.startContainer) && root.contains(range.endContainer) ? range : null;
     }
+
+    /**
+     * Replaces the document selection with the given range. The browser keeps a single
+     * selection, so any existing range has to be removed first.
+     * @param {Range} range - The range to select.
+     */
     static apply(range) { const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range); }
+
+    /**
+     * Determines whether a node takes user input. The nearest explicit contenteditable ancestor
+     * decides, because embedded islands and read-only frames override the surface.
+     * @param {Node} node - The node to test; a text node is judged by its parent.
+     * @param {HTMLElement} root - The editing surface bounding the search.
+     * @returns {boolean} True if the node is editable.
+     */
     static isEditable(node, root) {
         for (let element = node?.nodeType === 3 ? node.parentElement : node; element && element !== root; element = element.parentElement) {
             if (element.getAttribute("contenteditable") === "true") return true;
@@ -16,9 +39,21 @@ webexpress.webui.EditorSelection = class {
     }
 };
 
-/** History records completed model transactions, never DOM snapshots or delayed typing. */
+/**
+ * Undo history of completed model transactions. It never stores DOM snapshots or delayed
+ * typing, so restoring an entry always yields a state the reducer produced.
+ */
 webexpress.webui.EditorHistory = class {
+    /**
+     * The maximum number of retained entries; beyond it the oldest entry is dropped.
+     */
     static MAX = 200;
+
+    /**
+     * Initializes a new instance of the class and takes over the undo and redo input of the
+     * surface, because the native history would replay DOM changes the model never saw.
+     * @param {webexpress.webui.EditorCtrl} editor - The editor whose transactions are recorded.
+     */
     constructor(editor) {
         this._editor = editor; this._entries = []; this._index = 0; this._sequence = 0;
         this._keydown = e => this._onKeyDown(e);
@@ -27,6 +62,13 @@ webexpress.webui.EditorHistory = class {
         root.addEventListener("keydown", this._keydown);
         root.addEventListener("beforeinput", this._beforeinput);
     }
+
+    /**
+     * Maps the undo and redo shortcuts to the model history. The native history input some
+     * browsers fire for the same keystroke is suppressed until the next tick, so a shortcut
+     * never steps twice.
+     * @param {KeyboardEvent} e - The keydown event of the surface.
+     */
     _onKeyDown(e) {
         if (!this._editor.ownsInput(e) || e.defaultPrevented || e.isComposing || this._editor._composing || e.altKey || !(e.ctrlKey || e.metaKey)) return;
         const key = (e.key || "").toLowerCase();
@@ -38,12 +80,26 @@ webexpress.webui.EditorHistory = class {
         this._timer = this._editor.defer(() => { this._suppress = false; this._timer = null; }, 0);
         this[action]();
     }
+
+    /**
+     * Redirects native undo and redo input, such as from the context menu, to the model history.
+     * @param {InputEvent} e - The beforeinput event of the surface.
+     */
     _onBeforeInput(e) {
         if (!this._editor.ownsInput(e) || e.defaultPrevented || e.isComposing || this._editor._composing) return;
         if (!["historyUndo", "historyRedo"].includes(e.inputType)) return;
         e.preventDefault();
         if (!this._suppress) this[e.inputType === "historyUndo" ? "undo" : "redo"]();
     }
+
+    /**
+     * Records a transaction and discards the redo branch. A transaction that leaves the document
+     * unchanged is ignored, so a mere selection move never becomes an undo step.
+     * @param {object} action - The action that was reduced.
+     * @param {object} before - The editor state before the action.
+     * @param {object} after - The editor state after the action.
+     * @returns {boolean} True if an entry was recorded.
+     */
     record(action, before, after) {
         const Model = webexpress.webui.EditorModel;
         if (JSON.stringify(before.doc) === JSON.stringify(after.doc)) return false;
@@ -53,12 +109,45 @@ webexpress.webui.EditorHistory = class {
         this._index = this._entries.length;
         return true;
     }
+
+    /**
+     * Discards all entries, as an external state load establishes a new baseline.
+     */
     reset() { this._entries = []; this._index = 0; }
+
+    /**
+     * Determines whether an earlier state is available.
+     * @returns {boolean} True if undo would change the document.
+     */
     canUndo() { return this._index > 0; }
+
+    /**
+     * Determines whether an undone state is available.
+     * @returns {boolean} True if redo would change the document.
+     */
     canRedo() { return this._index < this._entries.length; }
+
+    /**
+     * Restores the state before the most recent transaction. A disabled or destroyed editor is
+     * left untouched, because its form value must not change behind the user's back.
+     */
     undo() { if (!this._editor.disabled && !this._editor._destroyed && this.canUndo()) this._restore(this._entries[--this._index].before); }
+
+    /**
+     * Reapplies the most recently undone transaction under the same conditions as undo.
+     */
     redo() { if (!this._editor.disabled && !this._editor._destroyed && this.canRedo()) this._restore(this._entries[this._index++].after); }
+
+    /**
+     * Replaces the editor state with a copy of a recorded one, so later transactions cannot
+     * mutate the history entry, and brings the form value up to date.
+     * @param {object} state - The recorded state to restore.
+     */
     _restore(state) { this._editor._state = webexpress.webui.EditorModel.clone(state); this._editor.render(true); this._editor._syncValue(); }
+
+    /**
+     * Releases the listeners and the pending timer of the history.
+     */
     destroy() {
         const root = this._editor.getEditorElement();
         root.removeEventListener("keydown", this._keydown); root.removeEventListener("beforeinput", this._beforeinput);
@@ -67,8 +156,17 @@ webexpress.webui.EditorHistory = class {
     }
 };
 
-/** Coordinates input, transactions and rendering while the model owns all content. */
+/**
+ * The rich text editor control. It coordinates input, transactions and rendering while the
+ * model owns all content: every change goes through the reducer, and the DOM is only ever
+ * rebuilt from the resulting state.
+ */
 webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
+    /**
+     * Initializes a new instance of the class. The host is emptied and rebuilt, and its form
+     * name moves to a hidden input, so the posted value is always the serialized model.
+     * @param {HTMLElement} element - The host element carrying the initial value as JSON state or HTML.
+     */
     constructor(element) {
         super(element);
         this._listeners = []; this._timers = new Set(); this._destroyed = false; this._composing = false;
@@ -87,6 +185,8 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         }
         this._plugins = webexpress.webui.EditorPlugins.getAll().map(plugin => Object.assign({}, plugin));
         this._createToolbar(element); this._createEditorArea(element); this._createStatusBar(element); this._initContextMenu();
+        // the label the form rendered for the host id names nothing on a div; it names the surface
+        this._adoptFieldLabel(this._editorElement, element.id, element);
         this._history = new webexpress.webui.EditorHistory(this);
         this._attachEventHandlers(); this._observeFieldsets(element);
         this._pluginCleanups = this._plugins.map(plugin => plugin.init?.(this)).filter(fn => typeof fn === "function");
@@ -109,7 +209,13 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
-    /** Applies validation before data becomes part of an editor document. */
+    /**
+     * Reads an initial or assigned value. JSON is taken as editor state and validated, any other
+     * string is imported as HTML and sanitized, so no unchecked data becomes part of a document.
+     * @param {object|string} value - The editor state or an HTML import.
+     * @returns {object} A validated editor state.
+     * @throws {TypeError} If the value is neither an object nor a string.
+     */
     _readValue(value) {
         const Model = webexpress.webui.EditorModel;
         if (typeof value === "object" && value !== null) return webexpress.webui.EditorHtml.restoreContainers(Model.validate(value));
@@ -117,24 +223,67 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (value.trim().startsWith("{")) return webexpress.webui.EditorHtml.restoreContainers(Model.validate(JSON.parse(value)));
         return this._sanitizeHtml(value).state;
     }
+
+    /**
+     * Imports HTML through the sanitizing reader, the one boundary every HTML path shares.
+     * @param {string} html - The untrusted HTML.
+     * @returns {object} The imported state together with its nodes.
+     */
     _sanitizeHtml(html) { return webexpress.webui.EditorHtml.read(html); }
 
-    /** Returns a detached document value suitable for ViewState and persistence. */
+    /**
+     * Returns a detached copy of the document. The selection is left out, because it is view
+     * state and must not end up in a view state or a persisted value.
+     * @returns {object} The version and the document.
+     */
     getState() { return webexpress.webui.EditorModel.clone({ version: this._state.version, doc: this._state.doc }); }
+
+    /**
+     * Gets the document as detached state.
+     * @returns {object} The version and the document.
+     */
     get state() { return this.getState(); }
+
+    /**
+     * Sets the document, like setState with default options.
+     * @param {object} value - The editor state to load.
+     */
     set state(value) { this.setState(value); }
 
-    /** External state loads establish a new history baseline without sharing references. */
+    /**
+     * Loads an external state. It establishes a new history baseline, because undoing into the
+     * previous record would be meaningless, and it shares no references with the caller. An
+     * unchanged document is ignored, so a reload does not wipe the history.
+     * @param {object} value - The editor state to load.
+     * @param {object} [options] - The load options.
+     * @param {boolean} [options.emit=true] - Whether a change event is raised.
+     */
     setState(value, options = {}) {
         if (this._destroyed) return;
         const next = webexpress.webui.EditorModel.validate(value);
         if (JSON.stringify(next.doc) === JSON.stringify(this._state.doc)) return;
         this._state = next; this._savedRange = null; this._history.reset(); this.render(false); this._syncValue(options.emit !== false);
     }
+
+    /**
+     * Gets the serialized document, the value the form posts.
+     * @returns {string} The document as JSON.
+     */
     get value() { return JSON.stringify(this.getState()); }
+
+    /**
+     * Sets the document from JSON state or from an HTML import.
+     * @param {string} value - The serialized state or the HTML.
+     */
     set value(value) { this.setState(this._readValue(value)); }
 
-    /** HTML remains an explicit interchange format, separate from the saved document. */
+    /**
+     * Exports the document as HTML. HTML is an explicit interchange format only; the saved value
+     * stays the JSON state.
+     * @param {object} [options] - The export options.
+     * @param {boolean} [options.layout=true] - False unwraps the regions and rows of the layout.
+     * @returns {string} The rendered HTML.
+     */
     exportHtml(options = {}) {
         const root = document.createElement("div"), view = new webexpress.webui.EditorView(this);
         view.render(this._state, root, true);
@@ -147,7 +296,12 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         return root.innerHTML;
     }
 
-    /** Commits one validated action before any DOM or form value changes. */
+    /**
+     * Commits one validated action before any DOM or form value changes, so history, rendering
+     * and form value always agree.
+     * @param {object} action - The action to reduce.
+     * @returns {boolean} True if the document changed.
+     */
     dispatch(action) {
         if (this.disabled || this._destroyed || this._composing) return false;
         const next = webexpress.webui.EditorModel.reduce(this._state, action);
@@ -161,7 +315,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         return changed;
     }
 
-    /** Rebuilds presentation from state and then restores the indexed selection. */
+    /**
+     * Rebuilds the presentation from the state and then restores the indexed selection.
+     * @param {boolean} [restore=false] - Whether focus and caret are put back into the surface.
+     */
     render(restore = false) {
         if (this._destroyed || !this._editorElement || this._composing) return;
         this._view.render(this._state, this._editorElement);
@@ -176,21 +333,51 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._savedRange = webexpress.webui.EditorSelection.getRange(this._editorElement);
         this._updateUndoRedoStates();
     }
+
+    /**
+     * Informs the plugins after each render, so previews and toolbar states follow the content.
+     */
     _notifyPluginsContentChanged() { this._plugins.forEach(plugin => plugin.onContentChange?.(this)); }
 
-    /** Tracks listener ownership so plugins and internal handlers share one teardown. */
+    /**
+     * Adds an event listener whose removal the editor owns, so plugins and internal handlers
+     * share one teardown.
+     * @param {EventTarget} target - The target to listen on.
+     * @param {string} type - The event type.
+     * @param {Function} handler - The listener.
+     * @param {object|boolean} [options] - The listener options.
+     * @returns {Function} A function removing the listener ahead of the teardown.
+     */
     listen(target, type, handler, options) {
         target.addEventListener(type, handler, options);
         const cleanup = () => target.removeEventListener(type, handler, options);
         this._listeners.push(cleanup); return cleanup;
     }
+
+    /**
+     * Schedules a callback that is dropped once the editor is destroyed, so no late timer
+     * touches a torn-down surface.
+     * @param {Function} callback - The callback to run.
+     * @param {number} [delay=0] - The delay in milliseconds.
+     * @returns {number} The timer handle for cancelDeferred.
+     */
     defer(callback, delay = 0) {
         const timer = setTimeout(() => { this._timers.delete(timer); if (!this._destroyed) callback(); }, delay);
         this._timers.add(timer); return timer;
     }
+
+    /**
+     * Cancels a callback scheduled with defer.
+     * @param {number} timer - The timer handle.
+     */
     cancelDeferred(timer) { clearTimeout(timer); this._timers.delete(timer); }
 
-    /** Embedded form controls and independent editable islands own their own input. */
+    /**
+     * Determines whether an event is input of the editor. Embedded form controls and independent
+     * editable islands handle their own input, which the editor must not reduce.
+     * @param {Event} event - The input, keyboard, clipboard or drag event.
+     * @returns {boolean} True if the editor handles the event.
+     */
     ownsInput(event) {
         if (this.disabled || this._destroyed) return false;
         const root = this._editorElement, target = event.target || root;
@@ -204,6 +391,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         return false;
     }
 
+    /**
+     * Wires the surface and toolbar events. The toolbar keeps the selection by cancelling the
+     * mousedown on its buttons, and a disabled editor swallows all input in the capture phase.
+     */
     _attachEventHandlers() {
         const root = this._editorElement, toolbar = this._uiContainer.querySelector(".wx-editor-toolbar");
         this.listen(toolbar, "mousedown", e => {
@@ -247,6 +438,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         });
     }
 
+    /**
+     * Handles the formatting shortcuts and the tab key. Tab inserts a tab character in code and
+     * indents in lists; elsewhere it keeps moving the focus, so the surface is no keyboard trap.
+     * @param {KeyboardEvent} e - The keydown event of the surface.
+     */
     _onKeyDown(e) {
         if (!this.ownsInput(e) || e.defaultPrevented || e.isComposing || this._composing || e.altKey) return;
         const key = (e.key || "").toLowerCase();
@@ -264,6 +460,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
+    /**
+     * Translates native input into model actions. Cancelable input is prevented and reduced;
+     * input the browser does not let go of is remembered and reconciled in _onInput.
+     * @param {InputEvent} e - The beforeinput event of the surface.
+     */
     _onBeforeInput(e) {
         if (!this.ownsInput(e) || e.defaultPrevented || e.isComposing || this._composing) return;
         if (["historyUndo", "historyRedo"].includes(e.inputType)) return;
@@ -290,6 +491,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         else if (["insertFromPaste", "insertFromDrop"].includes(e.inputType) && e.dataTransfer) this._insertTransfer(e.dataTransfer);
     }
 
+    /**
+     * Reconciles input the browser applied natively by reducing the remembered action, or
+     * re-renders, so the DOM matches the model again.
+     * @param {InputEvent} e - The input event of the surface.
+     */
     _onInput(e) {
         if (this._composing || e.isComposing || this._destroyed) return;
         const pending = this._nativeInput; this._nativeInput = null;
@@ -299,6 +505,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             else this.render(true);
         } else this.render(false);
     }
+
+    /**
+     * Replaces the native paste with a sanitized import of the clipboard.
+     * @param {ClipboardEvent} e - The paste event.
+     */
     _onPaste(e) {
         if (!this.ownsInput(e) || e.defaultPrevented) return;
         e.preventDefault(); this._saveCurrentSelection(); if (e.clipboardData) this._insertTransfer(e.clipboardData);
@@ -322,6 +533,13 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             else this.dispatch({ type: "insertNodes", nodes: lines.map(text => webexpress.webui.EditorModel.node("p", [{ type: "text", text, marks: {} }])) });
         }
     }
+
+    /**
+     * Writes the selection to the clipboard as rendered HTML and as plain text, because the
+     * native copy would carry the editing chrome along.
+     * @param {ClipboardEvent} e - The copy or cut event.
+     * @param {boolean} cut - Whether the selection is deleted afterwards.
+     */
     _onCopy(e, cut) {
         if (!this.ownsInput(e) || e.defaultPrevented || !e.clipboardData) return;
         this._saveCurrentSelection();
@@ -432,12 +650,19 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         target?.setAttribute("data-wx-drop", action.placement || (action.after ? "below" : "above"));
     }
 
-    /** Clears transient drag chrome after a drop or cancellation. */
+    /**
+     * Clears the transient drag chrome after a drop or a cancellation, so no drop marker
+     * outlives the gesture.
+     */
     _clearDrag() {
         this._draggedId = null;
         this._editorElement.querySelectorAll("[data-wx-drop]").forEach(node => node.removeAttribute("data-wx-drop"));
     }
 
+    /**
+     * Captures the DOM selection as model indices. Stored marks are dropped once the caret
+     * moved, because they belong to the position they were set at.
+     */
     _saveCurrentSelection() {
         if (this._composing || this._destroyed) return;
         const selection = this._view.selection(this._editorElement);
@@ -447,6 +672,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             this._savedRange = webexpress.webui.EditorSelection.getRange(this._editorElement);
         }
     }
+
+    /**
+     * Puts the saved model selection back into the DOM, typically after a toolbar dialog.
+     * @returns {boolean} True if the selection was restored.
+     */
     restoreSavedRange() { if (this._destroyed || this.disabled) return false; this._view.restore(this._state.selection); return true; }
     /**
      * Restores the caret after cancellation when native dialog focus resets an editable root.
@@ -459,13 +689,28 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             if (!this._destroyed && this._state.doc === doc && !document.querySelector("dialog[open]")) this.selection = selection;
         }, { once: true });
     }
+
+    /**
+     * Gets a copy of the model selection.
+     * @returns {{anchor: number, focus: number}} The selection indices.
+     */
     get selection() { return { ...this._state.selection }; }
+
+    /**
+     * Sets the model selection after validating it against the document and shows it in the DOM.
+     * @param {{anchor: number, focus: number}} value - The selection indices.
+     */
     set selection(value) {
         const next = webexpress.webui.EditorModel.validate({ ...this._state, selection: value });
         this._state.selection = next.selection; this._state.storedMarks = null; this.restoreSavedRange();
     }
 
-    /** Keeps plugin commands on the same reducer path as typing and native menus. */
+    /**
+     * Runs a named command. Plugin commands take the same reducer path as typing and native
+     * menus, so every command is undoable and reaches the form value.
+     * @param {string} command - The command name, case-insensitive.
+     * @param {*} [value=null] - The command argument, such as a color or a url.
+     */
     execCommand(command, value = null) {
         if (this.disabled || this._destroyed) return;
         const cmd = String(command).toLowerCase();
@@ -495,7 +740,20 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         const first = codeAt(from), last = codeAt(to > from ? to - 1 : to);
         return !!first && first === last;
     }
+
+    /**
+     * Maps a command name to the mark it applies. The names of the native execCommand are
+     * accepted, so toolbars written against it keep working.
+     * @param {string} command - The lower-case command name.
+     * @returns {string|null} The mark name, or null for a command that is no formatting.
+     */
     static formatMark(command) { return { forecolor: "color", hilitecolor: "background", backcolor: "background", fontname: "font", fontsize: "size", createlink: "link", unlink: "unlink", removeformat: "removeformat" }[command] || (webexpress.webui.EditorModel.MARKS.has(command) ? command : null); }
+
+    /**
+     * Determines whether a command is active at the selection, for the states of toolbar buttons.
+     * @param {string} command - The command name, case-insensitive.
+     * @returns {boolean} True if the command is active.
+     */
     queryCommandState(command) {
         const cmd = String(command).toLowerCase(), Model = webexpress.webui.EditorModel;
         if (cmd === "formatpainter") return !!this._paintMarks;
@@ -511,14 +769,51 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @param {object} [selection=this.selection] - The model range replaced by the content.
      */
     insertHtmlAtCursor(html, selection = this.selection) { if (this.disabled || this._destroyed) return; const input = this._sanitizeHtml(html); this.dispatch({ type: "insertNodes", nodes: input.nodes, selection, source: "html" }); }
+
+    /**
+     * Resolves a rendered element to the id of its model node.
+     * @param {Node} element - The rendered element.
+     * @returns {string|undefined} The node id, or undefined for an element outside the model.
+     */
     nodeId(element) { return this._view.entry(element)?.id; }
+
+    /**
+     * Removes a model node as a transaction, so plugin edits stay undoable.
+     * @param {HTMLElement|string} element - The rendered element or the node id.
+     * @returns {boolean} True if the document changed.
+     */
     removeNode(element) { return this.dispatch({ type: "removeNode", id: typeof element === "string" ? element : this.nodeId(element) }); }
+
+    /**
+     * Updates the attributes and optionally the children of a model node as a transaction.
+     * @param {HTMLElement|string} element - The rendered element or the node id.
+     * @param {object} attrs - The attributes to apply.
+     * @param {Array} [children] - The replacement children.
+     * @returns {boolean} True if the document changed.
+     */
     updateNode(element, attrs, children) { return this.dispatch({ type: "updateNode", id: typeof element === "string" ? element : this.nodeId(element), attrs, children }); }
+
+    /**
+     * Returns the editing surface, the root plugins attach their listeners to.
+     * @returns {HTMLElement} The editing surface.
+     */
     getEditorElement() { return this._editorElement; }
 
+    /**
+     * Gets whether the editor is disabled, on its own or by an enclosing disabled fieldset.
+     * @returns {boolean} True if the editor is disabled.
+     */
     get disabled() { return this._disabled || !!this._uiContainer.closest("fieldset[disabled]"); }
+
+    /**
+     * Sets the own disabled flag; an enclosing disabled fieldset still wins.
+     * @param {boolean} value - True to disable the editor.
+     */
     set disabled(value) { this._disabled = !!value; this._applyDisabled(); }
-    /** Keeps editing hosts and optional frame controls consistent with form ownership. */
+    /**
+     * Applies the disabled state to the editing hosts, the frame controls, the toolbar and the
+     * form input, so every part follows the state the form owns.
+     */
     _applyDisabled() {
         const disabled = this.disabled;
         this._uiContainer.setAttribute("aria-disabled", String(disabled));
@@ -533,13 +828,28 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (this._formInput) this._formInput.disabled = disabled;
         this._updateUndoRedoStates();
     }
+
+    /**
+     * Writes the serialized document to the hidden form input and announces the change.
+     * @param {boolean} [emit=true] - Whether a change event is raised.
+     */
     _syncValue(emit = true) {
         if (this._destroyed) return;
         if (this._formInput) { this._formInput.value = this.value; this._formInput.disabled = this.disabled; }
         if (emit) this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.getState() });
         this._updateUndoRedoStates();
     }
+
+    /**
+     * Syncs the form value once more on submit, so no pending change is lost.
+     */
     _setupFormIntegration() { const form = this._uiContainer.closest("form"); if (form) this.listen(form, "submit", () => this._syncValue(false)); }
+
+    /**
+     * Creates the editing surface. The surface itself is not editable, only the regions the view
+     * marks as owned are, which keeps the layout chrome out of the text.
+     * @param {HTMLElement} element - The editor host.
+     */
     _createEditorArea(element) {
         const container = document.createElement("div"); container.className = "wx-editor-container";
         this._editorElement = document.createElement("div"); this._editorElement.className = "wx-editor-content";
@@ -547,6 +857,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._editorElement.style.minHeight = "200px";
         container.appendChild(this._editorElement); element.appendChild(container);
     }
+
+    /**
+     * Enables the undo and redo buttons according to the history and the disabled state.
+     */
     _updateUndoRedoStates() {
         for (const command of ["undo", "redo"]) {
             const button = this._uiContainer.querySelector('button[data-command="' + command + '"]');
@@ -554,7 +868,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
-    /** Cancels every owned callback before removing view and plugin resources. */
+    /**
+     * Tears the editor down. Every owned callback is cancelled before the view and plugin
+     * resources are released, so nothing fires into a destroyed editor.
+     */
     destroy() {
         if (this._destroyed) return;
         this._destroyed = true; this._composing = false;
@@ -617,6 +934,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         element.appendChild(toolbar);
     }
 
+    /**
+     * Creates the trailing toolbar group with undo, redo and the fullscreen toggle.
+     * @returns {HTMLElement} The group.
+     */
     _createHistoryGroup() {
         const historyGroup = document.createElement("div");
         historyGroup.className = "wx-editor-btn-group";
@@ -634,12 +955,21 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         return historyGroup;
     }
 
+    /**
+     * Creates a visual separator between toolbar groups.
+     * @returns {HTMLElement} The separator.
+     */
     _createSeparator() {
         const sep = document.createElement("span");
         sep.className = "wx-editor-separator";
         return sep;
     }
 
+    /**
+     * Creates the fullscreen toggle. The generic primary action handles it, addressing the
+     * editor by its host id.
+     * @returns {HTMLButtonElement} The toggle.
+     */
     _createFullscreenButton() {
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn";
@@ -653,6 +983,13 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         return btn;
     }
 
+    /**
+     * Creates an undo or redo button.
+     * @param {string} command - The history command, undo or redo.
+     * @param {string} title - The translated title, which is also the accessible name.
+     * @param {string} iconClass - The symbolic icon name.
+     * @returns {HTMLButtonElement} The button.
+     */
     _createHistoryButton(command, title, iconClass) {
         const btn = document.createElement("button");
         btn.className = "wx-editor-btn";
@@ -670,6 +1007,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         return btn;
     }
 
+    /**
+     * Creates the status bar with the done button that leaves the fullscreen mode.
+     * @param {HTMLElement} element - The editor host.
+     */
     _createStatusBar(element) {
         const statusBar = document.createElement("div");
         statusBar.classList.add("wx-editor-status");
@@ -687,6 +1028,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         element.appendChild(statusBar);
     }
 
+    /**
+     * Creates the context menu on the body, where no overflow of the form clips it, and hides
+     * it on any click elsewhere.
+     */
     _initContextMenu() {
         this._contextMenu = document.createElement("div");
         this._contextMenu.className = "dropdown-menu shadow";

@@ -179,3 +179,16 @@ test("highlight removal accepts imported non-hex colors even when the shared pic
     click(menu.querySelector(".wx-color-clear"));
     assert.doesNotMatch(r.editor.exportHtml(), /background-color/);
 });
+
+test("the field label names the editing surface, which a label on the host div cannot reach", () => {
+    const r = loadEditor({ label: "Wysiwyg:" });
+    assert.equal(r.host.id, "field", "the host keeps its id for instance lookups");
+    assert.equal(r.root.getAttribute("aria-labelledby"), r.label.id);
+});
+
+test("the emoji search carries an id but no name, so autofill can address it without it being posted", () => {
+    const r = loadEditor({ label: "Wysiwyg:", files: ["editor/emojis.js"] });
+    const search = r.host.querySelector(".wx-emoji-search");
+    assert.equal(search.id, "field-emoji-search");
+    assert.equal(search.hasAttribute("name"), false);
+});
