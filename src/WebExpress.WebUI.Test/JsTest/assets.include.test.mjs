@@ -36,9 +36,8 @@ function walk(dir, prefix = "", acc = []) {
 }
 
 const onDisk = new Set(walk(assetsJs));
-const declared = new Set(
-    [...fs.readFileSync(includeCs, "utf8").matchAll(/\[Asset\("\/assets\/js\/([^"]+)"\)\]/g)].map((m) => m[1])
-);
+const order = [...fs.readFileSync(includeCs, "utf8").matchAll(/\[Asset\("\/assets\/js\/([^"]+)"\)\]/g)].map((m) => m[1]);
+const declared = new Set(order);
 
 test("every JavaScript asset on disk is declared in IncludeJavaScript", () => {
     const missing = [...onDisk].filter((f) => !declared.has(f));
@@ -48,4 +47,15 @@ test("every JavaScript asset on disk is declared in IncludeJavaScript", () => {
 test("every declared JavaScript asset exists on disk", () => {
     const orphaned = [...declared].filter((f) => !onDisk.has(f));
     assert.deepEqual(orphaned, [], `declared assets missing on disk:\n${orphaned.join("\n")}`);
+});
+
+test("add-ons and panels that translate while registering load after the language bundles", () => {
+    // translate answers with the bare key while no bundle is registered, and the
+    // definitions keep that key as their label for good
+    const bundles = Math.max(order.indexOf("i18n/en.js"), order.indexOf("i18n/de.js"));
+    const early = order
+        .filter((f) => /^(editor\/addons|panels)\//.test(f))
+        .filter((f) => fs.readFileSync(path.join(assetsJs, f), "utf8").includes("I18N.translate("))
+        .filter((f) => order.indexOf(f) < bundles);
+    assert.deepEqual(early, [], `declared before the language bundles:\n${early.join("\n")}`);
 });
