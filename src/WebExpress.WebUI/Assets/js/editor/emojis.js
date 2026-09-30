@@ -269,11 +269,7 @@ webexpress.webui.EditorPlugins.register("emojis", 2000, {
 
         btn.addEventListener("click", () => {
             editor.execCommand("insertText", emoji);
-            menu.classList.remove("show");
-            if (menu.previousElementSibling) {
-                menu.previousElementSibling.classList.remove("show");
-                menu.previousElementSibling.setAttribute("aria-expanded", "false");
-            }
+            webexpress.webui.NativeMenu.hide(menu);
         });
 
         return btn;

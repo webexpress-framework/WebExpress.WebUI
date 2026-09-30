@@ -503,7 +503,7 @@ webexpress.webui.EditorModel = class {
                 const e = this.find(state.doc, action.id);
                 const target = action.targetId && this.find(state.doc, action.targetId);
                 if (e?.parent && target?.parent && e.node !== target.node && !target.ancestors.includes(e.node) &&
-                    ["region", "addon"].includes(target.parent.type) && !["row", "region"].includes(e.node.type)) {
+                    (["region", "addon"].includes(target.parent.type) || e.node.type === "addon" && ["td", "th"].includes(target.parent.type)) && !["row", "region"].includes(e.node.type)) {
                     e.parent.children.splice(e.index, 1);
                     const index = target.parent.children.indexOf(target.node) + (action.after ? 1 : 0);
                     target.parent.children.splice(index, 0, e.node);

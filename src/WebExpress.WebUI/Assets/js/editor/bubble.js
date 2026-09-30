@@ -5,8 +5,8 @@
  *  - a formatting section (bold, italic, underline, strike, link, clear) shown
  *    whenever there is a non-empty text selection, and
  *  - a context section (a single "more actions" button opening a flyout) shown
- *    whenever the caret/selection sits on a context-aware element: a table
- *    cell, an add-on, an instruction text, an image or a link. The flyout is
+ *    whenever the caret/selection sits on a context-aware element: an
+ *    instruction text, an image or a link. The flyout is
  *    fed from the plugins' getContextMenuItems(), so every plugin that exposes
  *    context commands automatically contributes its specific commands.
  *
@@ -133,11 +133,12 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         }
 
         const range = sel.getRangeAt(0);
-        const hasSelection = !sel.isCollapsed && (range.toString() || "").trim().length > 0;
+        let hasSelection = !sel.isCollapsed && (range.toString() || "").trim().length > 0;
 
-        const target = this._resolveTarget(sel);
+        const target = this._resolveTarget(sel, editor);
         const contextEl = this._contextElement(editor, target);
         const hasContext = !!contextEl;
+        if (contextEl?.matches(".wx-editor-instruction")) hasSelection = false;
 
         if (!hasSelection && !hasContext) {
             return null;
@@ -164,9 +165,17 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
      * whole: in that case the anchor is the parent with an offset bracketing the
      * atomic, so we inspect the adjacent child nodes.
      * @param {Selection} sel - The current selection.
+     * @param {object} editor - The editor whose model identifies selected atomic content.
      * @returns {HTMLElement|null}
      */
-    _resolveTarget: function(sel) {
+    _resolveTarget: function(sel, editor) {
+        const selection = editor._view.selection(editor.getEditorElement());
+        if (selection) {
+            const from = Math.min(selection.anchor, selection.focus);
+            const to = Math.max(selection.anchor, selection.focus);
+            const selectedAtom = editor._view.points.find(point => point.atom && point.start === from && point.end === to);
+            if (selectedAtom) return selectedAtom.atom;
+        }
         let node = sel.anchorNode;
         if (!node) {
             return null;
@@ -198,10 +207,8 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         }
         const root = editor.getEditorElement();
         const candidates = [
-            target.closest("td, th"),
             target.closest(".wx-editor-instruction"),
             target.closest(".wx-editor-date"),
-            target.closest("[data-addon-id]"),
             target.tagName === "IMG" ? target : null,
             target.closest("a")
         ];
@@ -274,7 +281,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
             if (state.hasSelection) {
                 bubble.appendChild(this._makeSep());
             }
-            if (state.target?.tagName === "IMG") {
+            if (state.target?.matches("img,.wx-editor-instruction")) {
                 const edit = this._collectContextItems(editor, state.target).find(item => typeof item.action === "function");
                 if (edit) {
                     bubble.appendChild(this._makeBtn(edit.icon, edit.label, () => this._runAction(editor, edit.action)));

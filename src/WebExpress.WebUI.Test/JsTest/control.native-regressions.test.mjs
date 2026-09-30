@@ -77,17 +77,17 @@ test("toolbar more menu resolves its icon to a shipped drawing", () => {
 });
 
 test("editor palettes bind the outer menu and close the chosen editor's menu", () => {
-    const rt = runtime("editor/formatting.js");
+    const rt = runtime("webexpress.webui.input.color.js", "editor/formatting.js");
     const plugin = rt.wx.EditorPlugins.getAll().find(p => p._createTextColorDropdown);
     const commands = [];
-    const editor = { execCommand: (...args) => commands.push(args) };
+    const editor = { execCommand: (...args) => commands.push(args), getEditorElement: () => null };
     const first = plugin._createTextColorDropdown(editor);
     const second = plugin._createTextColorDropdown(editor);
     rt.host.append(first, second);
     const menu = first.querySelector(".dropdown-menu");
     assert.equal(menu.getAttribute("popover"), "auto");
     assert.equal(first.querySelector("[popovertarget]").getAttribute("popovertarget"), menu.id);
-    assert.equal(menu.querySelector("ul").getAttribute("popover"), null);
+    assert.equal(menu.querySelector(".wx-color-palette-grid").getAttribute("popover"), null);
     assert.notEqual(menu.id, second.querySelector(".dropdown-menu").id);
     menu.showPopover();
     const choice = menu.querySelector("button");

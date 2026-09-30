@@ -6,17 +6,19 @@
  */
 webexpress.webui.EditorPlugins.register("table", 3000, {
     _selections: new WeakMap(),
-    _lastCellColor: "#FFFF00",
-    _colors: [
-        "#000000", "#FF0000", "#008000", "#0000FF", "#FFFF00",
-        "#FFA500", "#800080", "#A52A2A", "#00FFFF", "#808080",
-        "#FFC0CB", "#FFD700", "#B22222", "#ADFF2F", "#20B2AA",
-        "#00CED1", "#4682B4", "#DA70D6", "#D2691E", "#C0C0C0",
-        "#FFB6C1", "#FFDAB9", "#E6E6FA", "#98FB98", "#AFEEEE",
-        "#D3D3D3", "#FFE4E1", "#F0E68C", "#F5DEB3", "#F4A460",
-        "#2F4F4F", "#696969", "#708090", "#778899", "#556B2F",
-        "#483D8B", "#8B0000", "#9400D3", "#FF4500", "#DC143C",
-        "#FFFFFF"
+    _selectionIds: new WeakMap(),
+    _colorControls: null,
+    _actions: [
+        ["insertRowAbove", "insert.row.above", "add-row-above"],
+        ["insertRowBelow", "insert.row.below", "add-row-below"],
+        ["insertColumnLeft", "insert.col.left", "add-column-above"],
+        ["insertColumnRight", "insert.col.right", "add-column-below"],
+        ["insertIntermediateHeader", "add.intermediate.header", "add-row-below"],
+        ["toggleLeftHeader", "toggle.left.header", "table-columns"],
+        ["mergeCells", "merge.cells", "table-merge-cells"],
+        ["splitCell", "split.cell", "split-cell"],
+        ["deleteRow", "delete.row", "del-row"],
+        ["deleteColumn", "delete.col", "del-column"]
     ],
 
     /**
@@ -29,6 +31,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         return () => {
             stopNavigation();
             stopSelection();
+            this._colorControls?.forEach(control => control.destroy());
         };
     },
 
@@ -38,8 +41,14 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
      * @param {object} editor - Editor instance.
      */
     onContentChange: function(editor) {
+        const ids = this._selectionIds.get(editor) || [];
+        this._colorControls?.forEach(control => control.destroy());
+        this._colorControls = new Map();
         this._clearCellSelection(editor);
+        const cells = Array.from(editor.getEditorElement().querySelectorAll("td,th")).filter(cell => ids.includes(editor.nodeId(cell)));
+        if (cells.length) this._highlightCells(editor, cells);
         this._upgradeRawTables(editor);
+        this._updateTableToolbars(editor);
     },
 
     /**
@@ -50,7 +59,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         let anchor = null;
         let dragging = false;
         const down = e => {
-            if (e.button !== 0 || e.target.closest?.(".wx-col-resizer")) {
+            if (e.button !== 0 || e.target.closest?.(".wx-col-resizer,.wx-editor-frame-toolbar,.wx-addon-header")) {
                 return;
             }
             const cell = e.target.closest?.("td,th");
@@ -80,6 +89,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         const up = () => {
             anchor = null;
             dragging = false;
+            this._updateTableToolbars(editor);
         };
         const change = () => {
             if (anchor) {
@@ -88,8 +98,9 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
             const range = webexpress.webui.EditorSelection.getRange(root);
             if (range) {
                 const cells = this._nativeSelectedCells(editor);
-                this._highlightCells(editor, cells.length > 1 ? cells : []);
+                this._highlightCells(editor, cells);
             }
+            this._updateTableToolbars(editor);
         };
         const key = e => {
             if (e.key === "Escape") {
@@ -209,7 +220,15 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
     _getSelectedCells: function(editor) {
         const cells = this._selections.get(editor);
         if (cells?.length && cells.every(cell => editor.getEditorElement().contains(cell))) return cells;
-        return this._nativeSelectedCells(editor);
+        const native = this._nativeSelectedCells(editor);
+        if (native.length) return native;
+        const Model = webexpress.webui.EditorModel, selection = editor.selection;
+        const from = Math.min(selection.anchor, selection.focus), to = Math.max(selection.anchor, selection.focus);
+        const cellAt = position => Model.block(editor._state.doc, position)?.ancestors.findLast(node => ["td", "th"].includes(node.type));
+        const first = cellAt(from), last = cellAt(to > from ? to - 1 : to);
+        if (!first || !last) return [];
+        const projected = Array.from(editor.getEditorElement().querySelectorAll("td,th"));
+        return this._cellRectangle(projected.find(cell => editor.nodeId(cell) === first.id), projected.find(cell => editor.nodeId(cell) === last.id));
     },
 
     /**
@@ -231,8 +250,10 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
      */
     _highlightCells: function(editor, cells) {
         this._clearCellSelection(editor);
-        cells.forEach(cell => cell.setAttribute("data-wx-table-selected", ""));
+        if (cells.length > 1) cells.forEach(cell => cell.setAttribute("data-wx-table-selected", ""));
         this._selections.set(editor, cells);
+        this._selectionIds.set(editor, cells.map(cell => editor.nodeId(cell)));
+        this._updateTableToolbars(editor);
     },
 
     /**
@@ -243,6 +264,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
             cell.removeAttribute("data-wx-table-selected");
         });
         this._selections.delete(editor);
+        this._selectionIds.delete(editor);
     },
 
     /**
@@ -254,61 +276,88 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         root.querySelectorAll("table").forEach(table => {
             table._wxEditor = editor;
             this._attachColumnResizersToTable(table);
-            this._attachFrameOptions(editor, table);
+            this._attachTableToolbar(editor, table);
         });
     },
 
     /**
-     * Exposes cell actions in the frame without stealing the current cell selection.
-     * @param {object} editor - The owner of the table transaction and selection.
-     * @param {HTMLTableElement} table - The projected table whose header receives options.
+     * Places table commands in the frame while preserving the cell selection on pointer input.
+     * @param {object} editor - The editor owning table actions and history.
+     * @param {HTMLTableElement} table - The table receiving a toolbar.
      */
-    _attachFrameOptions: function(editor, table) {
-        const header = table.closest(".wx-editor-table-frame")?.querySelector(".wx-addon-header");
-        if (!header || header.querySelector(".wx-editor-table-options")) return;
-        const button = document.createElement("button");
-        button.className = "wx-editor-btn wx-editor-table-options dropdown-toggle";
-        button.type = "button"; button.textContent = "⋯";
-        button.title = webexpress.webui.I18N.translate("webexpress.webui:editor.frame.options");
-        button.setAttribute("aria-label", button.title);
-        const menu = document.createElement("div"); menu.className = "dropdown-menu";
-        button.addEventListener("mousedown", event => { editor._saveCurrentSelection(); event.preventDefault(); });
-        menu.addEventListener("beforetoggle", event => {
-            if (event.target !== menu || event.newState !== "open" || editor.disabled) return;
-            const selected = this._getSelectedCells(editor).find(cell => cell.closest("table") === table);
-            const cell = selected || table.querySelector("td,th");
-            if (!cell) return;
-            menu.innerHTML = "";
-            this._fillOptionsMenu(menu, this.getContextMenuItems(editor, cell));
+    _attachTableToolbar: function(editor, table) {
+        const frame = table.closest(".wx-editor-table-frame");
+        if (!frame) return;
+        const toolbar = document.createElement("div");
+        toolbar.className = "wx-editor-frame-toolbar wx-editor-table-toolbar";
+        toolbar.setAttribute("role", "toolbar");
+        toolbar.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.table"));
+        toolbar.setAttribute("contenteditable", "false");
+        toolbar.addEventListener("mousedown", event => {
+            if (event.target.closest("button")) { editor._saveCurrentSelection(); event.preventDefault(); }
         });
-        header.appendChild(button); header.appendChild(menu);
-        webexpress.webui.NativeMenu.bind(button, menu);
-    },
-
-    /**
-     * Reuses table action descriptors so frame and selection menus stay consistent.
-     * @param {HTMLElement} menu - The popup receiving the action controls.
-     * @param {Array<object>} items - The current table action descriptors.
-     */
-    _fillOptionsMenu: function(menu, items) {
-        for (const item of items) {
-            if (item.separator) {
-                const separator = document.createElement("hr"); separator.className = "dropdown-divider";
-                menu.appendChild(separator); continue;
-            }
-            if (item.element) { menu.appendChild(item.element); continue; }
+        this._actions.forEach(([command, label, icon]) => {
             const button = document.createElement("button");
-            button.type = "button"; button.className = "dropdown-item";
-            button.textContent = item.label || item.value;
-            if (item.type === "color") button.style.color = item.value;
-            menu.appendChild(button);
-            if (item.submenu) {
-                button.classList.add("dropdown-toggle");
-                const submenu = document.createElement("div"); submenu.className = "dropdown-menu";
-                menu.appendChild(submenu); this._fillOptionsMenu(submenu, item.submenu);
-                webexpress.webui.NativeMenu.bind(button, submenu);
-                button.addEventListener("click", event => event.stopPropagation());
-            } else button.addEventListener("click", () => item.action?.());
+            button.type = "button";
+            button.className = "wx-editor-btn";
+            button.dataset.tableCommand = command;
+            button.title = webexpress.webui.I18N.translate("webexpress.webui:editor.table." + label);
+            button.setAttribute("aria-label", button.title);
+            button.innerHTML = '<i class="' + webexpress.webui.IconSet.resolve(icon) + '"></i>';
+            button.addEventListener("click", () => {
+                if (button.disabled || editor.disabled) return;
+                this._modifyTable(editor, command);
+            });
+            toolbar.appendChild(button);
+        });
+        const color = document.createElement("div");
+        color.dataset.allowEmpty = "true";
+        color.dataset.compact = "true";
+        color.dataset.icon = "fill-drip";
+        color.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.table.cell.background"));
+        const control = new webexpress.webui.InputColorCtrl(color);
+        const trigger = color.querySelector(".wx-color-trigger");
+        trigger.classList.add("wx-editor-btn");
+        trigger.title = color.getAttribute("aria-label");
+        color.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, event => {
+            event.stopPropagation();
+            if (!editor.disabled) this._setCellBackground(editor, event.detail.value);
+        });
+        this._colorControls.set(table, control);
+        toolbar.appendChild(color);
+        frame.insertBefore(toolbar, frame.querySelector(".card-body"));
+    },
+
+    /**
+     * Derives button availability and color feedback from cells in the toolbar's own table.
+     * @param {object} editor - The editor containing the current cell selection.
+     */
+    _updateTableToolbars: function(editor) {
+        const selected = this._getSelectedCells(editor);
+        for (const [table, color] of this._colorControls || []) {
+            const cells = selected.filter(cell => cell.closest("table") === table);
+            const toolbar = table.closest(".wx-editor-table-frame")?.querySelector(".wx-editor-table-toolbar");
+            if (!toolbar) continue;
+            toolbar.querySelectorAll("[data-table-command]").forEach(button => {
+                const command = button.dataset.tableCommand;
+                let enabled = cells.length > 0;
+                if (command === "mergeCells") enabled = this._canMergeCells(cells);
+                if (command === "splitCell") enabled = cells.length === 1 && (cells[0].colSpan > 1 || cells[0].rowSpan > 1);
+                button.dataset.wxSelectionDisabled = String(!enabled);
+                button.disabled = editor.disabled || !enabled;
+                if (command === "toggleLeftHeader") {
+                    const first = Array.from(table.rows).find(row => row.parentElement.tagName !== "THEAD")?.cells[0];
+                    const active = first?.tagName === "TH";
+                    button.setAttribute("aria-pressed", String(active));
+                    button.classList.toggle("active", active);
+                }
+            });
+            color.disabled = editor.disabled || !cells.length;
+            const values = cells.map(cell => webexpress.webui.EditorModel.find(editor._state.doc, editor.nodeId(cell))?.node.attrs.background || "");
+            const value = values.length && values.every(value => value === values[0]) ? values[0] : "";
+            if (!color.setValue(value, false)) color.setValue("", false);
+            color._colorPreview.style.backgroundColor = value || "transparent";
+            color._element.querySelectorAll("button,input").forEach(input => { input.dataset.wxSelectionDisabled = String(!cells.length); });
         }
     },
 
@@ -480,91 +529,6 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         frag.appendChild(sep);
         frag.appendChild(this._createInsertButton(editor));
         return frag;
-    },
-
-    /**
-     * Returns context menu items for table cell actions.
-     * Includes structural modifications and formatting.
-     * @param {object} editor - Editor instance.
-     * @param {HTMLElement} target - The element that triggered the context menu.
-     * @returns {Array<object>} Context menu descriptor array.
-     */
-    getContextMenuItems: function(editor, target) {
-        const cell = target.closest("td, th");
-        if (!cell || !editor.getEditorElement().contains(cell)) {
-            return [];
-        }
-
-        const cells = this._getSelectedCells(editor);
-        if (!cells.includes(cell)) {
-            this._clearCellSelection(editor);
-            this._focusCell(cell);
-        } else if (cells.length > 1) {
-            this._highlightCells(editor, cells);
-        }
-        editor._saveCurrentSelection();
-
-        const colorItems = this._colors.map(c => ({
-            type: "color",
-            value: c,
-            action: () => {
-                this._lastCellColor = c;
-                this._setCellBackground(editor, c);
-            }
-        }));
-
-        const customLi = document.createElement("li");
-        customLi.style.display = "inline-block";
-        const customLabel = document.createElement("label");
-        customLabel.className = "dropdown-item p-0 d-flex align-items-center justify-content-center";
-        customLabel.style.width = "24px";
-        customLabel.style.height = "24px";
-        customLabel.style.cursor = "pointer";
-        customLabel.style.border = "1px solid #ccc";
-        customLabel.style.borderRadius = "4px";
-        customLabel.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("plus")}" style="font-size: 10px;"></i>`;
-
-        const customInput = document.createElement("input");
-        customInput.type = "color";
-        customInput.style.position = "absolute";
-        customInput.style.opacity = "0";
-        customInput.style.width = "0";
-        customInput.style.height = "0";
-        customInput.addEventListener("input", (e) => {
-             this._lastCellColor = e.target.value;
-             this._setCellBackground(editor, e.target.value);
-        });
-        customLabel.appendChild(customInput);
-        customLi.appendChild(customLabel);
-
-        colorItems.push({
-            type: "custom-element",
-            element: customLi
-        });
-
-        return [
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.row.above"), action: () => this._modifyTable(editor, "insertRowAbove"), icon: "add-row-above" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.row.below"), action: () => this._modifyTable(editor, "insertRowBelow"), icon: "add-row-below" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.col.left"), action: () => this._modifyTable(editor, "insertColumnLeft"), icon: "add-column-above" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.col.right"), action: () => this._modifyTable(editor, "insertColumnRight"), icon: "add-column-below" },
-            { separator: true },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.add.intermediate.header"), action: () => this._modifyTable(editor, "insertIntermediateHeader"), icon: "add-row-below" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.toggle.left.header"), action: () => this._modifyTable(editor, "toggleLeftHeader"), icon: "table-columns" },
-            { separator: true },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.merge.cells"), action: () => this._modifyTable(editor, "mergeCells"), icon: "table-merge-cells" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.split.cell"), action: () => this._modifyTable(editor, "splitCell"), icon: "split-cell" },
-            { separator: true },
-            {
-                label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.cell.background"),
-                icon: "fill-drip",
-                submenu: colorItems,
-                submenuClass: "wx-editor-color-picker"
-            },
-            { separator: true },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.delete.row"), action: () => this._modifyTable(editor, "deleteRow"), icon: "del-row" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.delete.col"), action: () => this._modifyTable(editor, "deleteColumn"), icon: "del-column" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.delete.table"), action: () => this._modifyTable(editor, "deleteTable"), icon: "del-table" }
-        ];
     },
 
     /**
@@ -745,7 +709,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         const cells = this._getSelectedCells(editor);
         if (!cells.length) return;
         editor.dispatch({ type: "table", command: action, ids: cells.map(cell => editor.nodeId(cell)), text: webexpress.webui.I18N.translate("webexpress.webui:editor.table.intermediate.header") });
-        this._clearCellSelection(editor);
+        this._updateTableToolbars(editor);
     },
 
     /**

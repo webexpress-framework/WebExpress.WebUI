@@ -1,7 +1,7 @@
 /**
  * Plugin that powers the editor's inline shortcut surfaces:
  *  - the slash-command palette (`/`)
- *  - the inline triggers `@` (mention), `[[` (link), `{{` (AddOn)
+ *  - the inline triggers `@` (mention), `[` (link), `{` (AddOn), `:` (emoji)
  *  - block-level markdown patterns (# , ## , > , ``` , - , * , 1. , --- )
  *  - inline markdown patterns (**bold**, *italic*, _italic_, ~~strike~~, `code`)
  *
@@ -20,8 +20,8 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
     _slashNode: null,
     _slashOffset: -1,
     _slashBlock: null,
-    _mentionState: null,
-    _mentionPopup: null,
+    _inlineState: null,
+    _inlinePopup: null,
     _docClickHandler: null,
     _datePopup: null,
     _dateKeyHandler: null,
@@ -53,64 +53,60 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         });
         editor.listen(document, "mousedown", e => {
             if (!this._popup?.contains(e.target) && !root.contains(e.target)) this._closeSlashMenu();
-            if (!this._mentionPopup?.contains(e.target) && !root.contains(e.target)) this._closeMentionMenu();
+            if (!this._inlinePopup?.contains(e.target) && !root.contains(e.target)) this._closeInlineMenu();
         });
         return () => {
-            this._closeDatePopup(); this._closeMentionMenu(); this._closeSlashMenu();
-            this._popup?.remove(); this._mentionPopup?.remove();
+            this._closeDatePopup(); this._closeInlineMenu(); this._closeSlashMenu();
+            this._popup?.remove(); this._inlinePopup?.remove();
         };
     },
 
     /**
-     * keydown router: handles slash-menu navigation, inline-trigger key combos
-     * and forwards markdown patterns on space.
-     * @param {object} editor
-     * @param {KeyboardEvent} e
+     * Keeps inline picker navigation on the editor while ordinary typing reaches the model.
+     * @param {object} editor - The editor that owns the active inline picker.
+     * @param {KeyboardEvent} e - The key event used to navigate or dismiss the picker.
      */
     _onKeyDown: function(editor, e) {
-        // mention menu is active
-        if (this._mentionPopup && this._mentionPopup.style.display !== "none" && this._mentionState && this._mentionState.editor === editor) {
+        // keep picker navigation on the editor selection
+        if (this._inlinePopup && this._inlinePopup.style.display !== "none" && this._inlineState && this._inlineState.editor === editor) {
             if (e.key === "ArrowDown") {
                 e.preventDefault();
-                this._moveMentionActive(1);
+                this._moveInlineActive(1);
                 return;
             }
             if (e.key === "ArrowUp") {
                 e.preventDefault();
-                this._moveMentionActive(-1);
+                this._moveInlineActive(-1);
                 return;
             }
             if (e.key === "Enter") {
                 e.preventDefault();
-                this._activateMention();
+                this._activateInline();
                 return;
             }
             if (e.key === "Escape") {
                 e.preventDefault();
-                this._closeMentionMenu();
+                this._closeInlineMenu();
                 return;
             }
         }
 
-        // markdown block patterns react on Space at the very start of a line
-        if (e.key === " " || e.code === "Space") {
-            // run AFTER the space is inserted so the pattern is observable
-            // but we don't need preventDefault here - patterns rewrite the line
-        }
     },
 
     /**
-     * input router: opens the slash menu, handles `@`, `[[`, `{{` triggers,
-     * filters an open palette and applies markdown patterns.
-     * @param {object} editor
-     * @param {InputEvent} e
+     * Routes committed text through insertion pickers and reversible text shortcuts.
+     * @param {object} editor - The editor that committed the transaction.
+     * @param {object} action - The model transaction containing the inserted text.
      */
     onTransaction: function(editor, action) {
+        if (action.source === "shortcut") return;
+        if (this._inlineState && ["delete", "splitBlock"].includes(action.type)) { this._updateInlineQuery(); return; }
         if (action.type !== "insertText") return;
+        if (this._applyEmoticon(editor)) return;
         const e = { inputType: "insertText", data: action.text };
-        // if mention menu is open, update its query
-        if (this._mentionPopup && this._mentionPopup.style.display !== "none" && this._mentionState && this._mentionState.editor === editor) {
-            this._updateMentionQuery();
+        // an open inline picker owns its query until selection or cancellation
+        if (this._inlinePopup && this._inlinePopup.style.display !== "none" && this._inlineState && this._inlineState.editor === editor) {
+            this._updateInlineQuery();
             return;
         }
 
@@ -120,25 +116,30 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         if (inputType === "insertText" || inputType === "insertCompositionText" || inputType === "" || !inputType) {
             const data = e.data;
 
-            if (data === "/" && this._isAtBlockStart(editor)) this._openSlashMenu(editor);
+            if (data === "/" && this._isAtBlockStart(editor) && this._textBeforeCaret(editor) !== null) this._openSlashMenu(editor);
             if (data === "/") {
-                if (this._consumeDoubleTrigger(editor, "/")) {
+                if (this._consumeTrigger(editor, "//")) {
                     return;
                 }
             }
 
-            if (data === "@") {
+            if (data === "@" && this._atTriggerBoundary(editor, "@")) {
                 const host = editor._uiContainer || editor.getEditorElement();
                 const uri = host?.dataset?.mentionUri || "";
                 if (uri) {
-                    this._openMentionMenu(editor, uri);
+                    this._openInlineMenu(editor, uri);
                     return;
                 }
             }
 
-            // detect [[ and {{ - both characters are eaten and the dialog opens
+            if (data === ":" && this._atTriggerBoundary(editor, ":") && editor._plugins.some(plugin => plugin._emojis)) {
+                this._openInlineMenu(editor, "", "emoji");
+                return;
+            }
+
+            // single-character triggers share the date shortcut transaction path
             if (data === "[" || data === "{") {
-                if (this._consumeDoubleTrigger(editor, data)) {
+                if (this._consumeTrigger(editor, data)) {
                     return;
                 }
             }
@@ -206,7 +207,9 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
 
         // focus the search field so subsequent typing filters the list
         editor.defer(() => {
-            try { this._searchInput.focus(); } catch (_) { /* noop */ }
+            if (this._popup.style.display !== "none" && this._currentEditor === editor) {
+                this._searchInput.focus({ preventScroll: true });
+            }
         }, 0);
     },
 
@@ -278,7 +281,13 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         // typing in the search filters
         search.addEventListener("input", () => this._updateSlashQuery());
         search.addEventListener("keydown", (e) => {
-            if (e.key === "ArrowDown") { e.preventDefault(); this._moveActive(1); }
+            if (e.key === "/" && search.value === "") {
+                e.preventDefault();
+                const editor = this._currentEditor;
+                editor.dispatch({ type: "insertText", text: "/", source: "shortcut" });
+                this._consumeTrigger(editor, "//");
+            }
+            else if (e.key === "ArrowDown") { e.preventDefault(); this._moveActive(1); }
             else if (e.key === "ArrowUp") { e.preventDefault(); this._moveActive(-1); }
             else if (e.key === "Enter") { e.preventDefault(); this._activateCurrent(); }
             else if (e.key === "Escape") { e.preventDefault(); this._closeSlashMenu(); }
@@ -519,56 +528,101 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
     },
 
     // ------------------------------------------------------------------
-    // Inline triggers: `[[`, `{{`
+    // inline insertion triggers
     // ------------------------------------------------------------------
 
     /**
-     * Detects the second character of a double-character trigger (`[[` / `{{`)
-     * and routes to the appropriate dialog. Returns true if a trigger was
-     * consumed.
-     * @param {object} editor
-     * @param {string} char - The character just typed.
-     * @returns {boolean}
+     * Reads the current token without triggering pickers inside code blocks or inline code.
+     * @param {object} editor - The editor whose caret determines the current text prefix.
+     * @returns {string|null} The text prefix, or null when shortcuts are suppressed.
      */
-    _consumeDoubleTrigger: function(editor, char) {
+    _textBeforeCaret: function(editor) {
         const Model = webexpress.webui.EditorModel, pos = editor.selection.focus;
+        if (editor.selection.anchor !== pos) return null;
         const block = Model.block(editor._state.doc, pos);
-        if (!block) return false;
-        const before = Model.slice(block.node.children, 0, pos - block.start).map(n => n.text || "\ufffc").join("");
-        if (!before.endsWith(char + char)) return false;
-        editor.dispatch({ type: "delete", selection: { anchor: pos - 2, focus: pos }, source: "shortcut" });
-        if (char === "[") this._triggerLinkDialog(editor);
-        if (char === "{") this._triggerAddonDialog(editor);
-        if (char === "/") this._triggerDateDialog(editor);
+        if (!block || block.node.type === "pre" || Model.activeMarks(editor._state).code) return null;
+        return Model.slice(block.node.children, 0, pos - block.start).map(node => node.text || "\ufffc").join("");
+    },
+
+    /**
+     * Keeps trigger characters in addresses and ordinary words as literal text.
+     * @param {object} editor - The editor containing the freshly typed trigger.
+     * @param {string} trigger - The complete trigger sequence.
+     * @returns {boolean} Whether the sequence starts a new token at the caret.
+     */
+    _atTriggerBoundary: function(editor, trigger) {
+        const before = this._textBeforeCaret(editor);
+        if (before === null || !before.endsWith(trigger)) return false;
+        const prefix = before.slice(0, -trigger.length);
+        return !prefix || /\s$/.test(prefix);
+    },
+
+    /**
+     * Reserves a trigger for replacement only when the insertion dialog is confirmed.
+     * @param {object} editor - The editor retaining literal text when the dialog is cancelled.
+     * @param {string} trigger - A link, add-on or date trigger.
+     * @returns {boolean} Whether a dialog accepted the trigger.
+     */
+    _consumeTrigger: function(editor, trigger) {
+        if (!this._atTriggerBoundary(editor, trigger)) return false;
+        if (trigger === "{" && !editor._plugins.some(plugin => plugin._selectionModal !== undefined)) return false;
+        const pos = editor.selection.focus;
+        const selection = { anchor: pos - trigger.length, focus: pos };
+        if (trigger === "[") this._triggerLinkDialog(editor, selection);
+        if (trigger === "{") this._triggerAddonDialog(editor, selection);
+        if (trigger === "//") {
+            this._closeSlashMenu();
+            this._triggerDateDialog(editor, selection);
+        }
+        return true;
+    },
+
+    /**
+     * Converts complete emoticons in one undoable replacement while preserving surrounding text.
+     * @param {object} editor - The editor receiving the Unicode emoji.
+     * @returns {boolean} Whether a complete emoticon was replaced.
+     */
+    _applyEmoticon: function(editor) {
+        const before = this._textBeforeCaret(editor);
+        const match = before?.match(/(?:^|\s)(:-?\)|;-?\)|:-?\(|:-?[dDpP]|<3|\([/xX!]\))$/);
+        if (!match) return false;
+        const token = match[1];
+        const normalized = token.replace("-", "").toLowerCase();
+        const emoji = { ":)": "🙂", ";)": "😉", ":(": "🙁", ":d": "😃", ":p": "😛", "<3": "❤️", "(/)": "✅", "(x)": "❌", "(!)": "ℹ️" }[normalized];
+        const pos = editor.selection.focus;
+        this._closeInlineMenu();
+        editor.dispatch({ type: "insertText", text: emoji, selection: { anchor: pos - token.length, focus: pos }, source: "shortcut" });
         return true;
     },
 
     /**
      * Opens the link dialog via the media plugin if available, otherwise prompts.
-     * @param {object} editor
+     * @param {object} editor - The editor owning the insertion dialog.
+     * @param {object} [selection=editor.selection] - The model range replaced on confirmation.
      */
-    _triggerLinkDialog: function(editor) {
+    _triggerLinkDialog: function(editor, selection = editor.selection) {
         const media = editor._plugins.find((p) => p && p.linkModal !== undefined);
         if (media && typeof media._openModal === "function") {
             const range = editor._savedRange?.cloneRange?.() || null;
             media._openModal(editor, "linkModal", "editor-link", "webexpress.webui:editor.insert.link.title", { url: "", text: "" }, range);
+            media.linkModal.ctrl._insertionSelection = selection;
             return;
         }
         const url = prompt(this._i18n("webexpress.webui:editor.link.url.label", "URL"));
         if (url) {
-            editor.execCommand("createLink", url);
+            editor.dispatch({ type: "insertNodes", nodes: [{ type: "text", text: url, marks: { link: { href: url } } }], selection });
         }
     },
 
     /**
      * Opens the AddOn library via the addons plugin if available.
-     * @param {object} editor
+     * @param {object} editor - The editor owning the insertion dialog.
+     * @param {object} [selection=editor.selection] - The model range replaced on confirmation.
      */
-    _triggerAddonDialog: function(editor) {
+    _triggerAddonDialog: function(editor, selection = editor.selection) {
         const addons = editor._plugins.find((p) => p && p._selectionModal !== undefined && typeof p._openModal === "function");
         if (addons) {
-            const range = editor._savedRange?.cloneRange?.() || null;
-            addons._openModal(editor, "_selectionModal", "editor-addon", "webexpress.webui:editor.insert.addon.title", range);
+            addons._openModal(editor, "_selectionModal", "editor-addon", "webexpress.webui:editor.insert.addon.title", selection);
         }
     },
 
@@ -576,9 +630,10 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * Opens a date picker (webexpress.webui.InputDateCtrl) anchored at the
      * caret. When a date is chosen the editor receives a read-only display
      * control (webexpress.webui.DateCtrl) at the saved caret position.
-     * @param {object} editor
+     * @param {object} editor - The editor owning the date picker.
+     * @param {object} [selection=editor.selection] - The model range replaced on confirmation.
      */
-    _triggerDateDialog: function(editor) {
+    _triggerDateDialog: function(editor, selection = editor.selection) {
         this._closeDatePopup();
 
         const format = this._i18n("webexpress.webui:calendar.format", "DD.MM.YYYY");
@@ -595,7 +650,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         popup.appendChild(host);
 
         document.body.appendChild(popup);
-        this._datePopup = { popup: popup, editor: editor, format: format, done: false };
+        this._datePopup = { popup: popup, editor: editor, format: format, done: false, selection };
 
         // position at the saved caret (fall back to the live selection)
         const range = editor._savedRange?.cloneRange?.() || this._currentSelectionRange(editor);
@@ -640,7 +695,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         };
         editor.listen(document, "keydown", this._dateKeyHandler, true);
         // defer so the triggering interaction does not immediately close it
-        editor.defer(() => editor.listen(document, "mousedown", this._dateClickHandler, true), 0);
+        editor.defer(() => { if (this._datePopup?.popup === popup) editor.listen(document, "mousedown", this._dateClickHandler, true); }, 0);
     },
 
     /**
@@ -651,11 +706,12 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      */
     _commitDate: function(editor, value, format) {
         const id = this._dateTargetId; this._dateTargetId = null;
+        const selection = this._datePopup?.selection || editor.selection;
         if (this._datePopup) this._datePopup.done = true;
         this._closeDatePopup();
         const attrs = { kind: "date", text: value, value, format };
         if (id) editor.updateNode(id, attrs);
-        else editor.dispatch({ type: "insertNodes", nodes: [webexpress.webui.EditorModel.node("atom", [], attrs)] });
+        else editor.dispatch({ type: "insertNodes", nodes: [webexpress.webui.EditorModel.node("atom", [], attrs)], selection });
     },
 
     /**
@@ -768,21 +824,22 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
     // ------------------------------------------------------------------
 
     /**
-     * Opens the mention picker. Stores the anchor character offset so the
-     * selected entry can replace the `@query` text on commit.
-     * @param {object} editor
-     * @param {string} uri
+     * Anchors mention and emoji choices to a model position so selection replaces the typed query.
+     * @param {object} editor - The editor containing the trigger.
+     * @param {string} uri - The configured mention endpoint, or an empty string for local emoji choices.
+     * @param {string} kind - The inline picker kind, either mention or emoji.
      */
-    _openMentionMenu: function(editor, uri) {
-        this._ensureMentionPopup();
+    _openInlineMenu: function(editor, uri, kind = "mention") {
+        this._ensureInlinePopup();
 
         const sel = window.getSelection();
         if (!sel || sel.rangeCount === 0) return;
         const r = sel.getRangeAt(0);
 
-        this._mentionState = {
+        this._inlineState = {
             editor: editor,
             uri: uri,
+            kind: kind,
             anchor: editor.selection.focus - 1,
             timer: null,
             items: [],
@@ -791,29 +848,29 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         };
 
 
-        this._mentionPopup.style.display = "block";
-        this._positionMentionPopup();
-        this._updateMentionQuery();
+        this._inlinePopup.style.display = "block";
+        this._positionInlinePopup();
+        this._updateInlineQuery();
     },
 
     /**
-     * Closes the mention picker.
+     * Cancels an inline picker without changing the typed query.
      */
-    _closeMentionMenu: function() {
-        if (this._mentionPopup) {
-            this._mentionPopup.style.display = "none";
+    _closeInlineMenu: function() {
+        if (this._inlinePopup) {
+            this._inlinePopup.style.display = "none";
         }
-        if (this._mentionState && this._mentionState.timer) {
-            clearTimeout(this._mentionState.timer);
+        if (this._inlineState && this._inlineState.timer) {
+            clearTimeout(this._inlineState.timer);
         }
-        this._mentionState = null;
+        this._inlineState = null;
     },
 
     /**
-     * Builds the mention popup DOM lazily.
+     * Builds the shared inline picker without moving focus away from the caret.
      */
-    _ensureMentionPopup: function() {
-        if (this._mentionPopup) return;
+    _ensureInlinePopup: function() {
+        if (this._inlinePopup) return;
 
         const popup = document.createElement("div");
         popup.className = "wx-editor-shortcut-popup shadow";
@@ -829,20 +886,32 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
 
         popup.addEventListener("mousedown", (e) => e.preventDefault());
 
-        this._mentionPopup = popup;
-        this._mentionListEl = list;
+        this._inlinePopup = popup;
+        this._inlineListEl = list;
     },
 
     /**
-     * Extracts the current query (`@xyz`) and fetches matching candidates.
+     * Filters emoji names locally or requests matching mentions for the current query.
      */
-    _updateMentionQuery: function() {
-        const state = this._mentionState;
+    _updateInlineQuery: function() {
+        const state = this._inlineState;
         if (!state) return;
         const Model = webexpress.webui.EditorModel, block = Model.block(state.editor._state.doc, state.anchor);
         const end = state.editor.selection.focus;
-        if (!block || end < state.anchor + 1) { this._closeMentionMenu(); return; }
+        if (!block || end < state.anchor + 1 || state.editor.selection.anchor !== end || Model.block(state.editor._state.doc, end)?.node.id !== block.node.id) { this._closeInlineMenu(); return; }
         const q = Model.slice(block.node.children, state.anchor + 1 - block.start, end - block.start).map(n => n.text || "").join("");
+        if (/\s/.test(q)) { this._closeInlineMenu(); return; }
+        if (state.kind === "emoji") {
+            const plugin = state.editor._plugins.find(plugin => plugin._emojis);
+            const query = q.toLowerCase();
+            state.items = [...new Set(Object.values(plugin._emojis).flat())]
+                .map(emoji => ({ emoji, label: plugin._emojiNames[emoji] || emoji }))
+                .filter(item => item.label.toLowerCase().includes(query) || item.emoji.includes(query)).slice(0, 30);
+            state.activeIndex = state.items.length ? 0 : -1;
+            this._renderInlineList();
+            this._positionInlinePopup();
+            return;
+        }
         if (state.timer) state.editor.cancelDeferred(state.timer);
         state.timer = state.editor.defer(() => this._fetchMentions(state, q), 180);
     },
@@ -854,30 +923,30 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      */
     _fetchMentions: function(state, q) {
         const service = webexpress.webapp?.ServiceRegistry;
-        if (!service || this._mentionState !== state || state.editor._destroyed) return;
+        if (!service || this._inlineState !== state || state.editor._destroyed) return;
         const url = state.uri + (state.uri.includes("?") ? "&" : "?") + "q=" + encodeURIComponent(q);
         const request = (state.request || 0) + 1; state.request = request;
         service.request(url, { method: "GET" }).then(result => {
-            if (this._mentionState !== state || state.editor._destroyed || state.request !== request) return;
+            if (this._inlineState !== state || state.editor._destroyed || state.request !== request) return;
             state.items = result.ok && Array.isArray(result.data) ? result.data : [];
             state.activeIndex = state.items.length ? 0 : -1;
-            this._renderMentionList();
+            this._renderInlineList();
         });
     },
 
     /**
-     * Paints the current candidate list.
+     * Presents matching mention or emoji candidates with keyboard selection feedback.
      */
-    _renderMentionList: function() {
-        if (!this._mentionState || !this._mentionListEl) return;
-        const state = this._mentionState;
-        this._mentionListEl.innerHTML = "";
+    _renderInlineList: function() {
+        if (!this._inlineState || !this._inlineListEl) return;
+        const state = this._inlineState;
+        this._inlineListEl.innerHTML = "";
 
         if (state.items.length === 0) {
             const empty = document.createElement("div");
             empty.className = "wx-editor-shortcut-empty";
             empty.textContent = this._i18n("webexpress.webui:editor.slash.empty", "No matches");
-            this._mentionListEl.appendChild(empty);
+            this._inlineListEl.appendChild(empty);
             return;
         }
 
@@ -887,7 +956,11 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
             item.className = "wx-editor-shortcut-item";
             item.dataset.index = String(index);
 
-            if (entry.image) {
+            if (entry.emoji) {
+                const glyph = document.createElement("span");
+                glyph.textContent = entry.emoji;
+                item.appendChild(glyph);
+            } else if (entry.image) {
                 const img = document.createElement("img");
                 img.src = entry.image;
                 img.style.width = "20px";
@@ -917,62 +990,63 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
 
             item.addEventListener("mouseenter", () => {
                 state.activeIndex = index;
-                this._highlightMentionActive();
+                this._highlightInlineActive();
             });
             item.addEventListener("click", (e) => {
                 e.preventDefault();
                 state.activeIndex = index;
-                this._activateMention();
+                this._activateInline();
             });
 
-            this._mentionListEl.appendChild(item);
+            this._inlineListEl.appendChild(item);
         });
-        this._highlightMentionActive();
+        this._highlightInlineActive();
     },
 
     /**
-     * Highlights the current mention entry.
+     * Marks the active inline choice for keyboard navigation.
      */
-    _highlightMentionActive: function() {
-        if (!this._mentionState) return;
-        const items = this._mentionListEl.querySelectorAll(".wx-editor-shortcut-item");
+    _highlightInlineActive: function() {
+        if (!this._inlineState) return;
+        const items = this._inlineListEl.querySelectorAll(".wx-editor-shortcut-item");
         items.forEach((el) => {
             const idx = parseInt(el.dataset.index, 10);
-            el.classList.toggle("active", idx === this._mentionState.activeIndex);
+            el.classList.toggle("active", idx === this._inlineState.activeIndex);
         });
     },
 
     /**
-     * Moves the active mention entry.
-     * @param {number} delta
+     * Wraps keyboard navigation within the visible inline choices.
+     * @param {number} delta - The signed number of candidates to advance.
      */
-    _moveMentionActive: function(delta) {
-        if (!this._mentionState || this._mentionState.items.length === 0) return;
-        const n = this._mentionState.items.length;
-        this._mentionState.activeIndex = (this._mentionState.activeIndex + delta + n) % n;
-        this._highlightMentionActive();
+    _moveInlineActive: function(delta) {
+        if (!this._inlineState || this._inlineState.items.length === 0) return;
+        const n = this._inlineState.items.length;
+        this._inlineState.activeIndex = (this._inlineState.activeIndex + delta + n) % n;
+        this._highlightInlineActive();
     },
 
     /**
-     * Inserts the chosen mention into the editor, replacing the `@query` text.
+     * Replaces the typed query with the selected mention atom or Unicode emoji.
      */
-    _activateMention: function() {
-        const state = this._mentionState, entry = state?.items[state.activeIndex];
+    _activateInline: function() {
+        const state = this._inlineState, entry = state?.items[state.activeIndex];
         if (!entry) return;
         const editor = state.editor, selection = { anchor: state.anchor, focus: editor.selection.focus };
-        this._closeMentionMenu();
-        editor.dispatch({ type: "insertNodes", selection, nodes: [webexpress.webui.EditorModel.node("atom", [], { kind: "mention", text: "@" + (entry.label || entry.name || entry.id || ""), value: String(entry.id || "") })] });
+        this._closeInlineMenu();
+        if (entry.emoji) editor.dispatch({ type: "insertText", selection, text: entry.emoji, source: "shortcut" });
+        else editor.dispatch({ type: "insertNodes", selection, nodes: [webexpress.webui.EditorModel.node("atom", [], { kind: "mention", text: "@" + (entry.label || entry.name || entry.id || ""), value: String(entry.id || "") })] });
     },
 
     /**
-     * Positions the mention popup at the caret.
+     * Keeps inline choices next to the active text query.
      */
-    _positionMentionPopup: function() {
-        if (!this._mentionPopup || !this._mentionState) return;
-        const r = webexpress.webui.EditorSelection.getRange(this._mentionState.editor.getEditorElement());
+    _positionInlinePopup: function() {
+        if (!this._inlinePopup || !this._inlineState) return;
+        const r = webexpress.webui.EditorSelection.getRange(this._inlineState.editor.getEditorElement());
         if (!r) return;
         const rect = r.getBoundingClientRect();
-        const pRect = this._mentionPopup.getBoundingClientRect();
+        const pRect = this._inlinePopup.getBoundingClientRect();
         const margin = 8;
 
         let left = rect.left;
@@ -986,8 +1060,8 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
             const alt = rect.top - pRect.height - 4;
             top = alt > margin ? alt : Math.max(margin, window.innerHeight - pRect.height - margin);
         }
-        this._mentionPopup.style.left = left + "px";
-        this._mentionPopup.style.top = top + "px";
+        this._inlinePopup.style.left = left + "px";
+        this._inlinePopup.style.top = top + "px";
     },
 
     // ------------------------------------------------------------------

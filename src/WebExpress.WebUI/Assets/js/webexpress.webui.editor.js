@@ -112,9 +112,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     /** Applies validation before data becomes part of an editor document. */
     _readValue(value) {
         const Model = webexpress.webui.EditorModel;
-        if (typeof value === "object" && value !== null) return Model.validate(value);
+        if (typeof value === "object" && value !== null) return webexpress.webui.EditorHtml.restoreContainers(Model.validate(value));
         if (typeof value !== "string") throw new TypeError("Editor value must be JSON state or an HTML import.");
-        if (value.trim().startsWith("{")) return Model.validate(JSON.parse(value));
+        if (value.trim().startsWith("{")) return webexpress.webui.EditorHtml.restoreContainers(Model.validate(JSON.parse(value)));
         return this._sanitizeHtml(value).state;
     }
     _sanitizeHtml(html) { return webexpress.webui.EditorHtml.read(html); }
@@ -254,6 +254,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (command) { e.preventDefault(); this.execCommand(command); }
         else if (key === "tab" && !e.ctrlKey && !e.metaKey) {
             this._saveCurrentSelection();
+            if (this._codeSelection() && !e.shiftKey) {
+                e.preventDefault();
+                this.dispatch({ type: "insertText", text: "\t", marks: {} });
+                return;
+            }
             const block = webexpress.webui.EditorModel.block(this._state.doc, this._state.selection.focus);
             if (block?.ancestors.some(n => n.type === "li")) { e.preventDefault(); this.execCommand(e.shiftKey ? "outdent" : "indent"); }
         }
@@ -272,9 +277,13 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         const formats = { formatBold: "bold", formatItalic: "italic", formatUnderline: "underline", formatStrikeThrough: "strikethrough", formatSuperscript: "superscript", formatSubscript: "subscript", formatRemove: "removeformat", formatFontColor: "forecolor", formatBackColor: "hilitecolor", formatFontName: "fontname", insertLink: "createlink" };
         if (e.cancelable === false) { this._nativeInput = { type: e.inputType, data: e.data, selection: { ...this._state.selection } }; return; }
         e.preventDefault();
+        if (this._codeSelection() && ["insertParagraph", "insertLineBreak"].includes(e.inputType)) {
+            this.dispatch({ type: "insertText", text: "\n", marks: {} });
+            return;
+        }
         if (formats[e.inputType]) { this.execCommand(formats[e.inputType], e.data); return; }
         if (["insertOrderedList", "insertUnorderedList", "insertHorizontalRule"].includes(e.inputType)) { this.execCommand(e.inputType); return; }
-        if (["insertText", "insertReplacementText", "insertFromYank"].includes(e.inputType)) this.dispatch({ type: "insertText", text: e.data ?? e.dataTransfer?.getData("text/plain") ?? "" });
+        if (["insertText", "insertReplacementText", "insertFromYank"].includes(e.inputType)) this.dispatch({ type: "insertText", text: e.data ?? e.dataTransfer?.getData("text/plain") ?? "", marks: this._codeSelection() ? {} : undefined });
         else if (e.inputType === "insertParagraph") this.dispatch({ type: "split" });
         else if (e.inputType === "insertLineBreak") this.dispatch({ type: "insertNodes", nodes: [webexpress.webui.EditorModel.node("br")] });
         else if (e.inputType?.startsWith("delete")) this.dispatch({ type: "delete", direction: e.inputType.endsWith("Forward") ? 1 : -1, unit: e.inputType.includes("Word") ? "word" : e.inputType.includes("Line") ? "line" : "grapheme" });
@@ -299,6 +308,10 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @param {DataTransfer} transfer - The clipboard or external drop payload.
      */
     _insertTransfer(transfer) {
+        if (this._codeSelection()) {
+            this.dispatch({ type: "insertText", text: transfer.getData("text/plain").replace(/\r\n?/g, "\n"), marks: {}, source: "paste" });
+            return;
+        }
         const html = transfer.getData("text/html");
         if (html) {
             const input = webexpress.webui.EditorHtml.read(html, { clipboard: true });
@@ -386,11 +399,15 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             return { type: "layout", command: "moveRegion", regionId: source.node.id, targetId: this.nodeId(region), placement };
         }
         let target = this._view.entry(element);
+        if (source.node.type === "addon" && ["td", "th"].includes(target?.node.type)) {
+            target = Model.find(this._state.doc, target.node.children.at(-1).id);
+        }
         if (!target || target.node.type === "region") {
             const node = Model.find(this._state.doc, this.nodeId(region)).node.children.at(-1);
             target = Model.find(this._state.doc, node.id);
         } else target = target.node.type === "text" ? Model.block(this._state.doc, target.start) : Model.find(this._state.doc, target.id || target.node.id);
-        while (target?.parent && !["region", "addon"].includes(target.parent.type)) target = Model.find(this._state.doc, target.parent.id);
+        const containers = source.node.type === "addon" ? ["region", "addon", "td", "th"] : ["region", "addon"];
+        while (target?.parent && !containers.includes(target.parent.type)) target = Model.find(this._state.doc, target.parent.id);
         if (!target?.parent || target.node.id === source.node.id || target.ancestors.includes(source.node)) return null;
         let block = element;
         while (block.parentElement && block !== region && this._view.map.get(block)?.id !== target.node.id) block = block.parentElement;
@@ -431,6 +448,17 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         }
     }
     restoreSavedRange() { if (this._destroyed || this.disabled) return false; this._view.restore(this._state.selection); return true; }
+    /**
+     * Restores the caret after cancellation when native dialog focus resets an editable root.
+     * @param {HTMLDialogElement} dialog - The dialog taking focus away from this editor.
+     * @param {object} [selection=this.selection] - The selection to keep if no edit is committed.
+     */
+    preserveDialogSelection(dialog, selection = this.selection) {
+        const doc = this._state.doc;
+        dialog.addEventListener("close", () => {
+            if (!this._destroyed && this._state.doc === doc && !document.querySelector("dialog[open]")) this.selection = selection;
+        }, { once: true });
+    }
     get selection() { return { ...this._state.selection }; }
     set selection(value) {
         const next = webexpress.webui.EditorModel.validate({ ...this._state, selection: value });
@@ -443,6 +471,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         const cmd = String(command).toLowerCase();
         this._saveCurrentSelection();
         if (["undo", "redo"].includes(cmd)) { this._history[cmd](); return; }
+        if (this._codeSelection() && cmd !== "inserttext") return;
         if (cmd === "formatpainter") { this._paintMarks = this._paintMarks ? null : webexpress.webui.EditorModel.activeMarks(this._state); return; }
         const mark = this.constructor.formatMark(cmd);
         if (mark) { this.dispatch({ type: "format", mark, value: mark === "link" ? { href: value } : value }); return; }
@@ -455,6 +484,17 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             this.dispatch({ type: "block", block });
         } else if (cmd.startsWith("justify")) this.dispatch({ type: "block", attrs: { align: { justifyleft: "left", justifycenter: "center", justifyright: "right", justifyfull: "justify" }[cmd] } });
     }
+    /**
+     * Protects literal code input from rich text commands while retaining normal history.
+     * @returns {boolean} Whether both selection endpoints belong to the same code add-on.
+     */
+    _codeSelection() {
+        const Model = webexpress.webui.EditorModel;
+        const [from, to] = Model.bounds(this._state);
+        const codeAt = position => Model.block(this._state.doc, position)?.ancestors.findLast(node => node.type === "addon" && node.attrs.name === "code");
+        const first = codeAt(from), last = codeAt(to > from ? to - 1 : to);
+        return !!first && first === last;
+    }
     static formatMark(command) { return { forecolor: "color", hilitecolor: "background", backcolor: "background", fontname: "font", fontsize: "size", createlink: "link", unlink: "unlink", removeformat: "removeformat" }[command] || (webexpress.webui.EditorModel.MARKS.has(command) ? command : null); }
     queryCommandState(command) {
         const cmd = String(command).toLowerCase(), Model = webexpress.webui.EditorModel;
@@ -465,7 +505,12 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (["insertorderedlist", "insertunorderedlist"].includes(cmd)) return blocks.length > 0 && blocks.every(e => e.ancestors.some(n => n.type === (cmd === "insertorderedlist" ? "ol" : "ul")));
         return false;
     }
-    insertHtmlAtCursor(html) { if (this.disabled || this._destroyed) return; const input = this._sanitizeHtml(html); this.dispatch({ type: "insertNodes", nodes: input.nodes, source: "html" }); }
+    /**
+     * Imports HTML at the saved insertion range without depending on dialog focus.
+     * @param {string} html - The HTML normalized at the editor input boundary.
+     * @param {object} [selection=this.selection] - The model range replaced by the content.
+     */
+    insertHtmlAtCursor(html, selection = this.selection) { if (this.disabled || this._destroyed) return; const input = this._sanitizeHtml(html); this.dispatch({ type: "insertNodes", nodes: input.nodes, selection, source: "html" }); }
     nodeId(element) { return this._view.entry(element)?.id; }
     removeNode(element) { return this.dispatch({ type: "removeNode", id: typeof element === "string" ? element : this.nodeId(element) }); }
     updateNode(element, attrs, children) { return this.dispatch({ type: "updateNode", id: typeof element === "string" ? element : this.nodeId(element), attrs, children }); }
@@ -480,7 +525,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._editorElement.setAttribute("contenteditable", "false");
         this._editorElement.setAttribute("aria-disabled", String(disabled));
         this._editorElement.querySelectorAll("[data-wx-editor-owned]").forEach(el => el.setAttribute("contenteditable", String(!disabled)));
-        this._editorElement.querySelectorAll(".wx-addon-settings-btn,.wx-editor-table-options").forEach(el => { el.disabled = disabled; });
+        this._editorElement.querySelectorAll(".wx-editor-frame-options,[data-frame-command],[data-addon-command],[data-table-command],[data-wx-selection-disabled]").forEach(el => { el.disabled = disabled || el.dataset.wxSelectionDisabled === "true"; });
         const toolbar = this._uiContainer.querySelector(".wx-editor-toolbar");
         toolbar.setAttribute("aria-disabled", String(disabled)); toolbar.inert = disabled;
         toolbar.querySelectorAll("button,input,select,textarea").forEach(el => { el.disabled = disabled; });

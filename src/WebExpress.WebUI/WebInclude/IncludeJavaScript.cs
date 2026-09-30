@@ -114,6 +114,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/i18n/en.js")]
     [Asset("/assets/js/i18n/de.js")]
     [Asset("/assets/js/editor/addons/box.js")]
+    [Asset("/assets/js/editor/addons/code.js")]
     [Asset("/assets/js/templates/default.js")]
     [Asset("/assets/js/syntax/bash.js")]
     [Asset("/assets/js/syntax/basic.js")]

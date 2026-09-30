@@ -127,17 +127,17 @@ test("table handle movement works without the add-on plugin and is one undoable 
     r.editor.execCommand("redo"); assert.equal(regionNodes(r)[0].children.at(-1).id, tableId);
 });
 
-test("table insertion supplies frame options and cell editing still uses the document model", () => {
+test("table insertion supplies a frame toolbar and cell editing still uses the document model", () => {
     const r = loadEditor({ files: ["editor/table.js"] });
     r.editor._plugins[0]._insertTable(r.editor, 2, 2);
     const frame = r.root.querySelector(".wx-editor-table-frame");
-    assert.ok(frame.querySelector(".wx-editor-table-options"));
+    assert.ok(frame.querySelector(".wx-editor-table-toolbar"));
     const cell = frame.querySelector("td"), entry = r.wx.EditorModel.find(r.editor._state.doc, r.editor.nodeId(cell));
     r.select(entry.start); r.input("insertText", "typed", { target: cell });
     assert.equal(r.root.querySelector("td").textContent, "typed");
     r.editor.disabled = true;
     assert.equal(r.root.querySelector("table").getAttribute("contenteditable"), "false");
-    assert.equal(r.root.querySelector(".wx-editor-table-options").disabled, true);
+    assert.ok(Array.from(r.root.querySelector(".wx-editor-table-toolbar").querySelectorAll("button")).every(button => button.disabled));
 });
 
 test("dragenter accepts a table destination before the browser emits dragover", () => {
@@ -168,14 +168,14 @@ test("moving a table to a different region preserves cells and both region ident
     r.editor.execCommand("undo"); assert.equal(r.editor.value, before);
 });
 
-test("table frame options apply to the table in that frame even when selection was elsewhere", () => {
+test("table deletion applies to its own frame while selection is outside the table", () => {
     const r = loadEditor({ html: tableHtml + '<p>outside</p>', files: ["editor/table.js"] });
-    const frame = r.root.querySelector(".wx-editor-table-frame"), menu = frame.querySelector("[popover]");
+    const frame = r.root.querySelector(".wx-editor-table-frame");
     const before = r.editor.value;
-    menu.dispatchEvent({ type: "beforetoggle", target: menu, newState: "open" });
-    const action = Array.from(menu.querySelectorAll("button")).find(b => b.textContent.endsWith("editor.table.insert.row.below"));
+    const action = frame.querySelector('[data-frame-command="delete"]');
+    frame.querySelector("[popover]").hidePopover = () => {};
     action.dispatchEvent({ type: "click", target: action });
-    assert.equal(r.root.querySelectorAll("tr").length, 2);
+    assert.equal(r.root.querySelector("table"), null);
     assert.equal(r.editor._history._entries.length, 1);
     r.editor.execCommand("undo"); assert.equal(r.editor.value, before);
 });
@@ -188,7 +188,10 @@ test("inline add-ons remain movable to a text caret through the shared drag hand
     const before = r.editor.value;
     drag(r, r.root.querySelector(".wx-addon-inline-frame"), target);
     assert.equal(r.root.querySelector(".wx-editor-region").firstChild.textContent, "AB");
-    assert.equal(r.root.querySelector(".wx-addon-inline-frame").parentElement.textContent, "tarTokenget");
+    const moved = r.root.querySelector(".wx-addon-inline-frame");
+    assert.equal(moved.parentElement.firstChild.textContent, "tar");
+    assert.equal(moved.querySelector(".card-body").textContent, "Token");
+    assert.equal(moved.parentElement.lastChild.textContent, "get");
     r.editor.execCommand("undo"); assert.equal(r.editor.value, before);
 });
 
@@ -196,11 +199,63 @@ test("add-on frame options follow the title and the common grip moves its model 
     const r = loadEditor({ addons: { box: { label: "Box", isContainer: true, properties: [{ name: "title" }] } },
         html: '<div class="wx-addon-frame" data-addon-id="box"><div class="wx-addon-body-container"><p>inside</p></div></div><p>after</p>' });
     const frame = r.root.querySelector(".wx-addon-frame"), header = frame.querySelector(".wx-addon-header");
-    assert.equal(header.lastChild.className, "wx-addon-settings-btn");
+    const options = header.querySelector(".wx-editor-frame-options");
+    assert.ok(options.classList.contains("wx-editor-btn"));
+    assert.equal(options.querySelector("i").className, "more");
+    assert.equal(header.children[1].className, "wx-addon-title");
+    assert.equal(header.children[2], options);
     assert.equal(header.firstChild.textContent, "⠿");
     const id = r.editor.nodeId(frame);
     drag(r, header.firstChild, r.root.querySelector(".wx-editor-region").lastChild);
     assert.equal(regionNodes(r)[0].children.at(-1).id, id);
+});
+
+test("block add-ons move into cell content and cell padding with persistent identity and undo", () => {
+    for (const isContainer of [true, false]) {
+        const r = loadEditor({ addons: { box: { label: "Box", isContainer, render: () => "Widget" } },
+            html: '<div class="wx-addon-frame" data-addon-id="box"><div class="wx-addon-body-container"><p>inside</p></div></div>' + tableHtml });
+        const before = r.editor.value;
+        const frame = r.root.querySelector('[data-addon-id="box"]');
+        const id = r.editor.nodeId(frame);
+        drag(r, frame.querySelector(".wx-addon-drag-handle"), r.root.querySelector("td").querySelector("p"));
+        assert.equal(r.editor.nodeId(r.root.querySelector("td").querySelector('[data-addon-id="box"]')), id);
+        const moved = r.editor.value;
+        r.editor.execCommand("undo");
+        assert.equal(r.editor.value, before);
+        r.editor.execCommand("redo");
+        assert.equal(r.editor.value, moved);
+        r.editor.value = moved;
+        const cells = r.root.querySelectorAll("td");
+        drag(r, r.root.querySelector('[data-addon-id="box"]').querySelector(".wx-addon-drag-handle"), cells[1]);
+        assert.equal(r.editor.nodeId(r.root.querySelectorAll("td")[1].querySelector('[data-addon-id="box"]')), id);
+    }
+});
+
+test("an add-on cannot be dragged into its own nested table", () => {
+    const r = loadEditor({ addons: { box: { label: "Box", isContainer: true } },
+        html: '<div class="wx-addon-frame" data-addon-id="box"><div class="wx-addon-body-container">' + tableHtml + '</div></div>' });
+    const before = r.editor.value;
+    drag(r, r.root.querySelector('[data-addon-id="box"]').querySelector(".wx-addon-drag-handle"), r.root.querySelector("td"));
+    assert.equal(r.editor.value, before);
+});
+
+test("add-on frames expose deletion alone in the menu and properties in their toolbar", () => {
+    const r = loadEditor({ files: ["editor/addons.js"], addons: { box: { label: "Box", isContainer: true, properties: [{ name: "title" }] } },
+        html: '<div class="wx-addon-frame" data-addon-id="box"><div class="wx-addon-body-container"><p>inside</p></div></div>' });
+    const button = r.root.querySelector(".wx-editor-frame-options");
+    assert.equal(button.classList.contains("dropdown-toggle"), false);
+    assert.equal(button.querySelector("i").className, "more");
+    const menu = button.parentNode.querySelector("[popover]");
+    menu.dispatchEvent({ type: "beforetoggle", target: menu, newState: "open" });
+    assert.equal(menu.querySelectorAll("button").length, 1);
+    assert.doesNotMatch(menu.textContent, /editor.addon.properties/);
+    assert.ok(r.root.querySelector('.wx-editor-addon-toolbar').querySelector('[data-addon-command="properties"]'));
+    const before = r.editor.value;
+    menu.hidePopover = () => {};
+    menu.querySelector("button").dispatchEvent({ type: "click" });
+    assert.equal(r.root.querySelector('[data-addon-id="box"]'), null);
+    r.editor.execCommand("undo");
+    assert.equal(r.editor.value, before);
 });
 
 test("clipboard HTML removes backgrounds and foreign typography but maps supported semantics", () => {

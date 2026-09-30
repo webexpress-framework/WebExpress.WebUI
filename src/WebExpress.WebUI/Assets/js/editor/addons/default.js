@@ -1,34 +1,23 @@
-// register default add-ons immediately
-// CONTAINER BLOCK: Allows text and other addons inside
-webexpress.webui.EditorAddOns.register("info-box", {
-    label: "Info Container",
-    icon: "circle-info",
-    type: "block",
-    category: "Widgets",
-    isContainer: true,
-    content: '<div class="alert alert-info mb-0"><strong>Note:</strong> Type here...</div>',
-    description: "A nestable container for information."
-});
-
-webexpress.webui.EditorAddOns.register("warning-box", {
-    label: "Warning Widget",
-    icon: "triangle-exclamation",
-    type: "block",
-    category: "Widgets",
-    isContainer: false,
-    content: '<div class="alert alert-warning mb-0"><strong>Warning:</strong> Static alert.</div>',
-    description: "Inserts a static warning box."
-});
-
-    // --- Layout ---
-webexpress.webui.EditorAddOns.register("card-container", {
-    label: "Card Container",
-    icon: "card",
-    type: "block",
-    category: "Layout",
-    isContainer: true,
-    content: '<p>Card content goes here...</p>',
-    description: "A standard card frame."
+/**
+ * Registers semantic containers whose presentation stays separate from editable content.
+ */
+[
+    ["info", "info", "circle-info"],
+    ["warning", "warning", "triangle-exclamation"],
+    ["error", "danger", "circle-xmark"],
+    ["success", "success", "circle-check"]
+].forEach(([name, color, icon]) => {
+    const key = "webexpress.webui:editor.addon." + name;
+    webexpress.webui.EditorAddOns.register(name + "-box", {
+        label: webexpress.webui.I18N.translate(key + ".label"),
+        icon,
+        type: "block",
+        category: "Widgets",
+        isContainer: true,
+        bodyClass: "alert alert-" + color,
+        content: "<p>" + webexpress.webui.I18N.translate(key + ".content") + "</p>",
+        description: webexpress.webui.I18N.translate(key + ".description")
+    });
 });
 
 webexpress.webui.EditorAddOns.register("hr-styled", {
@@ -40,7 +29,6 @@ webexpress.webui.EditorAddOns.register("hr-styled", {
     description: "Inserts a gradient horizontal rule."
 });
 
-    // --- Inline Elements ---
 webexpress.webui.EditorAddOns.register("badge-primary", {
     label: "Badge (Blue)",
     icon: "label",

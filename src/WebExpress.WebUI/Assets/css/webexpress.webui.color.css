@@ -93,22 +93,77 @@
 
 .wx-color-dropdown {
     background-color: var(--wx-body-bg);
-    border: 1px solid rgba(0, 0, 0, 0.15);
+    border: 1px solid var(--wx-border-color);
     border-radius: 0.2em;
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
     z-index: 1000;
     box-sizing: border-box;
-    padding: 1em;
-    min-width: 12em;
+    padding: 0.5rem;
+    min-width: 0;
+    width: max-content;
 }
 
 .wx-color-palette-grid {
     margin-bottom: 0;
     display: grid;
-    gap: 0.5em;
-    grid-template-columns: repeat(5, 1fr);
+    gap: 5px;
+    grid-template-columns: repeat(5, 24px);
 }
 
 .wx-color-palette-grid > div {
     position: relative;
+}
+
+.wx-color-dropdown.wx-native-menu {
+    padding: 0.5rem;
+    min-width: 0;
+    width: max-content;
+}
+
+.wx-color-palette-grid button,
+.wx-color-palette-grid .wx-color-custom-btn {
+    display: block;
+    width: 24px;
+    height: 24px;
+}
+
+.wx-color-palette-grid .wx-color-custom-btn {
+    display: flex;
+}
+
+.wx-color-input .wx-color-clear {
+    width: 100%;
+    height: auto;
+    padding: 0.25rem 0.5rem;
+    border: 0;
+    white-space: nowrap;
+    color: var(--wx-body-color);
+    background-color: transparent;
+}
+
+.wx-color-input .wx-color-clear:hover {
+    padding: 0.25rem 0.5rem;
+}
+
+.wx-color-compact .wx-color-sample {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+}
+
+.wx-color-input.wx-color-compact .wx-color-preview-box {
+    width: 1.15em;
+    height: 3px;
+    box-sizing: content-box;
+    border-radius: 0;
+}
+
+.wx-color-input.wx-color-compact .wx-color-trigger {
+    width: auto;
+    height: auto;
+    border: 0;
+    background-color: transparent;
+    padding: 0.4em;
+    color: inherit;
 }

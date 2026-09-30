@@ -59,3 +59,15 @@ test("a source that holds markup is shown, not rendered, by every highlighter", 
         assert.ok(!/(^|[^&;a-z])&(?![a-z]+;)/.test(html.replace(/&amp;|&lt;|&gt;|&quot;/g, "")), language + " leaves no bare ampersand");
     }
 });
+
+test("preformatted source keeps whitespace and decodes markup exactly once", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.code.js"] });
+    const host = rt.createElement("div"), pre = rt.createElement("pre");
+    const source = '\n\t<div>literal &amp; and & text</div>\n';
+    pre.textContent = source;
+    host.appendChild(pre);
+    const ctrl = new rt.wx.CodeCtrl(host);
+    assert.equal(ctrl._code, source);
+    assert.equal(host.querySelector("code").textContent, source);
+    assert.equal(host.querySelector("code div"), null);
+});

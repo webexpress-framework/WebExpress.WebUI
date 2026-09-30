@@ -4,23 +4,7 @@
  * alignment, and block formatting options.
  */
 webexpress.webui.EditorPlugins.register("formatting", 0, {
-    _lastColor: "#000000",
-    _lastHighlight: "#FFFF00", // default highlight color (yellow)
-
-    _colors: [
-        // basic colors
-        "#000000", "#FF0000", "#008000", "#0000FF", "#FFFF00",
-        "#FFA500", "#800080", "#A52A2A", "#00FFFF", "#808080",
-        // extended palette
-        "#FFC0CB", "#FFD700", "#B22222", "#ADFF2F", "#20B2AA",
-        "#00CED1", "#4682B4", "#DA70D6", "#D2691E", "#C0C0C0",
-        // pastel tones
-        "#FFB6C1", "#FFDAB9", "#E6E6FA", "#98FB98", "#AFEEEE",
-        "#D3D3D3", "#FFE4E1", "#F0E68C", "#F5DEB3", "#F4A460",
-        // dark shades
-        "#2F4F4F", "#696969", "#708090", "#778899", "#556B2F",
-        "#483D8B", "#8B0000", "#9400D3", "#FF4500", "#DC143C"
-    ],
+    _colorControls: null,
 
     /**
      * Initializes the plugin.
@@ -56,6 +40,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         return () => {
             document.removeEventListener("selectionchange", selectionChanged);
             ["keyup", "mouseup", "focus", "input"].forEach(type => editorEl?.removeEventListener(type, update));
+            this._colorControls?.forEach(control => control.destroy());
         };
     },
 
@@ -100,6 +85,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     /**
      * Scopes toolbar feedback to its editor and uses the command engine for
      * mixed inline selections, independent of native browser command state.
+     * @param {object} editor - The editor whose active formatting is reflected in the toolbar.
      */
     _updateButtonStates: function(editor) {
         const editorEl = editor.getEditorElement();
@@ -151,6 +137,7 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
         // the user always sees what kind of block the caret sits in -
         // identical to Word's "Styles" indicator.
         this._updateFormatDropdown(toolbar, blockFormat);
+        this._updateColorButtons(editor, toolbar);
     },
 
     /**
@@ -421,149 +408,79 @@ webexpress.webui.EditorPlugins.register("formatting", 0, {
     },
 
     /**
-     * Creates the text color split-button.
-     * @param {object} editor - The editor instance.
-     * @returns {HTMLElement} The button group.
+     * Uses the common dropdown treatment for text colors.
+     * @param {object} editor - The editor receiving the color transaction.
+     * @returns {HTMLElement} The color dropdown group.
      */
     _createTextColorDropdown: function(editor) {
-        let lastColor = this._lastColor;
-        const container = document.createElement("div");
-        container.className = "wx-editor-btn-group";
-        container.style.gap = "0";
-
-        // action button (apply current text color)
-        const actionBtn = document.createElement("button");
-        actionBtn.className = "wx-editor-btn";
-        actionBtn.type = "button";
-        actionBtn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.textcolor");
-
-        const icon = document.createElement("i");
-        icon.className = webexpress.webui.IconSet.resolve("font");
-        icon.style.borderBottom = `3px solid ${lastColor}`;
-        actionBtn.appendChild(icon);
-
-        actionBtn.addEventListener("click", () => {
-            editor.execCommand("foreColor", lastColor);
-        });
-
-        // dropdown toggle button
-        const toggleBtn = document.createElement("button");
-        toggleBtn.className = "wx-editor-btn dropdown-toggle dropdown-toggle-split";
-        toggleBtn.type = "button";
-        toggleBtn.title = actionBtn.title;
-
-
-        const menu = document.createElement("div");
-        menu.className = "dropdown-menu";
-        const picker = document.createElement("ul");
-        picker.className = "wx-editor-color-picker";
-
-        this._colors.forEach((c) => {
-            const li = document.createElement("li");
-            const b = document.createElement("button");
-            b.className = "dropdown-item p-2";
-            b.type = "button";
-            b.style.backgroundColor = c;
-            b.title = c;
-            b.addEventListener("click", () => {
-                lastColor = c;
-                icon.style.borderBottomColor = c;
-                editor.execCommand("foreColor", c);
-                webexpress.webui.NativeMenu.hide(menu);
-            });
-            li.appendChild(b);
-            picker.appendChild(li);
-        });
-
-        menu.appendChild(picker);
-
-        container.appendChild(actionBtn);
-        container.appendChild(toggleBtn);
-        container.appendChild(menu);
-        webexpress.webui.NativeMenu.bind(toggleBtn, menu);
-        return container;
+        return this._createColorDropdown(editor, "foreColor", "font", "editor.textcolor");
     },
 
     /**
-     * Creates the highlight color split-button (Mark).
-     * @param {object} editor - The editor instance.
-     * @returns {HTMLElement} The button group.
+     * Keeps highlight controls consistent with text colors and exposes removal explicitly.
+     * @param {object} editor - The editor receiving the highlight transaction.
+     * @returns {HTMLElement} The highlight dropdown group.
      */
     _createHighlightDropdown: function(editor) {
-        let lastHighlight = this._lastHighlight;
-        const container = document.createElement("div");
-        container.className = "wx-editor-btn-group";
-        container.style.gap = "0";
+        return this._createColorDropdown(editor, "hiliteColor", "highlighter", "editor.highlightcolor");
+    },
 
-        // action button (apply current highlight)
-        const actionBtn = document.createElement("button");
-        actionBtn.className = "wx-editor-btn";
-        actionBtn.type = "button";
-        actionBtn.title = webexpress.webui.I18N.translate("webexpress.webui:editor.highlightcolor");
-
-        const icon = document.createElement("i");
-        icon.className = webexpress.webui.IconSet.resolve("highlighter");
-        icon.style.borderBottom = `3px solid ${lastHighlight}`;
-        actionBtn.appendChild(icon);
-
-        actionBtn.addEventListener("click", () => {
-            editor.execCommand("hiliteColor", lastHighlight);
+    /**
+     * Places color feedback outside the masked icon so the full indicator remains visible.
+     * @param {object} editor - The editor owning the saved selection and history.
+     * @param {string} command - The color command to apply to the saved selection.
+     * @param {string} symbol - The symbolic light icon name.
+     * @param {string} label - The translation key for the dropdown's accessible name.
+     * @returns {HTMLElement} The native dropdown and its color palette.
+     */
+    _createColorDropdown: function(editor, command, symbol, label) {
+        const host = document.createElement("div");
+        host.className = "wx-editor-btn-group";
+        host.dataset.compact = "true";
+        host.dataset.allowEmpty = "true";
+        host.dataset.icon = symbol;
+        host.dataset.emptyColor = command === "foreColor" ? "currentColor" : "transparent";
+        host.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:" + label));
+        const control = new webexpress.webui.InputColorCtrl(host);
+        const button = host.querySelector(".wx-color-trigger");
+        button.classList.add("wx-editor-btn");
+        button.dataset.colorCommand = command;
+        button.title = host.getAttribute("aria-label");
+        this._colorControls ||= new Map();
+        this._colorControls.set(command, control);
+        host.addEventListener("mousedown", event => {
+            if (event.target.closest("button")) { editor._saveCurrentSelection(); event.preventDefault(); }
         });
-
-        // 2. dropdown toggle button
-        const toggleBtn = document.createElement("button");
-        toggleBtn.className = "wx-editor-btn dropdown-toggle dropdown-toggle-split";
-        toggleBtn.type = "button";
-        toggleBtn.title = actionBtn.title;
-
-
-        const menu = document.createElement("div");
-        menu.className = "dropdown-menu";
-
-        const picker = document.createElement("ul");
-        picker.className = "wx-editor-color-picker";
-
-        // requested highlight colors
-        const markColors = [
-            { val: "#FFFF00", name: webexpress.webui.I18N.translate("webexpress.webui:editor.color.yellow") },
-            { val: "#00FFFF", name: webexpress.webui.I18N.translate("webexpress.webui:editor.color.cyan") },
-            { val: "#00FF00", name: webexpress.webui.I18N.translate("webexpress.webui:editor.color.lime") },
-            { val: "#FF00FF", name: webexpress.webui.I18N.translate("webexpress.webui:editor.color.magenta") },
-        ];
-
-        markColors.forEach((c) => {
-            const li = document.createElement("li");
-            const b = document.createElement("button");
-            b.className = "dropdown-item p-2 d-flex align-items-center justify-content-center";
-            b.type = "button";
-            b.style.backgroundColor = c.val;
-            b.title = c.name;
-            b.style.border = "1px solid #dee2e6";
-
-            if (c.icon) {
-                b.innerHTML = `<i class="${c.icon}" style="font-size: 10px; color: #000;"></i>`;
-            }
-
-            b.addEventListener("click", () => {
-                // update state if it is a visible color
-                if (c.val !== "transparent") {
-                    lastHighlight = c.val;
-                    icon.style.borderBottomColor = c.val;
-                }
-                editor.execCommand("hiliteColor", c.val);
-                webexpress.webui.NativeMenu.hide(menu);
-            });
-            li.appendChild(b);
-            picker.appendChild(li);
+        host.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, event => {
+            event.stopPropagation();
+            editor.execCommand(command, event.detail.value);
         });
+        return host;
+    },
 
-        menu.appendChild(picker);
+    /**
+     * Refreshes color indicators after cursor movement, loading and undo or redo.
+     * @param {object} editor - The editor whose active marks determine the displayed colors.
+     * @param {HTMLElement} toolbar - The toolbar belonging to that editor.
+     */
+    _updateColorButtons: function(editor, toolbar) {
+        const marks = webexpress.webui.EditorModel.activeMarks(editor._state);
+        toolbar.querySelectorAll("[data-color-command]").forEach(button => {
+            const mark = button.dataset.colorCommand === "foreColor" ? "color" : "background";
+            const color = marks[mark] || (mark === "color" ? "currentColor" : "transparent");
+            button.dataset.color = color;
+            const control = this._colorControls?.get(button.dataset.colorCommand);
+            if (control && !control.setValue(marks[mark] || "", false)) control.setValue("", false);
+            button.querySelector(".wx-color-preview-box").style.backgroundColor = color;
+        });
+    },
 
-        container.appendChild(actionBtn);
-        container.appendChild(toggleBtn);
-        container.appendChild(menu);
-        webexpress.webui.NativeMenu.bind(toggleBtn, menu);
-        return container;
+    /**
+     * Keeps toolbar feedback synchronized with model transactions and history restoration.
+     * @param {object} editor - The editor whose rendered content changed.
+     */
+    onContentChange: function(editor) {
+        this._updateButtonStates(editor);
     },
 
     /**

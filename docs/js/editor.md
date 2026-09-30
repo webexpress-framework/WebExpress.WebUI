@@ -58,11 +58,14 @@ The editor recognises direct triggers that map to specific actions or pickers:
 | Trigger | Action
 |---------|---------------------------------------------------------------
 | `@`     | Opens the mention picker (only when `data-mention-uri` is set)
-| `[[`    | Opens the link dialog
-| `{{`    | Opens the AddOn library
+| `[`    | Opens the link dialog
+| `{`    | Opens the AddOn library
 | `//`    | Inserts a date control at the cursor
+| `:`     | Opens the searchable emoji picker
 
-The double-character triggers (`[[`, `{{`, `//`) consume both characters; the surface document never contains the literal trigger.
+Trigger handling starts at the beginning of a text token and is disabled inside code. Link, AddOn and date dialogs replace their trigger only when insertion is confirmed. Cancelling either the AddOn selection or its property dialog leaves the original text and caret intact. Mention and emoji pickers also retain their query until an item is selected, so Escape preserves the typed text.
+
+Emoji entry uses `:` followed by an emoji name, such as `:wink`. Arrow keys choose an item and Enter inserts it. Complete emoticons such as `:)`, `:-)`, `;)`, `:(`, `:D`, `:P` and `<3` convert directly to Unicode emoji. The status shortcuts `(/)`, `(x)` and `(!)` become ✅, ❌ and ℹ️ respectively. Undo restores the original characters.
 
 ## Markdown Shortcuts
 
@@ -240,8 +243,9 @@ The editor supports the following keyboard shortcuts:
 | `Ctrl+Y` / `⌘+Y`             | Redo
 | `Ctrl+Shift+Z` / `⌘+Shift+Z` | Redo
 | `@`                          | Open mention picker (when `data-mention-uri` is set)
-| `[[`                         | Open link dialog
-| `{{`                         | Open AddOn library
+| `[`                         | Open link dialog
+| `{`                         | Open AddOn library
+| `:`                          | Open the emoji picker
 | `//`                         | Insert date control
 | `Tab` (in list)              | Indent list item
 | `Shift+Tab` (in list)        | Outdent list item
@@ -278,11 +282,11 @@ The cleanup applies to clipboard HTML and external HTML drops. Loading a saved d
 
 ### Editing tables
 
-The table frame uses the same `⠿` movement handle as block add-ons. Its title remains outside the editable cells, and optional action controls sit at the far right of the header. The table options menu exposes the same structural and color actions as the cell menu. Tables can be moved between blocks and regions without losing cells, formatting or column widths. Frames are recreated after loading or undo and are excluded from the exported table HTML.
+The table frame uses the same `⠿` movement handle as block add-ons. Its title remains outside the editable cells. A toolbar inside the frame exposes row and column insertion, headers, merging, splitting, deletion and cell background colors. These actions replace the cell context menu. Tables can be moved between blocks and regions without losing cells, formatting or column widths. Frames and toolbars are recreated after loading or undo and are excluded from the exported table HTML.
 
 Drag from one cell into another, or Shift-click another cell, to select a rectangle.
 Dragging within a single cell still selects text. The rectangle remains selected
-when opening the actions menu. Existing row and column spans expand the selection
+when using the toolbar or opening its color picker. Existing row and column spans expand the selection
 to include each affected cell completely.
 
 Merge combines the selected rectangle in reading order, including vertical spans;
@@ -292,10 +296,12 @@ cells, and cell background colors apply to the entire rectangle. Structural edit
 and colors update the form value and undo history. Selection highlighting is never
 stored in the value or history.
 
+Toolbar availability follows the selected cells within each table. Cell actions are disabled when the selection is outside that table. Merge requires a complete rectangle within one row group. Split requires one cell spanning multiple rows or columns. The table deletion action remains available for its own frame. The background color picker uses `InputColorCtrl`, shows the common selected color and can remove backgrounds from mixed selections.
+
 ### Editing images
 
-Click an image to select it and display the same floating popover used for tables
-and add-ons. Its edit button opens the image dialog; the actions menu offers
+Click an image to select it and display the floating popover used for contextual
+editing. Its edit button opens the image dialog; the actions menu offers
 left, center, right and inline alignment, 25%, 50%, 100% and original size, and
 removal. Double-clicking an image also opens the dialog.
 
@@ -360,7 +366,11 @@ webexpress.webui.EditorAddOns.register("alert-box", {
 });
 ```
 
-AddOns appear in the AddOn picker (opened via `{{`, or the toolbar button). When the AddOn has `properties`, a property dialog opens before insertion. A property with a fixed set of values declares `type: "select"` and lists them as `options` of `{ value, label }` pairs; every other `type` becomes an input of that type.
+AddOns appear in the AddOn picker (opened via `{`, or the toolbar button). When the AddOn has `properties`, a property dialog opens before insertion. A property with a fixed set of values declares `type: "select"` and lists them as `options` of `{ value, label }` pairs; every other `type` becomes an input of that type.
+
+Semantic containers include Info, Warning, Error and Success. Their bodies support ordinary text editing, paragraphs, formatting and nested content. The `bodyClass` definition supplies presentation classes shared by the editor and reading view, keeping the alert appearance separate from authored text. The former Card Container is no longer offered in the catalog.
+
+Box properties include layout, label and border color. The `borderColor` value persists with the document and changes the frame in both editing and reading views without recoloring its text.
 Inside the editor such an add-on keeps the generic card frame with the header that names it, and that frame carries the persisted properties as `data-*` attributes — which is what a stylesheet keys a preview on. The box stylesheet names the body of a frame with a given `data-layout` in every frame rule, so the author sees the frame the reader will get. See [Box](box.md).
 
 ## Use Case Examples
@@ -422,3 +432,11 @@ ctrl.insertHtmlAtCursor(`
     </div>
 `);
 ```
+
+## Editing Controls
+
+Frame controls use theme colors and compact headers for tables and block AddOns. Table frames expose their actions in a dedicated toolbar. AddOn headers expose an ellipsis menu without a caret, providing properties when available and removal for every block AddOn. The drag handle moves an AddOn into a table cell or between cells, including empty cell space. Moves retain the AddOn identity and configuration and participate in undo and redo. A container cannot move into its own descendants.
+
+Instruction editing starts with a click on the instruction. The bubble provides editing and removal actions, and a double click opens the instruction dialog directly. Delete or Backspace removes the selected instruction through the document model. Cancelling the dialog preserves the instruction, and committed edits and removals support undo.
+
+Color attributes use `webexpress.webui.InputColorCtrl` for text colors, highlights, cell backgrounds and AddOn properties. The shared control provides a compact toolbar presentation, the same native dropdown pattern as the other toolbar controls and a custom color picker. A separate indicator beneath each light icon reflects the color at the active caret or selection endpoint. The removal action clears only the corresponding text color or highlight mark, retaining other formatting. The indicators also update after loading, undo and redo. Selection changes synchronize the picker silently and never create an edit.

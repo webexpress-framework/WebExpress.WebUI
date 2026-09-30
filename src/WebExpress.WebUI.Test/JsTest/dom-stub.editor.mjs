@@ -131,6 +131,15 @@ class EditorNode {
     get firstChild() { return this.childNodes[0] || null; }
     get lastChild() { return this.childNodes[this.childNodes.length - 1] || null; }
 
+    /**
+     * Preserves source order when controls prepend decorations to authored text.
+     * @param {...(Node|string)} nodes - The nodes or text to insert before existing content.
+     */
+    prepend(...nodes) {
+        const reference = this.firstChild;
+        for (const node of nodes) this.insertBefore(typeof node === "string" ? this.ownerDocument.createTextNode(node) : node, reference);
+    }
+
     get nextSibling() {
         if (!this.parentNode) {
             return null;
@@ -349,8 +358,8 @@ class EditorElement extends EditorNode {
     get classList() {
         const owner = this;
         return {
-            add(name) { owner._classes.add(name); },
-            remove(name) { owner._classes.delete(name); },
+            add(...names) { names.forEach(name => owner._classes.add(name)); },
+            remove(...names) { names.forEach(name => owner._classes.delete(name)); },
             contains(name) { return owner._classes.has(name); },
             toggle(name, force) {
                 const has = owner._classes.has(name);

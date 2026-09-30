@@ -27,6 +27,12 @@ webexpress.webui.EditorAddOns.register("box", {
             }))
         },
         {
+            name: "borderColor",
+            label: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.box.bordercolor"),
+            type: "color",
+            default: "#808080"
+        },
+        {
             name: "header",
             label: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.box.header"),
             type: "text",

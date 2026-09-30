@@ -19,7 +19,8 @@ webexpress.webui.ContentFormat = class {
      * element, was handed to the reading view.
      */
     static CHROME = "[data-wx-caret], .wx-editor-placeholder, .wx-drop-marker, .wx-col-resizer,"
-        + " .wx-addon-drag-handle, .wx-addon-settings-btn, .wx-editor-toolbar, .wx-editor-status";
+        + " .wx-addon-drag-handle, .wx-addon-settings-btn, .wx-addon-header, .wx-editor-frame-toolbar,"
+        + " .wx-editor-toolbar, .wx-editor-status";
 
     /** Attributes that only make sense while the value is being edited. */
     static EDIT_ATTRIBUTES = ["contenteditable", "draggable", "spellcheck", "data-wx-focus-new", "data-wx-caret"];
@@ -162,8 +163,10 @@ webexpress.webui.ContentFormat = class {
         const registry = webexpress.webui.EditorAddOns;
         const definition = registry && registry.get(frame.getAttribute("data-addon-id"));
 
-        if (definition && definition.contentClass) {
-            target.classList.add(definition.contentClass);
+        if (definition) {
+            for (const classes of [definition.contentClass, definition.bodyClass]) {
+                if (classes) target.classList.add(...classes.split(/\s+/).filter(Boolean));
+            }
         }
     }
 

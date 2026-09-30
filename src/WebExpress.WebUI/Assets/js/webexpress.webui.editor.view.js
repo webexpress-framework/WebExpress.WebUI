@@ -49,8 +49,11 @@ webexpress.webui.EditorHtml = class {
             if (node.matches(".wx-addon-frame,.wx-addon-inline-frame")) {
                 const name = node.getAttribute("data-addon-id") || "";
                 const def = webexpress.webui.EditorAddOns?.get(name);
-                if (!def) return [];
-                const body = node.querySelector(".wx-addon-body-container");
+                if (!def) {
+                    const content = node.querySelector(".wx-addon-body-container");
+                    return content ? Array.from(content.childNodes).flatMap(n => read(n, {}, depth + 1)) : [];
+                }
+                const body = node.querySelector(".wx-addon-body-container,.wx-addon-body-widget");
                 const data = {};
                 (def.properties ?? []).forEach(prop => {
                     const attribute = "data-" + prop.name.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase();
@@ -97,6 +100,25 @@ webexpress.webui.EditorHtml = class {
         const state = Model.validate({ version: Model.VERSION, doc: Model.node("doc", raw) });
         const content = state.doc.children[0].children[0].children;
         return { state, nodes: inline ? content[0].children : raw.some(n => n.type === "row") ? state.doc.children.flatMap(row => row.children.flatMap(region => region.children)) : content };
+    }
+
+    /**
+     * Applies registered container capabilities when a saved widget becomes editable.
+     * @param {object} state - The validated document read from persisted JSON.
+     * @returns {object} The state with editable content initialized where necessary.
+     */
+    static restoreContainers(state) {
+        const Model = webexpress.webui.EditorModel;
+        let changed = false;
+        for (const { node } of Model.entries(state.doc)) {
+            if (node.type !== "addon" || node.attrs.container || node.attrs.inline) continue;
+            const def = webexpress.webui.EditorAddOns?.get(node.attrs.name);
+            if (!def?.isContainer) continue;
+            node.attrs.container = true;
+            if (!node.children.length) node.children = this.read(typeof def.renderer === "function" ? def.renderer(node.attrs.data) : def.content || "").nodes;
+            changed = true;
+        }
+        return changed ? Model.validate(state) : state;
     }
 };
 
@@ -262,7 +284,10 @@ webexpress.webui.EditorView = class {
         for (const [key, value] of Object.entries(node.attrs.data)) frame.setAttribute("data-" + key.replace(/([a-z0-9])([A-Z])/g, "$1-$2").toLowerCase(), value);
         const body = document.createElement(node.attrs.inline ? "span" : "div");
         body.className = "card-body p-2 " + (node.attrs.container ? "wx-addon-body-container" : "wx-addon-body-widget");
+        if (def?.bodyClass) body.classList.add(...def.bodyClass.split(/\s+/).filter(Boolean));
+        if (node.attrs.name === "box" && /^#[\da-f]{6}$/i.test(node.attrs.data.borderColor || "")) body.style.setProperty("--wx-box-line-color", node.attrs.data.borderColor);
         if (node.attrs.container) {
+            if (node.attrs.name === "code") body.setAttribute("spellcheck", "false");
             body.setAttribute("contenteditable", this.editor?.disabled ? "false" : "true");
             body.setAttribute("data-wx-editor-owned", "true");
             let pos = start;
@@ -272,15 +297,8 @@ webexpress.webui.EditorView = class {
             // registered renderers are application code; user HTML never becomes a widget
             body.appendChild(webexpress.webui.EditorHtml.widget(def, node.attrs.data));
         }
-        if (!exporting && !node.attrs.inline) {
-            const header = this._frameHeader(def?.label || node.attrs.name);
-            if (def?.properties?.length) {
-                const settings = document.createElement("button"); settings.type = "button";
-                settings.className = "wx-addon-settings-btn"; settings.textContent = "⚙";
-                settings.title = webexpress.webui.I18N.translate("webexpress.webui:editor.frame.options");
-                settings.setAttribute("aria-label", settings.title); header.appendChild(settings);
-            }
-            frame.appendChild(header);
+        if (!exporting) {
+            frame.appendChild(this._frameHeader(def?.label || node.attrs.name, node.attrs.inline));
         }
         if (!exporting && node.attrs.inline) frame.setAttribute("draggable", "true");
         frame.appendChild(body);
@@ -306,15 +324,44 @@ webexpress.webui.EditorView = class {
     /**
      * Gives tables and add-ons the same movable frame with trailing options.
      * @param {string} title - The visible frame title.
+     * @param {boolean} [inline=false] - Whether the frame participates in an inline text run.
      * @returns {HTMLElement} The noneditable frame header.
      */
-    _frameHeader(title) {
-        const header = document.createElement("div");
+    _frameHeader(title, inline = false) {
+        const header = document.createElement(inline ? "span" : "div");
         header.className = "card-header wx-addon-header";
         header.setAttribute("contenteditable", "false");
         header.appendChild(this._dragHandle("wx-addon-drag-handle", "editor.frame.move"));
         const label = document.createElement("span");
         label.className = "wx-addon-title"; label.textContent = title; header.appendChild(label);
+        const options = document.createElement("button");
+        options.type = "button";
+        options.className = "wx-editor-btn wx-editor-frame-options";
+        options.title = webexpress.webui.I18N.translate("webexpress.webui:editor.frame.options");
+        options.setAttribute("aria-label", options.title);
+        const icon = document.createElement("i");
+        icon.className = webexpress.webui.IconSet.resolve("more");
+        options.appendChild(icon);
+        const menu = document.createElement(inline ? "span" : "div");
+        menu.className = "dropdown-menu wx-editor-frame-menu";
+        const remove = document.createElement("button");
+        remove.type = "button";
+        remove.className = "dropdown-item";
+        remove.dataset.frameCommand = "delete";
+        const trash = document.createElement("i");
+        trash.className = webexpress.webui.IconSet.resolve("trash");
+        remove.appendChild(trash);
+        remove.appendChild(document.createTextNode(" " + webexpress.webui.I18N.translate("webexpress.webui:editor.frame.delete")));
+        header.addEventListener("mousedown", event => { this.editor._saveCurrentSelection(); event.preventDefault(); });
+        remove.addEventListener("click", () => {
+            if (this.editor.disabled) return;
+            webexpress.webui.NativeMenu.hide(menu);
+            this.editor.removeNode(header.parentElement);
+        });
+        menu.appendChild(remove);
+        header.appendChild(options);
+        header.appendChild(menu);
+        webexpress.webui.NativeMenu.bind(options, menu);
         return header;
     }
 

@@ -26,6 +26,8 @@ webexpress.webui.BoxCtrl = class extends webexpress.webui.Ctrl {
         this._headerIconImage = element.dataset.headerIconImage || null;
         this._colorClass = element.dataset.colorClass || null;
         this._colorStyle = element.dataset.colorStyle || null;
+        const borderColor = element.dataset.borderColor || "";
+        if (/^#[\da-f]{6}$/i.test(borderColor)) element.style.setProperty("--wx-box-line-color", borderColor);
 
         // preserve the original children - they become the box body. a node that was already
         // detached yields null and is dropped rather than carried into appendChild.
@@ -39,7 +41,8 @@ webexpress.webui.BoxCtrl = class extends webexpress.webui.Ctrl {
             "data-header-icon-css",
             "data-header-icon-image",
             "data-color-class",
-            "data-color-style"
+            "data-color-style",
+            "data-border-color"
         ].forEach(attr => element.removeAttribute(attr));
 
         element.classList.add("wx-box");

@@ -309,6 +309,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
 
             // provide editor reference to the modal controller
             ctrl._editor = editor;
+            ctrl._insertionSelection = editor.selection;
 
             // securely store the explicit cursor position
             ctrl._backupRange = activeRange || null;
@@ -320,6 +321,7 @@ webexpress.webui.EditorPlugins.register("media", 1000, {
 
             // show modal via controller api if available
             if (typeof ctrl.show === "function") {
+                editor.preserveDialogSelection(this[modalProperty].element);
                 ctrl.show();
             }
             if (modalProperty === "imageModal" && ctrl._imageTarget && typeof ctrl.selectPage === "function") {

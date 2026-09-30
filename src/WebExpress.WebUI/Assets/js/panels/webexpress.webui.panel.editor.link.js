@@ -179,7 +179,7 @@ webexpress.webui.DialogPanels.register("editor-link", {
         };
 
         // editor restores the saved range internally on focus/insert
-        editor.insertHtmlAtCursor('<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(rawText) + "</a>");
+        editor.insertHtmlAtCursor('<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(rawText) + "</a>", modal._insertionSelection);
 
         // close modal
         if (typeof modal.hide === "function") {

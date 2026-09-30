@@ -26,6 +26,7 @@ Initialization is declarative: the content is placed directly inside the host el
 | `data-header-icon-image` | URL of an image icon placed before the label. Takes precedence over `data-header-icon-css`.
 | `data-color-class`       | The CSS class of a system accent color (`text-primary`, …).
 | `data-color-style`       | The inline style of a user-defined accent color (`color:gold;`).
+| `data-border-color`      | An optional six-digit hexadecimal border color, such as `#cc2255`. It changes the frame without recoloring the body text and is also set by the editor's Box property dialog.
 
 The generic WebExpress utility classes still apply to the host: a `border-*` class recolors the line of every drawn frame, a `bg-*` class fills the box, and the spacing utilities place it.
 

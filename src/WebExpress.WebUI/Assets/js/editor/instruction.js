@@ -6,8 +6,33 @@
 webexpress.webui.EditorPlugins.register("instruction", 5000, {
     instructionModal: null,
 
+    /**
+     * Selects instruction atoms explicitly because browsers do not place a caret inside them.
+     * @param {object} editor - The editor that owns the instruction and its history.
+     * @returns {Function} The cleanup that releases the instruction dialog with its editor.
+     */
     init: function(editor) {
-        // No automatic initialization needed
+        const root = editor.getEditorElement();
+        editor.listen(root, "click", event => {
+            const instruction = event.target.closest?.(".wx-editor-instruction");
+            if (event.button !== 0 || editor.disabled || !instruction) return;
+            event.preventDefault();
+            instruction.closest('[contenteditable="true"]')?.focus({ preventScroll: true });
+            const range = document.createRange();
+            range.selectNode(instruction);
+            webexpress.webui.EditorSelection.apply(range);
+            editor._saveCurrentSelection();
+        });
+        editor.listen(root, "dblclick", event => {
+            const instruction = event.target.closest?.(".wx-editor-instruction");
+            if (editor.disabled || !instruction) return;
+            event.preventDefault();
+            this.getContextMenuItems(editor, instruction)[0].action();
+        });
+        return () => {
+            this.instructionModal?.ctrl?.destroy();
+            this.instructionModal?.element?.remove();
+        };
     },
 
     /**

@@ -1,6 +1,6 @@
 /**
  * A color selection control extending the base MenuCtrl class.
- * Shows only a color preview in collapsed state.
+ * Shows a color preview or a compact toolbar icon with a color indicator.
  * Provides a uniform grid of predefined colors and a custom selector in the dropdown.
  *
  * The following events are triggered:
@@ -12,7 +12,7 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
     _value = "#000000";
     _disabled = false;
 
-    // palette matching wysiwyg_editor_ctrl.js (40 colors)
+    // shared palette for forms and editor attributes
     _palette = [
         // basic colors
         "#000000", "#FF0000", "#008000", "#0000FF", "#FFFF00",
@@ -38,7 +38,11 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
         // initialize properties from attributes and dataset
         const id = element.getAttribute("id");
         const name = element.getAttribute("name");
-        const value = element.dataset.value || element.getAttribute("value") || "#000000";
+        this._allowEmpty = element.dataset.allowEmpty === "true";
+        this._compact = element.dataset.compact === "true";
+        this._icon = element.dataset.icon || "";
+        this._emptyColor = element.dataset.emptyColor === "currentColor" ? "currentColor" : "transparent";
+        const value = element.dataset.value ?? element.getAttribute("value") ?? (this._allowEmpty ? "" : "#000000");
 
         // check for disable attribute
         if (element.hasAttribute("disabled")) {
@@ -68,14 +72,16 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
         element.removeAttribute("disabled");
         element.innerHTML = "";
         element.classList.add("wx-color-input");
+        element.classList.toggle("wx-color-compact", this._compact);
         element.appendChild(hiddenInput);
         element.appendChild(dropdown);
         element.appendChild(dropdownMenu);
 
         // attach native popover behavior for the dropdown menu
         this._initializeMenu(dropdown, dropdownMenu);
+        this._valueText.id = dropdownMenu.id + "-value";
         // the trigger is named by the field label followed by the current value
-        this._adoptFieldLabel(dropdown, id, element, [this._valueText]);
+        this._adoptFieldLabel(dropdown, id, element, this._compact ? [] : [this._valueText]);
         if (!dropdown.hasAttribute("aria-labelledby") && !dropdown.hasAttribute("aria-label")) {
             dropdown.setAttribute("aria-label", this._i18n("webexpress.webui:editor.color", "Color"));
         }
@@ -107,14 +113,15 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
     }
 
     /**
-     * Creates the dropdown trigger area (only color preview, no text).
-     * @returns {HTMLDivElement} The dropdown element.
+     * Keeps the color preview accessible in both form and compact toolbar presentations.
+     * @returns {HTMLButtonElement} The dropdown trigger.
      */
     _createDropdown() {
         const dropdown = document.createElement("button");
         dropdown.type = "button";
         dropdown.disabled = this._disabled;
-        dropdown.classList.add("form-control", "wx-color-trigger");
+        dropdown.classList.add("wx-color-trigger");
+        dropdown.classList.add(this._compact ? "dropdown-toggle" : "form-control");
 
         // add disabled class for visual feedback
         if (this._disabled) {
@@ -133,11 +140,19 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
 
         const expandIcon = document.createElement("i");
         expandIcon.className = this._iconClass("angle-down");
-        expandIcon.style.color = "#666";
-
-        dropdown.appendChild(colorPreview);
+        if (this._compact) {
+            const sample = document.createElement("span");
+            sample.className = "wx-color-sample";
+            const icon = document.createElement("i");
+            icon.className = this._iconClass(this._icon || "palette");
+            sample.appendChild(icon);
+            sample.appendChild(colorPreview);
+            dropdown.appendChild(sample);
+        } else dropdown.appendChild(colorPreview);
         dropdown.appendChild(valueText);
-        dropdown.appendChild(expandIcon);
+        if (!this._compact) dropdown.appendChild(expandIcon);
+
+        this._trigger = dropdown;
 
         return dropdown;
     }
@@ -197,7 +212,7 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
         // the visible button with a "+" icon or similar
         const customBtn = document.createElement("div");
         customBtn.className = "wx-color-custom-btn";
-        customBtn.innerHTML = '<i class="palette"></i>';
+        customBtn.innerHTML = `<i class="${this._iconClass("palette")}"></i>`;
 
         // the actual native input, invisible but clickable
         const nativePicker = document.createElement("input");
@@ -226,6 +241,25 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
         paletteContainer.appendChild(customWrapper);
 
         dropdownMenu.appendChild(paletteContainer);
+        if (this._allowEmpty) {
+            const divider = document.createElement("hr");
+            divider.className = "dropdown-divider";
+            const clear = document.createElement("button");
+            clear.type = "button";
+            clear.className = "dropdown-item wx-color-clear";
+            const icon = document.createElement("i");
+            icon.className = this._iconClass("eraser");
+            clear.appendChild(icon);
+            clear.appendChild(document.createTextNode(" " + this._i18n("webexpress.webui:editor.color.remove", "Remove color")));
+            clear.addEventListener("click", () => {
+                // mixed editor selections can contain colors while the shared preview is empty
+                this.setValue("", false);
+                this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: "" });
+                this._hideDropdown();
+            });
+            dropdownMenu.appendChild(divider);
+            dropdownMenu.appendChild(clear);
+        }
         this._dropdownmenu = dropdownMenu;
         return dropdownMenu;
     }
@@ -268,7 +302,7 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
     render() {
         // update trigger view
         if (this._colorPreview) {
-            this._colorPreview.style.backgroundColor = this._value;
+            this._colorPreview.style.backgroundColor = this._value || this._emptyColor;
             this._colorPreview.title = this._value;
         }
         if (this._valueText) {
@@ -282,8 +316,9 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
 
         // update native picker to match if it exists
         if (this._nativePicker) {
-            this._nativePicker.value = this._formatHex6(this._value);
+            this._nativePicker.value = this._formatHex6(this._value || "#000000");
         }
+        this._element.querySelectorAll("button,input").forEach(input => { input.disabled = this._disabled; });
     }
 
     /**
@@ -312,17 +347,45 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
      * @param {string} val - Hex color string.
      */
     set value(val) {
-        const normalized = String(val).trim();
-        if (this._isValidHex(normalized)) {
+        this.setValue(val);
+    }
+
+    /**
+     * Synchronizes a color preview without emitting an edit when selection changes elsewhere.
+     * @param {string} val - A CSS color or an allowed empty value.
+     * @param {boolean} [notify=true] - Whether to emit a value change for an accepted color.
+     * @returns {boolean} Whether the supplied color could be represented by the picker.
+     */
+    setValue(val, notify = true) {
+        let normalized = String(val).trim();
+        if (normalized && !this._isValidHex(normalized)) {
+            // browsers serialize imported hex styles as rgb values
+            const rgb = webexpress.webui.ContrastColor.resolve(normalized);
+            if (rgb?.every(channel => Number.isInteger(channel) && channel >= 0 && channel <= 255)) {
+                normalized = "#" + rgb.map(channel => channel.toString(16).padStart(2, "0")).join("");
+            }
+        }
+        if (this._isValidHex(normalized) || this._allowEmpty && normalized === "") {
             const old = this._value;
             this._value = normalized;
             this.render();
 
-            if (old !== normalized) {
+            if (notify && old !== normalized) {
                 this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this._value });
             }
+            return true;
         }
+        return false;
     }
+
+    /** Gets whether the color input prevents user changes. */
+    get disabled() { return this._disabled; }
+
+    /**
+     * Keeps all palette actions and the native picker in the same enabled state.
+     * @param {boolean} value - Whether user changes should be prevented.
+     */
+    set disabled(value) { this._disabled = !!value; this.render(); }
 };
 
 // register the class in the controller

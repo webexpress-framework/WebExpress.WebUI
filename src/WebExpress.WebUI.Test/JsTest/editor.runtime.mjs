@@ -19,11 +19,6 @@ export function loadEditor(options = {}) {
     window.removeEventListener = (type, fn) => windowListeners[type]?.delete(fn);
     document.execCommand = () => { throw new Error("Native editing commands are forbidden"); };
     const wx = {
-        Ctrl: class {
-            constructor(element) { this._element = element; }
-            _dispatch(type, detail) { this._element.dispatchEvent({ type, detail: { ...detail, sender: this._element }, target: this._element }); }
-            destroy() {}
-        },
         Controller: { registerClass(name, cls) { classes.set(name, cls); }, getInstanceByElement(element) { return instances.get(element); }, classRegistry: classes, instanceMap: instances },
         Event: { CHANGE_VALUE_EVENT: "wx-change-value" }, I18N: { translate: key => key }, IconSet: { resolve: key => key },
         EditorPlugins: { register(name, order, plugin) { plugins.set(name, plugin); }, getAll: () => [...plugins.values()] },
@@ -56,10 +51,21 @@ export function loadEditor(options = {}) {
     };
     const sandbox = vm.createContext({ console, ...globals, Intl, navigator: { language: "en" }, MutationObserver, setTimeout(fn) { timers.set(++timerId, fn); return timerId; }, clearTimeout(id) { timers.delete(id); }, webexpress: { webui: wx } });
     const load = name => vm.runInContext(fs.readFileSync(webuiAsset(name), "utf8"), sandbox, { filename: name });
-    const core = fs.readFileSync(webuiAsset("webexpress.webui.js"), "utf8");
+    const core = fs.readFileSync(webuiAsset("webexpress.webui.js"), "utf8").replace(/\r\n/g, "\n");
+    sandbox.HTMLElement = document.body.constructor;
+    sandbox.CustomEvent = class {
+        constructor(type, options) { this.type = type; Object.assign(this, options); }
+        stopPropagation() {}
+    };
+    const ctrlStart = core.indexOf("webexpress.webui.Ctrl = class");
+    vm.runInContext(core.slice(ctrlStart, core.indexOf("\n}", ctrlStart) + 2), sandbox, { filename: "Ctrl" });
     const menuStart = core.indexOf("webexpress.webui.NativeMenu = class");
     vm.runInContext(core.slice(menuStart, core.indexOf("\n};", menuStart) + 3), sandbox, { filename: "NativeMenu" });
-    ["webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js", "webexpress.webui.editor.js", ...(options.files || [])].forEach(load);
+    const fieldMenuStart = core.indexOf("webexpress.webui.MenuCtrl = class");
+    vm.runInContext(core.slice(fieldMenuStart, core.indexOf("\n};", fieldMenuStart) + 3), sandbox, { filename: "MenuCtrl" });
+    const contrastStart = core.indexOf("webexpress.webui.ContrastColor = class");
+    vm.runInContext(core.slice(contrastStart, core.indexOf("\n};", contrastStart) + 3), sandbox, { filename: "ContrastColor" });
+    ["webexpress.webui.input.color.js", "webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js", "webexpress.webui.editor.js", ...(options.files || [])].forEach(load);
     if (options.addons) Object.entries(options.addons).forEach(([id, def]) => wx.EditorAddOns.register(id, def));
     const form = document.createElement("form"), host = document.createElement("div");
     host.setAttribute("name", "document");

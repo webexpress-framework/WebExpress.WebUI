@@ -286,6 +286,16 @@ test("the editor preview shares every frame rule, so the author sees what the re
     });
 });
 
+test("an authored border color affects the frame without changing the body text color", () => {
+    const rt = loadRuntime();
+    const host = box(rt, { id: "colored", borderColor: "#cc2255" });
+    assert.equal(host.style.getPropertyValue("--wx-box-line-color"), "#cc2255");
+    assert.equal(host.classList.contains("wx-box-accented"), false);
+    assert.ok(!host.style.color);
+    const invalid = box(rt, { id: "invalid-color", borderColor: "red; display:none" });
+    assert.ok(!invalid.style.getPropertyValue("--wx-box-line-color"));
+});
+
 test("the box never redefines the framework's shadow variable", () => {
     // --wx-box-shadow is the elevation every dropdown and popover takes; a box that declared a
     // value under that name would take the shadow off everything inside it
