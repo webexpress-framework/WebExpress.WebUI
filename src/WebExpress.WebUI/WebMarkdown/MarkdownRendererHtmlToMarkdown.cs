@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebHtml.Parser;
@@ -174,7 +175,7 @@ namespace WebExpress.WebUI.WebMarkdown
 
             return new MarkdownBlockElementCode
             {
-                Content = PlainText(pre).Trim('\r', '\n'),
+                Content = CodeText(pre).Trim('\r', '\n'),
                 Language = language
             };
         }
@@ -296,7 +297,7 @@ namespace WebExpress.WebUI.WebMarkdown
                 case HtmlElementTextSemanticsMark mark:
                     return [new MarkdownInlineElementMarked(ConvertInline(mark))];
                 case HtmlElementTextSemanticsCode code:
-                    return [new MarkdownInlineElementCode(PlainText(code))];
+                    return [new MarkdownInlineElementCode(CodeText(code))];
                 case HtmlElementTextSemanticsA link:
                     return [new MarkdownInlineElementLink(PlainText(link), link.Href ?? "")];
                 case HtmlElementMultimediaImg image:
@@ -337,6 +338,18 @@ namespace WebExpress.WebUI.WebMarkdown
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Returns the source text of a code element. The parser keeps entities as written,
+        /// while markdown code holds the characters themselves - a code span is shown
+        /// verbatim, so an undecoded <c>&amp;lt;</c> would come back as four visible characters.
+        /// </summary>
+        /// <param name="node">The code or preformatted element.</param>
+        /// <returns>The decoded text.</returns>
+        private static string CodeText(IHtmlNode node)
+        {
+            return WebUtility.HtmlDecode(PlainText(node));
         }
 
         /// <summary>

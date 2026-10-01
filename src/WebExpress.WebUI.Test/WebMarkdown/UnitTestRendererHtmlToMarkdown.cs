@@ -24,6 +24,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("<p><del>strike</del></p>", "~~strike~~")]
         [InlineData("<p><mark>marked</mark></p>", "==marked==")]
         [InlineData("<p><code>x = 1</code></p>", "`x = 1`")]
+        [InlineData("<p><code>a &lt; b &amp;&amp; c</code></p>", "`a < b && c`")]
         [InlineData("<p>a <strong>b</strong> c</p>", "a **b** c")]
         public void ConvertInline(string html, string expected)
         {
@@ -153,6 +154,29 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             // validation
             Assert.Contains("```csharp", markdown);
             Assert.Contains("var a = 1;", markdown);
+        }
+
+        /// <summary>
+        /// Tests that code holding markup and entities survives the way to html and back
+        /// unchanged - escaped once on the way out, decoded once on the way in.
+        /// </summary>
+        [Theory]
+        [InlineData("an `<object>` element")]
+        [InlineData("`a && b`")]
+        [InlineData("`&lt;`")]
+        [InlineData("```\n<div>a & b</div>\n```")]
+        public void RoundTripCode(string markdown)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
+            var html = MarkdownParser.Parse(markdown).ConvertToHtml(renderContext).ToString();
+
+            // act
+            var result = MarkdownRendererHtmlToMarkdown.ConvertHtmlToMarkdown(html);
+
+            // validation
+            Assert.Equal(markdown, result.Trim().Replace("\r\n", "\n"));
         }
 
         /// <summary>

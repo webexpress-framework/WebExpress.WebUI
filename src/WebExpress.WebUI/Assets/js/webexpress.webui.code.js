@@ -15,9 +15,10 @@ webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
         const lineNumbers = element.dataset.lineNumbers === "true";
         const isBase64 = element.dataset.base64 === "true";
 
-        // extract code from innerHTML and normalize line endings
+        // the text, not the markup: innerHTML re-escapes "<" and "&", which would then be
+        // shown as entities; a base64 payload reads the same either way
         const source = element.querySelector("pre");
-        let rawCode = (source ? source.textContent : (element?.innerHTML ?? "").trim()).replace(/\r\n/g, "\n");
+        let rawCode = (source ? source.textContent : (element?.textContent ?? "").trim()).replace(/\r\n/g, "\n");
         this._code = isBase64 && rawCode ? this._decode(rawCode) : rawCode;
 
         // clean up and add styling class

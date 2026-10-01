@@ -62,6 +62,8 @@
   href: page.md
 - name: Pagination
   href: pagination.md
+- name: PDF Viewer
+  href: pdf-viewer.md
 - name: Panel Dismissible
   href: panel.dismissible.md
 - name: Password

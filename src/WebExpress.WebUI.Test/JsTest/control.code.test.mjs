@@ -11,6 +11,7 @@ import { test } from "node:test";
 import assert from "node:assert";
 import { contract } from "./controls.contract.mjs";
 import { loadWebUi } from "./harness.mjs";
+import { loadEditor } from "./editor.runtime.mjs";
 
 contract({
     file: "webexpress.webui.code.js",
@@ -70,4 +71,14 @@ test("preformatted source keeps whitespace and decodes markup exactly once", () 
     assert.equal(ctrl._code, source);
     assert.equal(host.querySelector("code").textContent, source);
     assert.equal(host.querySelector("code div"), null);
+});
+
+test("a code block written as escaped text is shown with its characters, not its entities", () => {
+    // the markdown renderer writes a fenced block as text inside the host itself; only the
+    // editor dom serializes markup, so only it tells the text from its escaped form
+    const r = loadEditor({ html: "<p></p>", files: ["webexpress.webui.content.js", "webexpress.webui.code.js"] });
+    const read = r.wx.ContentFormat.toFragment('<pre class="wx-webui-code">&lt;div&gt;a &amp; b&lt;/div&gt;</pre>').querySelector(".wx-webui-code");
+    const ctrl = new r.wx.CodeCtrl(read);
+    assert.equal(ctrl._code, "<div>a & b</div>");
+    assert.equal(read.querySelector("div"), null, "the tag of the source stays text");
 });

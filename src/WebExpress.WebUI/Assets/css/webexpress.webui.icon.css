@@ -2316,6 +2316,11 @@
     mask-image: url("../icons/control-dismissible.svg");
 }
 
+.wx-icon-light-control-pdf-viewer {
+    -webkit-mask-image: url("../icons/control-pdf-viewer.svg");
+    mask-image: url("../icons/control-pdf-viewer.svg");
+}
+
 .wx-icon-light-control-popover {
     -webkit-mask-image: url("../icons/control-popover.svg");
     mask-image: url("../icons/control-popover.svg");

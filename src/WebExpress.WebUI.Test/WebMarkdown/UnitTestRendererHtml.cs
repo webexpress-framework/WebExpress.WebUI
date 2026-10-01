@@ -26,6 +26,9 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("~~~strikethrough & bolt~~~", "<p><s><strong>strikethrough & bolt</strong></s></p>")]
         [InlineData("==highlighted==", "<p><mark>highlighted</mark></p>")]
         [InlineData("`code`", "<p><code>code</code></p>")]
+        [InlineData("an `<object>` element", "<p>an <code>&lt;object&gt;</code> element</p>")]
+        [InlineData("`a && b`", "<p><code>a &amp;&amp; b</code></p>")]
+        [InlineData("`&lt;`", "<p><code>&amp;lt;</code></p>")]
         [InlineData("http://example.com", @"<p><a href=""http://example.com"">http://example.com</a></p>")]
         [InlineData("![alt](http://example.com)", @"<p><img src=""http://example.com"" alt=""alt"" style=""max-width: 100%;""></p>")]
         [InlineData("[text](http://example.com)", @"<p><a href=""http://example.com"">text</a></p>")]
@@ -187,6 +190,33 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             var cleaned = Regex.Replace(htmlString, @">\s+<", "><");
 
             AssertExtensions.EqualWithPlaceholders(expectedHtml, cleaned);
+        }
+
+        /// <summary>
+        /// Tests that a code block is written as text: the markup and the entities it holds
+        /// are shown as written instead of being laid out by the browser.
+        /// </summary>
+        [Theory]
+        [InlineData("```\nvar a = 1;\n```", @"<pre class=""wx-webui-code""*>var a = 1;</pre>")]
+        [InlineData("```html\n<div>a & b</div>\n```", @"<pre class=""wx-webui-code""*data-language=""html"">&lt;div&gt;a &amp; b&lt;/div&gt;</pre>")]
+        [InlineData("```\n&copy;\n```", @"<pre class=""wx-webui-code""*>&amp;copy;</pre>")]
+        public void ConvertCodeBlock(string markdown, string expectedHtml)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
+            var document = MarkdownParser.Parse(markdown);
+
+            // act
+            var html = document.ConvertToHtml(renderContext);
+
+            // validation
+            var htmlString = html.ToString()
+                .Replace("\r", "")
+                .Replace("\n", "")
+                .Replace("\t", "");
+
+            AssertExtensions.EqualWithPlaceholders(expectedHtml, htmlString.Trim());
         }
 
         /// <summary>

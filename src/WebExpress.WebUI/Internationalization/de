@@ -27,6 +27,9 @@ form.inputpassword.validation.max=Das Passwort ist länger als die maximale Län
 
 modal.close.label=Schließen
 
+pdfviewer.fallback=Das PDF-Dokument kann hier nicht angezeigt werden.
+pdfviewer.open=PDF öffnen
+
 login.title=Anmelden
 
 confirm.label=Bestätigung

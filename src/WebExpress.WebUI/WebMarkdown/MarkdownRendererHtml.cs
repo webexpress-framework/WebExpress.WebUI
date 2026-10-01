@@ -120,7 +120,7 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownBlockElementCode code)
                 {
-                    list.Add(new HtmlElementTextContentPre(new HtmlText(code.Content))
+                    list.Add(new HtmlElementTextContentPre(new HtmlText(EscapeCode(code.Content)))
                     {
                         Class = "wx-webui-code"
                     }
@@ -270,7 +270,7 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownInlineElementCode inlineCode)
                 {
-                    list.Add(new HtmlElementTextSemanticsCode(new HtmlText(inlineCode.Code)) { Inline = true });
+                    list.Add(new HtmlElementTextSemanticsCode(new HtmlText(EscapeCode(inlineCode.Code))) { Inline = true });
                 }
                 else if (element is MarkdownInlineElementUrl url)
                 {
@@ -409,6 +409,23 @@ namespace WebExpress.WebUI.WebMarkdown
             return cell.Content
                 .SelectMany(x => x is MarkdownBlockElementParagraph paragraph ? paragraph.Content : [x])
                 .ToList();
+        }
+
+        /// <summary>
+        /// Escapes the content of a code span or code block. Code is shown as written, so a
+        /// tag in it must stay text - unescaped, an <c>&lt;object&gt;</c> in backticks becomes a
+        /// live element that swallows the rest of the paragraph. Entities are not decoded
+        /// inside code either, which is why the ampersand is escaped as well. Plain text is
+        /// deliberately left alone: markdown passes inline HTML and entities through there.
+        /// </summary>
+        /// <param name="code">The code as written, may be null.</param>
+        /// <returns>The code as HTML text.</returns>
+        private static string EscapeCode(string code)
+        {
+            return code?
+                .Replace("&", "&amp;")
+                .Replace("<", "&lt;")
+                .Replace(">", "&gt;");
         }
     }
 }
