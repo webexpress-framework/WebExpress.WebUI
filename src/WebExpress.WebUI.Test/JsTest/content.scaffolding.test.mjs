@@ -2,8 +2,8 @@
  * Holds the client reading view against the same cases as the server-side reader.
  *
  * The rules for reading the working surface of the editor as a document exist twice: here in
- * webexpress.webui.content.js (ContentFormat) and on the server in WebControl/EditorContent.cs,
- * which is what converts a stored value to Markdown where no browser is available. The two
+ * webexpress.webui.content.js (ContentFormat) and on the server in WebEditor/EditorContent.cs,
+ * which is what converts a stored value to Markdown or PDF where no browser is available. The two
  * work on different trees and produce different output, so they cannot share code - they share
  * the cases in ../Data/editor-content.fixture.json instead, read by this file and by
  * UnitTestEditorContent.cs. A rule added on one side and forgotten on the other fails here.

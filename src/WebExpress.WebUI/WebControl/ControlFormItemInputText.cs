@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.WebEditor;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl

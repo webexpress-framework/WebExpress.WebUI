@@ -267,7 +267,12 @@ var markdown = EditorContent.ConvertToMarkdown(article.Description);
 
 // or the document nodes, to render or index them
 var nodes = EditorContent.ReadDocument(article.Description);
+
+// or a PDF file of the same document
+var pdf = EditorContent.ConvertToPdf(article.Description).ToArray();
 ```
+
+`EditorContent` lives in `WebExpress.WebUI.WebEditor` and works on the stored value alone - no control, page or render context - so a job or an export can use it without the web layer.
 
 `EditorContent` applies the same rules the client applies in `ContentFormat`: it drops the instruction texts, placeholder hints, drop and caret markers, column resizers, drag handles and settings buttons, unwraps add-on frames to what the add-on renders, and removes the empty guard paragraphs around a non-editable block while keeping a blank line the author typed.
 

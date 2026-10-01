@@ -3,6 +3,7 @@ using System.Text;
 using System.Text.RegularExpressions;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
+using WebExpress.WebUI.WebEditor;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.Test.WebControl

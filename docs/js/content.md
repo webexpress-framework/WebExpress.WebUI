@@ -122,11 +122,12 @@ new ControlContent()
 
 ## Reading a stored value on the server
 
-Away from a browser - converting a stored value to Markdown, indexing it, mailing it - there is no client to build the reading view. `EditorContent` applies the same rules on the server:
+Away from a browser - converting a stored value to Markdown or PDF, indexing it, mailing it - there is no client to build the reading view. `EditorContent` (`WebExpress.WebUI.WebEditor`) applies the same rules on the server, on the stored value alone and without a control or render context:
 
 ```csharp
 var markdown = EditorContent.ConvertToMarkdown(article.Description);
 var nodes = EditorContent.ReadDocument(article.Description);
+var pdf = EditorContent.ConvertToPdf(article.Description);
 ```
 
 The two implementations are held together by a shared fixture rather than by shared code: `Data/editor-content.fixture.json` is read by the C# tests and by `content.scaffolding.test.mjs`, so a rule added on one side and forgotten on the other fails on the other side. See the [Markdown guide](../md-guide.md) for the conversion itself.

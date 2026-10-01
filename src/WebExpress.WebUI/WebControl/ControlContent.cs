@@ -27,7 +27,12 @@ namespace WebExpress.WebUI.WebControl
     /// <see cref="ControlText"/>, so both controls render the same document from the same
     /// source, and the reading view stays a single client-side implementation. A value
     /// authored in the editor can be brought into this format with
-    /// <see cref="EditorContent.ConvertToMarkdown"/>.
+    /// <see cref="WebEditor.EditorContent.ConvertToMarkdown"/>.
+    /// </para>
+    /// <para>
+    /// A file of the same document is made from the stored value, not from this control:
+    /// <see cref="WebEditor.EditorContent.ConvertToPdf"/> for rich text,
+    /// <see cref="WebPdf.PdfRendererMarkdown.ConvertMarkdownToPdf"/> for Markdown.
     /// </para>
     /// <para>
     /// It is display only and never contributes a value to a form. It is the read side of

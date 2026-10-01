@@ -4,8 +4,9 @@ using System.Text;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebHtml.Parser;
 using WebExpress.WebUI.WebMarkdown;
+using WebExpress.WebUI.WebPdf;
 
-namespace WebExpress.WebUI.WebControl
+namespace WebExpress.WebUI.WebEditor
 {
     /// <summary>
     /// Reads the value the WYSIWYG editor stores and hands back the document inside it.
@@ -14,9 +15,16 @@ namespace WebExpress.WebUI.WebControl
     /// a frame that names it, offers its settings and can be dragged; instruction texts
     /// address whoever edits the document; and blocks that must not be typed into are fenced
     /// by empty paragraphs the caret needs. On a page that scaffolding is removed on the
-    /// client by <c>ContentFormat</c>, which is what <see cref="ControlContent"/> ships. Away
-    /// from a browser - converting a stored value to Markdown, indexing it, mailing it - there
-    /// is no client, and this class applies the same rules on the server.
+    /// client by <c>ContentFormat</c>, the reading view. Away from a browser - converting a
+    /// stored value to Markdown or PDF, indexing it, mailing it - there is no client, and this
+    /// class applies the same rules on the server.
+    /// </para>
+    /// <para>
+    /// It works on the stored value alone and knows no control, page or render context, so
+    /// exports and background jobs can read a document without pulling in the web layer. The
+    /// output formats depend on nothing editor specific either: this class removes the
+    /// scaffolding and hands the plain document to <see cref="MarkdownRendererHtmlToMarkdown"/>
+    /// or <see cref="PdfRendererHtml"/>.
     /// </para>
     /// <para>
     /// The two implementations are held together by a shared fixture rather than by shared
@@ -44,6 +52,18 @@ namespace WebExpress.WebUI.WebControl
         ];
 
         /// <summary>
+        /// The classes the editor puts on the body of every add-on frame to lay it out inside
+        /// the card. Whatever else the body carries is the presentation of the add-on.
+        /// </summary>
+        private static readonly string[] BodyFrame =
+        [
+            "card-body",
+            "p-2",
+            "wx-addon-body-container",
+            "wx-addon-body-widget"
+        ];
+
+        /// <summary>
         /// Converts a stored editor value into Markdown.
         /// </summary>
         /// <param name="html">The value as the editor stores it.</param>
@@ -54,6 +74,19 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Converts a stored editor value into a PDF document. Markup that did not come from
+        /// the editor carries no scaffolding and is better served by
+        /// <see cref="PdfRendererHtml.ConvertHtmlToPdf"/>; Markdown by
+        /// <see cref="PdfRendererMarkdown.ConvertMarkdownToPdf"/>.
+        /// </summary>
+        /// <param name="html">The value as the editor stores it.</param>
+        /// <returns>The PDF document, ready to be configured and saved; empty for no input.</returns>
+        public static PdfDocument ConvertToPdf(string html)
+        {
+            return ReadDocument(html).ConvertToPdf();
+        }
+
+        /// <summary>
         /// Reads a stored editor value and returns the nodes of the document, with the
         /// editing scaffolding removed.
         /// <para>
@@ -61,7 +94,8 @@ namespace WebExpress.WebUI.WebControl
         /// lossy, because <see cref="HtmlElementTableTable"/> renders from its own
         /// <c>Rows</c> collection and not from the children a parser gives it, so a parsed
         /// table would come back empty. Callers that want markup should render the nodes
-        /// themselves, or go through <see cref="ConvertToMarkdown"/>.
+        /// themselves, or go through <see cref="ConvertToMarkdown"/> or
+        /// <see cref="ConvertToPdf"/>.
         /// </para>
         /// </summary>
         /// <param name="html">The value as the editor stores it.</param>
@@ -116,6 +150,15 @@ namespace WebExpress.WebUI.WebControl
                     var content = body is not null
                         ? Strip(body.Elements, unwrapped)
                         : Strip(element.Elements.Where(x => !(x is HtmlElement h && HasClass(h, "card-header"))), unwrapped);
+                    var presentation = body is not null ? PresentationClasses(body) : null;
+
+                    if (presentation is not null)
+                    {
+                        // the body carries the presentation the add-on declares (bodyClass), which
+                        // the reading view moves onto its block; a bare unwrap would lose the
+                        // alert of a warning box
+                        content = [new HtmlElementTextContentDiv(content) { Class = presentation }];
+                    }
 
                     foreach (var child in content)
                     {
@@ -196,6 +239,21 @@ namespace WebExpress.WebUI.WebControl
         private static bool HasClass(HtmlElement element, string name)
         {
             return (element.Class ?? "").Split(' ').Contains(name);
+        }
+
+        /// <summary>
+        /// Returns the classes of an add-on body that are not part of the editing frame.
+        /// </summary>
+        /// <param name="body">The body of the add-on frame.</param>
+        /// <returns>The classes, or null when the body carries none of its own.</returns>
+        private static string PresentationClasses(HtmlElement body)
+        {
+            var classes = (body.Class ?? "")
+                .Split(' ', System.StringSplitOptions.RemoveEmptyEntries)
+                .Where(x => !BodyFrame.Contains(x))
+                .ToArray();
+
+            return classes.Length > 0 ? string.Join(" ", classes) : null;
         }
 
         /// <summary>

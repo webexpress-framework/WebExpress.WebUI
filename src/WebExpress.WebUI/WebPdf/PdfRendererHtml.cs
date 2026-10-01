@@ -23,8 +23,9 @@ namespace WebExpress.WebUI.WebPdf
     /// Only the inline <c>style</c> attribute and a few well known classes are read; there is
     /// no style sheet. That covers what the editor writes, and keeps a stored value from
     /// pulling in rules it does not carry itself. Scripts, styles, forms and embedded content
-    /// are dropped. Callers converting the working surface of the editor go through
-    /// <see cref="PdfRendererContent"/>, which removes the editing scaffolding first.
+    /// are dropped. It knows nothing about the editor: a stored editor value goes through
+    /// <see cref="WebEditor.EditorContent.ConvertToPdf"/>, which removes the editing
+    /// scaffolding by the rules of the reading view before handing the document over.
     /// </para>
     /// </summary>
     public static class PdfRendererHtml

@@ -83,6 +83,11 @@
     margin-bottom: 0.75rem;
 }
 
+/* mirrors the editor body, so a framed add-on (an alert) keeps even padding */
+.wx-content-addon > :last-child {
+    margin-bottom: 0;
+}
+
 .wx-content-inline {
     display: inline-block;
     vertical-align: middle;

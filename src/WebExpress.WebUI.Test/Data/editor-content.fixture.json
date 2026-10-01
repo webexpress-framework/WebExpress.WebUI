@@ -1,5 +1,5 @@
 {
-  "//": "The rules for reading the working surface of the editor as a document exist twice: on the client in webexpress.webui.content.js (ContentFormat) and on the server in WebControl/EditorContent.cs. They work on different trees and produce different output, so they cannot share code - they share these cases instead. Both UnitTestEditorContent.cs and content.scaffolding.test.mjs read this file, so a rule added on one side and forgotten on the other fails on the other side.",
+  "//": "The rules for reading the working surface of the editor as a document exist twice: on the client in webexpress.webui.content.js (ContentFormat) and on the server in WebEditor/EditorContent.cs. They work on different trees and produce different output, so they cannot share code - they share these cases instead. Both UnitTestEditorContent.cs and content.scaffolding.test.mjs read this file, so a rule added on one side and forgotten on the other fails on the other side.",
   "cases": [
     {
       "name": "an instruction text addresses the author, not the reader",

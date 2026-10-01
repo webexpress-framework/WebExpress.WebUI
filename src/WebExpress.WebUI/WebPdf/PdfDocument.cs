@@ -10,8 +10,8 @@ namespace WebExpress.WebUI.WebPdf
     /// Root node of a PDF document: a flow of blocks plus the settings for setting them on
     /// pages.
     /// <para>
-    /// The model is filled by a renderer - <see cref="PdfRendererMarkdown"/>,
-    /// <see cref="PdfRendererHtml"/> or <see cref="PdfRendererContent"/> - or by hand, and is
+    /// The model is filled by a renderer - <see cref="PdfRendererMarkdown"/> or
+    /// <see cref="PdfRendererHtml"/> - or by hand, and is
     /// laid out only when it is written. Until then nothing is positioned, so page size,
     /// margins and font can be changed after the content has been converted.
     /// </para>

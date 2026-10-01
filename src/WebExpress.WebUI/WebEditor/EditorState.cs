@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using WebExpress.WebCore.WebHtml;
 
-namespace WebExpress.WebUI.WebControl
+namespace WebExpress.WebUI.WebEditor
 {
     /// <summary>
     /// Allows server-side readers and form validation to consume the editor's versioned JSON document.
