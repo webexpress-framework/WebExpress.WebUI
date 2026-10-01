@@ -202,6 +202,8 @@ if (selectionCtrl) {
 }
 ```
 
+An option object may carry `color`, a css class for the chip of the selected item, and `style`, an inline style declaration for a user-defined chip color. The style is assigned through the CSSOM, so it passes a content security policy that blocks style attributes in markup. A chip filled through a `text-bg-*` class or a style gives its remove button the text color of the fill.
+
 ### Accepted Value Formats
 
 The `value` setter accepts the following formats:

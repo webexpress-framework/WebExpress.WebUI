@@ -557,6 +557,11 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
                 if (item.color) {
                     li.className = item.color;
                 }
+                // a user-defined color has no class; the cssom assignment passes the
+                // content security policy that blocks style attributes in markup
+                if (item.style) {
+                    li.style.cssText = item.style;
+                }
 
                 li.classList.add("wx-chip");
                 const span = document.createElement("span");

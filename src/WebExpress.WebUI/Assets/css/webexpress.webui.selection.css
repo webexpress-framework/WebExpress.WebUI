@@ -354,6 +354,12 @@
     color: var(--wx-danger) !important;
 }
 
+/* a chip filled by a badge color or a user-defined inline color already carries the contrast
+   color of its fill, so the remove glyph takes it over instead of the gray of an unfilled chip */
+.wx-chip[class*="text-bg-"] > .wx-chip-remove, .wx-chip[style] > .wx-chip-remove {
+    color: inherit !important;
+}
+
 .wx-selection > .form-control { position: relative; padding-inline-end: 2rem; cursor: pointer; }
 .wx-selection > .form-control > .wx-selection-trigger {
     position: absolute; inset: 0; width: 100%; height: 100%;
