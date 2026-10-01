@@ -106,6 +106,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Determines whether the field carries its id on a native, labelable element. Inputs
+        /// rendering a native field keep the default; custom inputs override it.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>True if a label element may point at the field.</returns>
+        public virtual bool IsLabelable(IRenderControlFormContext renderContext)
+        {
+            return true;
+        }
+
+        /// <summary>
         /// Initializes the form emement.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>

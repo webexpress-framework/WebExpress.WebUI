@@ -49,6 +49,19 @@ namespace WebExpress.WebUI.WebControl
             var role = Role?.Invoke(renderContext);
             var text = Text?.Invoke(renderContext);
 
+            // a label pointing at nothing labelable is flagged by the browser, so such a caption
+            // is a span that the client links to the focusable part through aria-labelledby
+            if (FormItem is null || (FormItem is IControlFormItemInput input && !input.IsLabelable(renderContext)))
+            {
+                return new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(renderContext.Request?.Culture, text)))
+                {
+                    Id = Id,
+                    Class = Css.Concatenate("wx-form-label", GetClasses(renderContext)),
+                    Style = GetStyles(renderContext),
+                    Role = role
+                };
+            }
+
             return new HtmlElementFieldLabel()
             {
                 Id = Id,
@@ -56,11 +69,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-form-label", GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
                 Role = role,
-                For = FormItem is not null ?
-                    string.IsNullOrWhiteSpace(FormItem.Id) ?
-                        name :
-                        FormItem.Id :
-                    null
+                For = string.IsNullOrWhiteSpace(FormItem.Id) ? name : FormItem.Id
             };
         }
     }

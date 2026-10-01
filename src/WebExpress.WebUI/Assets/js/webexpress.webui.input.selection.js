@@ -7,6 +7,11 @@
  * - webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT
  */
 webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
+    /**
+     * The counter behind the ids of the filter fields; a field without id or name is flagged
+     * by the browser's autofill, and a name would post the filter text with the form.
+     */
+    static _nextId = 0;
     _values = [];
     _items = [];
     _filterInput = null;
@@ -194,6 +199,8 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
         const filterContainer = document.createElement("div");
         const filterInput = document.createElement("input");
         filterInput.type = "text";
+        filterInput.id = "wx-selection-filter-" + (++webexpress.webui.InputSelectionCtrl._nextId);
+        filterInput.autocomplete = "off";
         filterInput.addEventListener("keydown", event => {
             if (event.key !== "ArrowDown" && event.key !== "ArrowUp") { return; }
             const options = [...this._dropdownoptions.querySelectorAll("button")];

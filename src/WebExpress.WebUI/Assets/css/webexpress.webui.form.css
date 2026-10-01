@@ -15,6 +15,11 @@
     align-items: baseline;
 }
 
+.wx-form-label-row {
+    display: flex;
+    align-items: center;
+}
+
 .wx-form-required {
     color: var(--wx-danger);
 }

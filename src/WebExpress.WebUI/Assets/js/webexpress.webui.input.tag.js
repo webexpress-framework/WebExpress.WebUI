@@ -7,6 +7,12 @@
  */
 webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
     /**
+     * The counter behind the ids of the entry fields; a field without id or name is flagged by
+     * the browser's autofill, and a name would post the half-typed tag with the form.
+     */
+    static _nextId = 0;
+
+    /**
      * Constructor: Initializes the control and DOM structure.
      * @param {HTMLElement} element - Host element for the tag control.
      */
@@ -60,6 +66,8 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
         // input field for new tags
         this._input = document.createElement("input");
         this._input.type = "text";
+        this._input.id = "wx-tag-input-" + (++webexpress.webui.InputTagCtrl._nextId);
+        this._input.autocomplete = "off";
         this._input.className = "input";
         // placeholder will be set dynamically depending on tags present; the field label
         // names the input where the form rendered one, the generic name is the fallback

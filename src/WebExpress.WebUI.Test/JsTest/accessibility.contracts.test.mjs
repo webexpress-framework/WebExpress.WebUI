@@ -198,6 +198,25 @@ test("a custom input takes over the label the form rendered for its host id", ()
     assert.equal(host.querySelector("ul[role=\"list\"] > li.wx-selection-placeholder") !== null, true, "the placeholder is an entry of the list");
 });
 
+test("a custom input is named by the caption span a form renders where no label may point", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.input.selection.js"] });
+    const fieldset = rt.createElement("fieldset");
+    const caption = rt.createElement("span");
+    caption.id = "country_label";
+    caption.textContent = "Country";
+    const host = rt.createElement("div");
+    host.id = "country";
+    fieldset.appendChild(caption);
+    fieldset.appendChild(host);
+    rt.document.body.appendChild(fieldset);
+    new rt.wx.InputSelectionCtrl(host);
+
+    const trigger = host.querySelector("button.wx-selection-trigger");
+    assert.ok(trigger.getAttribute("aria-labelledby").startsWith("country_label "), "the trigger is named by the caption first");
+    assert.ok(host.querySelector("input").id, "the filter carries an id, as the browser flags a field with neither id nor name");
+    assert.equal(host.querySelector("input").hasAttribute("name"), false, "the filter text is not posted with the form");
+});
+
 test("a tooltip stays readable after the title left the element", () => {
     const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.tooltip.js"] });
     const button = rt.createElement("button");

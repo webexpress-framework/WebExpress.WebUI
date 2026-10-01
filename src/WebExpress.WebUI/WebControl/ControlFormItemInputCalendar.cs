@@ -48,6 +48,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Determines whether a label element may point at the field. The client moves the id onto the
+        /// hidden input that posts the value, which is no labelable element, so the caption is a span.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>True if a label element may point at the field.</returns>
+        public override bool IsLabelable(IRenderControlFormContext renderContext)
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Renders the calendar control as an HTML node.
         /// </summary>
         /// <param name="renderContext">The current rendering context.</param>

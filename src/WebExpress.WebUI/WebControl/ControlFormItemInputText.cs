@@ -95,6 +95,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Determines whether a label element may point at the field. Only the rich-text format keeps its
+        /// id on a host div; the other formats render a native input or text area.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>True if a label element may point at the field.</returns>
+        public override bool IsLabelable(IRenderControlFormContext renderContext)
+        {
+            return (Format?.Invoke(renderContext) ?? TypeEditTextFormat.Default) != TypeEditTextFormat.Wysiwyg;
+        }
+
+        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>

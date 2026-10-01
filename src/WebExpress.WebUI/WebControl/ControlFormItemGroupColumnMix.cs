@@ -137,10 +137,10 @@ namespace WebExpress.WebUI.WebControl
                     }
                     else if (icon.Icon is not null)
                     {
-                        icon.Classes = ["me-2", "pt-1"];
+                        icon.Classes = ["me-2"];
                         row.Add(new HtmlElementTextContentDiv(icon.Render(renderGroupContext, visualTree), label)
                         {
-                            Style = "display: flex;"
+                            Class = "wx-form-label-row"
                         });
                     }
                     else if (label is not null)

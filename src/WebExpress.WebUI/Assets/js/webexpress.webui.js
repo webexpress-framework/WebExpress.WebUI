@@ -2255,7 +2255,9 @@ webexpress.webui.Ctrl = class {
         if (!target) { return null; }
         const group = host?.closest?.("fieldset, .wx-form-group");
         const escaped = id && window.CSS?.escape ? CSS.escape(id) : id;
-        const selector = id ? `label[for="${escaped}"]` : null;
+        // a field without a labelable element is captioned by a span the form gave the id
+        // "{id}_label" instead of by a label pointing at it
+        const selector = id ? `label[for="${escaped}"], [id="${escaped}_label"]` : null;
         const label = selector ? (group?.querySelector(selector) || document.querySelector(selector)) : null;
         if (label) { label.id ||= id + "_label"; }
         const parts = [label, ...valueParts].filter(Boolean).map((part, index) => {

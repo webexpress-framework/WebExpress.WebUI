@@ -6,6 +6,11 @@
  *  - webexpress.webui.Event.CHANGE_VALUE_EVENT
  */
 webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
+    /**
+     * The counter behind the ids of the search fields; a field without id or name is flagged
+     * by the browser's autofill, and a name would post the search text with the form.
+     */
+    static _nextId = 0;
     _tiles = [];
     _value = null;
     _hidden = null;
@@ -202,6 +207,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
 
         this._searchInput = document.createElement("input");
         this._searchInput.type = "search";
+        this._searchInput.id = "wx-tile-search-" + (++webexpress.webui.InputTileCtrl._nextId);
         this._searchInput.className = "form-control";
         this._searchInput.autocomplete = "off";
         this._searchInput.placeholder = this._searchPlaceholder;
