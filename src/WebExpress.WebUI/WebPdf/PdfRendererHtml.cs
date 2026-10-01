@@ -234,8 +234,8 @@ namespace WebExpress.WebUI.WebPdf
 
         /// <summary>
         /// Converts a division, which is how the editor and the markdown renderer write the
-        /// structures that have no element of their own: the regions of a row, callouts and
-        /// the alerts of an add-on.
+        /// structures that have no element of their own: the regions of a row, callouts,
+        /// plugins and the alerts of an add-on.
         /// </summary>
         /// <param name="element">The element.</param>
         /// <param name="context">The formatting, including the element's own style.</param>
@@ -248,6 +248,13 @@ namespace WebExpress.WebUI.WebPdf
             if (classes.Contains("wx-editor-row"))
             {
                 return [ConvertRow(element, context)];
+            }
+
+            if (PluginName(element, classes) is string name)
+            {
+                return classes.Contains("wx-plugin-inline")
+                    ? [new PdfBlockElementParagraph([new PdfInlineElementPlugin(name, PluginParameters(element), context.Style)]) { Align = css.Align ?? context.Align }]
+                    : [new PdfBlockElementPlugin(name, PluginParameters(element), ConvertBlocks(element.Elements, context))];
             }
 
             var callout = CalloutType(classes);
@@ -270,6 +277,37 @@ namespace WebExpress.WebUI.WebPdf
             }
 
             return Indent(blocks, css.MarginLeft);
+        }
+
+        /// <summary>
+        /// Returns the name of the plugin a division stands for, as
+        /// <see cref="WebMarkdown.MarkdownRendererHtml"/> writes it.
+        /// </summary>
+        /// <param name="element">The division.</param>
+        /// <param name="classes">Its classes.</param>
+        /// <returns>The name, or null when the division is no plugin.</returns>
+        private static string PluginName(HtmlElement element, HashSet<string> classes)
+        {
+            return classes.Contains("wx-plugin") && element.GetUserAttribute("data-plugin") is { Length: > 0 } name
+                ? WebUtility.HtmlDecode(name)
+                : null;
+        }
+
+        /// <summary>
+        /// Returns the parameters of a plugin division, which the markdown renderer writes as
+        /// one <c>data-plugin-*</c> attribute each.
+        /// </summary>
+        /// <param name="element">The division.</param>
+        /// <returns>The parameters by name.</returns>
+        private static Dictionary<string, string> PluginParameters(HtmlElement element)
+        {
+            const string prefix = "data-plugin-";
+
+            return element.Attributes
+                .OfType<HtmlAttribute>()
+                .Where(x => x.Name?.Length > prefix.Length && x.Name.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+                .GroupBy(x => x.Name[prefix.Length..], StringComparer.OrdinalIgnoreCase)
+                .ToDictionary(g => g.Key, g => WebUtility.HtmlDecode(g.First().Value ?? ""), StringComparer.OrdinalIgnoreCase);
         }
 
         /// <summary>
@@ -448,6 +486,9 @@ namespace WebExpress.WebUI.WebPdf
                     }
                     return;
                 case HtmlElement element when Hidden.Contains(element.GetType()):
+                    return;
+                case HtmlElementTextContentDiv division when PluginName(division, Classes(division)) is string name:
+                    result.Add(new PdfInlineElementPlugin(name, PluginParameters(division), style));
                     return;
                 case HtmlElement element:
                     var inner = Css.Parse(element.Style).ApplyTo(Semantics(element, style));

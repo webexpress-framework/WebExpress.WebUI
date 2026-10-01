@@ -4,6 +4,11 @@ plugin.description=Provides basic components.
 
 notificationmanager.initialization=The notification manager has been initialized.
 
+pdfpluginmanager.initialization=The PDF plugin manager has been initialized.
+pdfpluginmanager.register=The PDF plugin '{0}' of '{1}' has been registered.
+pdfpluginmanager.duplicate=The PDF plugin '{0}' of '{1}' was not registered, because the name is already taken.
+pdfpluginmanager.noname=The PDF plugin '{0}' was not registered, because it has no name attribute.
+
 form.empty.id=The form does not have an id!
 form.submit.label=Submit
 form.reset.label=Reset

@@ -210,6 +210,35 @@ Content (supports full Markdown syntax)
 - Content between the tags is parsed as standard Markdown and may include any block or inline elements.
 - Block plugins are block-level elements and are separated from surrounding content by blank lines.
 
+### Plugins in PDF
+On a page a plugin is rendered as a `div` with `data-plugin` and `data-plugin-*` attributes and brought to life by the client. A PDF has no client, so the server needs to know what a plugin looks like on paper. `PdfRendererMarkdown` and `PdfRendererHtml` turn a plugin into a `PdfBlockElementPlugin` or `PdfInlineElementPlugin` with its name and parameters, and the `IPdfPlugin` registered under that name decides, when the document is written, which elements of the PDF model take its place.
+
+A WebExpress plugin contributes one by a public, sealed class with a `Name` attribute. `PdfPluginManager` registers it when the plugin is loaded and removes it when the plugin is unloaded:
+
+```csharp
+[Name("ticket")]
+public sealed class TicketPdfPlugin : IPdfPlugin
+{
+    // {{ticket id="42"}} - set in the style of the text around it
+    public IEnumerable<PdfInlineElement> ConvertInline(PdfInlineElementPlugin element)
+    {
+        var id = element.Parameters.GetValueOrDefault("id");
+        return [new PdfInlineElementText($"#{id}", element.Style with { Link = $"https://tracker.example/{id}" })];
+    }
+
+    // {{% ticket id="42" %}}...{{% /ticket %}} - a box around the enclosed content
+    public IEnumerable<PdfBlockElement> ConvertBlock(PdfBlockElementPlugin element)
+    {
+        return [new PdfBlockElementCallout(PdfCalloutType.Hint, element.Content)];
+    }
+}
+```
+
+- Both methods are optional. By default a block shows its content and an inline element is left out - which is also what happens to a plugin nobody has registered, so a document stays readable on a server without the add-on.
+- A plugin answers with elements of the PDF model, not with drawing instructions, so page breaks, table cells and bookmarks work for its result as for any other block. The result may name plugins again; they are resolved in turn.
+- A plugin is asked once per element and document; its constructor may ask for `IHttpServerContext` and `IComponentHub`.
+- Outside of a server - in a test or a tool - register an instance yourself: `PdfPluginRegistry.Register("ticket", new TicketPdfPlugin())`. The first registration of a name wins; names are compared without regard to case.
+
 ## Markdown Conversion (Round-Trip)
 The parser supports bidirectional conversion between Markdown and its internal AST representation:
 

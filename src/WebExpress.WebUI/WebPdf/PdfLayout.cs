@@ -35,6 +35,7 @@ namespace WebExpress.WebUI.WebPdf
         private const float LineHeight = 1.4f;
         private const float CodeLineHeight = 1.35f;
         private const float RuleWidth = 0.75f;
+        private const int PluginDepth = 8;
 
         private static readonly PdfColor TextColor = new(33, 37, 41);
         private static readonly PdfColor MutedColor = new(108, 117, 125);
@@ -140,7 +141,7 @@ namespace WebExpress.WebUI.WebPdf
         /// <param name="width">The available width.</param>
         private void LayoutBlocks(IEnumerable<PdfBlockElement> blocks, float x, float width)
         {
-            var sequence = blocks?.ToList() ?? [];
+            var sequence = Resolve(blocks);
 
             for (var i = 0; i < sequence.Count; i++)
             {
@@ -213,6 +214,67 @@ namespace WebExpress.WebUI.WebPdf
                     LayoutBlocks(container.Content, x, width);
                     break;
             }
+        }
+
+        /// <summary>
+        /// Replaces the plugin blocks of a sequence by what their plugins make of them. It
+        /// runs wherever the layout reads a sequence of blocks, so a plugin's result is
+        /// spaced, measured and broken across pages like any other block.
+        /// </summary>
+        /// <param name="blocks">The blocks.</param>
+        /// <param name="depth">The number of plugins the sequence was produced by.</param>
+        /// <returns>The blocks, free of plugin blocks.</returns>
+        private List<PdfBlockElement> Resolve(IEnumerable<PdfBlockElement> blocks, int depth = 0)
+        {
+            var result = new List<PdfBlockElement>();
+
+            foreach (var block in blocks ?? [])
+            {
+                if (block is PdfBlockElementParagraph paragraph
+                    && paragraph.Content.Any(x => x is PdfInlineElementPlugin)
+                    && Resolve(paragraph.Content).Count == 0)
+                {
+                    // a line that only names a missing plugin would still leave its spacing
+                    continue;
+                }
+
+                if (block is not PdfBlockElementPlugin plugin)
+                {
+                    result.Add(block);
+                    continue;
+                }
+
+                // a plugin may answer with another plugin; past the limit one that keeps
+                // naming itself falls back to its content instead of recursing forever
+                result.AddRange(Resolve(depth < PluginDepth ? _resources.Expand(plugin) : plugin.Content, depth + 1));
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Replaces the inline plugin elements of a run by what their plugins make of them.
+        /// </summary>
+        /// <param name="content">The inline content.</param>
+        /// <param name="depth">The number of plugins the run was produced by.</param>
+        /// <returns>The inline content, free of plugin elements.</returns>
+        private List<PdfInlineElement> Resolve(IEnumerable<PdfInlineElement> content, int depth = 0)
+        {
+            var result = new List<PdfInlineElement>();
+
+            foreach (var element in content ?? [])
+            {
+                if (element is not PdfInlineElementPlugin plugin)
+                {
+                    result.Add(element);
+                }
+                else if (depth < PluginDepth)
+                {
+                    result.AddRange(Resolve(_resources.Expand(plugin), depth + 1));
+                }
+            }
+
+            return result;
         }
 
         /// <summary>
@@ -310,7 +372,7 @@ namespace WebExpress.WebUI.WebPdf
             // capped so heading and lead always fit on a fresh page together
             EnsureSpace(first + Math.Min(lead, _bottom - _top - first));
 
-            var title = heading.PlainText?.Trim();
+            var title = string.Concat(Resolve(heading.Content).Select(x => x.PlainText)).Trim();
 
             if (!_measuring && _document.Outline && !string.IsNullOrEmpty(title))
             {
@@ -959,7 +1021,7 @@ namespace WebExpress.WebUI.WebPdf
             var min = 0f;
             var max = 0f;
 
-            foreach (var block in blocks ?? [])
+            foreach (var block in Resolve(blocks))
             {
                 var (blockMin, blockMax) = block switch
                 {
@@ -1090,7 +1152,7 @@ namespace WebExpress.WebUI.WebPdf
         {
             var pieces = new List<Piece>();
 
-            foreach (var element in content ?? [])
+            foreach (var element in Resolve(content))
             {
                 switch (element)
                 {
@@ -1760,12 +1822,16 @@ namespace WebExpress.WebUI.WebPdf
 
         /// <summary>
         /// Holds the fonts and images used by the pages, and caches decoded pictures so a
-        /// picture is read once although it is measured and drawn.
+        /// picture is read once although it is measured and drawn. Plugin results are cached
+        /// for the same reason: a plugin is asked once per element, and the pictures in its
+        /// result keep their identity and are embedded once.
         /// </summary>
         internal sealed class Resources
         {
             private readonly Dictionary<PdfBlockElementImage, PdfImage> _loaded = [];
             private readonly Dictionary<PdfImage, string> _names = [];
+            private readonly Dictionary<PdfBlockElementPlugin, List<PdfBlockElement>> _blocks = [];
+            private readonly Dictionary<PdfInlineElementPlugin, List<PdfInlineElement>> _inlines = [];
 
             /// <summary>
             /// Returns the faces in use.
@@ -1799,6 +1865,42 @@ namespace WebExpress.WebUI.WebPdf
                 }
 
                 return image;
+            }
+
+            /// <summary>
+            /// Returns what the plugin registered under the element's name makes of a block
+            /// plugin element, or its content when no plugin is registered.
+            /// </summary>
+            /// <param name="element">The element.</param>
+            /// <returns>The blocks.</returns>
+            public List<PdfBlockElement> Expand(PdfBlockElementPlugin element)
+            {
+                if (!_blocks.TryGetValue(element, out var blocks))
+                {
+                    var plugin = PdfPluginRegistry.Get(element.Name);
+                    blocks = [.. (plugin is null ? element.Content : plugin.ConvertBlock(element) ?? []).Where(x => x is not null)];
+                    _blocks[element] = blocks;
+                }
+
+                return blocks;
+            }
+
+            /// <summary>
+            /// Returns what the plugin registered under the element's name makes of an inline
+            /// plugin element, or nothing when no plugin is registered.
+            /// </summary>
+            /// <param name="element">The element.</param>
+            /// <returns>The inline elements.</returns>
+            public List<PdfInlineElement> Expand(PdfInlineElementPlugin element)
+            {
+                if (!_inlines.TryGetValue(element, out var inlines))
+                {
+                    var plugin = PdfPluginRegistry.Get(element.Name);
+                    inlines = [.. (plugin?.ConvertInline(element) ?? []).Where(x => x is not null)];
+                    _inlines[element] = inlines;
+                }
+
+                return inlines;
             }
 
             /// <summary>

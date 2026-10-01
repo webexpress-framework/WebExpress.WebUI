@@ -16,8 +16,11 @@ namespace WebExpress.WebUI.WebPdf
     /// inside table cells, because a file has no client that could add it back.
     /// </para>
     /// <para>
-    /// Plugins have no meaning outside of a page: an inline plugin is dropped and a block
-    /// plugin contributes its content. Raw HTML within the text is read with
+    /// Plugins become <see cref="PdfBlockElementPlugin"/> and <see cref="PdfInlineElementPlugin"/>
+    /// with their name and parameters, so the <see cref="IPdfPlugin"/> an add-on registers in
+    /// <see cref="PdfPluginRegistry"/> decides how they look when the document is written.
+    /// Without one, an inline plugin is dropped and a block plugin contributes its content.
+    /// Raw HTML within the text is read with
     /// <see cref="HtmlParser"/> and converted by <see cref="PdfRendererHtml"/>, so it is
     /// formatted rather than printed as markup.
     /// </para>
@@ -132,7 +135,7 @@ namespace WebExpress.WebUI.WebPdf
                 case MarkdownBlockElementTable table:
                     return [ConvertTable(table)];
                 case MarkdownBlockElementPlugin plugin:
-                    return ConvertBlocks(plugin.Content);
+                    return [new PdfBlockElementPlugin(plugin.Name, plugin.Parameters, ConvertBlocks(plugin.Content))];
                 default:
                     return [];
             }
@@ -323,6 +326,9 @@ namespace WebExpress.WebUI.WebPdf
                         break;
                     case MarkdownInlineElementPlainText text:
                         result.AddRange(ConvertText(text.Text, style));
+                        break;
+                    case MarkdownInlineElementPlugin plugin:
+                        result.Add(new PdfInlineElementPlugin(plugin.Name, plugin.Parameters, style));
                         break;
                 }
             }
