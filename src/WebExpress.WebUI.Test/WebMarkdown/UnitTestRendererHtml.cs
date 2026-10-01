@@ -33,7 +33,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("[X]", @"<p><input type=""checkbox"" class=""form-check-input"" checked disabled></p>")]
         [InlineData("[ ]", @"<p><input type=""checkbox"" class=""form-check-input"" disabled></p>")]
         [InlineData("[x] Learn markdown", @"<p><input type=""checkbox"" class=""form-check-input"" checked disabled aria-label=""Learn markdown""> Learn markdown</p>")]
-        [InlineData("Text[^1]", @"<p>Text <sup>1</sup></p>")]
+        [InlineData("Text[^1]", @"<p>Text<sup>1</sup></p>")]
         public void ConvertInlineElements(string markdown, string expectedHtml)
         {
             // arrange
@@ -53,6 +53,29 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             var cleaned = Regex.Replace(htmlString, @">\s+<", "><");
 
             AssertExtensions.EqualWithPlaceholders(expectedHtml, cleaned);
+        }
+
+        /// <summary>
+        /// Tests that formatted text is written without any blank the source does not have.
+        /// The output is compared as written, because a browser reads a line break between
+        /// a word and its formatted part as a blank and the other tests normalize it away.
+        /// </summary>
+        [Theory]
+        [InlineData("x**b**y", "<p>x<strong>b</strong>y</p>")]
+        [InlineData("**a**_b_", "<p><strong>a</strong><u>b</u></p>")]
+        [InlineData("x***i***.", "<p>x<strong><i>i</i></strong>.</p>")]
+        [InlineData("see [map](/m), `c`[^1]", @"<p>see <a href=""/m"">map</a>, <code>c</code><sup>1</sup></p>")]
+        public void ConvertInlineElementsWithoutBlanks(string markdown, string expectedHtml)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock();
+
+            // act
+            var html = MarkdownParser.Parse(markdown).ConvertToHtml(renderContext).ToString().Trim();
+
+            // validation - the break before the closing tag of a block ends no text and stays
+            Assert.Equal(expectedHtml, Regex.Replace(html, @"\s+</p>$", "</p>"));
         }
 
         /// <summary>
@@ -85,7 +108,7 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [Theory]
         [InlineData("This is a paragraph.", "<p>This is a paragraph.</p>")]
         [InlineData("This is a paragraph.\n\nThis is another paragraph.", @"<p>This is a paragraph.</p><p>This is another paragraph.</p>")]
-        [InlineData("Welcome to **WebExpress**! Build your own `WebExpress` application.", @"<p>Welcome to  <strong>WebExpress</strong>! Build your own  <code>WebExpress</code> application.</p>")]
+        [InlineData("Welcome to **WebExpress**! Build your own `WebExpress` application.", @"<p>Welcome to <strong>WebExpress</strong>! Build your own <code>WebExpress</code> application.</p>")]
         public void ConvertParagraph(string markdown, string expectedHtml)
         {
             // arrange
@@ -291,6 +314,11 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         /// </summary>
         [Theory]
         [InlineData("|Name|City\r\n|---|---|---|\r\n|Mario|Mushroom", @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div data-label=""Name""></div><div data-label=""City""></div></div><div class=""wx-table-row""><div>Mario</div><div>Mushroom</div></div></div>")]
+        [InlineData("| Name | City |\r\n|:---|---:|\r\n| Mario | Mushroom |", @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div data-label=""Name""></div><div data-label=""City"" data-align=""right""></div></div><div class=""wx-table-row""><div>Mario</div><div>Mushroom</div></div></div>")]
+        [InlineData("| Item | Count |\r\n|---|---:|\r\n| Screws | 120 |\r\n|---|---|\r\n| Total | 120 |", @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div data-label=""Item""></div><div data-label=""Count"" data-align=""right""></div></div><div class=""wx-table-row""><div>Screws</div><div>120</div></div><div class=""wx-table-footer""><div>Total</div><div>120</div></div></div>")]
+        [InlineData("| Name | Note |\r\n|---|---|\r\n| **Mario** Bros | see [map](/m) |\r\n|---|---|\r\n| `total` | 1 |", @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div data-label=""Name""></div><div data-label=""Note""></div></div><div class=""wx-table-row""><div class=""wx-table-cell-markup""><span class=""wx-table-cell-text""><strong>Mario</strong> Bros</span></div><div class=""wx-table-cell-markup""><span class=""wx-table-cell-text"">see <a href=""/m"">map</a></span></div></div><div class=""wx-table-footer""><div class=""wx-table-cell-markup""><span class=""wx-table-cell-text""><code>total</code></span></div><div>1</div></div></div>")]
+        [InlineData("| **Name** | [Docs](/d) |\r\n|---|---:|\r\n| a | b |", @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div><span class=""wx-table-column-label""><strong>Name</strong></span></div><div data-align=""right""><span class=""wx-table-column-label""><a href=""/d"">Docs</a></span></div></div><div class=""wx-table-row""><div>a</div><div>b</div></div></div>")]
+        [InlineData("| Name | City |\r\n|:---:|---|\r\n| Mario | Mushroom |>>\r\n| | Kingdom |",@"<div class=""wx-webui-table""><div class=""wx-table-columns""><div data-label=""Name"" data-align=""center""></div><div data-label=""City""></div></div><div class=""wx-table-row""><div>Mario</div><div>Mushroom Kingdom</div></div></div>")]
         public void ConvertTable(string markdown, string expectedHtml)
         {
             // arrange

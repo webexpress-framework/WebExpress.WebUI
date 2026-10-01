@@ -231,16 +231,6 @@ namespace WebExpress.WebUI.WebPdf
             var footers = table.Footers.ToList();
             var result = new PdfBlockElementTable { Striped = true };
 
-            // the parser reads the closing pipe of a row as the start of one more cell; a
-            // column that is empty in every row is that artefact and would print as an empty
-            // strip along the right edge
-            var count = new[] { columns.Count, footers.Count }.Concat(rows.Select(r => r.Count)).Max();
-
-            while (count > 0 && new[] { columns, footers }.Concat(rows).All(r => r.Count < count || string.IsNullOrWhiteSpace(r[count - 1].PlainText)))
-            {
-                count--;
-            }
-
             PdfBlockElementTableCell Cell(MarkdownBlockElementTableCell cell, int index)
             {
                 var align = index < columns.Count ? columns[index].Align : cell.Align;
@@ -258,17 +248,17 @@ namespace WebExpress.WebUI.WebPdf
 
             if (columns.Count > 0)
             {
-                result.Add(new PdfBlockElementTableRow(columns.Take(count).Select(Cell)) { Header = true });
+                result.Add(new PdfBlockElementTableRow(columns.Select(Cell)) { Header = true });
             }
 
             foreach (var row in rows)
             {
-                result.Add(new PdfBlockElementTableRow(row.Take(count).Select(Cell)));
+                result.Add(new PdfBlockElementTableRow(row.Select(Cell)));
             }
 
             if (footers.Count > 0)
             {
-                result.Add(new PdfBlockElementTableRow(footers.Take(count).Select(Cell)) { Background = new PdfColor(241, 243, 245) });
+                result.Add(new PdfBlockElementTableRow(footers.Select(Cell)) { Background = new PdfColor(241, 243, 245) });
             }
 
             return result;

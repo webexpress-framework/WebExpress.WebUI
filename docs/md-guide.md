@@ -113,6 +113,8 @@ Tables provide a structured representation of tabular data. Cells are separated 
 | Peach  | 38  | Royal Castle |
 ```
 
+A row that ends with `>>` continues on the next line: the cells of both lines are joined column by column, so the first row reads *Mario*, *40*, *Mushroom Kingdom*. The closing pipe is optional, and a cell left empty between two pipes stays an empty column.
+
 ### Indent
 Markdown uses indentation for certain block elements such as code blocks or list nesting.
 

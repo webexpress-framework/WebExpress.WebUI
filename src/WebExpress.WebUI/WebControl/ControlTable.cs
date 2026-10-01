@@ -14,6 +14,7 @@ namespace WebExpress.WebUI.WebControl
     {
         private readonly List<IControlTableColumn> _columns = [];
         private readonly List<IControlTableRow> _rows = [];
+        private readonly List<IControlTableCell> _footer = [];
 
         /// <summary>
         /// Returns the columns of the table.
@@ -24,6 +25,13 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the rows of the table.
         /// </summary>
         public IEnumerable<IControlTableRow> Rows => _rows;
+
+        /// <summary>
+        /// Returns the cells of the footer, one per column. The footer is not a row: it is
+        /// neither sorted nor selected with the rows, and it stays below them - the place
+        /// for totals and summaries of the columns above.
+        /// </summary>
+        public IEnumerable<IControlTableCell> Footer => _footer;
 
         /// <summary>
         /// Gets or sets a value indicating whether the table is striped.
@@ -168,6 +176,54 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Adds one or more cells to the footer, in column order.
+        /// </summary>
+        /// <param name="cells">The cells to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlTable AddFooter(params IControlTableCell[] cells)
+        {
+            _footer.AddRange(cells);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Adds one or more cells to the footer, in column order.
+        /// </summary>
+        /// <param name="cells">The cells to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        public IControlTable AddFooter(IEnumerable<IControlTableCell> cells)
+        {
+            _footer.AddRange(cells);
+
+            return this;
+        }
+
+        /// <summary>
+        /// Renders the footer for the table script, which reads it from a child of the
+        /// table element; a table without footer cells has no such child.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <returns>The footer element, or nothing if the table has no footer.</returns>
+        protected IEnumerable<IHtmlNode> RenderFooter(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        {
+            if (_footer.Count == 0)
+            {
+                return [];
+            }
+
+            return
+            [
+                new HtmlElementTextContentDiv()
+                {
+                    Class = "wx-table-footer"
+                }
+                    .Add(_footer.Select(cell => cell.Render(renderContext, visualTree)))
+            ];
+        }
+
+        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -218,7 +274,8 @@ namespace WebExpress.WebUI.WebControl
                     (
                         row => row.Render(renderContext, visualTree)
                     )
-                );
+                )
+                .Add(RenderFooter(renderContext, visualTree));
 
             return html;
         }

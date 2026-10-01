@@ -265,6 +265,28 @@
     text-overflow: ellipsis;
 }
 
+/* column alignment: cells lay out as flex rows, so text-align alone would not move them */
+.wx-table-align-left,
+.wx-table-align-left > .wx-col-inner,
+.wx-table-align-left > .wx-cell-content {
+    justify-content: flex-start;
+    text-align: left;
+}
+
+.wx-table-align-center,
+.wx-table-align-center > .wx-col-inner,
+.wx-table-align-center > .wx-cell-content {
+    justify-content: center;
+    text-align: center;
+}
+
+.wx-table-align-right,
+.wx-table-align-right > .wx-col-inner,
+.wx-table-align-right > .wx-cell-content {
+    justify-content: flex-end;
+    text-align: right;
+}
+
 /* --- Sorting Indicators --- */
 .wx-sort-asc .wx-col-inner::after,
 .wx-sort-desc .wx-col-inner::after {
@@ -337,6 +359,16 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--wx-link-hover
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
+}
+
+/* formatted text of a markup cell: one flex item, so the blanks between a formatted word
+   and its neighbours survive, ellipsized like the plain text of a cell */
+.wx-table-cell-text {
+    min-width: 0;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .wx-table .wx-icon {

@@ -116,7 +116,7 @@ namespace WebExpress.WebUI.Test.WebPdf
 
         /// <summary>
         /// Tests that a table gets a header row, keeps the formatting inside its cells and
-        /// loses the empty column the parser reads after the closing pipe.
+        /// has no column after the closing pipe.
         /// </summary>
         [Fact]
         public void Table()
@@ -156,6 +156,26 @@ namespace WebExpress.WebUI.Test.WebPdf
             // validation
             Assert.Equal(PdfTextAlign.Left, body.Cells.First().Align);
             Assert.Equal(PdfTextAlign.Right, body.Cells.Last().Align);
+        }
+
+        /// <summary>
+        /// Tests that the alignment written in the delimiter row of a markdown text reaches
+        /// the cells of the file, and that a column left empty on purpose is kept.
+        /// </summary>
+        [Fact]
+        public void TableAlignmentFromText()
+        {
+            // act
+            var document = PdfRendererMarkdown.ConvertMarkdownToPdf("| Name | Count | Note | |\n|:---|---:|:---:|---|\n| a | 1 | x | |");
+
+            // validation
+            var table = Assert.IsType<PdfBlockElementTable>(Assert.Single(document.Elements));
+            var body = table.Rows.Last().Cells.ToList();
+            Assert.Equal(4, body.Count);
+            Assert.Equal(PdfTextAlign.Left, body[0].Align);
+            Assert.Equal(PdfTextAlign.Right, body[1].Align);
+            Assert.Equal(PdfTextAlign.Center, body[2].Align);
+            Assert.Equal(PdfTextAlign.Left, body[3].Align);
         }
 
         /// <summary>

@@ -142,7 +142,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree);
 
             // validation
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""alert"" role=""alert""><strong>Speichern&nbsp; </strong>Abbrechen</div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""alert"" role=""alert""><strong>Speichern&nbsp;</strong>Abbrechen</div>", html);
         }
     }
 }

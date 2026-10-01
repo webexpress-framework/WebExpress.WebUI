@@ -83,6 +83,43 @@ test("wx-webui-table keeps a cell panel as markup and a plain cell as text", () 
     assert.equal(cells[1].content, "1.0.0");
 });
 
+test("wx-webui-table keeps a markup cell as markup, sorts it by its text and keeps its own classes", () => {
+    const rt = loadTable();
+    const element = rt.document.createElement("div");
+
+    const columns = rt.document.createElement("div");
+    columns.classList.add("wx-table-columns");
+    const column = rt.document.createElement("div");
+    column.dataset.label = "Name";
+    columns.appendChild(column);
+    element.appendChild(columns);
+
+    for (const name of ["Stan", "Elaine", "Guybrush"]) {
+        const row = rt.document.createElement("div");
+        row.classList.add("wx-table-row");
+        const markup = rt.document.createElement("div");
+        markup.classList.add("wx-table-cell-markup");
+        markup.classList.add("extra");
+        const text = rt.document.createElement("span");
+        text.classList.add("wx-table-cell-text");
+        text.textContent = name;
+        markup.appendChild(text);
+        row.appendChild(markup);
+        element.appendChild(row);
+    }
+    rt.document.body.appendChild(element);
+
+    const ctrl = new rt.wx.TableCtrl(element);
+    const cell = ctrl._rows[0].cells[0];
+
+    assert.equal(cell.html, true, "the markup cell is marked as markup");
+    assert.equal(cell.text, "Stan", "the flattened text stays available for sorting");
+    assert.ok(String(cell.class).includes("extra"), "unlike a panel, the cell keeps its classes");
+
+    ctrl.orderRows(Object.assign(ctrl._columns[0], { sort: "asc" }));
+    assert.deepEqual(ctrl._rows.map((r) => r.cells[0].text), ["Elaine", "Guybrush", "Stan"]);
+});
+
 test("wx-webui-table sorts a cell panel by its text rather than its markup", () => {
     const rt = loadTable();
     const element = rt.document.createElement("div");
@@ -197,4 +234,150 @@ test("wx-webui-dropdown writes a multi-word action attribute back hyphenated", (
     // produce data-wx-primary-requirefile and the action would never see it
     assert.equal(link.getAttribute("data-wx-primary-require-file"), "true");
     assert.equal(link.getAttribute("data-wx-primary-confirm"), "Update package?");
+});
+
+test("wx-webui-table aligns the header and every cell of an aligned column", async () => {
+    const rt = loadTable();
+    const element = rt.document.createElement("div");
+
+    const columns = rt.document.createElement("div");
+    columns.classList.add("wx-table-columns");
+    for (const [label, align] of [["Name", null], ["Count", "right"]]) {
+        const column = rt.document.createElement("div");
+        column.dataset.label = label;
+        if (align) {
+            column.dataset.align = align;
+        }
+        columns.appendChild(column);
+    }
+    element.appendChild(columns);
+
+    for (const [name, count] of [["Screws", "120"], ["Washers", "8"]]) {
+        const row = rt.document.createElement("div");
+        row.classList.add("wx-table-row");
+        row.appendChild(cell(rt, name, false));
+        row.appendChild(cell(rt, count, false));
+        element.appendChild(row);
+    }
+    rt.document.body.appendChild(element);
+
+    new rt.wx.TableCtrl(element);
+    // the render is batched into a microtask
+    await Promise.resolve();
+
+    const aligned = element.querySelectorAll(".wx-table-align-right");
+    assert.equal(aligned.length, 3, "the header and both body cells of the column");
+    assert.deepEqual(Array.from(aligned).map((x) => x.textContent), ["Count", "120", "8"]);
+    const cells = [...element.querySelectorAll(".wx-grid-header-cell"), ...element.querySelectorAll(".wx-grid-cell")];
+    const classed = cells.filter((x) => String(x.className).includes("wx-table-align-"));
+    assert.equal(cells.length, 6, "two header and four body cells are rendered");
+    assert.equal(classed.length, 3, "a column without an alignment gets no class");
+});
+
+/**
+ * Builds a table host whose first column has a formatted header and no plain title,
+ * and whose second column is aligned and plain.
+ * @param {object} rt - The loaded runtime.
+ * @returns {object} The host element.
+ */
+function formattedHeaderHost(rt) {
+    const element = rt.document.createElement("div");
+    const columns = rt.document.createElement("div");
+    columns.classList.add("wx-table-columns");
+
+    const formatted = rt.document.createElement("div");
+    const label = rt.document.createElement("span");
+    label.classList.add("wx-table-column-label");
+    const strong = rt.document.createElement("strong");
+    strong.textContent = "Name";
+    label.appendChild(strong);
+    formatted.appendChild(label);
+    columns.appendChild(formatted);
+
+    const plain = rt.document.createElement("div");
+    plain.dataset.label = "Count";
+    plain.dataset.align = "right";
+    columns.appendChild(plain);
+    element.appendChild(columns);
+
+    const row = rt.document.createElement("div");
+    row.classList.add("wx-table-row");
+    row.appendChild(cell(rt, "Guybrush", false));
+    row.appendChild(cell(rt, "3", false));
+    element.appendChild(row);
+
+    rt.document.body.appendChild(element);
+    return element;
+}
+
+for (const [name, ctrl, files] of [
+    ["wx-webui-table", "TableCtrl", []],
+    ["wx-webui-table-reorderable", "TableReorderableCtrl", ["webexpress.webui.table.reorderable.js"]]
+]) {
+    test(`${name} shows a formatted column header and names the column by its text`, async () => {
+        const rt = loadWebUi({
+            browser: true,
+            extraFiles: ["webexpress.webui.dropdown.js", "webexpress.webui.table.js", ...files]
+        });
+        const element = formattedHeaderHost(rt);
+
+        const table = new rt.wx[ctrl](element);
+        // the render is batched into a microtask
+        await Promise.resolve();
+
+        // the dom stub does not serialize markup, so the contract is pinned rather than the
+        // materialised tags: the label is found, kept apart and named by its text
+        assert.equal(table._columns[0].label, "Name", "without a title the column is named by its text");
+        assert.ok(table._columns[0].labelHtml, "the formatted header is kept");
+        assert.equal(table._columns[1].labelHtml, null, "a plain column has no formatted header");
+
+        const headers = Array.from(element.querySelectorAll(".wx-col-header"));
+        assert.equal(headers.length, 2);
+        const line = headers[0].querySelector(".wx-table-cell-text");
+        assert.ok(line, "the formatted header is one line of text");
+        assert.equal(line.textContent, "Name");
+        assert.equal(headers[1].querySelector(".wx-table-cell-text"), null, "a plain header stays text");
+        assert.ok(String(headers[1].className).includes("wx-table-align-right"), "the header follows its column alignment");
+    });
+}
+
+test("wx-webui-table shows the footer the server renders below the rows, aligned with its column", async () => {
+    const rt = loadTable();
+    const element = rt.document.createElement("div");
+
+    const columns = rt.document.createElement("div");
+    columns.classList.add("wx-table-columns");
+    for (const [label, align] of [["Item", null], ["Count", "right"]]) {
+        const column = rt.document.createElement("div");
+        column.dataset.label = label;
+        if (align) {
+            column.dataset.align = align;
+        }
+        columns.appendChild(column);
+    }
+    element.appendChild(columns);
+
+    const row = rt.document.createElement("div");
+    row.classList.add("wx-table-row");
+    row.appendChild(cell(rt, "Screws", false));
+    row.appendChild(cell(rt, "120", false));
+    element.appendChild(row);
+
+    const footer = rt.document.createElement("div");
+    footer.classList.add("wx-table-footer");
+    footer.appendChild(cell(rt, "Total", false));
+    footer.appendChild(cell(rt, "120", false));
+    element.appendChild(footer);
+    rt.document.body.appendChild(element);
+
+    const ctrl = new rt.wx.TableCtrl(element);
+    // the render is batched into a microtask
+    await Promise.resolve();
+
+    assert.equal(ctrl._rows.length, 1, "the footer is not read as a row");
+    const group = element.querySelector(".wx-table-footer-group");
+    assert.ok(group, "the footer is rendered");
+    const cells = Array.from(group.querySelectorAll(".wx-grid-cell"));
+    assert.deepEqual(cells.map((x) => x.textContent), ["Total", "120"]);
+    assert.ok(String(cells[1].className).includes("wx-table-align-right"), "the footer cell follows its column");
 });

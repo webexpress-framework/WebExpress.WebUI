@@ -302,9 +302,11 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             index: idx,
             name: c.name || null,
             label: c.label != null ? String(c.label) : (c.id || this._columnFallbackName(idx)),
+            labelHtml: c.labelHtml || null,
             icon: c.icon || null,
             image: c.image || null,
             color: c.color || null,
+            align: c.align || null,
             width: c.width || null,
             minWidth: c.minWidth || null,
             resizable: typeof c.resizable === "boolean" ? c.resizable : true,
@@ -831,6 +833,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         if (col.color) {
             th.classList.add(col.color);
         }
+        if (col.align) {
+            th.classList.add(`wx-table-align-${col.align}`);
+        }
         if (col.sort) {
             th.classList.add(col.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc");
         }
@@ -850,7 +855,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             img.loading = "lazy";
             inner.appendChild(img);
         }
-        inner.appendChild(document.createTextNode(col.label));
+        this._appendHeaderLabel(inner, col);
         // a column that shows an icon or nothing at all still needs a name a reader can sort
         // by; it is text, hidden from the eye, because a header is read by its content
         if (!col.label) {
@@ -861,6 +866,24 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         }
         th.appendChild(inner);
         return th;
+    }
+
+    /**
+     * Appends the label of a column header: the formatted header the server rendered, or
+     * the plain label. The formatting is kept in one span, because the header lays out its
+     * children as flex items and would drop the blanks between formatted words.
+     * @param {HTMLElement} inner - The header content wrapper.
+     * @param {Object} col - The column.
+     */
+    _appendHeaderLabel(inner, col) {
+        if (col.labelHtml) {
+            const label = document.createElement("span");
+            label.className = "wx-table-cell-text";
+            label.innerHTML = col.labelHtml;
+            inner.appendChild(label);
+        } else {
+            inner.appendChild(document.createTextNode(col.label));
+        }
     }
 
     /**
@@ -975,6 +998,10 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         const td = document.createElement("div");
         td.className = "wx-grid-cell";
         td.setAttribute("role", this._cellRole);
+
+        if (colDef?.align) {
+            td.classList.add(`wx-table-align-${colDef.align}`);
+        }
 
         if (!cell) {
             td.textContent = "";
@@ -1132,6 +1159,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             const td = document.createElement("div");
             td.className = "wx-grid-cell";
             td.setAttribute("role", this._cellRole);
+            if (col.align) {
+                td.classList.add(`wx-table-align-${col.align}`);
+            }
             if (this._footer[i] != null) {
                 td.innerHTML = this._footer[i];
             }
@@ -1213,6 +1243,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
 
         return Array.from(div.children).map((el, idx) => {
             const typeEl = el.querySelector(":scope > [data-type], :scope > template[data-type]");
+            const labelEl = el.querySelector(":scope > .wx-table-column-label");
             const rendererType = typeEl?.dataset.type || el.dataset.type || null;
             const rendererOptions = typeEl ? Object.assign({}, typeEl.dataset) : Object.assign({}, el.dataset);
 
@@ -1226,11 +1257,15 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             return {
                 id: el.id || `col_${idx}`,
                 index: idx,
-                label: el.dataset.label || "",
+                // a formatted header still needs a plain name for the column chooser and
+                // the accessible name; without a title it is the text of the formatting
+                label: el.dataset.label || labelEl?.textContent.trim() || "",
+                labelHtml: labelEl ? labelEl.innerHTML : null,
                 name: el.dataset.objectName || null,
                 icon: el.dataset.icon || null,
                 image: el.dataset.image || null,
                 color: el.dataset.color || null,
+                align: el.dataset.align || null,
                 width: el.dataset.width || (el.getAttribute("width") ? parseInt(el.getAttribute("width"), 10) : null),
                 minWidth: el.dataset.minWidth || null,
                 resizable: el.dataset.resizable !== "false",
@@ -1284,19 +1319,20 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 } else if (child.classList.contains("wx-table-options")) {
                     row.options = this._parseOptions(child);
                 } else if (!child.classList.contains("wx-table-footer")) {
-                    // a cell panel carries controls instead of a value, so its markup is kept
-                    // verbatim; the flattened text is retained alongside it because sorting
-                    // needs a comparable value rather than markup
-                    const rich = child.classList.contains("wx-table-cell-panel");
+                    // a cell panel carries controls and a markup cell formatted text instead of
+                    // a value, so their markup is kept verbatim; the flattened text is retained
+                    // alongside it because sorting needs a comparable value rather than markup
+                    const panel = child.classList.contains("wx-table-cell-panel");
+                    const rich = panel || child.classList.contains("wx-table-cell-markup");
                     const text = child.textContent.trim();
                     row.cells.push({
                         content: rich ? child.innerHTML : text,
                         text: text,
                         html: rich,
                         id: child.id,
-                        // a rich cell keeps its classes on the panel element inside the markup;
+                        // a panel keeps its classes on the panel element inside the markup;
                         // copying them onto the grid cell too would apply the panel layout twice
-                        class: rich ? null : child.className,
+                        class: panel ? null : child.className,
                         style: child.getAttribute("style"),
                         color: child.dataset.color,
                         icon: child.dataset.icon,

@@ -339,6 +339,18 @@ namespace WebExpress.WebUI.WebMarkdown
         }
 
         /// <summary>
+        /// Creates a stream over tokens taken from this one. The tokens carry their
+        /// positions in the whole document, so the new stream must share the source of this
+        /// one rather than a cut-out of it - a code span reads its text through them.
+        /// </summary>
+        /// <param name="tokens">The tokens of the new stream.</param>
+        /// <returns>A stream over the tokens, sharing the source of this stream.</returns>
+        internal MarkdownTokenStream Derive(IEnumerable<MarkdownToken> tokens)
+        {
+            return new MarkdownTokenStream(tokens, _source);
+        }
+
+        /// <summary>
         /// Returns a new stream with the tokens in reverse order.
         /// This allows for processing tokens from the end of the stream towards the beginning.
         /// </summary>

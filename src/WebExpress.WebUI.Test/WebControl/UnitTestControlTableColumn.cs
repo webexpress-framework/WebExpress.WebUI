@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebIcon;
+﻿using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -31,6 +32,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -55,6 +57,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -78,6 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -109,6 +113,66 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that formatted header content is rendered as one inline line next to the
+        /// plain title, and that a column without it renders no such element.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div data-label=""Name""></div>")]
+        [InlineData(true, @"<div data-label=""Name""><span class=""wx-table-column-label"">x<strong>b</strong><em>i</em></span></div>")]
+        public void TitleContent(bool withContent, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableColumn()
+            {
+                Title = _ => "Name",
+                TitleContent = withContent
+                    ? _ => new HtmlList
+                    (
+                        new HtmlText("x"),
+                        new HtmlElementTextSemanticsStrong(new HtmlText("b")),
+                        new HtmlElementTextSemanticsEm(new HtmlText("i"))
+                    )
+                    : null
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the align property of the table column.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeHorizontalAlignmentTable.Default, @"<div></div>")]
+        [InlineData(TypeHorizontalAlignmentTable.Left, @"<div data-align=""left""></div>")]
+        [InlineData(TypeHorizontalAlignmentTable.Center, @"<div data-align=""center""></div>")]
+        [InlineData(TypeHorizontalAlignmentTable.Right, @"<div data-align=""right""></div>")]
+        public void Align(TypeHorizontalAlignmentTable align, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableColumn()
+            {
+                Align = _ => align
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }

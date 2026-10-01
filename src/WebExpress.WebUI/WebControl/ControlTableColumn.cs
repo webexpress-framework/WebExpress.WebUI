@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -24,6 +25,14 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
+        /// Gets or sets formatted content shown as the header instead of the plain title -
+        /// emphasis, a link, code. The title stays the name of the column wherever plain text
+        /// is needed (the column chooser, the accessible name); without a title the table
+        /// takes the text of this content.
+        /// </summary>
+        public Func<IRenderControlContext, IHtmlNode> TitleContent { get; set; }
+
+        /// <summary>
         /// Gets or sets the icon.
         /// </summary>
         public Func<IRenderControlContext, IIcon> Icon { get; set; }
@@ -37,6 +46,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the color scheme used for the column.
         /// </summary>
         public Func<IRenderControlContext, TypeColorTable> Color { get; set; } = _ => TypeColorTable.Default;
+
+        /// <summary>
+        /// Gets or sets the horizontal alignment of the header and of every cell of the column.
+        /// </summary>
+        public Func<IRenderControlContext, TypeHorizontalAlignmentTable> Align { get; set; } = _ => TypeHorizontalAlignmentTable.Default;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -62,9 +76,26 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Title?.Invoke(renderContext)))
                 .AddUserAttribute("data-icon", (Icon?.Invoke(renderContext) as Icon)?.Class)
                 .AddUserAttribute("data-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass());
+                .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass())
+                .AddUserAttribute("data-align", (Align?.Invoke(renderContext) ?? TypeHorizontalAlignmentTable.Default).ToValue())
+                .Add(RenderTitleContent(renderContext));
 
             return html;
+        }
+
+        /// <summary>
+        /// Renders the formatted header for the table script, which reads it from a child of
+        /// the column element; a column without formatted content has no such child.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>The element holding the formatted header, or nothing.</returns>
+        protected IEnumerable<IHtmlNode> RenderTitleContent(IRenderControlContext renderContext)
+        {
+            var content = TitleContent?.Invoke(renderContext);
+
+            return content is null
+                ? []
+                : [TableInlineText.Create(content, "wx-table-column-label")];
         }
     }
 }

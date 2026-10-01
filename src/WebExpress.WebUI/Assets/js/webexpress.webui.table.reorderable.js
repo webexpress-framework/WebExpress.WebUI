@@ -164,6 +164,10 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
                     th.classList.add(col.color);
                 }
 
+                if (col.align) {
+                    th.classList.add(`wx-table-align-${col.align}`);
+                }
+
                 if (col.sort) {
                     th.classList.add(col.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc");
                 }
@@ -182,7 +186,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
                     img.alt = "";
                     inner.appendChild(img);
                 }
-                inner.appendChild(document.createTextNode(col.label));
+                this._appendHeaderLabel(inner, col);
                 th.appendChild(inner);
 
                 // enable column d&d

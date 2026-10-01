@@ -21,6 +21,11 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlTableRow> Rows { get; }
 
         /// <summary>
+        /// Gets the cells of the footer, one per column.
+        /// </summary>
+        IEnumerable<IControlTableCell> Footer { get; }
+
+        /// <summary>
         /// Gets a value indicating whether the table is striped.
         /// </summary>
         Func<IRenderControlContext, TypeStripedTable> Striped { get; }
@@ -98,5 +103,19 @@ namespace WebExpress.WebUI.WebControl
         /// <param name="rows">The rows to add.</param>
         /// <returns>The current instance for method chaining.</returns>
         IControlTable AddRows(IEnumerable<IControlTableRow> rows);
+
+        /// <summary>
+        /// Adds one or more cells to the footer, in column order.
+        /// </summary>
+        /// <param name="cells">The cells to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlTable AddFooter(params IControlTableCell[] cells);
+
+        /// <summary>
+        /// Adds one or more cells to the footer, in column order.
+        /// </summary>
+        /// <param name="cells">The cells to add.</param>
+        /// <returns>The current instance for method chaining.</returns>
+        IControlTable AddFooter(IEnumerable<IControlTableCell> cells);
     }
 }

@@ -85,7 +85,8 @@ namespace WebExpress.WebUI.WebControl
                     (
                         row => row.Render(renderContext, visualTree)
                     )
-                );
+                )
+                .Add(RenderFooter(renderContext, visualTree));
 
             return html;
         }

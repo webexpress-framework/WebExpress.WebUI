@@ -93,7 +93,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<details id=""it1"" class=""accordion-item""><summary class=""accordion-button"">Header  <i class=""wx-icon-light wx-icon-light-angle-down wx-accordion-caret""></i></summary><div class=""accordion-body""></div></details>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<details id=""it1"" class=""accordion-item""><summary class=""accordion-button"">Header<i class=""wx-icon-light wx-icon-light-angle-down wx-accordion-caret""></i></summary><div class=""accordion-body""></div></details>", html);
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<details id=""it1"" class=""accordion-item"" open><summary class=""accordion-button"">Header  <i class=""wx-icon-light wx-icon-light-angle-down wx-accordion-caret""></i></summary><div class=""accordion-body""></div></details>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<details id=""it1"" class=""accordion-item"" open><summary class=""accordion-button"">Header<i class=""wx-icon-light wx-icon-light-angle-down wx-accordion-caret""></i></summary><div class=""accordion-body""></div></details>", html);
         }
     }
 }
