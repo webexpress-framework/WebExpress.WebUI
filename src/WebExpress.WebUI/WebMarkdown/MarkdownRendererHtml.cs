@@ -319,6 +319,13 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownInlineElementPlugin inlinePlugin)
                 {
+                    if (MarkdownPluginRegistry.Get(inlinePlugin.Name)?.ConvertInline(inlinePlugin, renderContext) is { } converted)
+                    {
+                        list.Add(converted);
+
+                        continue;
+                    }
+
                     var pluginDiv = new HtmlElementTextContentDiv()
                     {
                         Class = "wx-plugin wx-plugin-inline"
@@ -335,7 +342,16 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownBlockElementPlugin blockPlugin)
                 {
-                    var pluginDiv = new HtmlElementTextContentDiv(ConvertElement(blockPlugin.Content, renderContext))
+                    var content = ConvertElement(blockPlugin.Content, renderContext);
+
+                    if (MarkdownPluginRegistry.Get(blockPlugin.Name)?.ConvertBlock(blockPlugin, content, renderContext) is { } converted)
+                    {
+                        list.Add(converted);
+
+                        continue;
+                    }
+
+                    var pluginDiv = new HtmlElementTextContentDiv(content)
                     {
                         Class = "wx-plugin wx-plugin-block"
                     };

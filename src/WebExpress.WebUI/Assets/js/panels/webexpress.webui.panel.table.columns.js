@@ -71,37 +71,41 @@ webexpress.webui.DialogPanels.register("table-columns", {
                 handle.style.cursor = "grab";
             };
 
-            const labelWrap = document.createElement("label");
+            // a table that does not allow removing columns still lets them be reordered here
+            const canHide = typeof modal.applyVisibility === "function";
+
+            // without a check box there is nothing a label could name
+            const labelWrap = document.createElement(canHide ? "label" : "span");
             labelWrap.className = "wx-form-check";
             labelWrap.style.display = "flex";
             labelWrap.style.alignItems = "center";
             labelWrap.style.gap = "6px";
             labelWrap.style.flex = "1";
             labelWrap.style.margin = "0";
-            labelWrap.style.cursor = "pointer";
+            labelWrap.style.cursor = canHide ? "pointer" : "";
 
-            const cb = document.createElement("input");
-            cb.type = "checkbox";
-            cb.className = "form-check-input";
-            cb.style.marginTop = "0";
-            cb.checked = !!column.visible;
-            cb.addEventListener("change", (ev) => {
-                ev.preventDefault();
-                const cols = (typeof modal.getColumns === "function") ? modal.getColumns() : [];
-                const visibleCount = cols.filter((c) => c.visible).length;
-                if (!cb.checked && visibleCount <= 1) {
-                    cb.checked = true;
-                    return;
-                }
-                if (typeof modal.applyVisibility === "function") {
+            if (canHide) {
+                const cb = document.createElement("input");
+                cb.type = "checkbox";
+                cb.className = "form-check-input";
+                cb.style.marginTop = "0";
+                cb.checked = !!column.visible;
+                cb.addEventListener("change", (ev) => {
+                    ev.preventDefault();
+                    const cols = (typeof modal.getColumns === "function") ? modal.getColumns() : [];
+                    const visibleCount = cols.filter((c) => c.visible).length;
+                    if (!cb.checked && visibleCount <= 1) {
+                        cb.checked = true;
+                        return;
+                    }
                     modal.applyVisibility(column.id, cb.checked);
-                }
-            });
+                });
+                labelWrap.appendChild(cb);
+            }
 
             const lbl = document.createElement("span");
             lbl.textContent = column.label || column.id || modal._i18n("webexpress.webui:page.table.columns.default", "Column");
 
-            labelWrap.appendChild(cb);
             labelWrap.appendChild(lbl);
 
             line.appendChild(handle);

@@ -196,12 +196,22 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
                 headRow.appendChild(th);
             }
 
-            if (this._hasOptions || this._allowColumnRemove) {
+            if (this._hasActionsColumn()) {
                 this._renderActionsHeader(headRow);
             }
         }
 
         this._head.replaceChildren(headFragment);
+    }
+
+    /**
+     * Order, width and sort of the columns can always be changed, so the header
+     * carries the column manager whenever it is shown - not only when rows have
+     * options or columns may be hidden.
+     * @returns {boolean}
+     */
+    _hasActionsColumn() {
+        return this._hasOptions || !this._suppressHeaders;
     }
 
     /**
@@ -213,11 +223,16 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
         th.className = "wx-grid-header-cell wx-table-actions";
         th.setAttribute("role", "columnheader");
 
+        const label = this._i18n("webexpress.webui:table.columns.manage", "Manage columns");
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "btn btn-sm";
-        btn.title = this._i18n("webexpress.webui:table.columns.manage", "Manage columns");
-        btn.textContent = "≡";
+        btn.title = label;
+        btn.setAttribute("aria-label", label);
+        const icon = document.createElement("i");
+        icon.className = this._iconClass("bars-vertical");
+        icon.setAttribute("aria-hidden", "true");
+        btn.appendChild(icon);
         btn.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -282,7 +297,8 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
             }));
         };
 
-        modalCtrl.applyVisibility = (columnId, visible) => {
+        // the panel offers hiding a column only where this callback exists
+        modalCtrl.applyVisibility = !this._allowColumnRemove ? null : (columnId, visible) => {
             this._runWithModalPreservation(() => {
                 const col = this._columns.find(c => c.id === columnId);
                 if (col) {
@@ -678,7 +694,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
             firstVisible = false;
         }
 
-        if (this._hasOptions || this._allowColumnRemove) {
+        if (this._hasActionsColumn()) {
             const tdOpt = document.createElement("div");
             tdOpt.className = "wx-grid-cell wx-table-actions";
             tdOpt.setAttribute("role", this._cellRole);
@@ -756,7 +772,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
             }
         }
 
-        if (this._hasOptions || this._allowColumnRemove) {
+        if (this._hasActionsColumn()) {
             parts.push("1.5rem"); // actions width
         }
 

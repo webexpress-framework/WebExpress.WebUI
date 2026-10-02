@@ -9,6 +9,11 @@ pdfpluginmanager.register=Das PDF-Plugin '{0}' aus '{1}' wurde registriert.
 pdfpluginmanager.duplicate=Das PDF-Plugin '{0}' aus '{1}' wurde nicht registriert, da der Name bereits vergeben ist.
 pdfpluginmanager.noname=Das PDF-Plugin '{0}' wurde nicht registriert, da es kein Name-Attribut besitzt.
 
+markdownpluginmanager.initialization=Der Markdown-Pluginmanager wurde initialisiert.
+markdownpluginmanager.register=Das Markdown-Plugin '{0}' aus '{1}' wurde registriert.
+markdownpluginmanager.duplicate=Das Markdown-Plugin '{0}' aus '{1}' wurde nicht registriert, da der Name bereits vergeben ist.
+markdownpluginmanager.noname=Das Markdown-Plugin '{0}' wurde nicht registriert, da es kein Name-Attribut besitzt.
+
 form.empty.id=Das Formular verfügt über keine Id!
 form.submit.label=Speichern
 form.reset.label=Zurücksetzen

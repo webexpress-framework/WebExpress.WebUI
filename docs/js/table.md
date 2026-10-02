@@ -126,7 +126,7 @@ document.body.appendChild(div);
 
 ```
    ┌─┬──────────────────┬──────────────────┬─────┐
-   │≡│ [Icon] Column 1 ▼│ [Icon] Column 2  │ [+] │  // Drag & Drop, Sortable, resizable Headers
+   │ │ [Icon] Column 1 ▼│ [Icon] Column 2  │ [+] │  // Sortable, resizable Headers
    ├─┼──────────────────┼──────────────────┼─────┤
    │≡│ ▼ Row 1          │ Cell 1.2         │ […] │  // Row drag handle, Collapsible, Options
    ├─┼──────────────────┼──────────────────┼─────┤
@@ -143,8 +143,8 @@ document.body.appendChild(div);
 Beyond its core functionality, the table control component offers a range of advanced features that enhance usability, customization, and interaction.
 
 - **Column Drag & Drop:** CTRL+drag header to move columns; indicator visualizes destination.
-- **Column Modal:** Button in rightmost header cell opens a column management modal (reorder, show/hide, resize, sort). Can use an external DialogPanel via key `table-columns`.
-- **Column Visibility Management:** Easily hide or show columns via modal; modal can search/filter columns.
+- **Column Modal:** Button in rightmost header cell opens a column management modal (reorder, show/hide, resize, sort). The button is there whenever the header is shown; hiding columns in it needs `data-allow-column-remove`. Can use an external DialogPanel via key `table-columns`.
+- **Column Visibility Management:** With `data-allow-column-remove`, hide or show columns via modal; modal can search/filter columns.
 - **Persistence:** View state (columns, widths, tree collapsed/expanded, sort) is saved in localStorage using `data-persist-key` and restored on initialization.
 - **Row Reordering:** Drag handle (`≡`) in leftmost column when `data-movable-row="true"`; support for hierarchical drag and drop including reparenting.
 - **Auto-Expand on Row Hover:** When dragging a row, hovering for >2 seconds over a collapsed parent with children auto-expands the parent to enable dropping as a child.

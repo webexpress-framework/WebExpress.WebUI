@@ -210,8 +210,37 @@ Content (supports full Markdown syntax)
 - Content between the tags is parsed as standard Markdown and may include any block or inline elements.
 - Block plugins are block-level elements and are separated from surrounding content by blank lines.
 
+### Plugins on a page
+`MarkdownRendererHtml` asks the `IMarkdownPlugin` registered under a plugin's name which HTML node takes its place. A WebExpress plugin contributes one by a public, sealed class with a `Name` attribute; `MarkdownPluginManager` registers it when the plugin is loaded and removes it when the plugin is unloaded:
+
+```csharp
+[Name("ticket")]
+public sealed class TicketMarkdownPlugin : IMarkdownPlugin
+{
+    // {{ticket id="42"}} - a link to the tracker
+    public IHtmlNode ConvertInline(MarkdownInlineElementPlugin element, IRenderControlContext renderContext)
+    {
+        var id = element.Parameters.GetValueOrDefault("id");
+        return new HtmlElementTextSemanticsA($"#{id}") { Href = $"https://tracker.example/{id}" };
+    }
+
+    // {{% ticket id="42" %}}...{{% /ticket %}} - a box around the enclosed content
+    public IHtmlNode ConvertBlock(MarkdownBlockElementPlugin element, IHtmlNode content, IRenderControlContext renderContext)
+    {
+        return new HtmlElementTextContentDiv(content) { Class = "wx-callout" };
+    }
+}
+```
+
+- Both methods are optional. Returning null - the default - keeps the placeholder an unregistered plugin gets: a `div` with the classes `wx-plugin wx-plugin-inline` or `wx-plugin wx-plugin-block`, the name in `data-plugin`, every parameter as `data-plugin-{key}` and, for a block, the enclosed content. A script on the page can still pick that up.
+- A block plugin receives its content already rendered, so it only has to wrap or replace it.
+- A plugin is asked once per element and rendering; its constructor may ask for `IHttpServerContext` and `IComponentHub`.
+- Outside of a server - in a test or a tool - register an instance yourself: `MarkdownPluginRegistry.Register("ticket", new TicketMarkdownPlugin())`. The first registration of a name wins; names are compared without regard to case.
+
+The page and the PDF are served by separate registries, so an add-on that wants its plugin in both registers an `IMarkdownPlugin` and an `IPdfPlugin` under the same name.
+
 ### Plugins in PDF
-On a page a plugin is rendered as a `div` with `data-plugin` and `data-plugin-*` attributes and brought to life by the client. A PDF has no client, so the server needs to know what a plugin looks like on paper. `PdfRendererMarkdown` and `PdfRendererHtml` turn a plugin into a `PdfBlockElementPlugin` or `PdfInlineElementPlugin` with its name and parameters, and the `IPdfPlugin` registered under that name decides, when the document is written, which elements of the PDF model take its place.
+A PDF has no client, so the server needs to know what a plugin looks like on paper. `PdfRendererMarkdown` and `PdfRendererHtml` turn a plugin into a `PdfBlockElementPlugin` or `PdfInlineElementPlugin` with its name and parameters, and the `IPdfPlugin` registered under that name decides, when the document is written, which elements of the PDF model take its place.
 
 A WebExpress plugin contributes one by a public, sealed class with a `Name` attribute. `PdfPluginManager` registers it when the plugin is loaded and removes it when the plugin is unloaded:
 
