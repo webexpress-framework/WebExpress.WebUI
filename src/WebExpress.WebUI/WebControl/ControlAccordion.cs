@@ -8,8 +8,10 @@ namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Stacks a set of <see cref="ControlAccordionItem"/> sections into a single
-    /// accordion. By default only one section is open at a time; the whole
-    /// behavior is driven by the WebExpress collapse data API.
+    /// accordion. By default only one section is open at a time. No script is
+    /// involved: each section is a native <c>&lt;details&gt;</c> element, and the
+    /// sections share the accordion's id as their <c>name</c>, which makes the
+    /// browser close the open one when another is opened.
     /// </summary>
     public class ControlAccordion : Control
     {

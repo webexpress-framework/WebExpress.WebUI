@@ -1,17 +1,19 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// How a dropdown is opened (for example on click or on hover).
+    /// Determines whether the button of a dropdown carries the <c>dropdown-toggle</c> class, which
+    /// marks it with a caret. It does not change how the dropdown opens: that is always a click on
+    /// the button, whatever the value.
     /// </summary>
     public enum TypeToggleDropdown
     {
         /// <summary>
-        /// No toggle dropdown.
+        /// The button is rendered without the <c>dropdown-toggle</c> class and therefore without a caret.
         /// </summary>
         None,
 
         /// <summary>
-        /// Toggle dropdown.
+        /// The button is rendered with the <c>dropdown-toggle</c> class and shows a caret.
         /// </summary>
         Toggle
     }

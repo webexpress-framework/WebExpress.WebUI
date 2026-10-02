@@ -105,10 +105,10 @@ new ControlDismissible("detailPanel")
     .Add(new ControlText() { Text = _ => "Pick a character above." });
 ```
 
-For composable variants where additional content is contributed through registered fragments (analogous to `ControlBox`), derive the panel from `FragmentControlDismissible` and register any existing fragment control - a `FragmentControlText`, for instance - for the `SectionPanelDismissibleBody` section, scoped to that panel type. The fragments are rendered after the content the panel adds itself.
+For composable variants where additional content is contributed through registered fragments (analogous to `ControlBox`), derive the panel from `FragmentControlDismissible` and register any existing fragment control - a `FragmentControlText`, for instance - for the `SectionDismissible` section, scoped to that panel type. The fragments are rendered after the content the panel adds itself.
 
 ```csharp
-[Section<SectionPanelDismissibleBody>()]
+[Section<SectionDismissible>()]
 [Scope<DetailPanel>]
 public sealed class DetailHint : FragmentControlText
 {

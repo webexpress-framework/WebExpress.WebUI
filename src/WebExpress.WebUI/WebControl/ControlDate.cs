@@ -5,7 +5,10 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Renders a date picker, an input field that lets the user choose a calendar date.
+    /// Renders a calendar date as formatted, read-only text. The date is formatted on the server
+    /// with <see cref="Format"/> and the culture of the request; the client then decorates it with
+    /// a calendar icon. It is a display only - neither an input field nor a date picker. A date
+    /// the user enters or picks belongs in a <see cref="ControlFormItemInputDate"/>.
     /// </summary>
     public class ControlDate : Control, IControlTableTemplate
     {

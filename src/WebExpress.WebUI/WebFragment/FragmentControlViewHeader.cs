@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a control view for a fragment, implementing the IFragmentControlViewHeader interface.
+    /// Base class for a view header that is contributed as a fragment, so a plugin can add a header to an existing view.
     /// </summary>
     public abstract class FragmentControlViewHeader : ControlViewHeader, IFragmentControlViewHeader
     {

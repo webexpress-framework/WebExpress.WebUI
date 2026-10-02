@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a control view for a fragment, implementing the IFragmentControlViewFooter interface.
+    /// Base class for a view footer that is contributed as a fragment, so a plugin can add a footer to an existing view.
     /// </summary>
     public abstract class FragmentControlViewFooter : ControlViewFooter, IFragmentControlViewFooter
     {

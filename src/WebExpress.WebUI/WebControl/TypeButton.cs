@@ -1,22 +1,23 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// The visual style of a button (for example primary or secondary), controlling its appearance.
+    /// The value of the button's <c>type</c> attribute, which decides what pressing it does inside a
+    /// form. It does not affect the appearance; the visual style comes from the button's color.
     /// </summary>
     public enum TypeButton
     {
         /// <summary>
-        /// Default button type.
+        /// A plain button (<c>type="button"</c>) that neither submits nor resets its form.
         /// </summary>
-        Default = 0, // Button
+        Default = 0,
 
         /// <summary>
-        /// Submit button type.
+        /// A button that submits its form (<c>type="submit"</c>).
         /// </summary>
         Submit = 1,
 
         /// <summary>
-        /// Reset button type.
+        /// A button that resets its form to the initial values (<c>type="reset"</c>).
         /// </summary>
         Reset = 2
     }

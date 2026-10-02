@@ -6,7 +6,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a calendar input form item that supports single or range-based date selection.
+    /// Represents a form input that shows an inline calendar for picking a date range, a start and
+    /// an end date. For a single date use <see cref="ControlFormItemInputCalendar"/>.
     /// </summary>
     public class ControlFormItemInputCalendarRange : ControlFormItemInput<ControlFormInputValueDateRange>
     {

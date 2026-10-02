@@ -1,22 +1,24 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// The flexbox layout direction used to arrange a control's children.
+    /// Whether a control is a flex container, and whether it behaves as a block or as an inline
+    /// element towards its surroundings. The direction its children are laid out in is set
+    /// separately with <see cref="TypeDirection"/>.
     /// </summary>
     public enum TypeLayoutFlex
     {
         /// <summary>
-        /// No layout specified.
+        /// The control is not a flex container.
         /// </summary>
         None,
 
         /// <summary>
-        /// Default flexbox layout.
+        /// The control is a block-level flex container (<c>d-flex</c>).
         /// </summary>
         Default,
 
         /// <summary>
-        /// Inline flexbox layout.
+        /// The control is an inline flex container (<c>d-inline-flex</c>).
         /// </summary>
         Inline
     }

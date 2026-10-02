@@ -1,17 +1,18 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// The decoration applied to text (for example underline or line-through).
+    /// Whether the decoration a text would get from its element is kept or suppressed, for example
+    /// to remove the underline of a link. Adding a decoration is not supported.
     /// </summary>
     public enum TypeTextDecoration
     {
         /// <summary>
-        /// The default text decoration.
+        /// The text keeps the decoration of its element.
         /// </summary>
         Default,
 
         /// <summary>
-        /// No text decoration.
+        /// Any decoration is removed (<c>text-decoration-none</c>).
         /// </summary>
         None
     }

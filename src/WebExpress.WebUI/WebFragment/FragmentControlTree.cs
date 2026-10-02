@@ -6,9 +6,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a control tree for a fragment, implementing the IFragmentControl interface.
+    /// Base class for a tree that is contributed as a fragment, so the framework can insert it into a page section from a plugin.
     /// </summary>
-    /// <typeparam name="ControlTree">The type of control tree.</typeparam>
     public abstract class FragmentControlTree : ControlTree, IFragmentControl<ControlTree>
     {
         /// <summary>

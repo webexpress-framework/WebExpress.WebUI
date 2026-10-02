@@ -1,7 +1,9 @@
 ﻿namespace WebExpress.WebUI.WebNotification
 {
     /// <summary>
-    /// The layout options of the notification.
+    /// The color scheme of a notification, which tells the reader at a glance what kind of
+    /// message it carries (for example success, warning or danger). It does not change the
+    /// layout of the notification.
     /// </summary>
     public enum TypeNotification
     {

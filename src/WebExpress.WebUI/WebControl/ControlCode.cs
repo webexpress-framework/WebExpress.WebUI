@@ -6,7 +6,10 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a text control with various formatting options.
+    /// Renders a read-only block of source code. The client adds a header with the language name
+    /// and a copy button, syntax highlighting for the chosen <see cref="TypeLanguage"/> and,
+    /// optionally, line numbers. The code is transferred base64-encoded, so it reaches the client
+    /// exactly as given, whitespace and markup characters included.
     /// </summary>
     public class ControlCode : Control
     {
