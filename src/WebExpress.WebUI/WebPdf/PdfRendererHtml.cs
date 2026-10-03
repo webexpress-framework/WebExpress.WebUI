@@ -526,7 +526,7 @@ namespace WebExpress.WebUI.WebPdf
                 HtmlElementTextSemanticsU or HtmlElementEditIns => style with { Underline = true },
                 HtmlElementTextSemanticsS or HtmlElementEditDel => style with { Strikethrough = true },
                 HtmlElementTextSemanticsMark => style with { Background = MarkColor },
-                HtmlElementTextSemanticsCode or HtmlElementTextSemanticsKdb or HtmlElementTextSemanticsSamp
+                HtmlElementTextSemanticsCode or HtmlElementTextSemanticsKbd or HtmlElementTextSemanticsSamp
                     => style with { FontFamily = PdfFontFamily.Courier, Scale = style.Scale * 0.9f, Background = CodeColor },
                 HtmlElementTextSemanticsSup => style with { Superscript = true },
                 HtmlElementTextSemanticsSub => style with { Subscript = true },

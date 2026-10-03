@@ -299,7 +299,7 @@ namespace WebExpress.WebUI.WebControl
                     };
                     break;
                 case TypeFormatText.Input:
-                    html = new HtmlElementTextSemanticsKdb(new HtmlText(text))
+                    html = new HtmlElementTextSemanticsKbd(new HtmlText(text))
                     {
                         Id = Id,
                         Class = GetClasses(renderContext),
