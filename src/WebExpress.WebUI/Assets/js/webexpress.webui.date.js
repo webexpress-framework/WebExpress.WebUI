@@ -20,8 +20,12 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
         this._dateFormat = element.getAttribute("data-format") || this._i18n("webexpress.webui:calendar.format");
         this._rangeSeparator = element.dataset.separator || " – ";
 
-        // normalize initial value
-        this._value = this._normalizeValue(initialText);
+        // the server-formatted text honors the request culture, which the client parser cannot
+        // read back for every format; the culture-neutral data-value carries the actual date
+        const isoValue = element.getAttribute("data-value");
+        this._value = isoValue
+            ? this._parseDate(isoValue, "yyyy-MM-dd")
+            : this._normalizeValue(initialText);
 
         // extract color configuration from data-color
         const colorCss = element.getAttribute("data-color-css") || null;
@@ -52,7 +56,11 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
 
         element.appendChild(span);
 
-        this.render();
+        if (isoValue && this._value) {
+            this._span.textContent = initialText;
+        } else {
+            this.render();
+        }
     }
 
     /**

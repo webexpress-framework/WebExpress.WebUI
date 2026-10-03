@@ -1736,6 +1736,14 @@ legend {
     display: table-cell !important;
 }
 
+.float-left {
+    float: left !important;
+}
+
+.float-right {
+    float: right !important;
+}
+
 .position-static {
     position: static !important;
 }

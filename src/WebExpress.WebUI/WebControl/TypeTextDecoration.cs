@@ -12,7 +12,8 @@
         Default,
 
         /// <summary>
-        /// Any decoration is removed (<c>text-decoration-none</c>).
+        /// For text whose element brings a decoration that would be noise there, such as a link
+        /// inside a card that is already recognizable as clickable.
         /// </summary>
         None
     }

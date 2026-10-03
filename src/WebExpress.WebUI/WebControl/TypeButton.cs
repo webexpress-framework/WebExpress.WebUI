@@ -7,17 +7,18 @@
     public enum TypeButton
     {
         /// <summary>
-        /// A plain button (<c>type="button"</c>) that neither submits nor resets its form.
+        /// For buttons that run script; it is the safe choice inside a form, where a button
+        /// without a type would submit the form by accident.
         /// </summary>
         Default = 0,
 
         /// <summary>
-        /// A button that submits its form (<c>type="submit"</c>).
+        /// For the button that sends the form, so pressing enter in a field triggers it as well.
         /// </summary>
         Submit = 1,
 
         /// <summary>
-        /// A button that resets its form to the initial values (<c>type="reset"</c>).
+        /// For discarding all edits at once; rarely wanted, since a misclick loses the user's input.
         /// </summary>
         Reset = 2
     }

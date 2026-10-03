@@ -14,12 +14,12 @@
         Default,
 
         /// <summary>
-        /// The control is placed at the left edge (<c>float-left</c>).
+        /// The control is placed at the left edge, with the following content flowing around its right side.
         /// </summary>
         Left,
 
         /// <summary>
-        /// The control is placed at the right edge (<c>float-right</c>).
+        /// The control is placed at the right edge, with the following content flowing around its left side.
         /// </summary>
         Right
     }

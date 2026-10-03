@@ -4,8 +4,9 @@ using WebExpress.WebCore.WebHtml;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an action that dismisses a modal dialog by applying 
-    /// the appropriate attributes to an HTML node.
+    /// Represents an action that ends the fullscreen mode of the target element. The client
+    /// handles dismissal through its own <c>data-wx-dismiss</c> marker rather than the primary and
+    /// secondary action slots, so the action always fires on a click, whatever slot it is bound to.
     /// </summary>
     public class ActionDismiss : IAction
     {
@@ -32,7 +33,7 @@ namespace WebExpress.WebUI.WebControl
         /// The HTML node to which user attributes will be applied. Cannot be null.
         /// </param>
         /// <param name="typeAction">
-        /// The type of action being applied, which may influence how attributes are applied.
+        /// Ignored, since the dismiss marker has no slot; the parameter only satisfies <see cref="IAction"/>.
         /// </param>
         /// <returns>The current instance for method chaining.</returns>
         public IAction ApplyUserAttributes(IHtmlNode htmlNode, TypeAction typeAction = TypeAction.Primary)

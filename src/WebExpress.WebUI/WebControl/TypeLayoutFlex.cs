@@ -13,12 +13,13 @@
         None,
 
         /// <summary>
-        /// The control is a block-level flex container (<c>d-flex</c>).
+        /// For a container that takes the full width and starts on its own line, such as a toolbar row.
         /// </summary>
         Default,
 
         /// <summary>
-        /// The control is an inline flex container (<c>d-inline-flex</c>).
+        /// For a container that sits within a line of text and is only as wide as its children,
+        /// such as an icon next to a label.
         /// </summary>
         Inline
     }

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -6,9 +7,11 @@ namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// Renders a calendar date as formatted, read-only text. The date is formatted on the server
-    /// with <see cref="Format"/> and the culture of the request; the client then decorates it with
-    /// a calendar icon. It is a display only - neither an input field nor a date picker. A date
-    /// the user enters or picks belongs in a <see cref="ControlFormItemInputDate"/>.
+    /// with <see cref="Format"/> and the culture of the request, and the client keeps that text
+    /// and only adds a calendar icon. The date also travels in culture-neutral form, because the
+    /// client cannot parse every culture-specific format and needs the value when it is changed
+    /// from script. It is a display only - neither an input field nor a date picker. A date the
+    /// user enters or picks belongs in a <see cref="ControlFormItemInputDate"/>.
     /// </summary>
     public class ControlDate : Control, IControlTableTemplate
     {
@@ -48,18 +51,24 @@ namespace WebExpress.WebUI.WebControl
             var format = Format?.Invoke(renderContext);
             var color = Color?.Invoke(renderContext);
 
-            var d = date > DateTime.MinValue
+            var role = Role?.Invoke(renderContext);
+            var hasDate = date > DateTime.MinValue;
+
+            var text = hasDate
                  ? date?.ToString(format, renderContext.Request.Culture)
                  : "";
 
-            var html = new HtmlElementTextContentDiv(new HtmlText(d))
+            var html = new HtmlElementTextContentDiv(new HtmlText(text))
             {
                 Id = Id,
-                Class = "wx-webui-date"
+                Class = Css.Concatenate("wx-webui-date", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
+                Role = role
             }
                 .AddUserAttribute("data-color-css", color?.ToClass())
                 .AddUserAttribute("data-color-style", color?.ToStyle())
-                .AddUserAttribute("data-format", format);
+                .AddUserAttribute("data-format", format)
+                .AddUserAttribute("data-value", hasDate ? date?.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) : null);
 
             return html;
         }

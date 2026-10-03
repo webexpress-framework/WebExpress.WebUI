@@ -6,10 +6,12 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Renders a read-only block of source code. The client adds a header with the language name
-    /// and a copy button, syntax highlighting for the chosen <see cref="TypeLanguage"/> and,
-    /// optionally, line numbers. The code is transferred base64-encoded, so it reaches the client
-    /// exactly as given, whitespace and markup characters included.
+    /// Renders a read-only block of source code with a copy button and, optionally, line numbers.
+    /// Only when a <see cref="TypeLanguage"/> other than the default is chosen does the client add
+    /// a header with the language name and syntax highlighting; without one the code stays plain
+    /// text, since there is no language to name or highlight. The code is transferred
+    /// base64-encoded, so it reaches the client exactly as given, whitespace and markup characters
+    /// included.
     /// </summary>
     public class ControlCode : Control
     {
