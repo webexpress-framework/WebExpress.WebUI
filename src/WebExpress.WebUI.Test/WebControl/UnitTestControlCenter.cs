@@ -44,6 +44,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(TypeColorBackground.Dark, @"<div class=""bg-dark""></div>")]
         [InlineData(TypeColorBackground.Light, @"<div class=""bg-light""></div>")]
         [InlineData(TypeColorBackground.Highlight, @"<div class=""bg-highlight""></div>")]
+        [InlineData(TypeColorBackground.Tertiary, @"<div class=""bg-body-tertiary""></div>")]
         [InlineData(TypeColorBackground.Transparent, @"<div class=""bg-transparent""></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {

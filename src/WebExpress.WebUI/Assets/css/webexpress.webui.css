@@ -906,8 +906,12 @@ legend {
     background: var(--wx-secondary-bg) !important;
 }
 
+/* a theme surface resets the on-surface color, so a colored ancestor's contrast text does not
+   leak onto it */
 .bg-body-tertiary {
     background: var(--wx-tertiary-bg) !important;
+    color: var(--wx-body-color);
+    --wx-on-surface: var(--wx-body-color);
 }
 
 .bg-transparent {
