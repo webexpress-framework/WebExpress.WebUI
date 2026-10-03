@@ -3,7 +3,7 @@
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a submit button form item control.
+    /// A submit button inside a form that sends the form's data to the server.
     /// </summary>
     public class ControlFormItemButtonSubmit : ControlFormItemButton
     {

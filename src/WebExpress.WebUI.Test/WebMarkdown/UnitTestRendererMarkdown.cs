@@ -312,5 +312,88 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             // validation
             Assert.Contains("[^1]", result);
         }
+
+        /// <summary>
+        /// Tests that a table keeps its column count and its alignment through a round
+        /// trip, so a document written and read again does not grow a column per pass.
+        /// </summary>
+        [Fact]
+        public void RoundTripTable()
+        {
+            // arrange
+            var markdown = "| a | b | c |\n|:---|:---:|---:|\n| 1 | 2 | 3 |";
+
+            // act
+            var result = MarkdownParser.Parse(markdown).ConvertToMarkdown();
+            var table = MarkdownParser.Parse(MarkdownParser.Parse(result).ConvertToMarkdown()).Elements.OfType<MarkdownBlockElementTable>().Single();
+
+            // validation
+            Assert.Contains("| --- | :---: | ---: |", result);
+            Assert.Equal(3, table.Columns.Count());
+            Assert.Equal(3, table.Rows.Single().Count());
+            Assert.Equal(new[] { MarkdownCellAlign.Left, MarkdownCellAlign.Center, MarkdownCellAlign.Right }, table.Columns.Select(c => c.Align));
+        }
+
+        /// <summary>
+        /// Tests that the formatting inside cells, pipes in cell text and the footer survive
+        /// a round trip; a pipe written unescaped would split its cell when read again.
+        /// </summary>
+        [Fact]
+        public void RoundTripTableContent()
+        {
+            // arrange
+            var markdown = "| **Name** | Note |\n|---|---|\n| [map](/m) and x\\|y | `a\\|b` ~~old~~ |\n|---|---|\n| *Total* | 2 |";
+
+            // act
+            var result = MarkdownParser.Parse(markdown).ConvertToMarkdown();
+            var table = MarkdownParser.Parse(result).Elements.OfType<MarkdownBlockElementTable>().Single();
+            var row = table.Rows.Single().ToList();
+
+            // validation
+            Assert.Contains("| **Name** | Note |", result);
+            Assert.Contains("| [map](/m) and x\\|y | `a\\|b` ~~old~~ |", result);
+            Assert.Contains("| *Total* | 2 |", result);
+            Assert.Equal(2, table.Columns.Count());
+            Assert.Equal(2, row.Count);
+            var name = Assert.IsType<MarkdownBlockElementParagraph>(Assert.Single(row[0].Content)).Content.ToList();
+            Assert.Equal("map", Assert.IsType<MarkdownInlineElementLink>(name[0]).Text);
+            Assert.Equal(" and x|y", string.Concat(name.Skip(1).Select(x => x.PlainText)));
+            var note = Assert.IsType<MarkdownBlockElementParagraph>(Assert.Single(row[1].Content)).Content.ToList();
+            Assert.Equal("a|b", Assert.IsType<MarkdownInlineElementCode>(note[0]).Code);
+            Assert.IsType<MarkdownInlineElementStrikethrough>(note[^1]);
+            Assert.Equal(new[] { "Total", "2" }, table.Footers.Select(c => c.PlainText));
+        }
+
+        /// <summary>
+        /// Tests that a table built from HTML, whose cells hold inline elements directly,
+        /// keeps their formatting when written as Markdown.
+        /// </summary>
+        [Fact]
+        public void TableFromHtmlKeepsFormatting()
+        {
+            // act
+            var markdown = MarkdownRendererHtmlToMarkdown.ConvertHtmlToMarkdown(
+                "<table><thead><tr><th>Name</th><th>Note</th></tr></thead>"
+                + "<tbody><tr><td><strong>Guybrush</strong></td><td>a | b</td></tr></tbody></table>");
+
+            // validation
+            Assert.Contains("| **Guybrush** | a \\| b |", markdown);
+        }
+
+        /// <summary>
+        /// Tests that an escaped pipe is a literal pipe outside of tables too, while a code
+        /// span outside a table keeps its text verbatim.
+        /// </summary>
+        [Fact]
+        public void EscapedPipe()
+        {
+            // act
+            var doc = MarkdownParser.Parse("a \\| b `c\\|d`");
+            var paragraph = Assert.IsType<MarkdownBlockElementParagraph>(Assert.Single(doc.Elements));
+
+            // validation
+            Assert.StartsWith("a | b", string.Concat(paragraph.Content.Select(x => x.PlainText)));
+            Assert.Equal("c\\|d", paragraph.Content.OfType<MarkdownInlineElementCode>().Single().Code);
+        }
     }
 }

@@ -3,7 +3,7 @@
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form input value of type string.
+    /// Represents the value of a form input field as text.
     /// </summary>
     public class ControlFormInputValueString : IControlFormInputValue
     {

@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a table control.
+    /// A table control whose rows can be reordered by the user via drag and drop.
     /// </summary>
     public class ControlTableReorderable : ControlTable, IControlTableReorderable
     {
@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-table-reorderable", classes),
-                Style = GetStyles(),
+                Style = GetStyles(renderContext),
                 Role = role
             }
                 .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass())
@@ -85,7 +85,8 @@ namespace WebExpress.WebUI.WebControl
                     (
                         row => row.Render(renderContext, visualTree)
                     )
-                );
+                )
+                .Add(RenderFooter(renderContext, visualTree));
 
             return html;
         }

@@ -1,13 +1,13 @@
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
-    /// Represents an icon for a outdent.
+    /// Represents an icon for decreasing the indentation.
     /// </summary>
     public class IconOutdent : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-outdent";
+        public override string Symbol => "outdent";
     }
 }

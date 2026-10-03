@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a navigation item dropdown control.
+    /// A navigation-bar entry that opens a dropdown of further items.
     /// </summary>
     public class ControlNavigationItemDropdown : ControlDropdown, IControlNavigationItem
     {

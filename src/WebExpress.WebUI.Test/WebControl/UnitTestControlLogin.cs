@@ -39,7 +39,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-login""></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-login"" dataset-username=""abc""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-login"" data-username=""abc""></div>")]
         public void Username(string login, string expected)
         {
             // arrange
@@ -63,8 +63,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-login""></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-login"" dataset-title=""abc""></div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-login"" dataset-title=""WebExpress.WebUI""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-login"" data-title=""abc""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-login"" data-title=""WebExpress.WebUI""></div>")]
         public void Title(string title, string expected)
         {
             // arrange

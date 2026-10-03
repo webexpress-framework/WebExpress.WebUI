@@ -1,10 +1,12 @@
 .wx-form {
     padding: 0.5em;
-    background-color: var(--bs-light);
+    background-color: var(--wx-light);
 }
 
-[data-bs-theme="dark"] .wx-form {
-    background-color: var(--bs-body-bg);
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-form {
+    background-color: var(--wx-body-bg);
+}
 }
 
 .wx-form-label {
@@ -13,12 +15,17 @@
     align-items: baseline;
 }
 
+.wx-form-label-row {
+    display: flex;
+    align-items: center;
+}
+
 .wx-form-required {
-    color: var(--bs-danger);
+    color: var(--wx-danger);
 }
 
 .wx-input-success {
-    border-color: var(--bs-success);
+    border-color: var(--wx-success);
 }
 
 .wx-input-success:focus {
@@ -26,7 +33,7 @@
 }
 
 .wx-input-warning {
-    border-color: var(--bs-warning);
+    border-color: var(--wx-warning);
 }
 
 .wx-input-warning:focus {
@@ -34,7 +41,7 @@
 }
 
 .wx-input-error {
-    border-color: var(--bs-danger) !important;
+    border-color: var(--wx-danger) !important;
 }
 
 .wx-input-error:focus {
@@ -140,14 +147,12 @@
     margin-top: 0.5em;
 }
 
-[data-bs-theme="dark"] .wx-form .form-control {
-    background-color: black;
-}
+
 
 .wx-validation-alert {
-    border-left: 4px solid var(--bs-danger);
-    background-color: var(--bs-danger-bg-subtle);
-    color: var(--bs-danger-text);
+    border-left: 4px solid var(--wx-danger);
+    background-color: var(--wx-danger-bg-subtle);
+    color: var(--wx-danger-text-emphasis);
     padding: 0.75rem 1rem;
     border-radius: 0.375rem;
     font-size: 0.95rem;
@@ -157,3 +162,12 @@
 .wx-login {
     flex: 1;
 }
+
+/* framed by a dialog the form is the whole body, so the last field ends flush with
+   the body padding instead of adding its own gap above the footer */
+.wx-login-plain form > .mb-3:last-child {
+    margin-bottom: 0;
+}
+
+.wx-login { background: var(--wx-tertiary-bg); color: var(--wx-body-color); }
+.wx-login > .card { background: var(--wx-body-bg); color: var(--wx-body-color); }

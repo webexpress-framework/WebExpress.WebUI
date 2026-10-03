@@ -2,7 +2,7 @@
 
 # InputPasswordCtrl
 
-The `InputPasswordCtrl` component provides a password input field. The component is fully configurable via `data-*` attributes on the host element and integrates cleanly into Bootstrap-styled forms.
+The `InputPasswordCtrl` component provides a password input field. The component is fully configurable via `data-*` attributes on the host element and integrates cleanly into WebExpress forms.
 
 ```
    ┌────────────────────────────┐
@@ -28,7 +28,7 @@ All `data-*` configuration attributes are removed from the host element during i
 
 ## Functionality
 
-The control renders an [Bootstrap input group](https://getbootstrap.com/docs/5.0/forms/input-group/) consisting of a password input:
+The control renders a WebExpress input group consisting of a password input:
 
 - The **visible input** starts as `<input type="password">` and is updated to `<input type="text">` when the user reveals the password.
 - Every keystroke in the visible input fires `CHANGE_VALUE_EVENT` with the current value as payload.

@@ -47,7 +47,7 @@ webexpress.webui.Syntax.register("groovy", null, (code) => {
 
     // The function converts detected syntax elements into HTML span tags for highlighting
     function tokenToSpan(token, value) {
-        return `<span class="${token}">${value}</span>`;
+        return `<span class="${token}">${webexpress.webui.Syntax.escape(value)}</span>`;
     }
 
     // The Groovy code is processed line by line and returned with highlighting
@@ -58,7 +58,7 @@ webexpress.webui.Syntax.register("groovy", null, (code) => {
 
         for (const match of matches) {
             const index = match.index;
-            result += line.slice(lastIndex, index);
+            result += webexpress.webui.Syntax.escape(line.slice(lastIndex, index));
 
             for (const key in match.groups) {
                 if (match.groups[key] !== undefined) {
@@ -69,7 +69,7 @@ webexpress.webui.Syntax.register("groovy", null, (code) => {
             lastIndex = index + match[0].length;
         }
 
-        result += line.slice(lastIndex);
+        result += webexpress.webui.Syntax.escape(line.slice(lastIndex));
         return `<span>${result}</span>`;
     }).join('');
 });

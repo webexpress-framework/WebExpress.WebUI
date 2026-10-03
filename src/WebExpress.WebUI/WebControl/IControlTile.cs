@@ -25,6 +25,12 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, bool> AllowRemove { get; }
 
         /// <summary>
+        /// Gets a value indicating whether the tiles take the height their host
+        /// offers instead of growing with their number.
+        /// </summary>
+        Func<IRenderControlContext, bool> Fill { get; }
+
+        /// <summary>
         /// Adds one or more items to the tile control.
         /// </summary>
         /// <param name="items">The items to add.</param>

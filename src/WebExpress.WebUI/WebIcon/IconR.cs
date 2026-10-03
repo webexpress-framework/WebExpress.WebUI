@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconR : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-r";
+        public override string Symbol => "r";
     }
 }

@@ -254,5 +254,30 @@ namespace WebExpress.WebUI.Test.WebControl
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
+        /// <summary>
+        /// Tests that the reorderable table renders its footer after the rows like the
+        /// plain table does.
+        /// </summary>
+        [Fact]
+        public void AddFooter()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableReorderable();
+
+            control.AddRow(new ControlTableCell() { Text = _ => "a" });
+            control.AddFooter(new ControlTableCell() { Text = _ => "sum" });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            var expected = @"<div class=""wx-webui-table-reorderable""><div class=""wx-table-columns""></div><div class=""wx-table-row""><div>a</div></div><div class=""wx-table-footer""><div>sum</div></div></div>";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
     }
 }

@@ -106,6 +106,58 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that the fill mode reaches the rich-text surface, and only it: the other
+        /// formats size themselves from the row count, so an editor attribute on them would
+        /// promise a behaviour their markup cannot have.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeEditTextFormat.Wysiwyg, true, @"<div class=""wx-webui-editor form-control"" data-fill=""true""></div>")]
+        [InlineData(TypeEditTextFormat.Wysiwyg, false, @"<div class=""wx-webui-editor form-control""></div>")]
+        [InlineData(TypeEditTextFormat.Multiline, true, @"<textarea class=""form-control"" rows=""8""></textarea>")]
+        [InlineData(TypeEditTextFormat.Default, true, @"<input type=""text"" class=""form-control"">")]
+        public void Fill(TypeEditTextFormat format, bool fill, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputText(null)
+            {
+                Format = _ => format,
+                Fill = _ => fill
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that an undeclared fill resolver leaves the editor markup untouched, so a
+        /// control written before the mode existed renders exactly as it did.
+        /// </summary>
+        [Fact]
+        public void FillNotDeclared()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputText(null)
+            {
+                Format = _ => TypeEditTextFormat.Wysiwyg
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-editor form-control""></div>", html);
+        }
+
+        /// <summary>
         /// Tests the description property of the form text control.
         /// </summary>
         [Theory]
@@ -282,8 +334,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form text control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input type=""text"" class=""form-control"">*")]
-        [InlineData("abc", @"*<input value=""abc"" type=""text"" class=""form-control"">*")]
+        [InlineData(null, @"*<input id=""*"" type=""text"" class=""form-control"">*")]
+        [InlineData("abc", @"*<input id=""*"" value=""abc"" type=""text"" class=""form-control"">*")]
         public void ValueForm(string value, string expected)
         {
             // arrange
@@ -310,8 +362,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form text control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<input type=""text"" class=""form-control"">*")]
-        [InlineData("abc", @"*<input value=""abc"" type=""text"" class=""form-control"">*")]
+        [InlineData(null, @"*<input id=""*"" type=""text"" class=""form-control"">*")]
+        [InlineData("abc", @"*<input id=""*"" value=""abc"" type=""text"" class=""form-control"">*")]
         public void ValueItem(string value, string expected)
         {
             // arrange
@@ -499,6 +551,70 @@ namespace WebExpress.WebUI.Test.WebControl
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
             Assert.True(processed);
+        }
+
+        /// <summary>
+        /// Tests the server side min length check of the form text control. The native
+        /// constraint only guards the browser, so a value that arrived another way has
+        /// to be caught here.
+        /// </summary>
+        [Theory]
+        [InlineData(null, false)]
+        [InlineData("ab", true)]
+        [InlineData("abc", false)]
+        [InlineData("abcd", false)]
+        public void ValidateMinLength(string value, bool expectedError)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var control = new ControlFormItemInputText("text-box")
+            {
+                MinLength = _ => 3u
+            };
+
+            if (value is not null)
+            {
+                context.SetValue(control, new ControlFormInputValueString(value));
+            }
+
+            // act
+            var results = control.Validate(context).ToList();
+
+            // validation
+            Assert.Equal(expectedError, results.Any(x => x.Type == TypeInputValidity.Error));
+        }
+
+        /// <summary>
+        /// Tests the server side max length check of the form text control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, false)]
+        [InlineData("abc", false)]
+        [InlineData("abcd", false)]
+        [InlineData("abcde", true)]
+        public void ValidateMaxLength(string value, bool expectedError)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var control = new ControlFormItemInputText("text-box")
+            {
+                MaxLength = _ => 4u
+            };
+
+            if (value is not null)
+            {
+                context.SetValue(control, new ControlFormInputValueString(value));
+            }
+
+            // act
+            var results = control.Validate(context).ToList();
+
+            // validation
+            Assert.Equal(expectedError, results.Any(x => x.Type == TypeInputValidity.Error));
         }
     }
 }

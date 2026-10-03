@@ -1,12 +1,14 @@
 /**
  * Styles for the QuickFilter control.
- * Uses only Bootstrap color variables for theme compatibility.
+ * Uses only adaptive WebExpress color variables (body, secondary, tertiary
+ * tokens) for theme compatibility; --wx-light and --wx-dark are static and
+ * would not follow data-wx-theme="dark".
  */
 
 .wx-quickfilter {
     display: block;
     width: 100%;
-    margin-bottom: 1rem;
+    margin-bottom: 0.5rem;
 }
 
 .wx-quickfilter > div {
@@ -17,44 +19,89 @@
     padding: 0.2em;
 }
 
-/* chip-like filter button: default (not active) */
+/* chip-like filter button: default (not active). The accent carries the chip
+   hue - primary by default, swapped by a color class or an inline value - so
+   every state rule below follows a colored chip automatically */
 .wx-quickfilter-btn-chip {
-    outline: none;
     background: transparent;
-    color: var(--bs-primary);
+    /* the text of a hollow chip sits on the body background, where the accent surface
+       color falls short of 4.5:1; the emphasis variant of the hue is the readable one */
+    color: var(--wx-quickfilter-text, var(--wx-primary-text-emphasis));
     font-size: 0.85em;
     font-weight: 500;
     border-radius: 20px;
-    border: 1px solid var(--bs-primary);
+    border: 1px solid var(--wx-quickfilter-accent, var(--wx-primary));
     transition: box-shadow 0.2s, background 0.15s, color 0.2s;
     cursor: pointer;
     gap: 0;
 }
 
+/* a colored chip (btn-primary, btn-danger, ...) draws its accent from the
+   WebExpress button props its color class defines, keeping the outline-to-
+   filled chip behavior in that hue */
+.wx-quickfilter-btn-chip:is(.btn-primary, .btn-secondary, .btn-success, .btn-info, .btn-warning, .btn-danger, .btn-light, .btn-dark, .btn-highlight) {
+    --wx-quickfilter-accent: var(--wx-btn-bg);
+    --wx-quickfilter-contrast: var(--wx-btn-color);
+    --wx-quickfilter-text: var(--wx-btn-bg);
+}
+
+/* the hue of a colored chip has an emphasis variant that reads on the body background */
+.wx-quickfilter-btn-chip.btn-primary { --wx-quickfilter-text: var(--wx-primary-text-emphasis); }
+.wx-quickfilter-btn-chip.btn-secondary { --wx-quickfilter-text: var(--wx-secondary-text-emphasis); }
+.wx-quickfilter-btn-chip.btn-success { --wx-quickfilter-text: var(--wx-success-text-emphasis); }
+.wx-quickfilter-btn-chip.btn-info { --wx-quickfilter-text: var(--wx-info-text-emphasis); }
+.wx-quickfilter-btn-chip.btn-warning { --wx-quickfilter-text: var(--wx-warning-text-emphasis); }
+.wx-quickfilter-btn-chip.btn-danger { --wx-quickfilter-text: var(--wx-danger-text-emphasis); }
+
 /* chip button active state */
 .wx-quickfilter-btn-chip.active,
 .wx-quickfilter-btn-chip[aria-pressed="true"] {
-    background: var(--bs-primary);
-    color: var(--bs-white);
-    border-color: var(--bs-primary);
+    background: var(--wx-quickfilter-accent, var(--wx-primary));
+    color: var(--wx-quickfilter-contrast, var(--wx-white));
+    border-color: var(--wx-quickfilter-accent, var(--wx-primary));
 }
 
 /* chip button hover (not active) */
 .wx-quickfilter-btn-chip:hover {
-    background: var(--bs-light);
-    color: var(--bs-primary);
+    background: var(--wx-tertiary-bg);
+    color: var(--wx-quickfilter-text, var(--wx-primary-text-emphasis));
     box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 /* chip button: active + hover = darker */
 .wx-quickfilter-btn-chip.active:hover,
 .wx-quickfilter-btn-chip[aria-pressed="true"]:hover {
-    background: var(--bs-primary);
-    color: var(--bs-white);
+    background: var(--wx-quickfilter-accent, var(--wx-primary));
+    color: var(--wx-quickfilter-contrast, var(--wx-white));
 }
 
 .wx-quickfilter-btn-chip i {
     margin-right: 0.3em;
+}
+
+/* the trailing count badge of a chip or option; it follows the chip accent
+   and inverts wherever the accent becomes the background (an active chip, a
+   hovered option) so the count stays readable in both states */
+.wx-quickfilter-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 1.5em;
+    padding: 0 0.4em;
+    margin-left: 0.35em;
+    border-radius: 9999px;
+    font-size: 0.78em;
+    font-weight: 600;
+    line-height: 1.5;
+    background: var(--wx-quickfilter-accent, var(--wx-primary));
+    color: var(--wx-quickfilter-contrast, var(--wx-white));
+}
+
+.wx-quickfilter-btn-chip.active .wx-quickfilter-badge,
+.wx-quickfilter-btn-chip[aria-pressed="true"] .wx-quickfilter-badge,
+.wx-quickfilter .dropdown-item:hover .wx-quickfilter-badge {
+    background: var(--wx-quickfilter-contrast, var(--wx-white));
+    color: var(--wx-quickfilter-accent, var(--wx-primary));
 }
 
 /* close button for chips */
@@ -78,26 +125,186 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    background-color: var(--bs-light);
-    color: var(--bs-primary);
+    background-color: var(--wx-tertiary-bg);
+    color: var(--wx-primary);
 }
 
 /* dropdown menu style */
 .wx-quickfilter .dropdown-menu {
     border-radius: 0.5rem;
     padding: 0.5rem 0;
-    background-color: var(--bs-light);
+    background-color: var(--wx-tertiary-bg);
 }
 
 /* dropdown item style */
 .wx-quickfilter .dropdown-item {
     font-size: 0.9rem;
     padding: 0.4rem 1rem;
-    color: var(--bs-dark);
+    color: var(--wx-body-color);
     transition: background-color 0.15s ease-in-out;
 }
 
 .wx-quickfilter .dropdown-item:hover {
-    background-color: var(--bs-primary);
-    color: var(--bs-white);
+    background-color: var(--wx-primary);
+    color: var(--wx-white);
 }
+
+/* the dropdown wrapper positions the menu beneath the toggle */
+.wx-quickfilter .wx-quickfilter-dropdown,
+.wx-quickfilter .wx-quickfilter-multiselect {
+    position: relative;
+}
+
+.wx-quickfilter .wx-quickfilter-dropdown-menu {
+    margin-top: 0.25rem;
+}
+
+.wx-quickfilter .dropdown-item i {
+    margin-right: 0.4em;
+}
+
+/* the toggle is a chip; the caret trails the label and the checks lead the
+   multi-select options */
+.wx-quickfilter-dropdown-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3em;
+}
+
+.wx-quickfilter-dropdown-caret {
+    margin-left: 0.15em;
+    font-size: 0.85em;
+}
+
+/* the multi-select check carries the selection state, so it is colored: muted
+   when unchecked, primary when checked, and white on the hover background */
+.wx-quickfilter .dropdown-item .wx-quickfilter-multiselect-check {
+    margin-right: 0.5em;
+    color: var(--wx-secondary-color, #6c757d);
+}
+
+.wx-quickfilter .dropdown-item .wx-quickfilter-multiselect-check.wx-checked {
+    color: var(--wx-primary, #0d6efd);
+}
+
+.wx-quickfilter .dropdown-item:hover .wx-quickfilter-multiselect-check {
+    color: var(--wx-white, #fff);
+}
+
+/* the search box of a REST dropdown, with a scrollable result list for large
+   option sets */
+.wx-quickfilter-dropdown-search {
+    padding: 0.25rem 0.6rem 0.5rem;
+}
+
+.wx-quickfilter-dropdown-list {
+    max-height: 16rem;
+    overflow-y: auto;
+}
+
+/* avatar filter toggle: a chip carrying a round avatar bubble and a name. The
+   chip padding comes from .btn so the avatar matches the button chips; only the
+   left padding is tucked in so the bubble sits near the edge */
+.wx-quickfilter-avatar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding-left: 0.35rem;
+}
+
+.wx-quickfilter-avatar-bubble {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.4em;
+    height: 1.4em;
+    flex: 0 0 auto;
+    border-radius: 9999px;
+    overflow: hidden;
+    font-size: 0.72em;
+    font-weight: 700;
+    color: var(--wx-white, #fff);
+    background: var(--wx-secondary, #6c757d);
+}
+
+.wx-quickfilter-avatar-bubble img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wx-quickfilter-avatar-name {
+    font-size: 0.85em;
+    font-weight: 500;
+}
+
+/* the chip that creates a new filter: a muted dashed outline sets it apart
+   from the filter chips, and the auto margin keeps it at the trailing edge so
+   its position stays put while filters come and go. Once the bar overflows the
+   free space is gone and the chip simply trails the last one */
+.wx-quickfilter-add {
+    margin-left: auto;
+    border-style: dashed;
+    color: var(--wx-secondary-color, #6c757d);
+    border-color: var(--wx-secondary-color, #6c757d);
+}
+
+/* only the leading add chip absorbs the free space; further ones trail it */
+.wx-quickfilter-add ~ .wx-quickfilter-add {
+    margin-left: 0;
+}
+
+.wx-quickfilter-add:hover {
+    background: var(--wx-tertiary-bg);
+    border-style: solid;
+    color: var(--wx-primary);
+    border-color: var(--wx-primary);
+}
+
+/* an icon-only chip has no label to separate the icon from */
+.wx-quickfilter-add i:only-child {
+    margin-right: 0;
+}
+
+/* the options menu of a user-defined filter. A button holds no buttons, so the
+   chip and its menu share a wrapper, which is also the positioning context that
+   drops the menu beneath the chip it belongs to */
+.wx-quickfilter-chip-wrap {
+    position: relative;
+    display: inline-flex;
+}
+
+.wx-quickfilter-menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 0.4em;
+    padding: 0 0.15em;
+    border-radius: 0.25em;
+    opacity: 0.65;
+    cursor: pointer;
+}
+
+.wx-quickfilter-menu-toggle:hover,
+.wx-quickfilter-menu-toggle:focus-visible {
+    opacity: 1;
+}
+
+.wx-quickfilter-menu-toggle i {
+    margin-right: 0;
+    font-size: 0.9em;
+}
+
+/* the menu carries the chip's own text color, which would be the accent of an
+   inactive chip and the contrast of an active one - neither is readable on the
+   menu surface, so it resets to the body color */
+.wx-quickfilter-menu {
+    margin-top: 0.25rem;
+    padding: 0.25rem 0;
+    border-radius: 0.5rem;
+    background-color: var(--wx-tertiary-bg);
+    color: var(--wx-body-color);
+    font-weight: 400;
+}
+
+
+.wx-quickfilter-menu-toggle { border: 0; background: transparent; color: inherit; }

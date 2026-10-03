@@ -1,7 +1,8 @@
 namespace WebExpress.WebUI.WebMarkdown.Element
 {
     /// <summary>
-    /// Represents a checkbox element.
+    /// An inline checkbox node in the parsed Markdown tree — the task-list marker written as
+    /// <c>[ ]</c> (unchecked) or <c>[x]</c> (checked).
     /// </summary>
     public class MarkdownInlineElementCheckbox : MarkdownInlineElement
     {

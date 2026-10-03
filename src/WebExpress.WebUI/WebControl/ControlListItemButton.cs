@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a button control within a list item.
+    /// A button rendered as an entry within a list.
     /// </summary>
     /// <remarks>
     /// This control is used to create a button element within a list item, 

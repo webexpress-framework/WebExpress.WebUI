@@ -1,0 +1,58 @@
+/* metric / KPI tile, scoped to .wx-stat */
+
+.wx-stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.85rem;
+    padding: 0.85rem 1rem;
+}
+
+.wx-stat-icon {
+    flex: 0 0 auto;
+    width: 44px;
+    height: 44px;
+    border-radius: 0.6rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    background: var(--wx-secondary-bg, #e9ecef);
+    color: var(--wx-primary, #0d6efd);
+}
+
+.wx-stat-body {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.wx-stat-label {
+    font-size: 0.8rem;
+    color: var(--wx-secondary-color, #6c757d);
+}
+
+.wx-stat-value {
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--wx-body-color, #212529);
+}
+
+.wx-stat-delta {
+    margin-top: 0.1rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+/* the emphasis shades: the raw tints fall short of 4.5:1 on the dark body */
+.wx-stat-up {
+    color: var(--wx-success-text-emphasis, #0a3622);
+}
+
+.wx-stat-down {
+    color: var(--wx-danger-text-emphasis, #58151c);
+}
+
+.wx-stat-neutral {
+    color: var(--wx-secondary-color, #6c757d);
+}

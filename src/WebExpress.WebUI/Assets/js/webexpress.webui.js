@@ -207,11 +207,28 @@ webexpress.webui.Controller = new class {
             // handle added nodes
             for (const node of mutation.addedNodes) {
                 if (node.nodeType === Node.ELEMENT_NODE) {
+                    // a record describes the dom as it was, not as it is: while the
+                    // page is parsed, the batch still carries the insertion of an
+                    // element that a control has since detached to hold on to (the
+                    // smart edit takes its editor out of the host it was parsed
+                    // into). clearing the mark on that stale record would strip the
+                    // protection from an element a control still owns, and the next
+                    // batch would destroy it. only a node that is connected now was
+                    // really re-attached.
+                    if (node.isConnected) {
+                        delete node._wxDetached;
+                    }
                     this.createInstances(node);
                     // quickfilter
                     node.querySelectorAll?.("[data-wx-primary-action='filter']").forEach(el => {
                         this._registerQuickfilterElement(el);
                     });
+                }
+            }
+            // handle removed nodes - destroy instances deterministically
+            for (const node of mutation.removedNodes) {
+                if (node.nodeType === Node.ELEMENT_NODE) {
+                    this.removeInstances(node);
                 }
             }
         }
@@ -271,19 +288,60 @@ webexpress.webui.Controller = new class {
     }
 
     /**
-     * Removes instances for removed DOM elements.
+     * Removes instances for removed DOM elements. The instance of the element
+     * and of every descendant is destroyed and dropped from the instance map,
+     * which gives every subscription, timer and in-flight request a
+     * deterministic teardown. An element that is still connected at the time
+     * the mutation batch is processed was moved rather than removed, for
+     * example through a temporary detach, and is left untouched. The same
+     * applies to an intentionally detached element nested in the removed
+     * subtree: a control that parks such an element inside a container it later
+     * clears (the smart edit puts its editor into a form and empties the host
+     * again when the edit ends) still holds it and will re-attach it.
      * @param {Element} element - The DOM element whose instances should be removed.
      */
     removeInstances(element) {
-        if (this.instanceMap.has(element)) {
-            this.instanceMap.delete(element);
+        if (element.isConnected || element._wxDetached) {
+            return;
         }
-        // remove instances for all descendants
-        element.querySelectorAll('*').forEach((child) => {
-            if (this.instanceMap.has(child)) {
-                this.instanceMap.delete(child);
+
+        const destroyInstance = (el) => {
+            // run cleanups that binds registered on the element
+            if (Array.isArray(el._wxCleanup)) {
+                for (const cleanup of el._wxCleanup) {
+                    try {
+                        cleanup();
+                    } catch (error) {
+                        console.error("Error running element cleanup", el, error);
+                    }
+                }
+                delete el._wxCleanup;
             }
-        });
+
+            const instance = this.instanceMap.get(el);
+            if (instance) {
+                try {
+                    instance.destroy?.();
+                } catch (error) {
+                    console.error("Error destroying instance", el, error);
+                }
+                this.instanceMap.delete(el);
+            }
+        };
+
+        // walked by hand rather than through querySelectorAll, because a
+        // detached branch has to be skipped as a whole: its content belongs to
+        // the control that holds it, not to the subtree being torn down
+        const destroySubtree = (el) => {
+            if (el._wxDetached) {
+                return;
+            }
+            destroyInstance(el);
+            Array.from(el.children).forEach(destroySubtree);
+        };
+
+        destroyInstance(element);
+        Array.from(element.children).forEach(destroySubtree);
     }
 
     /**
@@ -535,8 +593,64 @@ webexpress.webui.Controller = new class {
 };
 
 /**
+ * Keeps optional UI preferences on the client without making controls depend
+ * on storage access, which browsers may deny or exhaust independently of the UI.
+ */
+webexpress.webui.LocalStorage = class {
+    /**
+     * Returns a preference when storage is available, otherwise the default.
+     * @param {string|null} key - A stable preference key, or null to disable persistence.
+     * @returns {string|null} The stored value, or null.
+     */
+    static getItem(key) {
+        if (!key) return null;
+        try {
+            return localStorage.getItem(key);
+        } catch {
+            return null;
+        }
+    }
+
+    /**
+     * Remembers a preference without interrupting an interaction when storage is unavailable.
+     * @param {string|null} key - A stable preference key, or null to disable persistence.
+     * @param {string} value - The preference to retain across visits.
+     */
+    static setItem(key, value) {
+        if (!key) return;
+        try {
+            localStorage.setItem(key, value);
+        } catch {
+            // storage is optional; the control still keeps its current state
+        }
+    }
+
+    /**
+     * Treats damaged JSON as a missing preference so controls can use their defaults.
+     * @param {string|null} key - A stable preference key.
+     * @returns {*} The stored JSON value, or null.
+     */
+    static getJson(key) {
+        try {
+            return JSON.parse(this.getItem(key));
+        } catch {
+            return null;
+        }
+    }
+
+    /**
+     * Retains structured UI state as JSON for subsequent visits.
+     * @param {string|null} key - A stable preference key.
+     * @param {*} value - JSON-serializable UI state.
+     */
+    static setJson(key, value) {
+        this.setItem(key, JSON.stringify(value));
+    }
+};
+
+/**
  * Central registry for managing client-side quick filters.
- * Handles state, enforces group exclusivity, persists to cookies, and notifies observers.
+ * Handles state, enforces group exclusivity, persists to localStorage, and notifies observers.
  */
 webexpress.webui.FilterRegistry = new class {
     /**
@@ -545,7 +659,7 @@ webexpress.webui.FilterRegistry = new class {
     constructor() {
         this._knownFilters = new Map();
         this._activeFilters = new Set();
-        this._cookieName = "wx_quickfilters";
+        this._storageKey = "wx_quickfilters";
         this._saveTimer = null;
         this._debounceTime = 300;
     }
@@ -559,27 +673,83 @@ webexpress.webui.FilterRegistry = new class {
             for (let i = 0; i < filters.length; i++) {
                 const f = filters[i];
                 if (f && f.id) {
-                    this._knownFilters.set(f.id, {
-                        id: f.id,
-                        name: f.name || f.id,
-                        group: f.group || null,
-                        exclusive: f.exclusive === true,
-                        reset: f.reset === true
-                    });
+                    this._knownFilters.set(f.id, this._normalize(f));
                 }
             }
         }
     }
 
     /**
-     * Initializes the state from the cookie and broadcasts the initial state.
+     * Adds or replaces a single filter definition and announces the change, so
+     * every bound control shows a new or changed filter at once instead of on
+     * the next reload. Unlike registerFilters this is meant for the rare
+     * definition change, not for the bulk registration that runs on each render.
+     * @param {Object} filter - the filter definition.
+     * @param {string} [origin] - the id of the control that caused the change.
+     */
+    defineFilter(filter, origin) {
+        if (!filter || !filter.id) {
+            return;
+        }
+
+        this._knownFilters.set(filter.id, this._normalize(filter));
+        this._notifyDefinitionListeners(filter.id, origin);
+        this._notifyListeners();
+    }
+
+    /**
+     * Removes a filter definition, deactivating it first so no control keeps
+     * showing a chip for a filter that no longer exists.
+     * @param {string} id - the id of the filter.
+     * @param {string} [origin] - the id of the control that caused the change.
+     */
+    undefineFilter(id, origin) {
+        if (!this._knownFilters.has(id)) {
+            return;
+        }
+
+        this._activeFilters.delete(id);
+        this._knownFilters.delete(id);
+        this._updateResetStates();
+        this._scheduleSave();
+        this._notifyDefinitionListeners(id, origin);
+        this._notifyListeners();
+    }
+
+    /**
+     * Normalizes a filter definition. Beyond the fields the registry evaluates
+     * itself it keeps the display properties and the opaque criteria, so a
+     * control can rebuild a chip from the registry alone.
+     * @param {Object} filter - the filter definition.
+     * @returns {Object} the normalized definition.
+     */
+    _normalize(filter) {
+        return {
+            id: filter.id,
+            name: filter.name || filter.id,
+            group: filter.group || null,
+            exclusive: filter.exclusive === true,
+            reset: filter.reset === true,
+            custom: filter.custom === true,
+            criteria: filter.criteria ?? null,
+            icon: filter.icon || null,
+            color: filter.color || null,
+            colorValue: filter.colorValue || null,
+            badge: filter.badge != null ? String(filter.badge) : null,
+            badgeColor: filter.badgeColor || null,
+            badgeStyle: filter.badgeStyle || null
+        };
+    }
+
+    /**
+     * Initializes the state from localStorage and broadcasts the initial state.
      */
     init() {
-        const savedData = this._readCookie();
+        const savedData = this._readState();
         let changed = false;
 
-        if (savedData) {
-            const parsedIds = savedData.split(",");
+        if (savedData.length) {
+            const parsedIds = savedData;
             for (let i = 0; i < parsedIds.length; i++) {
                 const id = parsedIds[i].trim();
                 // validate against known filters to prevent manipulation
@@ -602,9 +772,9 @@ webexpress.webui.FilterRegistry = new class {
         // update reset visual states based on initially active filters
         this._updateResetStates();
 
-        // if unknown filters were dropped, update the cookie immediately
+        // if unknown filters were dropped, update localStorage immediately
         if (changed) {
-            this._scheduleCookieSave();
+            this._scheduleSave();
         }
 
         this._notifyListeners();
@@ -649,7 +819,7 @@ webexpress.webui.FilterRegistry = new class {
         if (!this._activeFilters.has(id)) {
             this._activeFilters.add(id);
             this._updateResetStates();
-            this._scheduleCookieSave();
+            this._scheduleSave();
             this._notifyListeners();
             const el = document.getElementById(id);
             if (el) {
@@ -666,7 +836,7 @@ webexpress.webui.FilterRegistry = new class {
         if (this._activeFilters.has(id)) {
             this._activeFilters.delete(id);
             this._updateResetStates();
-            this._scheduleCookieSave();
+            this._scheduleSave();
             this._notifyListeners();
             const el = document.getElementById(id);
             if (el) {
@@ -715,7 +885,7 @@ webexpress.webui.FilterRegistry = new class {
 
         if (changed) {
             this._updateResetStates();
-            this._scheduleCookieSave();
+            this._scheduleSave();
             this._notifyListeners();
         }
     }
@@ -734,7 +904,7 @@ webexpress.webui.FilterRegistry = new class {
             }
             this._activeFilters.clear();
             this._updateResetStates();
-            this._scheduleCookieSave();
+            this._scheduleSave();
             this._notifyListeners();
         }
     }
@@ -784,47 +954,46 @@ webexpress.webui.FilterRegistry = new class {
     }
 
     /**
-     * Schedules a debounced write operation to the cookie.
+     * Announces that a filter definition was added, changed or removed. The
+     * origin lets the control that performed the change ignore its own event,
+     * because it has already updated itself and would otherwise reload.
+     * @param {string} id - the id of the affected filter.
+     * @param {string} [origin] - the id of the control that caused the change.
      */
-    _scheduleCookieSave() {
+    _notifyDefinitionListeners(id, origin) {
+        const event = new CustomEvent(webexpress.webui.Event.CHANGE_FILTER_DEFINITION_EVENT, {
+            detail: { id: id, origin: origin || null },
+            bubbles: true
+        });
+        document.dispatchEvent(event);
+    }
+
+    /**
+     * Debounces filter changes to avoid repeated synchronous storage writes.
+     */
+    _scheduleSave() {
         if (this._saveTimer) {
             clearTimeout(this._saveTimer);
         }
         this._saveTimer = setTimeout(() => {
-            this._writeCookie();
+            this._persistState();
         }, this._debounceTime);
     }
 
     /**
-     * Serializes the active filters and writes them to a document cookie.
+     * Remembers active filters across visits without sending them with HTTP requests.
      */
-    _writeCookie() {
-        const val = encodeURIComponent(Array.from(this._activeFilters).join(","));
-        // set cookie valid for 30 days with secure attributes
-        const date = new Date();
-        date.setTime(date.getTime() + (30 * 24 * 60 * 60 * 1000));
-        const expires = "expires=" + date.toUTCString();
-        document.cookie = this._cookieName + "=" + val + ";" + expires + ";path=/;SameSite=Strict";
+    _persistState() {
+        webexpress.webui.LocalStorage.setJson(this._storageKey, Array.from(this._activeFilters));
     }
 
     /**
-     * Reads and decodes the filter state from the document cookie.
-     * @returns {string} The decoded cookie value or empty string.
+     * Ignores damaged preferences so filter initialization can use its defaults.
+     * @returns {Array<string>} The remembered filter identifiers.
      */
-    _readCookie() {
-        const nameEq = this._cookieName + "=";
-        const ca = document.cookie.split(";");
-
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === " ") {
-                c = c.substring(1, c.length);
-            }
-            if (c.indexOf(nameEq) === 0) {
-                return decodeURIComponent(c.substring(nameEq.length, c.length));
-            }
-        }
-        return "";
+    _readState() {
+        const value = webexpress.webui.LocalStorage.getJson(this._storageKey);
+        return Array.isArray(value) ? value.filter(id => typeof id === "string") : [];
     }
 
     /**
@@ -863,8 +1032,8 @@ webexpress.webui.FilterRegistry = new class {
 
 /**
  * Central singleton that tracks the current color scheme (light or dark),
- * persists it to a cookie, applies it to the root element via
- * <c>data-bs-theme</c>, and notifies observers via
+ * persists it to localStorage, applies it to the root element via
+ * <c>data-wx-theme</c>, and notifies observers via
  * <c>webexpress.webui.Event.CHANGE_DARKMODE_EVENT</c>.
  */
 webexpress.webui.DarkMode = new class {
@@ -872,11 +1041,10 @@ webexpress.webui.DarkMode = new class {
      * Creates a new instance of the class.
      */
     constructor() {
-        this._cookieName = "wx_darkmode";
-        this._cookieMaxAgeDays = 365;
+        this._storageKey = "wx_darkmode";
         this._current = this._resolveInitialMode();
 
-        // apply the resolved mode so the cookie wins over the server-rendered default
+        // apply the resolved mode so localStorage wins over the server-rendered default
         this._apply(this._current);
     }
 
@@ -890,7 +1058,7 @@ webexpress.webui.DarkMode = new class {
 
     /**
      * Sets the current color mode, updates the root element, persists the
-     * cookie and notifies observers. A no-op if the mode is unchanged.
+     * preference and notifies observers. A no-op if the mode is unchanged.
      * @param {"light"|"dark"} mode - The mode to switch to.
      */
     set current(mode) {
@@ -900,7 +1068,7 @@ webexpress.webui.DarkMode = new class {
         }
         this._current = normalized;
         this._apply(normalized);
-        this._writeCookie(normalized);
+        this._persistState(normalized);
         this._notify(normalized);
     }
 
@@ -914,25 +1082,25 @@ webexpress.webui.DarkMode = new class {
     }
 
     /**
-     * Determines the initial mode: cookie first, then the server-rendered
+     * Determines the initial mode: localStorage first, then the server-rendered
      * attribute on the root element, then falling back to "light".
      * @returns {"light"|"dark"} The initial mode.
      */
     _resolveInitialMode() {
-        const fromCookie = this._readCookie();
-        if (fromCookie === "dark" || fromCookie === "light") {
-            return fromCookie;
+        const fromStorage = this._readState();
+        if (fromStorage === "dark" || fromStorage === "light") {
+            return fromStorage;
         }
-        const attr = document.documentElement.getAttribute("data-bs-theme");
+        const attr = document.documentElement.getAttribute("data-wx-theme");
         return attr === "dark" ? "dark" : "light";
     }
 
     /**
-     * Applies the given mode to the root element's <c>data-bs-theme</c>.
+     * Applies the given mode to the root element's <c>data-wx-theme</c>.
      * @param {"light"|"dark"} mode - The mode to apply.
      */
     _apply(mode) {
-        document.documentElement.setAttribute("data-bs-theme", mode);
+        document.documentElement.setAttribute("data-wx-theme", mode);
     }
 
     /**
@@ -947,33 +1115,19 @@ webexpress.webui.DarkMode = new class {
     }
 
     /**
-     * Persists the given mode to the document cookie.
-     * @param {"light"|"dark"} mode - The mode to persist.
+     * Retains the chosen scheme across visits on this origin.
+     * @param {"light"|"dark"} mode - The selected scheme.
      */
-    _writeCookie(mode) {
-        const date = new Date();
-        date.setTime(date.getTime() + (this._cookieMaxAgeDays * 24 * 60 * 60 * 1000));
-        const expires = "expires=" + date.toUTCString();
-        document.cookie = this._cookieName + "=" + encodeURIComponent(mode) + ";" + expires + ";path=/;SameSite=Strict";
+    _persistState(mode) {
+        webexpress.webui.LocalStorage.setItem(this._storageKey, mode);
     }
 
     /**
-     * Reads the persisted mode from the document cookie.
-     * @returns {string} The decoded cookie value or an empty string.
+     * Allows the server default to apply when there is no saved preference.
+     * @returns {string|null} The remembered scheme.
      */
-    _readCookie() {
-        const nameEq = this._cookieName + "=";
-        const ca = document.cookie.split(";");
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === " ") {
-                c = c.substring(1, c.length);
-            }
-            if (c.indexOf(nameEq) === 0) {
-                return decodeURIComponent(c.substring(nameEq.length, c.length));
-            }
-        }
-        return "";
+    _readState() {
+        return webexpress.webui.LocalStorage.getItem(this._storageKey);
     }
 };
 
@@ -1107,6 +1261,17 @@ webexpress.webui.Syntax = new class {
     }
 
     /**
+     * Escapes the text of a source line for the markup a highlighter builds. The highlighters
+     * assemble html from the source, so a source that contains markup of its own - a sample
+     * that shows a button - would otherwise be rendered rather than shown.
+     * @param {string} text - The source text.
+     * @returns {string} The text with the characters that open markup replaced.
+     */
+    escape(text) {
+        return String(text ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+    }
+
+    /**
      * Retrieves the syntax configuration for a specific language.
      * @param {string} language - The language code (e.g., "csharp").
      * @returns {object|null} The syntax configuration for the language, or null if not registered.
@@ -1211,6 +1376,40 @@ webexpress.webui.Actions = new class {
 };
 
 /**
+ * Builds the guide column of a tree row: one entry per nesting level, telling
+ * whether the branch of that level continues below this row.
+ * @remarks
+ * The controls that draw a tree (table, list) render a flat sequence of rows, so
+ * a row has to know the shape of the whole path above it in order to draw the
+ * connecting lines: a vertical line is only drawn in an ancestor's column while
+ * that ancestor still has a sibling to come, otherwise the branch has ended and
+ * the column stays blank. The last entry belongs to the row itself and decides
+ * whether its elbow is a tee or a corner.
+ *
+ * The walk goes upwards through the parent chain, which every tree node of both
+ * controls carries, so no control has to keep a second index of the hierarchy.
+ * @param {object} node - The tree node, carrying `parent` and `children`.
+ * @returns {Array<boolean>} One flag per level, outermost first. Empty at the root.
+ */
+webexpress.webui.treeGuides = function (node) {
+    const guides = [];
+    let current = node;
+    let hops = 0;
+
+    // the hop limit is a guard against a parent chain that loops back on itself,
+    // which a malformed payload can produce and which would otherwise hang the render
+    while (current && current.parent && hops++ < 512) {
+        const siblings = current.parent.children || [];
+        const index = siblings.indexOf(current);
+
+        guides.unshift(index >= 0 && index < siblings.length - 1);
+        current = current.parent;
+    }
+
+    return guides;
+};
+
+/**
  * Registry for bind plugins.
  * Allows bindings to be extended freely from external files.
  * Each bind is identified by a name (e.g. "filter", "darkmode") and provides
@@ -1298,73 +1497,127 @@ webexpress.webui.Binds = new class {
 };
 
 /**
- * Global icon-theme registry.
+ * Global icon registry.
  *
- * The active theme is bound to the document root via
- * <c>&lt;html data-icon-theme="light"&gt;</c>. When the attribute is missing
- * or set to anything other than "light", the page is rendered in the
- * default theme (FontAwesome glyphs). The light theme switches to the
- * lightweight SVG variants defined in webexpress.webui.icon.css
- * (the <c>wx-icon-light wx-icon-light-*</c> class pair).
- *
- * Controls should not read the document attribute directly; both
- * <see cref="webexpress.webui.Ctrl#_iconTheme">_iconTheme()</see> and
- * <see cref="webexpress.webui.Ctrl#_iconClass">_iconClass(fa, light)</see>
- * are forwarded to this singleton, which also implements the
- * cross-theme fallback (use FontAwesome when no light variant exists
- * and vice versa).
+ * The framework ships one icon set - the light set - whose drawings are applied as css
+ * masks by webexpress.webui.icon.css. Controls resolve icons through here rather than
+ * writing class names themselves, so the day a second set is registrable only this
+ * resolver changes.
  */
-webexpress.webui.IconTheme = new class {
+webexpress.webui.IconSet = new class {
     /**
-     * Returns the active icon theme as read from
-     * <c>document.documentElement.dataset.iconTheme</c>.
-     * @returns {"light" | "default"} The current icon theme.
+     * The css class prefix the light set publishes its icons under.
      */
-    current() {
-        const root = (typeof document !== "undefined") ? document.documentElement : null;
-        const value = (root?.dataset?.iconTheme || "").trim().toLowerCase();
-        return value === "light" ? "light" : "default";
-    }
+    PREFIX = "wx-icon-light";
 
     /**
-     * Resolves an icon CSS class for the active theme with cross-theme
-     * fallback. When the active theme is "light", the light class is
-     * preferred; the FontAwesome class is used as a fallback when no light
-     * variant has been supplied. The reverse applies for the default theme.
-     *
-     * The light argument accepts either a full class string
-     * ("wx-icon-light wx-icon-light-pen") or the bare icon name
-     * ("pen"); in the latter case the "wx-icon-light wx-icon-light-"
-     * prefix is added automatically.
-     *
-     * @param {string|null|undefined} faClass - FontAwesome class string.
-     * @param {string|null|undefined} lightClass - Light-theme class or name.
-     * @returns {string} The resolved CSS class, or "" when both are empty.
+     * FontAwesome names the light set publishes under a different name. Kept because such
+     * names still arrive from stored dashboards, addon definitions and user data. A legacy
+     * name that matches a drawing one to one needs no entry - it resolves to itself.
      */
-    resolve(faClass, lightClass) {
-        const fa = (faClass || "").trim();
-        const lightFull = this._normalizeLight(lightClass);
+    ALIAS = {
+        "info-circle": "circle-info",
+        "ellipsis-v": "more",
+        "ellipsis-vertical": "more",
+        "exclamation-triangle": "triangle-exclamation",
+        "calendar-days": "calendar",
+        "file-lines": "file",
+        "file-alt": "file",
+        "file-archive": "file-zipper",
+        "trash-alt": "trash",
+        "save": "floppy-disk",
+        "tasks": "list-check",
+        "map-marked-alt": "map-location-dot",
+        "map-marker-alt": "location-dot"
+    };
 
-        if (this.current() === "light") {
-            return lightFull || fa || "";
+    /**
+     * Resolves an icon reference to the css class pair of the active set. Accepts a
+     * symbolic name ("anchor"), an already resolved class string, or a legacy FontAwesome
+     * class, because icon references reach the client from control code, server payloads
+     * and stored user data alike.
+     * @param {string|null|undefined} icon - The icon reference.
+     * @returns {string} The class string, or "" when nothing was passed.
+     */
+    resolve(icon) {
+        const value = (icon || "").trim();
+        if (!value) {
+            return "";
         }
-        return fa || lightFull || "";
+
+        const prefix = this.PREFIX;
+        if (value.startsWith(prefix + " ")) {
+            return value;
+        }
+        if (value.startsWith(prefix + "-")) {
+            return prefix + " " + value;
+        }
+
+        // the style token (fa-solid, fa-regular, fa-brands) is not the icon name
+        const legacy = /\bfa-(?!solid\b|regular\b|brands\b)([a-z0-9-]+)/.exec(value);
+        const name = legacy
+            ? (this.ALIAS[legacy[1]] ?? legacy[1])
+            : value;
+
+        return prefix + " " + prefix + "-" + name;
+    }
+};
+
+/**
+ * Single factory for assigning icons to controls built in JavaScript. It
+ * unifies the two icon kinds a control may use: a CSS/font icon (a class string
+ * such as "plus", rendered as an <i>) and an image icon (a path, URL or
+ * data URI, rendered as an <img>). Controls should build every icon through
+ * this factory instead of writing raw markup or unicode glyphs, so an image can
+ * be substituted for a font glyph anywhere without touching the control.
+ *
+ * This concern is deliberately independent of webexpress.webui.IconSet, which turns an
+ * icon reference into css classes; this factory decides between a css icon and an image.
+ * A caller that has a symbolic name resolves it first and passes the result here.
+ */
+webexpress.webui.Icon = new class {
+    /**
+     * Builds an icon element from a spec. A spec that points at an image (an
+     * absolute or relative path, a data URI, an http(s) URL or a value carrying
+     * an image file extension) yields an <img>; any other non-empty spec is
+     * treated as a CSS class string and yields an <i>. An empty spec yields
+     * null, so a caller can omit the icon without a branch of its own.
+     * @param {string|null|undefined} spec - The CSS class string or image source.
+     * @param {string|null} [extraClass] - Extra CSS class(es) for the element.
+     * @returns {HTMLElement|null} The icon element, or null.
+     */
+    create(spec, extraClass) {
+        const value = (spec || "").trim();
+        if (!value) {
+            return null;
+        }
+
+        const extra = (extraClass || "").trim();
+
+        if (this._isImage(value)) {
+            const img = document.createElement("img");
+            img.className = ("wx-icon-img " + extra).trim();
+            img.src = value;
+            // decorative by default; controls add a label on the host element
+            img.alt = "";
+            return img;
+        }
+
+        const i = document.createElement("i");
+        // a spec may be a symbolic name, an already resolved class string or a legacy
+        // FontAwesome class; the set decides which, so callers never have to
+        i.className = (webexpress.webui.IconSet.resolve(value) + " " + extra).trim();
+        return i;
     }
 
     /**
-     * Normalises a light-theme value into a full CSS class string. Accepts
-     * either an already-prefixed class ("wx-icon-light wx-icon-light-foo"),
-     * just the modifier class ("wx-icon-light-foo") or the bare icon name
-     * ("foo").
-     * @param {string|null|undefined} value - Raw light-theme value.
-     * @returns {string} The full class string or "".
+     * Determines whether a spec denotes an image source rather than a CSS class.
+     * @param {string} value - The trimmed spec.
+     * @returns {boolean} True when the spec is an image source.
      */
-    _normalizeLight(value) {
-        const v = (value || "").trim();
-        if (!v) return "";
-        if (v.startsWith("wx-icon-light ")) return v;
-        if (v.startsWith("wx-icon-light-")) return `wx-icon-light ${v}`;
-        return `wx-icon-light wx-icon-light-${v}`;
+    _isImage(value) {
+        return /^(https?:|data:|\.{0,2}\/)/i.test(value)
+            || /\.(svg|png|jpe?g|gif|webp|ico|bmp|avif)(\?.*)?$/i.test(value);
     }
 };
 
@@ -1441,13 +1694,15 @@ webexpress.webui.EditorAddOns = new class {
      * @param {string} id - Unique identifier for the add-on.
      * @param {object} definition - The add-on definition object.
      * @param {string} definition.label - Display name used in the UI.
-     * @param {string} definition.icon - Icon CSS class (e.g., 'fas fa-star').
+     * @param {string} definition.icon - Icon CSS class (e.g., 'wx-icon-light wx-icon-light-star').
      * @param {string} [definition.category] - Category group (e.g., 'Widgets', 'Layout'). Defaults to 'General'.
      * @param {string} [definition.type] - Layout type: 'block' (default) or 'inline'.
      * @param {boolean} [definition.isContainer] - If true, the body is editable (for nesting).
+     * @param {string} [definition.contentClass] - Marker class the reading view puts on the block, so a registered controller adopts the content of a container add-on the way it adopts a server-rendered host.
+     * @param {string} [definition.bodyClass] - Presentation classes shared by the editable body and reading view.
      * @param {string} [definition.content] - Static HTML content (used if no renderer is provided).
      * @param {string} [definition.description] - Optional description text shown in the picker.
-     * @param {Array<object>} [definition.properties] - Array of property definitions for the settings dialog.
+     * @param {Array<object>} [definition.properties] - Array of property definitions for the settings dialog. A property with `type: "select"` lists its values as `options` of `{ value, label }`.
      * @param {Function} [definition.renderer] - Function(data) returning HTML string based on properties.
      * @returns {this} The registry instance for chaining.
      */
@@ -1521,7 +1776,7 @@ webexpress.webui.EditorShortcuts = new class {
      * @param {object} definition - The shortcut definition object.
      * @param {string} definition.label - Display name shown in the slash menu.
      * @param {string} [definition.description] - Optional secondary line.
-     * @param {string} [definition.icon] - FontAwesome icon class. Defaults to 'fas fa-bolt'.
+     * @param {string} [definition.icon] - Icon name. Defaults to 'bolt'.
      * @param {string} [definition.category] - Group header in the menu. Defaults to 'General'.
      * @param {Array<string>} [definition.keywords] - Extra search terms.
      * @param {Function} [definition.execute] - Handler called with (editor).
@@ -1893,6 +2148,8 @@ webexpress.webui.Ctrl = class {
     _detachElement(element) {
         if (!element || !element.parentNode) return null;
 
+        // an intentional detach keeps its instances alive until reattached
+        element._wxDetached = true;
         element.parentNode.removeChild(element);
 
         return element;
@@ -1913,6 +2170,33 @@ webexpress.webui.Ctrl = class {
             bubbles: true,
             composed: true
         }));
+    }
+
+    /**
+     * Writes the entries of an action map back onto an element as
+     * data-wx-{prefix}-* attributes, so the Actions registry finds the same
+     * payload it would find on a server-rendered element.
+     *
+     * The keys arrive camel-cased because they were read through the dataset
+     * api; they are hyphenated again rather than lower-cased, otherwise a
+     * multi-word attribute such as data-wx-primary-require-file would come
+     * back as data-wx-primary-requirefile and the action would not see it.
+     *
+     * @param {HTMLElement} el - Target element.
+     * @param {"primary"|"secondary"} prefix - Attribute prefix.
+     * @param {Object|null} actionMap - The action map (key→value).
+     */
+    _applyActionAttrs(el, prefix, actionMap) {
+        if (!actionMap) {
+            return;
+        }
+        for (const [key, value] of Object.entries(actionMap)) {
+            if (value === null || value === undefined || value === false || value === "") {
+                continue;
+            }
+            const name = key.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase());
+            el.setAttribute(`data-wx-${prefix}-${name}`, value);
+        }
     }
 
     /**
@@ -1940,144 +2224,520 @@ webexpress.webui.Ctrl = class {
     }
 
     /**
-     * Returns the active icon theme as read from the root <html data-icon-theme>
-     * attribute. Possible values are "light" (lightweight SVG variants from
-     * webexpress.webui.icon.css) or "default" (FontAwesome glyphs, also used
-     * when the attribute is missing).
+     * Resolves an icon reference to the css classes of the active icon set. Derived
+     * controls go through here instead of writing class names, so a control keeps working
+     * when the set behind the name changes.
      *
-     * Derived controls should use this together with {@link _iconClass} to
-     * stay in sync with whatever theme the page sets, instead of mirroring
-     * the theme on every individual control via a per-control data attribute.
-     *
-     * @returns {"light" | "default"} The current icon theme.
+     * @param {string|null|undefined} icon - A symbolic name such as "pen", an already
+     *     resolved class string, or a legacy FontAwesome class.
+     * @returns {string} The CSS class string to apply to the icon element.
      */
-    _iconTheme() {
-        return webexpress.webui.IconTheme.current();
+    _iconClass(icon) {
+        return webexpress.webui.IconSet.resolve(icon);
     }
 
     /**
-     * Resolves an icon CSS class for the active theme. Falls back to the
-     * other variant whenever the preferred one is missing - so passing only
-     * the FontAwesome name still produces a sensible result under the light
-     * theme, and vice versa.
+     * Hands the name and the description of a form field to the element that actually
+     * takes the focus. A custom input keeps the host id on a hidden field for the form
+     * post, which strands the label the form rendered for that id, and a help text
+     * referenced on the host never reaches the control inside it. The label is looked
+     * up in the enclosing form group first, because a page may render the same sample
+     * twice with identical ids.
      *
-     * @param {string|null|undefined} faClass - The FontAwesome class string,
-     *     e.g. "fas fa-pen".
-     * @param {string|null|undefined} lightClass - The light-theme class
-     *     string, e.g. "wx-icon-light wx-icon-light-pen". Pass just the
-     *     icon name (e.g. "pen") and the "wx-icon-light wx-icon-light-"
-     *     prefix is added automatically.
-     * @returns {string} The CSS class string to apply to the icon element.
+     * @param {HTMLElement} target - The focusable element that stands for the field.
+     * @param {string|null} id - The host id the form addressed the field by.
+     * @param {HTMLElement} [host] - The host element carrying aria-* set by the server.
+     * @param {HTMLElement[]} [valueParts] - Elements whose text completes the name, such as
+     *     the box showing the chosen value; they are read after the label.
+     * @returns {HTMLElement|null} The label the field was named by, if one was found.
      */
-    _iconClass(faClass, lightClass) {
-        return webexpress.webui.IconTheme.resolve(faClass, lightClass);
+    _adoptFieldLabel(target, id, host = this._element, valueParts = []) {
+        if (!target) { return null; }
+        const group = host?.closest?.("fieldset, .wx-form-group");
+        const escaped = id && window.CSS?.escape ? CSS.escape(id) : id;
+        // a field without a labelable element is captioned by a span the form gave the id
+        // "{id}_label" instead of by a label pointing at it
+        const selector = id ? `label[for="${escaped}"], [id="${escaped}_label"]` : null;
+        const label = selector ? (group?.querySelector(selector) || document.querySelector(selector)) : null;
+        if (label) { label.id ||= id + "_label"; }
+        const parts = [label, ...valueParts].filter(Boolean).map((part, index) => {
+            part.id ||= (id || "wx-field") + "_name" + index;
+            return part.id;
+        });
+        if (parts.length && !target.hasAttribute("aria-label") && !target.hasAttribute("aria-labelledby")) {
+            target.setAttribute("aria-labelledby", parts.join(" "));
+        }
+        for (const name of ["aria-describedby", "aria-required", "aria-invalid", "aria-label"]) {
+            const value = host?.getAttribute?.(name);
+            if (value && !target.hasAttribute(name)) { target.setAttribute(name, value); }
+        }
+        return label;
     }
 }
 
 /**
- * Base class for popper Controls.
+ * The built-in transport adapter: fetch for requests, XMLHttpRequest for uploads, because
+ * only the latter reports upload progress. It normalises every outcome and announces the
+ * failures on the document.
  */
-webexpress.webui.PopperCtrl = class extends webexpress.webui.Ctrl {
+webexpress.webui.FetchTransport = class {
     /**
-     * Initializes Popper.js for managing the menu box positioning.
-     * @param {HTMLElement} container - The container element (searchBox) to position the suggestion box relative to.
-     * @param {HTMLElement} dropdownmenu - The menu box element (as HTMLElement, not jQuery).
+     * The event the built-in adapter announces a non-abort failure with.
      */
-    _initializePopper(container, dropdownmenu) {
-        // map to track the visibility state of each menu
-        this._menuVisibilityMap = this._menuVisibilityMap || new Map();
+    static ERROR_EVENT = "webexpress.webui.transport.error";
 
-        // popper.js instance for positioning
-        const popperInstance = Popper.createPopper(container, dropdownmenu, {
-            placement: "bottom-start",
-            modifiers: [
-                {
-                    name: "offset",
-                    options: {
-                        offset: [0, 4], // offset the suggestion box slightly
-                    },
-                },
-                {
-                    name: "preventOverflow",
-                    options: {
-                        boundary: "viewport", // ensure the suggestion box stays within the viewport
-                    },
-                },
-            ],
-        });
+    /**
+     * Performs a request with fetch. The body is read by content type, as json for
+     * application/json and as { text } otherwise, on success and failure alike, so a caller
+     * can show a server's answer to a refused submission.
+     * @param {string} url - The request url.
+     * @param {object} [init={}] - The fetch init.
+     * @returns {Promise<object>} The normalised result.
+     */
+    async request(url, init = {}) {
+        try {
+            const response = await fetch(url, Object.assign({ credentials: "same-origin" }, init));
+            const contentType = (response.headers && typeof response.headers.get === "function"
+                ? response.headers.get("content-type")
+                : "") || "";
 
-        // hide the suggestion box when clicking outside of it
-        document.addEventListener("click", (event) => {
-            if (!this._element.contains(event.target)) {
-                if (this._menuVisibilityMap.get(dropdownmenu)) {
-                    this._menuVisibilityMap.delete(dropdownmenu);
-                    // trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
-                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                        detail: {
-                            sender: this._element,
-                            id: this._element.id
-                        }
-                    }));
-                }
-                // hide menu
-                dropdownmenu.style.display = "none";
-            }
-        });
+            let data = null;
 
-        // register the ESC key to close the suggestion menu
-        document.addEventListener("keydown", (event) => {
-            if (event.key === "Escape") {
-                dropdownmenu.style.display = "none";
-                if (this._menuVisibilityMap.get(dropdownmenu)) {
-                    this._menuVisibilityMap.delete(dropdownmenu);
-                    // trigger the DROPDOWN_HIDDEN_EVENT when the suggestion box is hidden
-                    document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                        detail: {
-                            sender: this._element,
-                            id: this._element.id
-                        }
-                    }));
+            if (response.status !== 204) {
+                try {
+                    data = contentType.includes("application/json") ? await response.json() : { text: await response.text() };
+                } catch (parseError) {
+                    return this._report(this._result(false, response, contentType, null, "parse", "response could not be read", false), init);
                 }
             }
-        });
 
-        // show and hide methods for the dropdownmenu (simulate .on('show')/.on('hide'))
-        dropdownmenu.show = () => {
-            dropdownmenu.style.display = "flex";
-            // set width to match the element, if needed
-            dropdownmenu.style.width = this._element.offsetWidth + "px";
-            popperInstance.update();
-            this._menuVisibilityMap.set(dropdownmenu, true);
-            // trigger show event
-            document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_SHOW_EVENT, {
-                detail: {
-                    sender: this._element,
-                    id: this._element.id
-                }
-            }));
-        };
-        dropdownmenu.hide = () => {
-            dropdownmenu.style.display = "none";
-            if (this._menuVisibilityMap.get(dropdownmenu)) {
-                this._menuVisibilityMap.delete(dropdownmenu);
-                document.dispatchEvent(new CustomEvent(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {
-                    detail: {
-                        sender: this._element,
-                        id: this._element.id
+            if (!response.ok) {
+                const message = response.statusText || ("request failed with status " + response.status);
+                return this._report(this._result(false, response, contentType, data, "http", message, response.status >= 500), init);
+            }
+
+            return this._result(true, response, contentType, data, null, "", false);
+        } catch (networkError) {
+            // the signal is the authority on why the request ended: an abort with a reason
+            // rejects with that reason rather than with an AbortError
+            const aborted = (init.signal && init.signal.aborted) || (networkError && networkError.name === "AbortError");
+            const result = webexpress.webui.Transport.fail(aborted ? "abort" : "network", 0, networkError ? networkError.message : "network error", !aborted);
+
+            return aborted ? result : this._report(result, init);
+        }
+    }
+
+    /**
+     * Uploads a body with XMLHttpRequest, so the progress of the upload can be reported.
+     * @param {string} url - The request url.
+     * @param {FormData|Blob} body - The body.
+     * @param {object} [options={}] - method (default POST), onProgress(percent), signal, and
+     *     report: false for an adapter that wraps this upload and announces the failure itself.
+     * @returns {Promise<object>} The normalised result.
+     */
+    upload(url, body, options = {}) {
+        return new Promise((resolve) => {
+            const xhr = new XMLHttpRequest();
+            const method = options.method || "POST";
+            const settle = (result) => resolve(result.ok || result.error.kind === "abort" || options.report === false ? result : this._report(result, { method: method }));
+
+            xhr.open(method, url, true);
+            xhr.withCredentials = options.credentials === "include";
+
+            if (typeof options.onProgress === "function") {
+                xhr.upload.onprogress = (e) => {
+                    if (e.lengthComputable) {
+                        options.onProgress(Math.round((e.loaded / e.total) * 100), e);
                     }
-                }));
+                };
             }
-        };
 
-        // listen for custom 'show' and 'hide' events
-        dropdownmenu.addEventListener("show", () => {
-            dropdownmenu.show();
-        });
-        dropdownmenu.addEventListener("hide", () => {
-            dropdownmenu.hide();
+            xhr.onload = () => {
+                const contentType = xhr.getResponseHeader("content-type") || "";
+                let data = null;
+
+                if (xhr.status !== 204 && xhr.responseText) {
+                    try {
+                        data = contentType.includes("application/json") ? JSON.parse(xhr.responseText) : { text: xhr.responseText };
+                    } catch (parseError) {
+                        settle(this._result(false, xhr, contentType, null, "parse", "response could not be read", false));
+                        return;
+                    }
+                }
+
+                if (xhr.status >= 200 && xhr.status < 300) {
+                    settle(this._result(true, xhr, contentType, data, null, "", false));
+                } else {
+                    settle(this._result(false, xhr, contentType, data, "http", xhr.statusText || ("request failed with status " + xhr.status), xhr.status >= 500));
+                }
+            };
+            xhr.onerror = () => settle(webexpress.webui.Transport.fail("network", 0, "network error", true));
+            xhr.onabort = () => settle(webexpress.webui.Transport.fail("abort", 0, "request was aborted", false));
+
+            if (options.signal) {
+                if (options.signal.aborted) {
+                    xhr.onabort();
+                    return;
+                }
+                options.signal.addEventListener("abort", () => xhr.abort(), { once: true });
+            }
+
+            xhr.send(body);
         });
     }
-}
+
+    /**
+     * Builds a result around a response.
+     * @param {boolean} ok - Whether the request succeeded.
+     * @param {Response|XMLHttpRequest} response - The response the result came from.
+     * @param {string} contentType - The content type of the body.
+     * @param {*} data - The parsed body.
+     * @param {string|null} kind - The failure kind, null on success.
+     * @param {string} message - The failure message.
+     * @param {boolean} retriable - Whether a retry may succeed.
+     * @returns {object} The normalised result.
+     */
+    _result(ok, response, contentType, data, kind, message, retriable) {
+        return {
+            ok: ok,
+            status: response.status,
+            data: data,
+            error: ok ? null : { kind: kind, status: response.status, message: message, retriable: !!retriable },
+            response: response,
+            contentType: contentType
+        };
+    }
+
+    /**
+     * Announces a failure on the document and hands the result back unchanged.
+     * @param {object} result - The failed result.
+     * @param {object} init - The request init, for the operation name.
+     * @returns {object} The same result.
+     */
+    _report(result, init) {
+        document.dispatchEvent(new CustomEvent(webexpress.webui.FetchTransport.ERROR_EVENT, {
+            detail: Object.assign({ operation: (init && init.method) || "GET", result: result }, result.error)
+        }));
+
+        return result;
+    }
+};
+
+/**
+ * The one door of the WebUI controls to the network.
+ *
+ * A control that talks to a server - the frame loading a page, the dialog submitting a form,
+ * the inline editor storing a value, the upload - never calls fetch itself. It asks the
+ * transport, and the transport answers with one result shape whatever happened:
+ * { ok, status, data, error, response, contentType }, where error is null on success and
+ * { kind, status, message, retriable } on failure, with kind one of "http", "network",
+ * "parse" or "abort". A request never rejects, so a control has one path to write and an
+ * abort is a result like any other rather than an exception to catch.
+ *
+ * The built-in adapter is plain fetch. An application replaces it through use(), which is
+ * how WebExpress.WebApp routes every WebUI request through its service layer and its error
+ * channel without the WebUI knowing that layer exists. The built-in adapter announces its
+ * non-abort failures on the document as "webexpress.webui.transport.error", so a page that
+ * has no service layer still sees them in one place.
+ */
+webexpress.webui.Transport = new class {
+    /**
+     * Creates the transport with the built-in adapter installed.
+     */
+    constructor() {
+        this._adapter = null;
+        this._builtIn = new webexpress.webui.FetchTransport();
+    }
+
+    /**
+     * Returns the built-in adapter, for an installed adapter that wraps rather than
+     * replaces it.
+     * @returns {webexpress.webui.FetchTransport} The built-in adapter.
+     */
+    get builtIn() {
+        return this._builtIn;
+    }
+
+    /**
+     * Installs an adapter. An adapter answers request(url, init) with the result shape
+     * described above; upload(url, body, options) is optional and falls back to the
+     * built-in one. Passing null restores the built-in adapter.
+     * @param {object|null} adapter - The adapter.
+     * @returns {this} The transport for chaining.
+     */
+    use(adapter) {
+        this._adapter = adapter && typeof adapter.request === "function" ? adapter : null;
+        return this;
+    }
+
+    /**
+     * Performs a request.
+     * @param {string} url - The request url.
+     * @param {object} [init={}] - The fetch init: method, headers, body, signal, credentials.
+     * @returns {Promise<object>} The normalised result; the promise never rejects.
+     */
+    request(url, init = {}) {
+        return (this._adapter || this._builtIn).request(url, init);
+    }
+
+    /**
+     * Uploads a body, reporting progress on the way.
+     * @param {string} url - The request url.
+     * @param {FormData|Blob} body - The body.
+     * @param {object} [options={}] - method (default POST), onProgress(percent), signal.
+     * @returns {Promise<object>} The normalised result; the promise never rejects.
+     */
+    upload(url, body, options = {}) {
+        const adapter = this._adapter && typeof this._adapter.upload === "function" ? this._adapter : this._builtIn;
+        return adapter.upload(url, body, options);
+    }
+
+    /**
+     * Builds a failed result.
+     * @param {string} kind - One of "http", "network", "parse", "abort".
+     * @param {number} status - The http status, 0 when there is none.
+     * @param {string} message - What went wrong, for a log or a reader.
+     * @param {boolean} retriable - Whether a retry may succeed.
+     * @returns {object} The normalised failure result.
+     */
+    fail(kind, status, message, retriable) {
+        return {
+            ok: false,
+            status: status,
+            data: null,
+            error: { kind: kind, status: status, message: message, retriable: !!retriable },
+            response: null,
+            contentType: ""
+        };
+    }
+};
+
+/**
+ * Picks the text color that reads on a fill an author chose at run time. A control that
+ * paints an element in a color it only learns from data cannot have a stylesheet rule for
+ * it, so it asks here whether black or white keeps the better contrast on that fill.
+ */
+webexpress.webui.ContrastColor = class {
+    /**
+     * Parses a css color in hex or rgb notation into its channels.
+     * @param {string} raw The color as written.
+     * @returns {number[]|null} The [r, g, b] triple, or null when the notation is not one of the two.
+     */
+    static parse(raw) {
+        const value = String(raw || "").trim();
+        const rgb = value.match(/^rgba?\(\s*(\d+)[\s,]+(\d+)[\s,]+(\d+)/i);
+        if (rgb) {
+            return [Number(rgb[1]), Number(rgb[2]), Number(rgb[3])];
+        }
+        let hex = value.charAt(0) === "#" ? value.slice(1) : "";
+        if (hex.length === 3 || hex.length === 4) {
+            hex = hex.slice(0, 3).split("").map(c => c + c).join("");
+        } else if (hex.length === 8) {
+            hex = hex.slice(0, 6);
+        }
+        if (hex.length !== 6 || /[^0-9a-f]/i.test(hex)) {
+            return null;
+        }
+        return [parseInt(hex.slice(0, 2), 16), parseInt(hex.slice(2, 4), 16), parseInt(hex.slice(4, 6), 16)];
+    }
+
+    /**
+     * Returns the relative luminance as WCAG defines it.
+     * @param {number[]} rgb The [r, g, b] triple.
+     * @returns {number} The luminance between 0 and 1.
+     */
+    static luminance(rgb) {
+        const [r, g, b] = rgb.map(c => {
+            const s = c / 255;
+            return s <= 0.03928 ? s / 12.92 : Math.pow((s + 0.055) / 1.055, 2.4);
+        });
+        return 0.2126 * r + 0.7152 * g + 0.0722 * b;
+    }
+
+    /**
+     * Resolves any css color the browser understands into its channels: the two notations are
+     * read directly, everything else - a named color, hsl - is asked of the browser.
+     * @param {string} raw The color as written.
+     * @returns {number[]|null} The [r, g, b] triple, or null when the browser rejects the color too.
+     */
+    static resolve(raw) {
+        const direct = this.parse(raw);
+        if (direct || typeof document === "undefined" || !document.body || typeof getComputedStyle !== "function") {
+            return direct;
+        }
+        const probe = document.createElement("span");
+        probe.style.color = raw;
+        // a value the browser refuses leaves the property empty
+        if (!probe.style.color) {
+            return null;
+        }
+        document.body.appendChild(probe);
+        const computed = getComputedStyle(probe).color;
+        probe.remove();
+        return this.parse(computed);
+    }
+
+    /**
+     * Picks black or white, whichever keeps the higher contrast ratio on the fill.
+     * @param {string} fill The fill color as written.
+     * @returns {string|null} "#000" or "#fff", or null when the fill cannot be resolved.
+     */
+    static on(fill) {
+        const rgb = this.resolve(fill);
+        if (!rgb) {
+            return null;
+        }
+        const l = this.luminance(rgb);
+        // (l + 0.05) / 0.05 is the ratio against black, 1.05 / (l + 0.05) the one against white
+        return (l + 0.05) / 0.05 >= 1.05 / (l + 0.05) ? "#000" : "#fff";
+    }
+
+    /**
+     * Reads the background a style declaration paints, when it paints one.
+     * @param {string} cssText The declarations, as they would sit in a style attribute.
+     * @returns {string|null} The background color, or null when the declarations set none.
+     */
+    static background(cssText) {
+        const m = String(cssText || "").match(/(?:^|;)\s*background(?:-color)?\s*:\s*([^;]+)/i);
+        return m ? m[1].trim() : null;
+    }
+
+    /**
+     * Paints an element with the declarations an author supplied and, when they fill it without
+     * saying what reads on the fill, adds the text color that does.
+     * @param {HTMLElement} element The element to paint.
+     * @param {string} cssText The declarations, as they would sit in a style attribute.
+     */
+    static paint(element, cssText) {
+        element.style.cssText = cssText || "";
+        const fill = this.background(cssText);
+        if (!fill || this.setsColor(cssText)) {
+            return;
+        }
+        const text = this.on(fill);
+        if (text) {
+            element.style.color = text;
+        }
+    }
+
+    /**
+     * Tells whether a style declaration sets the text color itself.
+     * @param {string} cssText The declarations.
+     * @returns {boolean}
+     */
+    static setsColor(cssText) {
+        return /(?:^|;)\s*color\s*:/i.test(String(cssText || ""));
+    }
+};
+
+/**
+ * Connects top-layer menus to their invokers while CSS owns all placement decisions.
+ */
+webexpress.webui.NativeMenu = class {
+    static _nextId = 0;
+    static _sources = new WeakMap();
+
+    /**
+     * Gives each menu an independent anchor, including menus nested inside dialogs.
+     */
+    static bind(anchor, menu, invoker = anchor) {
+        this._sources.set(menu, invoker || anchor);
+        const id = "wx-menu-" + (++this._nextId);
+        menu.id ||= id;
+        menu.setAttribute("popover", "auto");
+        menu.classList.add("wx-native-menu");
+        const anchors = anchor.style.getPropertyValue("anchor-name");
+        anchor.style.setProperty("anchor-name", [anchors, "--" + id].filter(Boolean).join(", "));
+        menu.style.setProperty("position-anchor", "--" + id);
+        if (invoker?.tagName === "BUTTON") {
+            invoker.type = "button";
+            invoker.setAttribute("popovertarget", menu.id);
+            if (invoker.classList.contains("dropdown-toggle") && !invoker.querySelector(".wx-dropdown-caret")) {
+                const caret = document.createElement("i");
+                caret.className = webexpress.webui.IconSet.resolve("angle-down") + " wx-dropdown-caret";
+                invoker.appendChild(caret);
+            }
+        }
+        // popovertarget implies the popup state only for buttons and only in browsers that map
+        // it; a link or a widget row invoking a menu says nothing, so the state is written out.
+        // the kind is read at toggle time because a control assigns the menu role after binding
+        if (invoker?.matches("button, a, [role], [tabindex]")) {
+            const kinds = ["menu", "listbox", "tree", "grid", "dialog"];
+            const describe = () => {
+                const role = menu.getAttribute("role");
+                invoker.setAttribute("aria-haspopup", kinds.includes(role) ? role : "true");
+                invoker.setAttribute("aria-expanded", menu.matches(":popover-open") ? "true" : "false");
+            };
+            invoker.setAttribute("aria-controls", menu.id);
+            describe();
+            menu.addEventListener("toggle", (event) => { if (event.target === menu) { describe(); } });
+        }
+        // tabbing out of a menu leaves it open behind the focus otherwise; a null relatedTarget
+        // is a click on a non-focusable spot inside the menu, not a departure
+        menu.addEventListener("focusout", (event) => {
+            const next = event.relatedTarget;
+            if (next && !menu.contains(next) && next !== invoker && !invoker?.contains(next)) { this.hide(menu); }
+        });
+        menu.addEventListener("click", (event) => {
+            const item = event.target.closest(".dropdown-item");
+            if (item && !item.classList.contains("disabled") && !menu.hasAttribute("data-wx-keep-open")) {
+                this.hide(menu);
+            }
+        });
+        // keyboard navigation belongs to the menu; dismissal and focus restoration belong to the browser
+        const navigate = (event) => {
+            if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(event.key)) { return; }
+            if (event.defaultPrevented || event.target.matches("input, textarea, select") ||
+                (event.currentTarget === menu && event.target.closest("[popover]") !== menu)) { return; }
+            event.preventDefault();
+            this.show(menu);
+            const items = [...menu.querySelectorAll("button:not(:disabled), a[href], [tabindex]")]
+                .filter(item => !item.hidden && !item.closest("[hidden], .disabled") && item.closest("[popover]") === menu);
+            let index = items.indexOf(document.activeElement);
+            index = event.key === "Home" ? 0 : event.key === "End" ? items.length - 1
+                : (index + (event.key === "ArrowUp" ? -1 : 1) + items.length) % items.length;
+            items[index]?.focus({ preventScroll: true });
+            // the page must not jump, but an entry inside the menu's own scroll region has to
+            // come into view, or the focus walks on below the visible part of the list
+            items[index]?.closest(".wx-dropdown-scroll") && items[index].scrollIntoView?.({ block: "nearest" });
+        };
+        invoker?.addEventListener("keydown", navigate);
+        menu.addEventListener("keydown", navigate);
+    }
+
+    /**
+     * Typeahead and keyboard interactions can enter the same native menu as its button.
+     */
+    static show(menu) {
+        if (menu.isConnected && !menu.matches(":popover-open")) { menu.showPopover({ source: this._sources.get(menu) }); }
+    }
+
+    /**
+     * Selection commits close only a menu that still owns a top-layer entry.
+     */
+    static hide(menu) {
+        if (menu.matches(":popover-open")) { menu.hidePopover(); }
+    }
+};
+
+/**
+ * Shares native menu lifecycle notifications with selection and suggestion controls.
+ */
+webexpress.webui.MenuCtrl = class extends webexpress.webui.Ctrl {
+    /**
+     * Keeps component events in sync with native light dismissal and Escape.
+     */
+    _initializeMenu(anchor, menu, invoker = anchor) {
+        webexpress.webui.NativeMenu.bind(anchor, menu, invoker);
+        menu.setAttribute("data-wx-keep-open", "");
+        menu.classList.add("wx-native-menu-field");
+        menu.addEventListener("beforetoggle", (event) => {
+            if (event.target !== menu) { return; }
+            this._dispatch(event.newState === "open" ? webexpress.webui.Event.DROPDOWN_SHOW_EVENT
+                : webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
+        });
+    }
+};
 
 /**
  * A utility class for defining and managing event names within the WebExpress UI framework.
@@ -2091,6 +2751,8 @@ webexpress.webui.Event = class {
     static DOUBLE_CLICK_EVENT = "webexpress.webui.dbclick";
     // Event triggered when a filter changes, typically in search or filter controls.
     static CHANGE_FILTER_EVENT = "webexpress.webui.change.filter";
+    // Event triggered when a filter definition is added, changed or removed.
+    static CHANGE_FILTER_DEFINITION_EVENT = "webexpress.webui.change.filter.definition";
     // Event triggered when a dropdown menu is shown.
     static DROPDOWN_SHOW_EVENT = "webexpress.webui.dropdown.show";
     // Event triggered when a dropdown menu is hidden.
@@ -2121,6 +2783,8 @@ webexpress.webui.Event = class {
     static DATA_REQUESTED_EVENT = "webexpress.webui.data.requested";
     // Event triggered when data has arrived.
     static DATA_ARRIVED_EVENT = "webexpress.webui.data.arrived";
+    // Event triggered when data could not be loaded or persisted.
+    static DATA_ERROR_EVENT = "webexpress.webui.data.error";
     // Event triggered when a task starts.
     static TASK_START_EVENT = "webexpress.webui.task.start";
     // Event triggered when a task is updated.
@@ -2175,4 +2839,10 @@ webexpress.webui.Event = class {
     static SELECTED_TAB_EVENT = "webexpress.webui.tab.selected";
     // Event triggered when dark mode is toggled.
     static CHANGE_DARKMODE_EVENT = "webexpress.webui.change.darkmode";
+    // Event triggered when a service level agreement changes its status.
+    static SLA_STATUS_CHANGE_EVENT = "webexpress.webui.sla.status.change";
+    // Event triggered when a service level agreement is paused, resumed or settled.
+    static SLA_ACTION_EVENT = "webexpress.webui.sla.action";
+    // Event triggered when a periodic service level agreement starts its next cycle.
+    static SLA_CYCLE_EVENT = "webexpress.webui.sla.cycle";
 }

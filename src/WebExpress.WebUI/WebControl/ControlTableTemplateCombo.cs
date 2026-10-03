@@ -89,13 +89,13 @@ namespace WebExpress.WebUI.WebControl
             {
                 if (v.SubItems.Any())
                 {
-                    html.Add(new HtmlElementFormOptgroup() { Label = v.Text?.Invoke(null) });
+                    html.Add(new HtmlElementFormOptgroup() { Label = v.Text?.Invoke(renderContext) });
                     foreach (var s in v.SubItems)
                     {
                         html.Add(new HtmlElementFormOption()
                         {
-                            Value = s.Value?.Invoke(null),
-                            Text = I18N.Translate(renderContext.Request?.Culture, s.Text?.Invoke(null))
+                            Value = s.Value?.Invoke(renderContext),
+                            Text = I18N.Translate(renderContext.Request?.Culture, s.Text?.Invoke(renderContext))
                         });
                     }
                 }
@@ -103,8 +103,8 @@ namespace WebExpress.WebUI.WebControl
                 {
                     html.Add(new HtmlElementFormOption()
                     {
-                        Value = v.Value?.Invoke(null),
-                        Text = I18N.Translate(renderContext.Request?.Culture, v.Text?.Invoke(null))
+                        Value = v.Value?.Invoke(renderContext),
+                        Text = I18N.Translate(renderContext.Request?.Culture, v.Text?.Invoke(renderContext))
                     });
                 }
             }

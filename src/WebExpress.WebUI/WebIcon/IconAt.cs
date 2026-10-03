@@ -6,8 +6,8 @@
     public class IconAt : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-at";
+        public override string Symbol => "at";
     }
 }

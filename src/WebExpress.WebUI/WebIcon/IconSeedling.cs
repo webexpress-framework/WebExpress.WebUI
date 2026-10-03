@@ -6,11 +6,8 @@
     public class IconSeedling : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the seedling icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        /// <value>
-        /// A string representing the CSS class for the seedling icon.
-        /// </value>
-        public override string Class => "fas fa-seedling";
+        public override string Symbol => "seedling";
     }
 }

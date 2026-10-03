@@ -5,14 +5,19 @@
  * - webexpress.webui.Event.MODAL_HIDE_EVENT
  */
 webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
+
+    static DIALOG_SELECTOR = "dialog";
+    static _nextId = 0;
+
     _closeLabel = null;
     _size = null;
     _autoShow = null;
-    _dialogDiv = document.createElement("div");
-    _headerDiv = document.createElement("div");
-    _titleH1 = document.createElement("h1");
+    _headerDiv = document.createElement("header");
+    // a second-level heading: a dialog is content of the page it opens on, whose first level
+    // is taken, and a first level here would break the outline of that page
+    _titleHeading = document.createElement("h2");
     _bodyDiv = document.createElement("div");
-    _footerDiv = document.createElement("div");
+    _footerDiv = document.createElement("footer");
     _cancelButton = document.createElement("button");
     _fullscreenButton = document.createElement("button");
     _fullscreenMode = "true"; // "true" (css) or "native" or ""
@@ -28,45 +33,50 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this._closeLabel = element.getAttribute("data-close-label") || this._i18n("webexpress.webui:close");
         this._size = element.getAttribute("data-size") || "";
         this._autoShow = element.getAttribute("data-auto-show") === "true";
+        // scrollable by default
+        this._scrollable = element.getAttribute("data-scrollable") !== "false";
 
         // cleanup the dom element
         element.removeAttribute("data-close-label");
         element.removeAttribute("data-size");
         element.removeAttribute("data-auto-show");
-        element.classList.add("modal", "fade");
+        element.removeAttribute("data-scrollable");
+        element.id ||= "wx-dialog-" + (++webexpress.webui.ModalCtrl._nextId);
+        element.classList.add("modal");
+        element.classList.toggle("wx-dialog-scrollable", this._scrollable);
 
         // create modal elements
         this._bodyDiv.className = "modal-body";
         this._headerDiv.className = "modal-header";
-        this._titleH1.className = "modal-title fs-5 flex-grow-1";
+        this._titleHeading.className = "modal-title fs-5 flex-grow-1";
         this._footerDiv.className = "modal-footer";
 
-        // extract and append children from .wx-modal-header
-        const headers = this._element.querySelectorAll(".wx-modal-header");
-        headers.forEach(header => {
-            this._titleH1.appendChild(this._detachElement(header));
-        });
+        this.liftTitle(this._element);
 
         // extract and append all .wx-modal-content elements directly to body div
-        const contents = this._element.querySelectorAll(".wx-modal-content");
+        const contents = [...this._element.querySelectorAll(".wx-modal-content")]
+            .filter(content => content.closest("dialog") === this._element);
+
+        // a body reserved for a filling element stops scrolling and passes its height down, so a
+        // writing surface ends exactly where the dialog does instead of guessing at the chrome
+        // around it. Asked before the content is moved, while it is still whole.
+        const fills = [...contents].some(content => content.querySelector("[data-fill=\"true\"]"));
+
         contents.forEach(content => {
             this._bodyDiv.appendChild(this._detachElement(content));
         });
 
-        // extract and append all .wx-modal-footer elements
-        const footers = this._element.querySelectorAll(".wx-modal-footer");
-        footers.forEach(footer => {
-            this._footerDiv.appendChild(this._detachElement(footer));
-        });
+        this._bodyDiv.classList.toggle("wx-modal-fill", fills);
+        this.liftFooter(this._element);
 
         // create header content
-        this._headerDiv.appendChild(this._titleH1);
+        this._headerDiv.appendChild(this._titleHeading);
 
         if (this._fullscreenMode && this._size !== "modal-fullscreen") {
             // create fullscreen toggle button
             this._fullscreenButton.type = "button";
             this._fullscreenButton.className = "btn wx-button-fullscreen ms-auto";
-            this._fullscreenButton.innerHTML = `<i class="${this._iconClass("fas fa-expand", "wx-icon-light-expand")}"></i>`;
+            this._fullscreenButton.innerHTML = `<i class="${this._iconClass("expand")}"></i>`;
             this._fullscreenButton.setAttribute("aria-label", this._i18n("webexpress.webui:fullscreen.toggle", "Toggle Fullscreen"));
             this._fullscreenButton.addEventListener("click", () => {
                 this.toggleFullscreen();
@@ -79,7 +89,7 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         closeButton.type = "button";
         closeButton.className = "btn wx-button-close";
         closeButton.setAttribute("data-wx-dismiss", "modal");
-        closeButton.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")}"></i>`;
+        closeButton.innerHTML = `<i class="${this._iconClass("xmark")}"></i>`;
         closeButton.setAttribute("aria-label", this._closeLabel);
         closeButton.addEventListener("click", () => {
             this.hide();
@@ -90,28 +100,94 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
         this._cancelButton.type = "button";
         this._cancelButton.className = "btn btn-secondary";
         this._cancelButton.setAttribute("data-wx-dismiss", "modal");
-        this._cancelButton.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")} me-2"></i>${this._closeLabel}`;
+        this._cancelButton.innerHTML = `<i class="${this._iconClass("xmark")} me-2"></i>${this._closeLabel}`;
         this._cancelButton.addEventListener("click", () => {
             this.hide();
         });
         this._footerDiv.appendChild(this._cancelButton);
 
-        // create modal content structure
-        this._dialogDiv.className = `modal-dialog modal-dialog-scrollable ${this._size}`;
-
-        const modalContentDiv = document.createElement("div");
-        modalContentDiv.className = "modal-content";
-        modalContentDiv.appendChild(this._headerDiv);
-        modalContentDiv.appendChild(this._bodyDiv);
-        modalContentDiv.appendChild(this._footerDiv);
-
-        this._dialogDiv.appendChild(modalContentDiv);
-        this._element.appendChild(this._dialogDiv);
+        this._element.append(this._headerDiv, this._bodyDiv, this._footerDiv);
+        this._titleHeading.id = this._element.id + "-title";
+        this._element.setAttribute("aria-labelledby", this._titleHeading.id);
+        this._element.addEventListener("cancel", (event) => {
+            event.preventDefault();
+            this.hide();
+        });
+        this._element.addEventListener("close", () => {
+            this._dispatch(webexpress.webui.Event.MODAL_HIDE_EVENT, {});
+        });
 
         // auto-show if specified
         if (this._autoShow) {
-            this.show();
+            queueMicrotask(() => this.show());
         }
+    }
+
+    /**
+     * Moves the title sections a subtree declares onto the dialog's own title bar.
+     *
+     * What a dialog is made of is decided here, in the base, rather than in one of the
+     * controllers built on it: every dialog has a title bar and a footer bar, so every dialog
+     * has to be able to take the sections an author wrote for them. A subclass that assembles
+     * its dialog from somewhere else - a page it fetched, say - passes that root in instead of
+     * repeating the rule.
+     *
+     * @param {HTMLElement} root - The element whose sections are lifted.
+     * @returns {number} How many sections were found, so a caller can fall back to a title of
+     * its own when the subtree declared none.
+     */
+    liftTitle(root) {
+        return this._lift(root, ".wx-modal-header", "header", this._titleHeading);
+    }
+
+    /**
+     * Moves the footer sections a subtree declares onto the dialog's own footer bar.
+     *
+     * The footer is where a form puts what belongs beside its buttons - a save state, a hint, a
+     * validation summary - so it is lifted onto the bar those buttons end up on rather than
+     * dropped into the body, where it would comment on a decision taken somewhere else.
+     *
+     * @param {HTMLElement} root - The element whose sections are lifted.
+     * @returns {number} How many sections were found.
+     */
+    liftFooter(root) {
+        return this._lift(root, ".wx-modal-footer", "footer", this._footerDiv);
+    }
+
+    /**
+     * Moves the sections of one bar out of a subtree and onto that bar.
+     *
+     * A section is recognised either by the class a control authored it with or by the element
+     * an author wrote by hand. The class is looked up anywhere below the root, which is how the
+     * dialog controls have always emitted it; the element only among the root's own children,
+     * because a &lt;footer&gt; deeper down belongs to the content and is not the dialog's.
+     *
+     * A section that belongs to a dialog nested inside the root is left where it is. A form can
+     * carry a whole dialog of its own - the document editor is one - and taking its title bar
+     * away to build this one would dismantle it.
+     *
+     * @param {HTMLElement} root - The element whose sections are lifted.
+     * @param {string} className - The class a control marks the section with.
+     * @param {string} tagName - The element an author writes the section as.
+     * @param {HTMLElement} bar - The bar the sections are moved onto.
+     * @returns {number} How many sections were moved.
+     */
+    _lift(root, className, tagName, bar) {
+        if (!root) {
+            return 0;
+        }
+
+        const owner = root.closest(webexpress.webui.ModalCtrl.DIALOG_SELECTOR);
+        const sections = [
+            ...root.querySelectorAll(className),
+            ...root.querySelectorAll(":scope > " + tagName)
+        ].filter(section => section.closest(webexpress.webui.ModalCtrl.DIALOG_SELECTOR) === owner);
+
+        for (const section of sections) {
+            bar.appendChild(this._detachElement(section));
+        }
+
+        return sections.length;
     }
 
     /**
@@ -125,35 +201,29 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
                 webexpress.webui.Controller.toggleNativeFullscreen(this._element);
             } else {
                 // fallback to css if controller not available
-                this._dialogDiv.classList.toggle("modal-fullscreen");
+                this._element.classList.toggle("modal-fullscreen");
             }
             return;
         }
 
         // default: css/light fullscreen toggle
-        const isFullscreen = this._dialogDiv.classList.toggle("modal-fullscreen");
+        const isFullscreen = this._element.classList.toggle("modal-fullscreen");
         const icon = this._fullscreenButton ? this._fullscreenButton.querySelector("i") : null;
 
         if (isFullscreen) {
             if (icon) {
-                icon.classList.remove("fa-expand");
-                icon.classList.add("fa-compress");
+                icon.className = this._iconClass("compress");
             }
             this._fullscreenButton.setAttribute("aria-pressed", "true");
-            this._dialogDiv.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl");
-
-            // set backdrop/body state if needed (css-only)
-            document.body.classList.add("modal-open");
+            this._element.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl");
         } else {
             if (icon) {
-                icon.classList.remove("fa-compress");
-                icon.classList.add("fa-expand");
+                icon.className = this._iconClass("expand");
             }
             this._fullscreenButton.setAttribute("aria-pressed", "false");
-            this._dialogDiv.classList.add(this._size);
-
-            // restore body state
-            document.body.classList.remove("modal-open");
+            if (this._size) {
+                this._element.classList.add(this._size);
+            }
         }
     }
 
@@ -161,70 +231,47 @@ webexpress.webui.ModalCtrl = class extends webexpress.webui.Ctrl {
      * Updates the modal content with fetched data from the URI.
      */
     update() {
-        if (!this._element.hasChildNodes()) {
-            this._element.appendChild(this._dialogDiv);
-        }
-
-        // bind click event to close the modal when dismiss button is clicked
-        const closeButton = this._dialogDiv.querySelector("[data-wx-dismiss='modal']");
-        if (closeButton) {
-            closeButton.removeEventListener("click", this.hide);
-            closeButton.addEventListener("click", () => {
-                this.hide();
-            });
-        }
 
         // remove all known size classes except fullscreen if it was toggled manually
-        this._dialogDiv.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl", "modal-fullscreen");
+        this._element.classList.remove("modal-sm", "modal-md", "modal-lg", "modal-xl", "modal-fullscreen");
 
         // reset icon state
         const icon = this._fullscreenButton.querySelector("i");
         if (icon) {
-            icon.classList.remove("fa-compress");
-            icon.classList.add("fa-expand");
+            icon.className = this._iconClass("expand");
         }
+        this._fullscreenButton.setAttribute("aria-pressed", "false");
 
         if (this._size) {
             // apply modal size class
-            this._dialogDiv.classList.add(this._size);
+            this._element.classList.add(this._size);
         }
     }
 
     /**
-     * Displays the modal by retrieving or creating its Bootstrap instance.
+     * Enters the browser top layer so focus and background inertness follow the dialog.
      * Ensures the modal is properly initialized before showing it.
      */
     show() {
         // ensure modal content is refreshed
         this.update();
 
-        const modalInstance = new bootstrap.Modal(this._element, {
-            backdrop: "static",
-            keyboard: true,
-        });
-        modalInstance.show();
+        if (this._element.open) {
+            return;
+        }
+        this._element.showModal();
 
         // trigger event for showing the modal
         this._dispatch(webexpress.webui.Event.MODAL_SHOW_EVENT, {});
     }
 
     /**
-     * Hides the modal by retrieving its Bootstrap instance.
+     * Releases the browser top layer and restores focus to the invoking control.
      * If an instance exists, it triggers the hide action.
      */
     hide() {
-        const modalInstance = bootstrap.Modal.getInstance(this._element);
-
-        this._element.addEventListener("hidden.bs.modal", () => {
-            this._element.removeAttribute("style");
-            this._element.removeAttribute("aria-hidden");
-            this._dispatch(webexpress.webui.Event.MODAL_HIDE_EVENT, {});
-        }, { once: true });
-
-        document.body.focus();
-
-        if (modalInstance) {
-            modalInstance.hide();
+        if (this._element.open) {
+            this._element.close();
         }
     }
 

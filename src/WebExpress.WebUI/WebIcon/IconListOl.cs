@@ -1,13 +1,13 @@
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
-    /// Represents an icon for a list-ol.
+    /// Represents an icon for an ordered list.
     /// </summary>
     public class IconListOl : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-list-ol";
+        public override string Symbol => "list-ol";
     }
 }

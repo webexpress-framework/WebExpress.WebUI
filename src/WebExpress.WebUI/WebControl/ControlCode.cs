@@ -6,7 +6,12 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a text control with various formatting options.
+    /// Renders a read-only block of source code with a copy button and, optionally, line numbers.
+    /// Only when a <see cref="TypeLanguage"/> other than the default is chosen does the client add
+    /// a header with the language name and syntax highlighting; without one the code stays plain
+    /// text, since there is no language to name or highlight. The code is transferred
+    /// base64-encoded, so it reaches the client exactly as given, whitespace and markup characters
+    /// included.
     /// </summary>
     public class ControlCode : Control
     {
@@ -16,7 +21,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertySizeText> Size
         {
             get => (Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -59,8 +64,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentPre(new HtmlText(decode))
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-code", GetClasses()),
-                Style = GetStyles()
+                Class = Css.Concatenate("wx-webui-code", GetClasses(renderContext)),
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("data-line-numbers", lineNumbers ? "true" : null)
                 .AddUserAttribute("data-language", language.ToLanguage())

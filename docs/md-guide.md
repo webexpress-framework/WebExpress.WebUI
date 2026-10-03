@@ -29,6 +29,8 @@ Headings structure a document hierarchically. Markdown offers six levels (# to #
 ### Title 3
 ```
 
+A document opens its own outline at the first level. Placed under the headings of a page - in a `ControlText` with `Format = Markdown` under a section, say - it continues that section: `HeadingLevel` on the control (or the `headingLevel` argument of `ConvertToHtml`) names the level its first-level heading is spoken at, and every deeper heading follows with its own step. The tags keep their look; the level is carried by `role="heading"` and `aria-level`, so a reader walking the outline of the page meets no gap. A task marker (`[x]`) is rendered as a disabled checkbox named by the text that follows it: it pictures a state, it is not a control anyone can flip.
+
 ### Horizontal Line
 A horizontal line serves as a visual separator between content, e.g., between two topic blocks or as the end of a section. It consists of three or more dashes.
 
@@ -110,6 +112,8 @@ Tables provide a structured representation of tabular data. Cells are separated 
 |        |     | Kingdom      |
 | Peach  | 38  | Royal Castle |
 ```
+
+A row that ends with `>>` continues on the next line: the cells of both lines are joined column by column, so the first row reads *Mario*, *40*, *Mushroom Kingdom*. The closing pipe is optional, and a cell left empty between two pipes stays an empty column.
 
 ### Indent
 Markdown uses indentation for certain block elements such as code blocks or list nesting.
@@ -206,20 +210,130 @@ Content (supports full Markdown syntax)
 - Content between the tags is parsed as standard Markdown and may include any block or inline elements.
 - Block plugins are block-level elements and are separated from surrounding content by blank lines.
 
+### Plugins on a page
+`MarkdownRendererHtml` asks the `IMarkdownPlugin` registered under a plugin's name which HTML node takes its place. A WebExpress plugin contributes one by a public, sealed class with a `Name` attribute; `MarkdownPluginManager` registers it when the plugin is loaded and removes it when the plugin is unloaded:
+
+```csharp
+[Name("ticket")]
+public sealed class TicketMarkdownPlugin : IMarkdownPlugin
+{
+    // {{ticket id="42"}} - a link to the tracker
+    public IHtmlNode ConvertInline(MarkdownInlineElementPlugin element, IRenderControlContext renderContext)
+    {
+        var id = element.Parameters.GetValueOrDefault("id");
+        return new HtmlElementTextSemanticsA($"#{id}") { Href = $"https://tracker.example/{id}" };
+    }
+
+    // {{% ticket id="42" %}}...{{% /ticket %}} - a box around the enclosed content
+    public IHtmlNode ConvertBlock(MarkdownBlockElementPlugin element, IHtmlNode content, IRenderControlContext renderContext)
+    {
+        return new HtmlElementTextContentDiv(content) { Class = "wx-callout" };
+    }
+}
+```
+
+- Both methods are optional. Returning null - the default - keeps the placeholder an unregistered plugin gets: a `div` with the classes `wx-plugin wx-plugin-inline` or `wx-plugin wx-plugin-block`, the name in `data-plugin`, every parameter as `data-plugin-{key}` and, for a block, the enclosed content. A script on the page can still pick that up.
+- A block plugin receives its content already rendered, so it only has to wrap or replace it.
+- A plugin is asked once per element and rendering; its constructor may ask for `IHttpServerContext` and `IComponentHub`.
+- Outside of a server - in a test or a tool - register an instance yourself: `MarkdownPluginRegistry.Register("ticket", new TicketMarkdownPlugin())`. The first registration of a name wins; names are compared without regard to case.
+
+The page and the PDF are served by separate registries, so an add-on that wants its plugin in both registers an `IMarkdownPlugin` and an `IPdfPlugin` under the same name.
+
+### Plugins in PDF
+A PDF has no client, so the server needs to know what a plugin looks like on paper. `PdfRendererMarkdown` and `PdfRendererHtml` turn a plugin into a `PdfBlockElementPlugin` or `PdfInlineElementPlugin` with its name and parameters, and the `IPdfPlugin` registered under that name decides, when the document is written, which elements of the PDF model take its place.
+
+A WebExpress plugin contributes one by a public, sealed class with a `Name` attribute. `PdfPluginManager` registers it when the plugin is loaded and removes it when the plugin is unloaded:
+
+```csharp
+[Name("ticket")]
+public sealed class TicketPdfPlugin : IPdfPlugin
+{
+    // {{ticket id="42"}} - set in the style of the text around it
+    public IEnumerable<PdfInlineElement> ConvertInline(PdfInlineElementPlugin element)
+    {
+        var id = element.Parameters.GetValueOrDefault("id");
+        return [new PdfInlineElementText($"#{id}", element.Style with { Link = $"https://tracker.example/{id}" })];
+    }
+
+    // {{% ticket id="42" %}}...{{% /ticket %}} - a box around the enclosed content
+    public IEnumerable<PdfBlockElement> ConvertBlock(PdfBlockElementPlugin element)
+    {
+        return [new PdfBlockElementCallout(PdfCalloutType.Hint, element.Content)];
+    }
+}
+```
+
+- Both methods are optional. By default a block shows its content and an inline element is left out - which is also what happens to a plugin nobody has registered, so a document stays readable on a server without the add-on.
+- A plugin answers with elements of the PDF model, not with drawing instructions, so page breaks, table cells and bookmarks work for its result as for any other block. The result may name plugins again; they are resolved in turn.
+- A plugin is asked once per element and document; its constructor may ask for `IHttpServerContext` and `IComponentHub`.
+- Outside of a server - in a test or a tool - register an instance yourself: `PdfPluginRegistry.Register("ticket", new TicketPdfPlugin())`. The first registration of a name wins; names are compared without regard to case.
+
 ## Markdown Conversion (Round-Trip)
 The parser supports bidirectional conversion between Markdown and its internal AST representation:
 
 - **Markdown → AST:** `MarkdownParser.Parse(markdownText)` parses Markdown text into a `MarkdownDocument` AST.
 - **AST → HTML:** `document.ConvertToHtml(renderContext)` converts the AST to an HTML tree.
 - **AST → Markdown:** `document.ConvertToMarkdown()` converts the AST back to valid Markdown text.
+- **HTML → AST:** `nodes.ConvertToDocument()` maps a parsed HTML tree onto the AST.
+- **HTML → Markdown:** `nodes.ConvertToMarkdown()` does both steps at once.
 
 This enables a complete round-trip: Markdown can be parsed, transformed, and then serialized back to Markdown while preserving all structural elements including plugin syntax.
 
+### HTML to Markdown
 
+The way back from HTML is `MarkdownRendererHtmlToMarkdown`. The HTML itself is read by `HtmlParser`, which maps every known tag to its own node class; the renderer matches on those classes and builds the AST, so all decisions about escaping, list indentation, numbering and table alignment stay in the Markdown renderer that already makes them.
 
+```csharp
+// read the html, then render the nodes as markdown
+var markdown = new HtmlParser().Parse(html).ConvertToMarkdown();
 
+// or in one step
+var markdown = MarkdownRendererHtmlToMarkdown.ConvertHtmlToMarkdown(html);
 
+// the ast is available too, for a caller that wants to transform before serializing
+var document = new HtmlParser().Parse(html).ConvertToDocument();
+```
 
+What is mapped:
 
+| HTML | Markdown |
+|------|----------|
+| `h1` ... `h6` | `#` ... `######` |
+| `p` | paragraph - one holding nothing but `<br>` is dropped |
+| `hr` | `---` |
+| `blockquote` | `>` |
+| `ul` / `ol` / `li` | list, a list nested in an item is indented |
+| `table`, `tr`, `th`, `td` | table - a table without a header row is given its first row as one |
+| `pre` / `code` | fenced block, language taken from a `language-x` class |
+| `strong`, `b` | `**bold**` |
+| `em`, `i` | `*italic*` |
+| `u` | `_underline_` |
+| `s`, `del` | `~~strikethrough~~` |
+| `mark` | `==marked==` |
+| `code` | `` `code` `` |
+| `a`, `img` | `[text](url)`, `![alt](url)` |
+| `br` | hard line break |
+| anything else | transparent: the wrapper is dropped, the content is kept |
 
+Markup Markdown has no notation for - a coloured span, an inline style - loses the wrapper and keeps its text. That is deliberate: the point of converting to Markdown is a portable document, and carrying the markup along as raw HTML would only defer the question.
 
+The renderer knows nothing about the editor. The value the WYSIWYG editor stores is a working surface, not a document: it carries add-on frames with their labels and drag handles, and instruction texts addressed to the author. All of that is ordinary markup to this renderer, so a stored editor value is read by `EditorContent` first:
+
+```csharp
+// a stored editor value as a portable document
+var markdown = EditorContent.ConvertToMarkdown(article.Description);
+
+// or the document nodes, to render or index them
+var nodes = EditorContent.ReadDocument(article.Description);
+
+// or a PDF file of the same document
+var pdf = EditorContent.ConvertToPdf(article.Description).ToArray();
+```
+
+`EditorContent` lives in `WebExpress.WebUI.WebEditor` and works on the stored value alone - no control, page or render context - so a job or an export can use it without the web layer.
+
+`EditorContent` applies the same rules the client applies in `ContentFormat`: it drops the instruction texts, placeholder hints, drop and caret markers, column resizers, drag handles and settings buttons, unwraps add-on frames to what the add-on renders, and removes the empty guard paragraphs around a non-editable block while keeping a blank line the author typed.
+
+The two implementations cannot share code - one walks a DOM in the browser and builds a fragment, the other walks an `IHtmlNode` tree on the server and builds Markdown - so they share their cases instead: `Data/editor-content.fixture.json` is read by `UnitTestEditorContent.cs` and by `content.scaffolding.test.mjs`. A rule added on one side and forgotten on the other fails on the other side.
+
+Two limits are worth knowing. An attribute written with an empty value (`data-wx-caret=""`) does not survive parsing, because the HTML element model treats an empty value as unset; only the valueless form is visible on the server. And `EditorContent` returns nodes rather than markup, because serializing a parsed tree back is lossy: `HtmlElementTableTable` renders from its own `Rows` collection and not from the children a parser gives it, so a parsed table would come back empty.

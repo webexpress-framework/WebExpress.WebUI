@@ -1,0 +1,245 @@
+/* service level agreement widget, scoped to .wx-sla */
+
+.wx-sla {
+  /* one custom property carries the status colour through the whole widget, so
+     a status change is a single class swap rather than a repaint of every part */
+  --wx-sla-color: var(--wx-success, #198754);
+  --wx-sla-track: var(--wx-secondary-bg, #e9ecef);
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+  /* the widget draws no box of its own: whatever hosts it - a card, a dashboard
+     tile, the panel below - already owns one, and a second, nested frame reads
+     as a widget inside a widget. the one edge that stays repeats the status the
+     badge shows, so the tile is readable for a visitor who cannot separate the
+     badge colours */
+  border-left: 4px solid var(--wx-sla-color);
+  container-type: inline-size;
+}
+
+.wx-sla-at-risk {
+  --wx-sla-color: var(--wx-warning, #ffc107);
+}
+
+.wx-sla-violated {
+  --wx-sla-color: var(--wx-danger, #dc3545);
+}
+
+.wx-sla-paused {
+  --wx-sla-color: var(--wx-secondary-color, #6c757d);
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-sla {
+  --wx-sla-track: #343a40;
+}
+}
+
+.wx-sla-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.wx-sla-label {
+  font-weight: 600;
+  color: var(--wx-body-color, #212529);
+  /* a long agreement name must not push the badge out of the tile */
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.wx-sla-status {
+  flex: 0 0 auto;
+  padding: 0.1rem 0.55rem;
+  border-radius: 1rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+  color: #fff;
+  background: var(--wx-sla-color);
+}
+
+/* the yellow of the warning state is too light to carry white text */
+.wx-sla-at-risk .wx-sla-status {
+  color: #212529;
+}
+
+.wx-sla-description {
+  font-size: 0.8rem;
+  color: var(--wx-secondary-color, #6c757d);
+}
+
+.wx-sla-meter-track {
+  height: 0.5rem;
+  border-radius: 0.25rem;
+  background: var(--wx-sla-track);
+  overflow: hidden;
+}
+
+.wx-sla-meter-value {
+  height: 100%;
+  background: var(--wx-sla-color);
+  transition: width .3s ease-in-out, background-color .3s ease-in-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wx-sla-meter-value {
+    transition: none;
+  }
+}
+
+.wx-sla-footer {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.8rem;
+  color: var(--wx-secondary-color, #6c757d);
+}
+
+.wx-sla-remaining {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--wx-body-color, #212529);
+}
+
+.wx-sla-violated .wx-sla-remaining {
+  color: var(--wx-sla-color);
+}
+
+.wx-sla-actions {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.wx-sla-action {
+  flex: 0 0 auto;
+  min-width: 2rem;
+  padding: 0.25rem 0.6rem;
+  border: 1px solid var(--wx-border-color, #dee2e6);
+  border-radius: 0.35rem;
+  background: transparent;
+  color: var(--wx-body-color, #212529);
+  cursor: pointer;
+  transition: background-color .15s ease-in-out;
+}
+
+.wx-sla-action:hover:not(:disabled) {
+  background: var(--wx-secondary-bg, #e9ecef);
+}
+
+/* the outline is never removed, only replaced, so the row stays keyboard navigable */
+.wx-sla-action:focus-visible {
+  outline: 2px solid var(--wx-sla-color);
+  outline-offset: 2px;
+}
+
+.wx-sla-action:disabled {
+  opacity: .45;
+  cursor: default;
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-sla-action {
+  border-color: #495057;
+  color: var(--wx-body-color, #dee2e6);
+}
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-sla-action:hover:not(:disabled) {
+  background: #343a40;
+}
+}
+
+/* below the width of a narrow dashboard column the header and the footer read
+   better stacked than squeezed onto one line */
+@container (max-width: 18rem) {
+  .wx-sla-header,
+  .wx-sla-footer {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   group - several agreements read as one panel
+   --------------------------------------------------------------------------- */
+
+.wx-sla-group {
+  /* the aggregated status is read by the summary rather than by an edge of its
+     own: every tile already carries the colour of its own agreement, and a
+     second accent spanning all of them repeats the worst one without saying
+     which agreement it belongs to */
+  --wx-sla-color: var(--wx-success, #198754);
+
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding: 0.85rem 1rem;
+}
+
+.wx-sla-group-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.wx-sla-group-label {
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: var(--wx-body-color, #212529);
+}
+
+.wx-sla-summary {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--wx-sla-color);
+}
+
+.wx-sla-group-description {
+  font-size: 0.8rem;
+  color: var(--wx-secondary-color, #6c757d);
+}
+
+/* a section already steps its body in from the label. the panel adding its own step
+   on top of that reads as a nesting the panel does not have - it draws no box, so
+   there is nothing for the second inset to sit inside of */
+.wx-section-body > .wx-sla-group {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+.wx-sla-group-items {
+  display: flex;
+  flex-direction: column;
+}
+
+/* inside a panel a tile is an entry of it rather than a widget that happens to
+   sit in it, so it gives up the air a standalone tile needs and thins its
+   status accent down to the weight of a list marker */
+.wx-sla-group-items > .wx-sla {
+  padding: 0.6rem 0 0.6rem 0.75rem;
+  border-left-width: 3px;
+}
+
+.wx-sla-group-items > .wx-sla + .wx-sla {
+  border-top: 1px solid var(--wx-border-color, #dee2e6);
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-sla-group-items > .wx-sla + .wx-sla {
+  border-top-color: #343a40;
+}
+}
+

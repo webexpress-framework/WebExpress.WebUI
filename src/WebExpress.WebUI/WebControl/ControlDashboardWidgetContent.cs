@@ -11,7 +11,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an widget element in a dashboard control.
+    /// The inner content area of a dashboard widget, holding the controls shown inside the widget.
     /// </summary>
     public class ControlDashboardWidgetContent : IControlDashboardWidget
     {

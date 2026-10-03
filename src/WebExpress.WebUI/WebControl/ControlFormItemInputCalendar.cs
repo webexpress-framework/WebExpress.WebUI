@@ -6,7 +6,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a calendar input form item that supports single or range-based date selection.
+    /// Represents a form input that shows an inline calendar for picking a single date. For a
+    /// start and end date use <see cref="ControlFormItemInputCalendarRange"/>.
     /// </summary>
     public class ControlFormItemInputCalendar : ControlFormItemInput<ControlFormInputValueDate>
     {
@@ -26,11 +27,6 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, string> Format { get; set; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether date range selection is enabled.
-        /// </summary>
-        public Func<IRenderControlContext, bool> Range { get; set; }
-
-        /// <summary>
         /// Initializes a new instance of the <see cref="ControlFormItemInputCalendar"/> class.
         /// </summary>
         public ControlFormItemInputCalendar()
@@ -45,6 +41,17 @@ namespace WebExpress.WebUI.WebControl
         public ControlFormItemInputCalendar(string id)
             : base(id)
         {
+        }
+
+        /// <summary>
+        /// Determines whether a label element may point at the field. The client moves the id onto the
+        /// hidden input that posts the value, which is no labelable element, so the caption is a span.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>True if a label element may point at the field.</returns>
+        public override bool IsLabelable(IRenderControlFormContext renderContext)
+        {
+            return false;
         }
 
         /// <summary>

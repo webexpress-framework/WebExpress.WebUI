@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// The size units.
+    /// The unit used to express a size value (for example pixels or percent).
     /// </summary>
     public enum TypeSizeUnit
     {

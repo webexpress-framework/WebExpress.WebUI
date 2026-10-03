@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.Test.WebIcon
         /// Tests the web icon.
         /// </summary>
         [Theory]
-        [InlineData(typeof(IconHome), @"<i class=""fas fa-home""></i>")]
+        [InlineData(typeof(IconHome), @"<i class=""wx-icon-light wx-icon-light-home""></i>")]
         public void Id(Type iconType, string expected)
         {
             // arrange

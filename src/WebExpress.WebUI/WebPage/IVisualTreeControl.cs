@@ -1,6 +1,5 @@
 ﻿using System.Collections.Generic;
 using WebExpress.WebCore.WebHtml;
-using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebTheme;
 using WebExpress.WebUI.WebControl;
@@ -24,13 +23,6 @@ namespace WebExpress.WebUI.WebPage
         /// the application has no theme.
         /// </summary>
         IThemeContext Theme { get; }
-
-        /// <summary>
-        /// Gets the icon theme used to render icons on this page. Pulled from
-        /// <see cref="Theme"/>; falls back to
-        /// <see cref="TypeIconTheme.Default"/> when no theme is registered.
-        /// </summary>
-        TypeIconTheme IconTheme { get; }
 
         /// <summary>
         /// Overrides the active theme with the one identified by

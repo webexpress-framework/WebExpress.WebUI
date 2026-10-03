@@ -1,8 +1,18 @@
-﻿# en-US language resource file
+# en-US language resource file
 plugin.name=WebExpress.WebUI
 plugin.description=Provides basic components.
 
 notificationmanager.initialization=The notification manager has been initialized.
+
+pdfpluginmanager.initialization=The PDF plugin manager has been initialized.
+pdfpluginmanager.register=The PDF plugin '{0}' of '{1}' has been registered.
+pdfpluginmanager.duplicate=The PDF plugin '{0}' of '{1}' was not registered, because the name is already taken.
+pdfpluginmanager.noname=The PDF plugin '{0}' was not registered, because it has no name attribute.
+
+markdownpluginmanager.initialization=The markdown plugin manager has been initialized.
+markdownpluginmanager.register=The markdown plugin '{0}' of '{1}' has been registered.
+markdownpluginmanager.duplicate=The markdown plugin '{0}' of '{1}' was not registered, because the name is already taken.
+markdownpluginmanager.noname=The markdown plugin '{0}' was not registered, because it has no name attribute.
 
 form.empty.id=The form does not have an id!
 form.submit.label=Submit
@@ -21,6 +31,11 @@ form.inputpassword.validation.min=The password does not meet the minimum length 
 form.inputpassword.validation.max=The password exceeds the maximum length of {0} characters!
 
 modal.close.label=Close
+
+pdfviewer.fallback=The PDF document cannot be displayed here.
+pdfviewer.open=Open PDF
+
+login.title=Login
 
 confirm.label=Confirm
 confirm.header=Request Confirmation
@@ -41,3 +56,16 @@ fileupload.file.validation.error.nofile=No file was specified.
 
 darkmode.text.light=Activate dark mode
 darkmode.text.dark=Activate light mode
+
+masterdetail.empty.title=No item selected
+masterdetail.empty.message=Please select an item from the list.
+
+carousel.previous=Previous slide
+carousel.next=Next slide
+breadcrumb.label=Breadcrumb
+toolbar.label=Toolbar
+form.actions=Actions
+table.actions=Actions
+sidebar.label=Sidebar
+splitbutton.toggle=More options
+quickfilter.label=Filter

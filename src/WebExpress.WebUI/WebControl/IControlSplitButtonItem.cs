@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Interface for a split button item control.
+    /// Contract for an entry in a split button's dropdown menu.
     /// </summary>
     public interface IControlSplitButtonItem : IControl
     {

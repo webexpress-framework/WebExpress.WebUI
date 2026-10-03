@@ -6,18 +6,24 @@
     margin-bottom: 0.2em;
     min-height: 1.6em;
     box-sizing: border-box;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
     flex: 1;
 }
 
 .wx-smart-edit:hover {
 }
 
-/* pencil icon for inline editing */
+/* the edit affordance; the class keeps the historic name other modules style */
 .wx-smart-edit .pencil {
     position: absolute;
     right: 1em;
     margin-left: 0.5em;
+}
+
+/* the stand-in for an unset value, which names the field the editor edits */
+.wx-smart-edit-placeholder {
+    color: var(--wx-secondary-color);
+    font-style: italic;
 }
 
 .wx-smart-edit button {
@@ -30,7 +36,7 @@
     vertical-align: middle;
     user-select: none;
     transition: color 0.2s;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
 .wx-smart-edit > ul {
@@ -65,7 +71,7 @@
 }
 
 .wx-smart-edit button:hover {
-    background-color: var(--bs-secondary-bg);
+    background-color: var(--wx-secondary-bg);
 }
 
 .wx-smart-edit button:focus {
@@ -80,13 +86,14 @@
 .wx-smart-edit-editor {
     font-size: 1em;
     padding: 4px 8px;
-    border: 1px solid #ccc;
+    border: 1px solid var(--wx-border-color);
     border-radius: 3px;
     margin-right: 8px;
     margin-left: 0;
     outline: none;
     box-sizing: border-box;
-    background: #fff;
+    background: var(--wx-body-bg);
+    color: var(--wx-body-color);
     display: block;
     width: 100%;
     box-sizing: border-box;
@@ -99,6 +106,17 @@
     gap: 0.5em;
     margin-top: 1px;
     display: flex;
-    background-color: var(--bs-body-bg);
+    background-color: var(--wx-body-bg);
     right: 1em;
+}
+
+.wx-smart-edit .form-buttons > button { background: var(--wx-secondary-bg); color: var(--wx-body-color); padding: 0.35em 0.6em; }
+.wx-smart-edit .form-buttons > button:hover { background: var(--wx-tertiary-bg); }
+.wx-smart-edit .form-buttons .wx-smart-edit-save { color: var(--wx-success-text-emphasis); }
+.wx-smart-edit .form-buttons .wx-smart-edit-cancel { color: var(--wx-danger-text-emphasis); }
+
+/* the editor field drops the browser outline, so the focus ring is drawn here */
+.wx-smart-edit-editor:focus-visible {
+    border-color: var(--wx-primary);
+    box-shadow: 0 0 0 0.2rem rgba(var(--wx-primary-rgb), 0.2);
 }

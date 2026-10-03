@@ -182,8 +182,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form password control using item initialization.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-password""></div>*")]
-        [InlineData("secret", @"*<div class=""wx-webui-input-password"" data-value=""secret""></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-password""></div>*")]
+        [InlineData("secret", @"*<div id=""*"" class=""wx-webui-input-password"" data-value=""secret""></div>*")]
         public void ValueItem(string value, string expected)
         {
             // arrange
@@ -238,6 +238,70 @@ namespace WebExpress.WebUI.Test.WebControl
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
             Assert.True(processed);
+        }
+
+        /// <summary>
+        /// Tests the server side min length check of the form password control. The native
+        /// constraint only guards the browser, so a value that arrived another way has to
+        /// be caught here.
+        /// </summary>
+        [Theory]
+        [InlineData(null, false)]
+        [InlineData("ab", true)]
+        [InlineData("abc", false)]
+        [InlineData("abcd", false)]
+        public void ValidateMinLength(string value, bool expectedError)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var control = new ControlFormItemInputPassword("pw-box")
+            {
+                MinLength = _ => 3u
+            };
+
+            if (value is not null)
+            {
+                context.SetValue(control, new ControlFormInputValueString(value));
+            }
+
+            // act
+            var results = control.Validate(context).ToList();
+
+            // validation
+            Assert.Equal(expectedError, results.Any(x => x.Type == TypeInputValidity.Error));
+        }
+
+        /// <summary>
+        /// Tests the server side max length check of the form password control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, false)]
+        [InlineData("abc", false)]
+        [InlineData("abcd", false)]
+        [InlineData("abcde", true)]
+        public void ValidateMaxLength(string value, bool expectedError)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var control = new ControlFormItemInputPassword("pw-box")
+            {
+                MaxLength = _ => 4u
+            };
+
+            if (value is not null)
+            {
+                context.SetValue(control, new ControlFormInputValueString(value));
+            }
+
+            // act
+            var results = control.Validate(context).ToList();
+
+            // validation
+            Assert.Equal(expectedError, results.Any(x => x.Type == TypeInputValidity.Error));
         }
     }
 }

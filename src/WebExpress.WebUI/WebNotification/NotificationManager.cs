@@ -72,8 +72,10 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="icon">An icon.</param>
         /// <param name="type">The notification type.</param>
         /// <param name="scops">The scopes for the notification.</param>
+        /// <param name="link">The address the notification is about, so the reader can go
+        /// there instead of having to find it. Null for a notification without a page.</param>
         /// <returns>The created notification.</returns>
-        public INotification AddNotification(IApplicationContext applicationContext, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, IEnumerable<IScope> scops = null)
+        public INotification AddNotification(IApplicationContext applicationContext, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, IEnumerable<IScope> scops = null, string link = null)
         {
             var notification = new Notification()
             {
@@ -81,6 +83,7 @@ namespace WebExpress.WebUI.WebNotification
                 Durability = durability,
                 Heading = heading,
                 Icon = icon,
+                Link = link,
                 Type = type,
                 Scops = scops ?? []
             };
@@ -103,8 +106,10 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="icon">An icon.</param>
         /// <param name="type">The notification type.</param>
         /// <param name="scops">The scopes for the notification.</param>
+        /// <param name="link">The address the notification is about, so the reader can go
+        /// there instead of having to find it. Null for a notification without a page.</param>
         /// <returns>The created notification.</returns>
-        public INotification AddNotification(IApplicationContext applicationContext, Request request, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, IEnumerable<IScope> scops = null)
+        public INotification AddNotification(IApplicationContext applicationContext, Request request, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, IEnumerable<IScope> scops = null, string link = null)
         {
             var notification = new Notification()
             {
@@ -112,6 +117,7 @@ namespace WebExpress.WebUI.WebNotification
                 Durability = durability,
                 Heading = I18N.Translate(request, heading),
                 Icon = icon?.ToString(),
+                Link = link,
                 Type = type,
                 Scops = scops ?? []
             };

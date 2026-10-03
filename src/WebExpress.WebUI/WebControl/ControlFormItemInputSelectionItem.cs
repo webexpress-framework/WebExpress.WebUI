@@ -1,4 +1,6 @@
-using System;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
@@ -9,7 +11,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a selection input form.
+    /// A single selectable option within a selection input.
     /// </summary>
     public class ControlFormItemInputSelectionItem : IControlFormItemInputSelectionItem
     {
@@ -54,6 +56,13 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, IControl> Content { get; set; }
 
         /// <summary>
+        /// Gets or sets the values of the field named by
+        /// <see cref="ControlFormItemInputSelection.DependsOn"/> for which this option is
+        /// offered. Left unset, the option is offered whatever that field says.
+        /// </summary>
+        public Func<IRenderControlContext, IEnumerable<string>> Requires { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
         /// </summary>
         public ControlFormItemInputSelectionItem()
@@ -83,12 +92,17 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-selection-item"),
             }
-                .AddUserAttribute("data-label", I18N.Translate(Text?.Invoke(renderContext)))
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, Text?.Invoke(renderContext)))
                 .AddUserAttribute("data-icon", Icon?.Invoke(renderContext) is Icon ? (Icon?.Invoke(renderContext) as Icon).Class : null)
                 .AddUserAttribute("data-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) is ImageIcon imageIcon ? imageIcon.Uri?.ToString() : null))
                 .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorSelection.Default) != TypeColorSelection.Default
                     ? (Color?.Invoke(renderContext) ?? TypeColorSelection.Default).ToClass()
                     : null)
+                // an option that takes part in a dependency names the values it belongs to;
+                // one that names none is left without the attribute rather than with an
+                // empty one, because "no condition" and "no value satisfies it" are opposite
+                // statements and the client reads a missing attribute as the first
+                .AddUserAttribute("data-requires", RenderRequires(renderContext))
                 .Add(Content?.Invoke(renderContext)?.Render(renderContext, visualTree));
 
             if (Selected?.Invoke(renderContext) == true)
@@ -102,6 +116,24 @@ namespace WebExpress.WebUI.WebControl
             }
 
             return html;
+        }
+
+        /// <summary>
+        /// Renders <see cref="Requires"/> as the semicolon-separated list the client reads,
+        /// or null when the option names no values and is therefore always offered.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>The attribute value, or null when there is no condition to render.</returns>
+        private string RenderRequires(IRenderControlContext renderContext)
+        {
+            var values = Requires?.Invoke(renderContext)?
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Select(x => x.Trim())
+                .ToList();
+
+            return values is null || values.Count == 0
+                ? null
+                : string.Join(";", values);
         }
     }
 }

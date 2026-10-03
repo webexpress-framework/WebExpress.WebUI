@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebUI.WebEditor;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
@@ -48,6 +49,26 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, uint?> Rows { get; set; } = _ => 8;
 
         /// <summary>
+        /// Gets or sets whether the rich-text surface takes the height its dialog or page has
+        /// left over instead of the fixed box a field among many fields gets.
+        /// </summary>
+        /// <remarks>
+        /// This is for the form whose text <i>is</i> the work - an article, a page, a post -
+        /// where everything that is not the writing area is overhead. It applies to
+        /// <see cref="TypeEditTextFormat.Wysiwyg"/> only; the other formats size themselves
+        /// from <see cref="Rows"/>.
+        /// <para>
+        /// The height is a viewport calculation rather than a share of the parent, because a
+        /// form has no height to share: inside a modal the form element is laid out as
+        /// <c>display: contents</c>, so a percentage resolves to auto the whole way down. How
+        /// much stands above and below the surface is the caller's to know, so the amount is
+        /// subtracted through the <c>--wx-editor-fill-offset</c> custom property, which
+        /// defaults to the chrome of a full-screen dialog.
+        /// </para>
+        /// </remarks>
+        public Func<IRenderControlContext, bool> Fill { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public ControlFormItemInputText()
@@ -75,6 +96,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Determines whether a label element may point at the field. Only the rich-text format keeps its
+        /// id on a host div; the other formats render a native input or text area.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>True if a label element may point at the field.</returns>
+        public override bool IsLabelable(IRenderControlFormContext renderContext)
+        {
+            return (Format?.Invoke(renderContext) ?? TypeEditTextFormat.Default) != TypeEditTextFormat.Wysiwyg;
+        }
+
+        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -91,6 +123,7 @@ namespace WebExpress.WebUI.WebControl
             var placeholder = Placeholder?.Invoke(renderContext);
             var pattern = Pattern?.Invoke(renderContext);
             var rows = Rows?.Invoke(renderContext);
+            var fill = Fill?.Invoke(renderContext) ?? false;
             var minLength = MinLength?.Invoke(renderContext);
             var maxLength = MaxLength?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
@@ -118,13 +151,18 @@ namespace WebExpress.WebUI.WebControl
                     Placeholder = I18N.Translate(renderContext, placeholder),
                     Rows = rows?.ToString()
                 },
-                TypeEditTextFormat.Wysiwyg => new HtmlElementTextContentDiv(new HtmlText(value?.Text))
+                TypeEditTextFormat.Wysiwyg => new HtmlElementTextContentDiv()
                 {
                     Id = id,
                     Class = Css.Concatenate("wx-webui-editor", classes),
-                    Style = GetStyles(),
+                    Style = GetStyles(renderContext),
                     Role = role,
-                }.AddUserAttribute("name", name),
+                }
+                    .AddUserAttribute("name", name)
+                    .AddUserAttribute("value", value?.Text)
+                    .AddUserAttribute("data-disabled", disabled ? "true" : null)
+                    .AddUserAttribute("aria-disabled", disabled ? "true" : null)
+                    .AddUserAttribute("data-fill", fill ? "true" : null),
                 _ => new HtmlElementFieldInput()
                 {
                     Id = Id,
@@ -157,10 +195,25 @@ namespace WebExpress.WebUI.WebControl
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
             var disabled = Disabled?.Invoke(renderContext) ?? false;
             var required = Required?.Invoke(renderContext) ?? false;
+            var minLength = MinLength?.Invoke(renderContext);
+            var maxLength = MaxLength?.Invoke(renderContext);
 
             if (disabled)
             {
                 return [];
+            }
+
+            if ((Format?.Invoke(renderContext) ?? TypeEditTextFormat.Default) == TypeEditTextFormat.Wysiwyg && EditorState.IsState(value))
+            {
+                try
+                {
+                    value = EditorState.ValidationText(value);
+                }
+                catch (System.Text.Json.JsonException)
+                {
+                    validationResults.Add(new ValidationResult(TypeInputValidity.Error, "webexpress.webui:editor.state.invalid"));
+                    return validationResults;
+                }
             }
 
             if (required && string.IsNullOrWhiteSpace(value))
@@ -170,14 +223,14 @@ namespace WebExpress.WebUI.WebControl
                 return validationResults;
             }
 
-            if (!string.IsNullOrWhiteSpace(MinLength?.ToString()) && Convert.ToInt32(MinLength) > value?.Length)
+            if (value is not null && minLength > value.Length)
             {
-                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.min"), MinLength)));
+                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.min"), minLength)));
             }
 
-            if (!string.IsNullOrWhiteSpace(MaxLength?.ToString()) && Convert.ToInt32(MaxLength) < value?.Length)
+            if (value is not null && maxLength < value.Length)
             {
-                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.max"), MaxLength)));
+                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, string.Format(I18N.Translate(renderContext.Request?.Culture, "webexpress.webui:form.inputtextbox.validation.max"), maxLength)));
             }
 
             return validationResults;

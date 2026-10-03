@@ -1,5 +1,3 @@
-using WebExpress.WebCore.WebIcon;
-
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
@@ -9,15 +7,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconApplication : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the class with the default theme.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public IconApplication() { }
-
-        /// <summary>
-        /// Gets the CSS class for the application icon, depending on the selected theme.
-        /// </summary>
-        public override string Class => Theme == TypeIconTheme.Light
-            ? "wx-icon-light wx-icon-light-application"
-            : "fas fa-question";
+        public override string Symbol => "application";
     }
 }

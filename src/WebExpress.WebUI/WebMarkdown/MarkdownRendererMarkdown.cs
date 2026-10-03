@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -221,26 +222,64 @@ namespace WebExpress.WebUI.WebMarkdown
         /// <param name="sb">The string builder.</param>
         private static void ConvertTable(MarkdownBlockElementTable table, StringBuilder sb)
         {
+            static void Row(IEnumerable<string> cells, StringBuilder sb)
+            {
+                sb.Append("| ");
+                sb.Append(string.Join(" | ", cells));
+                sb.AppendLine(" |");
+            }
+
             // write header row
             if (table.Columns.Any())
             {
-                sb.Append("| ");
-                sb.Append(string.Join(" | ", table.Columns.Select(c => c.PlainText)));
-                sb.AppendLine(" |");
-
-                // write separator
-                sb.Append("| ");
-                sb.Append(string.Join(" | ", table.Columns.Select(_ => "---")));
-                sb.AppendLine(" |");
+                Row(table.Columns.Select(ConvertTableCell), sb);
+                Row(table.Columns.Select(c => c.Align switch
+                {
+                    MarkdownCellAlign.Center => ":---:",
+                    MarkdownCellAlign.Right => "---:",
+                    _ => "---"
+                }), sb);
             }
 
             // write data rows
             foreach (var row in table.Rows)
             {
-                sb.Append("| ");
-                sb.Append(string.Join(" | ", row.Select(c => c.PlainText)));
-                sb.AppendLine(" |");
+                Row(row.Select(ConvertTableCell), sb);
             }
+
+            // the parser reads the rows after a second delimiter as the footer
+            if (table.Footers.Any())
+            {
+                var count = new[] { table.Columns.Count(), table.Footers.Count() }
+                    .Concat(table.Rows.Select(r => r.Count()))
+                    .Max();
+
+                Row(Enumerable.Repeat("---", count), sb);
+                Row(table.Footers.Select(ConvertTableCell), sb);
+            }
+        }
+
+        /// <summary>
+        /// Converts the content of a table cell to the text of one cell. A cell is one line
+        /// between two pipes, so the content is written on a single line and every pipe in
+        /// its text is escaped.
+        /// </summary>
+        /// <param name="cell">The cell.</param>
+        /// <returns>The Markdown text of the cell.</returns>
+        private static string ConvertTableCell(MarkdownBlockElementTableCell cell)
+        {
+            var sb = new StringBuilder();
+
+            // the parser wraps the inline content of a cell in a paragraph, while a cell built
+            // from HTML holds the inline elements directly
+            var content = cell.Content
+                .SelectMany(x => x is MarkdownBlockElementParagraph paragraph ? paragraph.Content : [x]);
+
+            ConvertInlineElements(content, sb, tableCell: true);
+
+            return string.Join(" ", sb.ToString().Split(['\r', '\n'], StringSplitOptions.RemoveEmptyEntries)
+                .Select(x => x.Trim())
+                .Where(x => x.Length > 0));
         }
 
         /// <summary>
@@ -295,11 +334,12 @@ namespace WebExpress.WebUI.WebMarkdown
         /// </summary>
         /// <param name="elements">The inline elements to convert.</param>
         /// <param name="sb">The string builder.</param>
-        private static void ConvertInlineElements(IEnumerable<IMarkdownElement> elements, StringBuilder sb)
+        /// <param name="tableCell">Whether the elements form a table cell, whose pipes are escaped.</param>
+        private static void ConvertInlineElements(IEnumerable<IMarkdownElement> elements, StringBuilder sb, bool tableCell = false)
         {
             foreach (var element in elements)
             {
-                ConvertInlineElement(element, sb);
+                ConvertInlineElement(element, sb, tableCell);
             }
         }
 
@@ -308,41 +348,46 @@ namespace WebExpress.WebUI.WebMarkdown
         /// </summary>
         /// <param name="element">The inline element to convert.</param>
         /// <param name="sb">The string builder.</param>
-        private static void ConvertInlineElement(IMarkdownElement element, StringBuilder sb)
+        /// <param name="tableCell">Whether the element is part of a table cell, whose pipes are escaped.</param>
+        private static void ConvertInlineElement(IMarkdownElement element, StringBuilder sb, bool tableCell = false)
         {
+            // links, images, html and plugins are read as one token, so a pipe inside them
+            // never splits a cell; only text and code spans need the escape
+            string Escape(string value) => tableCell ? value?.Replace("|", "\\|") : value;
+
             switch (element)
             {
                 case MarkdownInlineElementPlainText text:
-                    sb.Append(text.Text);
+                    sb.Append(Escape(text.Text));
                     break;
                 case MarkdownInlineElementBold bold:
                     sb.Append("**");
-                    ConvertInlineElements(bold.Content, sb);
+                    ConvertInlineElements(bold.Content, sb, tableCell);
                     sb.Append("**");
                     break;
                 case MarkdownInlineElementItalic italic:
                     sb.Append("*");
-                    ConvertInlineElements(italic.Content, sb);
+                    ConvertInlineElements(italic.Content, sb, tableCell);
                     sb.Append("*");
                     break;
                 case MarkdownInlineElementUnderline underline:
                     sb.Append("_");
-                    ConvertInlineElements(underline.Content, sb);
+                    ConvertInlineElements(underline.Content, sb, tableCell);
                     sb.Append("_");
                     break;
                 case MarkdownInlineElementStrikethrough strikethrough:
                     sb.Append("~~");
-                    ConvertInlineElements(strikethrough.Content, sb);
+                    ConvertInlineElements(strikethrough.Content, sb, tableCell);
                     sb.Append("~~");
                     break;
                 case MarkdownInlineElementMarked marked:
                     sb.Append("==");
-                    ConvertInlineElements(marked.Content, sb);
+                    ConvertInlineElements(marked.Content, sb, tableCell);
                     sb.Append("==");
                     break;
                 case MarkdownInlineElementCode code:
                     sb.Append('`');
-                    sb.Append(code.Code);
+                    sb.Append(Escape(code.Code));
                     sb.Append('`');
                     break;
                 case MarkdownInlineElementUrl url:

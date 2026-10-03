@@ -5,12 +5,12 @@ webexpress.webui.DialogPanels.register("editor-link", {
     id: "editor-link-page",
     parentId: null,
     title: webexpress.webui.I18N.translate("webexpress.webui:editor.link.title"),
-    iconClass: "fas fa-link",
+    iconClass: "link",
 
     /**
      * Renders the page ui.
      * @param {HTMLElement} container - Host container for the page.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      */
     render: function (container, modal) {
         const wrapper = document.createElement("div");
@@ -68,7 +68,7 @@ webexpress.webui.DialogPanels.register("editor-link", {
     /**
      * Called when the page becomes active.
      * Resets or prefills inputs and attaches the explicit click handler.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      */
     onShow: function (modal) {
         if (!(modal && modal._link && modal._link.urlInput)) {
@@ -118,7 +118,7 @@ webexpress.webui.DialogPanels.register("editor-link", {
 
     /**
      * Validates current page data.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      * @returns {true|{valid:false,message:string}}
      */
     validate: function (modal) {
@@ -143,7 +143,7 @@ webexpress.webui.DialogPanels.register("editor-link", {
 
     /**
      * Handles submit and inserts the link into the editor.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      * @returns {void}
      */
     onSubmit: function (modal) {
@@ -179,7 +179,7 @@ webexpress.webui.DialogPanels.register("editor-link", {
         };
 
         // editor restores the saved range internally on focus/insert
-        editor.insertHtmlAtCursor('<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(rawText) + "</a>");
+        editor.insertHtmlAtCursor('<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(rawText) + "</a>", modal._insertionSelection);
 
         // close modal
         if (typeof modal.hide === "function") {
@@ -188,11 +188,8 @@ webexpress.webui.DialogPanels.register("editor-link", {
             modal.ctrl.hide();
         } else {
             const modalWrapper = urlInput.closest(".modal");
-            if (modalWrapper && typeof bootstrap !== "undefined") {
-                const bsModal = bootstrap.Modal.getInstance(modalWrapper);
-                if (bsModal) {
-                    bsModal.hide();
-                }
+            if (modalWrapper?.open) {
+                modalWrapper.close();
             }
         }
     }

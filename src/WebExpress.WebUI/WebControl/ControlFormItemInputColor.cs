@@ -5,7 +5,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a color input form item control.
+    /// A form input that lets the user pick a color.
     /// </summary>
     public class ControlFormItemInputColor : ControlFormItemInput<ControlFormInputValueString>
     {
@@ -32,6 +32,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Determines whether a label element may point at the field. The client moves the id onto the
+        /// hidden input that posts the value, which is no labelable element, so the caption is a span.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>True if a label element may point at the field.</returns>
+        public override bool IsLabelable(IRenderControlFormContext renderContext)
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -45,8 +56,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-input-color", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-input-color", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
             }
               .AddUserAttribute("data-value", value ?? color);
 

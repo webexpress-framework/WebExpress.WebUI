@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a label for a form item control.
+    /// The caption shown next to or above a form field, describing what to enter.
     /// </summary>
     public class ControlFormItemLabel : ControlFormItem
     {
@@ -49,18 +49,27 @@ namespace WebExpress.WebUI.WebControl
             var role = Role?.Invoke(renderContext);
             var text = Text?.Invoke(renderContext);
 
+            // a label pointing at nothing labelable is flagged by the browser, so such a caption
+            // is a span that the client links to the focusable part through aria-labelledby
+            if (FormItem is null || (FormItem is IControlFormItemInput input && !input.IsLabelable(renderContext)))
+            {
+                return new HtmlElementTextSemanticsSpan(new HtmlText(I18N.Translate(renderContext.Request?.Culture, text)))
+                {
+                    Id = Id,
+                    Class = Css.Concatenate("wx-form-label", GetClasses(renderContext)),
+                    Style = GetStyles(renderContext),
+                    Role = role
+                };
+            }
+
             return new HtmlElementFieldLabel()
             {
                 Id = Id,
                 Text = I18N.Translate(renderContext.Request?.Culture, text),
-                Class = Css.Concatenate("wx-form-label", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-form-label", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
-                For = FormItem is not null ?
-                    string.IsNullOrWhiteSpace(FormItem.Id) ?
-                        name :
-                        FormItem.Id :
-                    null
+                For = string.IsNullOrWhiteSpace(FormItem.Id) ? name : FormItem.Id
             };
         }
     }

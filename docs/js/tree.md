@@ -139,13 +139,13 @@ element.addEventListener(webexpress.webui.Event.MOVE_EVENT, (event) => {
      data-movable="true">
 
     <!-- Root node, initially expanded -->
-    <div id="folder-1" class="wx-tree-node" data-label="Project Files" data-icon="fas fa-folder" data-expand="true">
+    <div id="folder-1" class="wx-tree-node" data-label="Project Files" data-icon="folder" data-expand="true">
         <!-- Child nodes -->
-        <div id="file-1a" class="wx-tree-node" data-label="index.html" data-icon="fas fa-file-code"></div>
-        <div id="file-1b" class="wx-tree-node" data-label="styles.css" data-icon="fas fa-file-alt"></div>
+        <div id="file-1a" class="wx-tree-node" data-label="index.html" data-icon="file-code"></div>
+        <div id="file-1b" class="wx-tree-node" data-label="styles.css" data-icon="file"></div>
     </div>
 
     <!-- Another root node -->
-    <div id="folder-2" class="wx-tree-node" data-label="Documents" data-icon="fas fa-folder"></div>
+    <div id="folder-2" class="wx-tree-node" data-label="Documents" data-icon="folder"></div>
 </div>
 ```

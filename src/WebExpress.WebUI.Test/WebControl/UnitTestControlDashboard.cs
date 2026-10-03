@@ -33,6 +33,30 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that the fill mode marks the host, which is what makes a shell
+        /// hand a height down to the board instead of letting it grow.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-dashboard""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-dashboard wx-fill""></div>")]
+        public void Fill(bool fill, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlDashboard()
+            {
+                Fill = _ => fill
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests adding a column to the dashboard control.
         /// </summary>
         [Fact]

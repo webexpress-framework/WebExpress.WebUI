@@ -16,3 +16,9 @@ A typical SVG header for an icon in this project consists only of the namespace 
 ```
 
 The naming of icon files follows a simple and predictable pattern. All file names use lowercase letters and hyphens, and they describe the icon’s purpose as clearly as possible. Examples include “icon-add.svg”, “icon-user.svg” or “icon-settings.svg”. This naming scheme ensures that icons can be referenced easily in code and remain discoverable within the repository.
+
+## Beyond the drawing
+
+A drawing on its own renders nothing. The file name is the icon’s **symbolic name**, and two more places have to use it: a mask rule in `../css/webexpress.webui.icon.css`, and a class under `WebIcon/` that returns the name from its `Symbol` property. A file without a rule is the failure mode to watch for — the element renders and stays blank, without an error.
+
+The full picture, including how icons are used from C#, JavaScript and markup, is in `docs/icons.md`.

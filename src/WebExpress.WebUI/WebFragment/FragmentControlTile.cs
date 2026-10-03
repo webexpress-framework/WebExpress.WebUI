@@ -6,9 +6,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a control tile for a fragment, implementing the IFragmentControl interface.
+    /// Base class for a tile that is contributed as a fragment, so the framework can insert it into a page section from a plugin.
     /// </summary>
-    /// <typeparam name="ControlTree">The type of control tile.</typeparam>
     public abstract class FragmentControlTile : ControlTile, IFragmentControl<ControlTile>
     {
         /// <summary>
@@ -34,7 +33,7 @@ namespace WebExpress.WebUI.WebFragment
         /// <returns>An HTML node representing the rendered fragments. Can be null if no nodes are present.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            if (!FragmentContext.Conditions.Check(renderContext?.Request))
+            if (!FragmentContext.Check(renderContext?.Request))
             {
                 return null;
             }

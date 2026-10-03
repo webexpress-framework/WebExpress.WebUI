@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a dataset for a chart control.
+    /// Holds one series of data points shown in a chart control, together with its display options.
     /// </summary>
     public class ControlChartDataset
     {

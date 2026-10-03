@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -28,10 +29,25 @@ namespace WebExpress.WebUI.WebControl
         public virtual IEnumerable<IControlToolbarItem> ToolbarItems => _toolbarItems;
 
         /// <summary>
-        /// Gets or sets the breakpoint value that determines when the layout switches between 
+        /// Gets or sets the breakpoint value that determines when the layout switches between
         /// reduced and extended behavior.
         /// </summary>
         public virtual Func<IRenderControlContext, int> Breakpoint { get; set; } = _ => -1;
+
+        /// <summary>
+        /// Gets or sets whether hovering the collapsed rail reveals the full sidebar as an
+        /// offcanvas flyout until the pointer leaves. Enabled by default; disable it when the
+        /// reduced rail should stay static on hover, for example when the surrounding layout
+        /// already provides its own way to expand the sidebar.
+        /// </summary>
+        public virtual Func<IRenderControlContext, bool> HoverExpanded { get; set; } = _ => true;
+
+        /// <summary>
+        /// Gets or sets whether the first active item is scrolled into view once the sidebar is
+        /// built, expanding its ancestor groups so the current location stays visible. Enabled by
+        /// default; disable it when the initial scroll position must not be changed.
+        /// </summary>
+        public virtual Func<IRenderControlContext, bool> ScrollActiveIntoView { get; set; } = _ => true;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -144,19 +160,24 @@ namespace WebExpress.WebUI.WebControl
             var enable = Enable?.Invoke(renderContext) ?? true;
             var role = Role?.Invoke(renderContext);
             var brakpoint = Breakpoint?.Invoke(renderContext) ?? -1;
+            var hoverExpanded = HoverExpanded?.Invoke(renderContext) ?? true;
+            var scrollActiveIntoView = ScrollActiveIntoView?.Invoke(renderContext) ?? true;
 
             if (!enable)
             {
                 return null;
             }
 
-            var html = new HtmlElementTextContentDiv()
+            // the sidebar is the navigation landmark of the page, named so a reader can jump
+            // to it and tell it from the other navigation blocks
+            var html = new HtmlElementSectionNav()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-sidebar", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-sidebar", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             }
+                .AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:sidebar.label"))
                 .Add(items.Select(x => x.Render(renderContext, visualTree)))
                 .Add
                 (
@@ -170,7 +191,10 @@ namespace WebExpress.WebUI.WebControl
                 )
                 .AddUserAttribute("data-breakpoint", brakpoint >= 0
                     ? brakpoint.ToString()
-                    : null);
+                    : null)
+                // the client enables both behaviors by default, so only the opt-out is emitted
+                .AddUserAttribute("data-hover-expanded", hoverExpanded ? null : "false")
+                .AddUserAttribute("data-scroll-active", scrollActiveIntoView ? null : "false");
 
             return html;
         }

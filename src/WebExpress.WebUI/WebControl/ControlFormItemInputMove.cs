@@ -85,6 +85,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Determines whether a label element may point at the field. The client moves the id onto the
+        /// hidden input that posts the value, which is no labelable element, so the caption is a span.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>True if a label element may point at the field.</returns>
+        public override bool IsLabelable(IRenderControlFormContext renderContext)
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -110,19 +121,19 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-input-move", classes),
-                Style = GetStyles()
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 
             if (!string.IsNullOrEmpty(SelectedHeader?.Invoke(renderContext)))
             {
-                html.AddUserAttribute("data-header-selected", I18N.Translate(SelectedHeader?.Invoke(renderContext)));
+                html.AddUserAttribute("data-header-selected", I18N.Translate(renderContext, SelectedHeader?.Invoke(renderContext)));
             }
 
             if (!string.IsNullOrEmpty(AvailableHeader?.Invoke(renderContext)))
             {
-                html.AddUserAttribute("data-header-available", I18N.Translate(AvailableHeader?.Invoke(renderContext)));
+                html.AddUserAttribute("data-header-available", I18N.Translate(renderContext, AvailableHeader?.Invoke(renderContext)));
             }
 
             if (!string.IsNullOrWhiteSpace(value))

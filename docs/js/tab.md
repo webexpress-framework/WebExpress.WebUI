@@ -34,8 +34,11 @@ Each child element representing a tab view can also use `data-` attributes to co
 |---------------------------|----------------------------------------------------------------------|---------------------------------
 | `id`                      | Unique identifier for the tab (required for linking nav and pane).   | `id="settings-tab"`
 | `data-label`              | Text label displayed in the tab navigation.                          | `data-label="Settings"`
-| `data-icon`               | CSS class for an icon displayed next to the label.                   | `data-icon="fas fa-cog"`
+| `data-icon`               | CSS class for an icon displayed next to the label.                   | `data-icon="cog"`
 | `data-color`              | CSS class for the icon color.                                        | `data-color="text-primary"`
+| `data-badge`              | Badge text at the trailing edge of the tab header, typically a count. Authored in C# through the `Badge` property of `ControlTabView`. | `data-badge="12"`
+| `data-badge-color`        | Badge color css class, derived from the C# `BadgeColor` property for a system color. | `data-badge-color="text-bg-danger"`
+| `data-badge-style`        | Inline badge style, derived from the C# `BadgeColor` property for a user-defined color. | `data-badge-style="background:#7c3aed;"`
 | `data-wx-primary-action`  | Optional action identifier for the tab.                              | `data-wx-primary-action="save"`
 | `data-wx-primary-target`  | Optional target identifier for the tab action.                       | `data-wx-primary-target="form1"`
 
@@ -58,7 +61,7 @@ Refer to [toolbar.md](toolbar.md) for full documentation on item types and `data
 <div id="myTabs" class="wx-webui-tab">
     <!-- Toolbar -->
     <div class="wx-tab-toolbar">
-        <div class="wx-toolbar-button" data-icon="fas fa-plus" data-title="Add"></div>
+        <div class="wx-toolbar-button" data-icon="plus" data-title="Add"></div>
         <div class="wx-toolbar-separator"></div>
         <div class="wx-toolbar-dropdown" data-label="Options">
             <ul class="dropdown-menu">
@@ -116,16 +119,22 @@ The following example illustrates a complete declarative setup for a tab control
     </div>
     
     <!-- Tab 1 -->
-    <div id="home-tab" class="wx-tab-view" data-label="Home" data-icon="fas fa-home">
+    <div id="home-tab" class="wx-tab-view" data-label="Home" data-icon="home">
         <h3>Home Content</h3>
         <p>This is the content for the home tab.</p>
     </div>
     
-    <!-- Tab 2 -->
-    <div id="profile-tab" class="wx-tab-view" data-label="Profile" data-icon="fas fa-user">
+    <!-- Tab 2, showing an unread count as a badge -->
+    <div id="profile-tab" class="wx-tab-view" data-label="Profile" data-icon="user"
+         data-badge="12" data-badge-color="text-bg-danger">
         <h3>Profile Content</h3>
         <p>This is the content for the user profile tab.</p>
     </div>
 
 </div>
 ```
+
+
+## UI persistence
+
+The active tab is remembered in localStorage under `wx-tab:{id}` or an explicit `data-persist-key`. Stable tab ids survive a changed tab order. A missing tab falls back to the first available one. The WebApp REST tab applies this preference after its data arrives.

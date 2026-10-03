@@ -6,8 +6,8 @@
     public class IconFileImport : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-file-import";
+        public override string Symbol => "file-import";
     }
 }

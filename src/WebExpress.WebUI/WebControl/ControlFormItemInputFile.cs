@@ -8,7 +8,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form item input control for file uploads.
+    /// A form input that lets the user select one or more files to upload.
     /// </summary>
     public class ControlFormItemInputFile : ControlFormItemInput<ControlFormInputValueFile>
     {
@@ -82,8 +82,8 @@ namespace WebExpress.WebUI.WebControl
                 Value = value,
                 Name = name,
                 Type = "file",
-                Class = Css.Concatenate("form-control-file", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("form-control-file", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 Placeholder = placeholder
             };

@@ -1,5 +1,3 @@
-using WebExpress.WebCore.WebIcon;
-
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
@@ -9,16 +7,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconDashboard : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the class with the light theme.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public IconDashboard()
-            : base(TypeIconTheme.Light)
-        {
-        }
-
-        /// <summary>
-        /// Gets the CSS class for the dashboard icon, depending on the selected theme.
-        /// </summary>
-        public override string Class => "wx-icon-light wx-icon-light-dashboard";
+        public override string Symbol => "dashboard";
     }
 }

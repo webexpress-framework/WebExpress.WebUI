@@ -7,7 +7,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a dashboard widget.
+    /// Contract for a dashboard widget, a single panel shown on a dashboard.
     /// </summary>
     public interface IControlDashboardWidget : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

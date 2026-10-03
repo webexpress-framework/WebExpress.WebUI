@@ -20,7 +20,18 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertyColorLine> Color
         {
             get => (Func<IRenderControlContext, PropertyColorLine>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
+        }
+
+        /// <summary>
+        /// Gets or sets how the line is drawn. A dashed or dotted rule separates
+        /// more quietly than a solid one, for a break inside a group rather than
+        /// between groups.
+        /// </summary>
+        public Func<IRenderControlContext, TypeStyleLine> LineStyle
+        {
+            get => (Func<IRenderControlContext, TypeStyleLine>)GetPropertyObjectValue();
+            set => SetProperty(value, (renderContext) => (value?.Invoke(renderContext) ?? TypeStyleLine.Default).ToClass());
         }
 
         /// <summary>
@@ -45,8 +56,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentHr()
             {
                 Id = Id,
-                Class = GetClasses(),
-                Style = GetStyles(),
+                Class = GetClasses(renderContext),
+                Style = GetStyles(renderContext),
                 Role = role
             };
 

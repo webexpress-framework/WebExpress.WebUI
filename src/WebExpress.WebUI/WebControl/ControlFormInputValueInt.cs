@@ -3,7 +3,7 @@
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form input value of type int.
+    /// Represents the value of a form input field as a strongly typed integer.
     /// </summary>
     public class ControlFormInputValueInt : IControlFormInputValue
     {

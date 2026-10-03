@@ -1,10 +1,10 @@
 .wx-editor {
-    background-color: var(--bs-body-bg);
-    color: var(--bs-body-color);
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
 }
 
 .wx-editor-toolbar {
-    border-bottom: 1px solid var(--bs-border-color);
+    border-bottom: 1px solid var(--wx-border-color);
 }
 
 .wx-editor-format-toolbar {
@@ -17,23 +17,69 @@
     padding: 5px;
     white-space: normal;
     overflow: auto;
+    line-height: 1.5;
+    /* make sure the caret is always rendered with a visible, high-contrast
+       colour - especially next to non-editable add-ons / instruction texts */
+    caret-color: var(--wx-body-color);
     /* Enable vertical resizing */
     resize: vertical;
+}
+
+/* nested editable islands (container add-on bodies) inherit a visible caret */
+.wx-editor-content [contenteditable="true"] {
+    caret-color: var(--wx-body-color);
 }
 
 .wx-editor-content:focus {
     outline: none;
 }
 
+/* format painter armed: signal that the next selection receives the format */
+.wx-editor-content.wx-editor-painting,
+.wx-editor-content.wx-editor-painting * {
+    cursor: copy;
+}
+
+/* guard / empty paragraphs (placed around non-editable blocks) must keep a
+   caret-sized line height so the caret is visible when it lands inside them */
+.wx-editor-content p:empty {
+    min-height: 1.2em;
+}
+
+.wx-editor-content p:has(> br:only-child) {
+    min-height: 1.2em;
+}
+
 /* Status Bar / Footer Styles */
 .wx-editor-status {
     padding: 5px 10px;
-    border-top: 1px solid var(--bs-border-color);
-    background-color: var(--bs-secondary-bg);
+    border-top: 1px solid var(--wx-border-color);
+    background-color: var(--wx-secondary-bg);
     display: none; /* Hidden by default */
     align-items: center;
     font-size: 0.85em;
     min-height: 30px; /* Ensure height */
+}
+
+/* The editor host turns into a viewport overlay when fullscreen is active */
+.wx-editor.wx-fullscreen-active {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    margin: 0;
+    max-width: none;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--wx-body-bg);
+    overflow: hidden;
+}
+
+.wx-editor.wx-fullscreen-active .wx-editor-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: auto;
+    display: flex;
+    flex-direction: column;
 }
 
 .wx-fullscreen-active .wx-editor-content {
@@ -47,7 +93,7 @@
 .wx-fullscreen-active .wx-editor-status {
     display: flex !important;
     margin-top: auto;
-    background-color: var(--bs-body-bg);
+    background-color: var(--wx-body-bg);
 }
 
 /* align finish/done button to the right */
@@ -60,19 +106,19 @@
     border: none;
     padding: 0.5em;
     font-size: 16px;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
     transition: all 0.3s ease-in-out;
     cursor: pointer;
 }
 
 .wx-editor-format-dropdown:hover {
-    background-color: var(--bs-secondary-bg);
+    background-color: var(--wx-secondary-bg);
     border-radius: 4px;
 }
 
 .wx-editor-format-dropdown:focus {
     outline: none;
-    background-color: var(--bs-secondary-bg);
+    background-color: var(--wx-secondary-bg);
 }
 
 .wx-editor-btn-group {
@@ -85,15 +131,19 @@
     background: transparent;
     border: none;
     padding: 0.4em;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
     transition: all 0.3s ease-in-out;
-    display: inline-block;
+    display: inline-flex;
     align-items: center;
     justify-content: center;
+    gap: 0.3em;
     font-size: 80%;
     margin-top: 0.2em;
     margin-bottom: 0.2em;
     height: 2.2em;
+    /* the target size criterion asks for 24px, which the icon alone falls short of */
+    min-width: 24px;
+    min-height: 24px;
 }
 
 .wx-editor-btn i {
@@ -101,49 +151,29 @@
 }
 
 .wx-editor-btn:hover {
-    background-color: var(--bs-secondary-bg);
+    background-color: var(--wx-secondary-bg);
     border-radius: 4px;
 }
 
 .wx-editor-btn.active {
-    background-color: var(--bs-primary);
+    background-color: var(--wx-primary);
     color: #ffffff;
     border-radius: 4px;
     font-weight: bold;
 }
 
+/* Disabled toolbar buttons (e.g. undo/redo when nothing to do) */
+.wx-editor-btn:disabled,
+.wx-editor-btn[disabled] {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
 .wx-editor-btn:focus-visible {
-    outline: 2px solid var(--bs-primary);
+    outline: 2px solid var(--wx-primary);
     outline-offset: 1px;
     border-radius: 4px;
-}
-
-.wx-editor-color-picker {
-    display: grid;
-    grid-template-columns: repeat(5, 24px);
-    gap: 5px;
-    padding-left: 0.5em;
-    padding-right: 0.5em;
-    list-style: none;
-    margin: 0;
-}
-
-.wx-editor-color-picker button {
-    width: 24px;
-    height: 24px;
-    border: none;
-    cursor: pointer;
-    display: inline-block;
-    border-radius: 4px;
-}
-
-.wx-editor-color-picker button:hover {
-    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
-}
-
-.wx-editor-color-picker button:focus-visible {
-    outline: 2px solid var(--bs-primary);
-    outline-offset: 1px;
 }
 
 .wx-editor-insertable-grid {
@@ -157,37 +187,37 @@
 .wx-editor-insertable-cell {
     width: 24px;
     height: 24px;
-    border: 1px solid var(--bs-border-color, #dee2e6);
-    background: var(--bs-body-bg, #fff);
+    border: 1px solid var(--wx-border-color, #dee2e6);
+    background: var(--wx-body-bg, #fff);
     cursor: pointer;
     box-sizing: border-box;
     transition: background 0.1s, border-color 0.1s;
 }
 
 .wx-editor-insertable-cell.selected {
-    background: var(--bs-info, #337ab7);
-    border-color: var(--bs-info-border-subtle, #23527c);
+    background: var(--wx-info, #337ab7);
+    border-color: var(--wx-info-border-subtle, #23527c);
 }
 
 .wx-editor-table-size-display {
     margin-top: 8px;
     font-size: smaller;
     text-align: center;
-    color: var(--bs-secondary-color, #495057);
+    color: var(--wx-secondary-color, #495057);
 }
 
 .wx-editor-separator {
     display: inline-block;
     width: 1px;
     height: 1em;
-    background-color: var(--bs-border-color);
+    background-color: var(--wx-border-color);
     margin: 0 0.5em;
 }
 
 .wx-editor-table,
 .wx-editor-table th,
 .wx-editor-table td {
-    border: 1px solid var(--bs-border-color, #dee2e6);
+    border: 1px solid var(--wx-border-color, #dee2e6);
     border-collapse: collapse;
 }
 
@@ -197,8 +227,8 @@
 }
 
 .wx-editor-table th {
-    background-color: var(--bs-secondary-bg, #e9ecef);
-    color: var(--bs-secondary-color, #495057);
+    background-color: var(--wx-secondary-bg, #e9ecef);
+    color: var(--wx-secondary-color, #495057);
     font-weight: bold;
     text-align: left;
     padding: 0.5rem;
@@ -207,40 +237,104 @@
 
 .wx-editor-table td {
     padding: 0.5rem;
-    background-color: var(--bs-table-bg, #fff);
+    background-color: var(--wx-table-bg, #fff);
     min-height: 1em;
 }
 
-.wx-icon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+.wx-editor-content [data-wx-table-selected] {
+    box-shadow: inset 0 0 0 100vmax rgba(13, 110, 253, 0.2);
+    outline: 2px solid var(--wx-primary, #0d6efd);
+    outline-offset: -2px;
 }
 
-/* Icons (Add Row, Delete Row etc.) - kept short for brevity, assume content exists */
-.wx-icon.add-row-above::before { content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M 0,8 H 2 V 9 H 16 V 5 H 10 V 3 h 7 c 1,0 1,0 1,1 v 6 c 0,1 0,1 -1,1 H 1 C 0,11 0,11 0,10 Z m 0,4 h 5 v 5 H 0 Z M 1,3 H 3 V 1 H 5 V 3 H 7 V 5 H 5 V 7 H 3 V 5 H 1 Z m 5,9 h 6 v 5 H 6 Z m 7,0 h 5 v 5 h -5 z"/></svg>'); }
-.wx-icon.add-row-below::before { content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path d="M 18,10 H 16 V 9 H 2 v 4 h 6 v 2 H 1 C 0,15 0,15 0,14 V 8 C 0,7 0,7 1,7 h 16 c 1,0 1,0 1,1 z M 18,6 H 13 V 1 h 5 z m -1,9 h -2 v 2 h -2 v -2 h -2 v -2 h 2 v -2 h 2 v 2 h 2 z M 12,6 H 6 V 1 h 6 z M 5,6 H 0 V 1 h 5 z"/></svg>'); }
-.wx-icon.delete-row::before { content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M 14.654297 2.3457031 C 14.39708 2.3473007 14.139723 2.4462143 13.941406 2.6445312 L 2.6445312 13.941406 C 2.2478974 14.33804 2.2449816 14.971544 2.6367188 15.363281 C 3.0284559 15.755018 3.6619599 15.752103 4.0585938 15.355469 L 15.355469 4.0585938 C 15.752103 3.6619599 15.755018 3.0284559 15.363281 2.6367188 C 15.167413 2.4408502 14.911514 2.3441055 14.654297 2.3457031 z M 1 5 C 0 5 0 5 0 6 L 0 12 C 0 12.908283 0.0084993505 12.990406 0.7578125 12.998047 L 2.7558594 11 L 2 11 L 2 7 L 6.7558594 7 L 8.7558594 5 L 1 5 z M 17.242188 5.0019531 L 15.244141 7 L 16 7 L 16 11 L 11.244141 11 L 9.2441406 13 L 17 13 C 17.875 13 17.98637 12.669922 18 12 C 18.0044 9.8900084 17.999 8.110015 18 6 C 18 5.0917171 17.991501 5.0095936 17.242188 5.0019531 z"/></svg>'); }
-.wx-icon.add-col-above::before { content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M 8,0 V 2 H 9 V 16 H 5 V 10 H 3 v 7 c 0,1 0,1 1,1 h 6 c 1,0 1,0 1,-1 V 1 C 11,0 11,0 10,0 Z m 4,0 v 5 h 5 V 0 Z M 3,1 V 3 H 1 V 5 H 3 V 7 H 5 V 5 H 7 V 3 H 5 V 1 Z m 9,5 v 6 h 5 V 6 Z m 0,7 v 5 h 5 v -5 z"/></svg>'); }
-.wx-icon.add-col-below::before { content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M 10,18 V 16 H 9 V 2 h 4 v 6 h 2 V 1 C 15,0 15,0 14,0 H 8 C 7,0 7,0 7,1 v 16 c 0,1 0,1 1,1 z M 6,18 V 13 H 1 v 5 z m 9,-1 v -2 h 2 v -2 h -2 v -2 h -2 v 2 h -2 v 2 h 2 v 2 z M 6,12 V 6 H 1 v 6 z M 6,5 V 0 H 1 v 5 z"/></svg>'); }
-.wx-icon.delete-col::before { content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="m 2.3462229,14.653777 c 0.0016,-0.257217 0.100511,-0.514574 0.298828,-0.712891 L 13.941925,2.6440112 c 0.396634,-0.3966338 1.030138,-0.3995496 1.421875,-0.0078 0.391737,0.3917371 0.388822,1.0252411 -0.0078,1.421875 L 4.0591129,15.354949 c -0.396634,0.396634 -1.030138,0.399549 -1.421875,0.0078 -0.195868,-0.195868 -0.292613,-0.451767 -0.291015,-0.708984 z M 5.0005199,0.99947999 c 0,-1.00000000477 0,-1.00000000477 1,-1.00000000477 h 5.9999991 c 0.908283,0 0.990406,0.008499355 0.998047,0.75781250477 L 11.000519,2.7553394 V 1.99948 H 7.0005199 v 4.7558594 l -2,2 z m 0.002,16.24218801 1.998047,-1.998047 v 0.755859 h 3.9999521 v -4.755859 l 2,-2.0000004 V 16.99948 c 0,0.875 -0.330078,0.98637 -1,1 -2.1099912,0.0044 -3.8899846,-10e-4 -5.9999991,0 -0.908283,0 -0.990407,-0.0085 -0.998047,-0.757812 z"/></svg>'); }
-.wx-icon.merge-cells::before { content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M 0 0 L 0 5 L 5 5 L 5 0 L 0 0 z M 6 0 L 6 5 L 12 5 L 12 0 L 6 0 z M 13 0 L 13 5 L 18 5 L 18 0 L 13 0 z M 0 6 L 0 12 L 18 12 L 18 6 L 0 6 z M 0 13 L 0 18 L 5 18 L 5 13 L 0 13 z M 6 13 L 6 18 L 12 18 L 12 13 L 6 13 z M 13 13 L 13 18 L 18 18 L 18 13 L 13 13 z"/></svg>'); }
-.wx-icon.split-cell::before { content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M 0 0 L 0 5 L 5 5 L 5 0 L 0 0 z M 6 0 L 6 5 L 12 5 L 12 0 L 6 0 z M 13 0 L 13 5 L 18 5 L 18 0 L 13 0 z M 0 6 L 0 12 L 7 12 L 7 6 L 0 6 z M 8 6 L 8 12 L 10 12 L 10 6 L 8 6 z M 11 6 L 11 12 L 18 12 L 18 6 L 11 6 z M 0 13 L 0 18 L 5 18 L 5 13 L 0 13 z M 6 13 L 6 18 L 12 18 L 12 13 L 6 13 z M 13 13 L 13 18 L 18 18 L 18 13 L 13 13 z"/></svg>'); }
-.wx-icon.cell-background::before { content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M9 2 2 9l5 5 7-7-5-5zm0 2.8L11.2 7H6.8L9 4.8zM15.5 8.5c-.8.8-1.5 1.9-1.5 2.5 0 .9.7 1.5 1.5 1.5s1.5-.6 1.5-1.5c0-.6-.7-1.7-1.5-2.5z"/></svg>'); }
-.wx-icon.delete-table::before { content: url('data:image/svg+xml;utf8,<svg width="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg"><path fill="currentColor" d="M 0 0 L 0 5 L 5 5 L 5 0 L 0 0 z M 6 0 L 6 5 L 8.7558594 5 L 11.962891 1.7929688 L 11.962891 0 L 6 0 z M 13 0 L 13 0.75585938 L 13.755859 0 L 13 0 z M 16.070312 0.92773438 C 15.814693 0.92773437 15.55915 1.0267877 15.363281 1.2226562 L 1.2226562 15.363281 C 0.83091909 15.755018 0.83091909 16.385607 1.2226562 16.777344 C 1.6143934 17.169081 2.2449816 17.169081 2.6367188 16.777344 L 16.777344 2.6367188 C 17.169081 2.2449816 17.169081 1.6143934 16.777344 1.2226562 C 16.581475 1.0267877 16.325932 0.92773438 16.070312 0.92773438 z M 18 4.2441406 L 17.244141 5 L 18 5 L 18 4.2441406 z M 6 5.9628906 L 6 7.7558594 L 7.7929688 5.9628906 L 6 5.9628906 z M 0 6 L 0 11.962891 L 1.7929688 11.962891 L 5 8.7558594 L 5 6 L 0 6 z M 16.207031 6.0371094 L 13 9.2441406 L 13 12 L 18 12 L 18 6.0371094 L 16.207031 6.0371094 z M 12 10.244141 L 10.244141 12 L 12 12 L 12 10.244141 z M 0 13 L 0 13.755859 L 0.75585938 13 L 0 13 z M 9.2441406 13 L 6.0371094 16.207031 L 6.0371094 18 L 12 18 L 12 13 L 9.2441406 13 z M 13 13 L 13 18 L 18 18 L 18 13 L 13 13 z M 5 17.244141 L 4.2441406 18 L 5 18 L 5 17.244141 z"/></svg>'); }
+/* native text ranges include intervening columns outside the selected rectangle */
+.wx-editor-content table:has([data-wx-table-selected]) ::selection {
+    background: transparent;
+    color: inherit;
+}
+
 
 .wx-addon-frame {
     cursor: default;
 }
 
-.wx-addon-header {
-    user-select: none;
-    cursor: grab;
-    background-color: #f8f9fa;
+.wx-editor-content .wx-addon-frame {
+    border: 1px solid var(--wx-border-color);
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
+    box-shadow: none !important;
 }
 
-.wx-addon-header:active {
+.wx-editor-content .wx-addon-header {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.1rem 0.4rem;
+    min-height: 24px;
+    font-size: 0.8rem;
+    line-height: 1.2;
+    user-select: none;
+    cursor: default;
+    background-color: var(--wx-tertiary-bg);
+    color: var(--wx-secondary-color);
+    border-bottom: 1px solid var(--wx-border-color);
+}
+
+.wx-addon-header .wx-editor-btn {
+    margin-block: 0;
+    height: 24px;
+    padding: 0.2rem;
+    font-size: inherit;
+}
+
+.wx-editor-content .wx-addon-frame > .card-body {
+    padding: 0.25rem !important;
+}
+
+.wx-editor-table-frame > .card-body > table {
+    margin-bottom: 0;
+}
+
+.wx-editor-frame-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.15rem 0.4rem;
+    border-bottom: 1px solid var(--wx-border-color);
+    background-color: var(--wx-tertiary-bg);
+    color: var(--wx-body-color);
+}
+
+.wx-editor-frame-toolbar > .wx-editor-btn {
+    margin: 0;
+}
+
+.wx-addon-frame[data-addon-id="code"] > .wx-addon-body-container > pre {
+    margin: 0;
+    min-height: 3em;
+    padding: 0.4rem;
+    white-space: pre-wrap;
+    tab-size: 4;
+    color: var(--wx-body-color);
+    background-color: var(--wx-body-bg);
+}
+
+.wx-addon-inline-frame > .wx-addon-header,
+.wx-addon-inline-frame > .wx-editor-frame-toolbar {
+    display: inline-flex;
+    vertical-align: middle;
+    border: 0;
+}
+
+.wx-addon-drag-handle:active,
+.wx-editor-region-handle:active {
     cursor: grabbing;
+}
+
+.wx-addon-title {
+    flex: 1;
+    min-width: 0;
 }
 
 .wx-addon-body-container,
@@ -250,7 +344,20 @@
 }
 
 .wx-addon-body-container {
+    margin: 0;
     cursor: text;
+}
+
+.wx-addon-body-container > :last-child {
+    margin-bottom: 0;
+}
+
+/* tables inside the editor must allow text selection in their cells */
+.wx-native-table,
+.wx-native-table th,
+.wx-native-table td {
+    -webkit-user-select: text;
+    user-select: text;
 }
 
 .wx-addon-body-widget {
@@ -269,7 +376,7 @@
 }
 
 .wx-addon-drag-handle,
-.wx-addon-settings-btn {
+.wx-addon-options {
     opacity: 0.6;
     transition: opacity 0.2s;
 }
@@ -279,13 +386,13 @@
     margin-right: 0.5rem;
 }
 
-.wx-addon-settings-btn {
-    cursor: pointer;
-    margin-left: 0.5rem;
+.wx-addon-options {
+    cursor: default;
+    margin-inline-start: auto;
 }
 
 .wx-addon-drag-handle:hover,
-.wx-addon-settings-btn:hover {
+.wx-addon-options:hover {
     opacity: 1;
 }
 
@@ -322,7 +429,7 @@
 
 /*
    Ensure Modals are ABOVE the fullscreen editor (Z-Index 2000).
-   Bootstrap Modals default to 1055/1060.
+   WebExpress Modals default to 1055/1060.
    We force them and their backdrop higher.
 */
 .wx-addon-modal,
@@ -341,9 +448,126 @@
     overflow-y: auto;
 }
 
+/* AddOn library (selection modal) */
+
+.wx-addon-library {
+    display: flex;
+    gap: 1rem;
+    height: 60vh;
+    min-height: 320px;
+}
+
+.wx-addon-cats {
+    width: 200px;
+    flex-shrink: 0;
+    overflow-y: auto;
+    border-right: 1px solid var(--wx-border-color);
+    padding-right: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.wx-addon-cat-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    border: none;
+    background: transparent;
+    color: var(--wx-body-color);
+    padding: 8px 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.1s ease;
+}
+
+.wx-addon-cat-item:hover {
+    background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.05));
+}
+
+.wx-addon-cat-item.active {
+    background-color: var(--wx-primary);
+    color: #fff;
+    font-weight: 600;
+}
+
+.wx-addon-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.wx-addon-search {
+    margin-bottom: 0.75rem;
+    flex-shrink: 0;
+}
+
+.wx-addon-grid {
+    flex: 1;
+    overflow-y: auto;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    align-content: start;
+}
+
+.wx-addon-tile {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    text-align: left;
+    padding: 12px;
+    border: 1px solid var(--wx-border-color);
+    border-radius: 8px;
+    background: var(--wx-body-bg);
+    color: var(--wx-body-color);
+    cursor: pointer;
+    transition: border-color 0.1s ease, box-shadow 0.1s ease, background-color 0.1s ease;
+}
+
+.wx-addon-tile:hover {
+    border-color: var(--wx-primary);
+    box-shadow: 0 0 0 1px var(--wx-primary);
+}
+
+.wx-addon-tile.selected {
+    border-color: var(--wx-primary);
+    box-shadow: 0 0 0 2px var(--wx-primary);
+    background-color: var(--wx-primary-bg-subtle, rgba(13, 110, 253, 0.08));
+}
+
+.wx-addon-tile-icon {
+    font-size: 1.25rem;
+    color: var(--wx-primary);
+    flex-shrink: 0;
+    margin-top: 2px;
+}
+
+.wx-addon-tile-body {
+    min-width: 0;
+}
+
+.wx-addon-tile-label {
+    font-weight: 600;
+    margin-bottom: 2px;
+}
+
+.wx-addon-tile-desc {
+    font-size: 12px;
+    color: var(--wx-secondary-color);
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-addon-cat-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+}
+
 .wx-editor-shortcut-popup {
-    background: var(--bs-body-bg);
-    border: 1px solid var(--bs-border-color);
+    background: var(--wx-body-bg);
+    border: 1px solid var(--wx-border-color);
     border-radius: 8px;
     width: 320px;
     max-height: 360px;
@@ -352,41 +576,41 @@
     overflow: hidden;
     font-size: 13px;
 }
- 
+
 .wx-editor-shortcut-search {
     padding: 6px 6px 4px 6px;
-    border-bottom: 1px solid var(--bs-border-color);
-    background: var(--bs-tertiary-bg);
+    border-bottom: 1px solid var(--wx-border-color);
+    background: var(--wx-tertiary-bg);
 }
- 
+
 .wx-editor-shortcut-search input {
     border: none;
     background: transparent;
     width: 100%;
     padding: 4px 6px;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
- 
+
 .wx-editor-shortcut-search input:focus {
     outline: none;
     box-shadow: none;
 }
- 
+
 .wx-editor-shortcut-list {
     overflow-y: auto;
     padding: 4px 0;
     flex: 1;
 }
- 
+
 .wx-editor-shortcut-group {
     font-size: 10px;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    color: var(--bs-secondary-color);
+    color: var(--wx-secondary-color);
     padding: 8px 12px 4px 12px;
     font-weight: 600;
 }
- 
+
 .wx-editor-shortcut-item {
     display: flex;
     align-items: center;
@@ -396,68 +620,68 @@
     background: transparent;
     border: none;
     text-align: left;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
     cursor: pointer;
     transition: background-color 0.1s ease;
 }
- 
+
 .wx-editor-shortcut-item:hover,
 .wx-editor-shortcut-item.active {
-    background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.05));
+    background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.05));
 }
- 
+
 .wx-editor-shortcut-item > i {
     width: 18px;
     text-align: center;
-    color: var(--bs-secondary-color);
+    color: var(--wx-secondary-color);
     flex-shrink: 0;
 }
- 
+
 .wx-editor-shortcut-body {
     display: flex;
     flex-direction: column;
     min-width: 0;
     flex: 1;
 }
- 
+
 .wx-editor-shortcut-label {
     font-weight: 500;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
- 
+
 .wx-editor-shortcut-desc {
     font-size: 11px;
-    color: var(--bs-secondary-color);
+    color: var(--wx-secondary-color);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
- 
+
 .wx-editor-shortcut-empty {
     padding: 16px;
     text-align: center;
-    color: var(--bs-secondary-color);
+    color: var(--wx-secondary-color);
     font-size: 12px;
 }
- 
+
 /* Bubble menu */
- 
+
 .wx-editor-bubble {
     display: none;
     align-items: center;
-    background: var(--bs-body-bg);
-    border: 1px solid var(--bs-border-color);
+    background: var(--wx-body-bg);
+    border: 1px solid var(--wx-border-color);
     border-radius: 6px;
     padding: 2px 4px;
     gap: 2px;
 }
- 
+
 .wx-editor-bubble-btn {
     background: transparent;
     border: none;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
     width: 28px;
     height: 28px;
     border-radius: 4px;
@@ -466,110 +690,95 @@
     justify-content: center;
     cursor: pointer;
     padding: 0;
-    font-size: 12px;
+    font-size: 14px;
     transition: background-color 0.1s ease;
 }
- 
+
 .wx-editor-bubble-btn:hover {
-    background-color: var(--bs-tertiary-bg);
+    background-color: var(--wx-tertiary-bg);
 }
- 
+
 .wx-editor-bubble-btn.active {
-    background-color: var(--bs-primary);
+    background-color: var(--wx-primary);
     color: #fff;
 }
- 
+
 .wx-editor-bubble-sep {
     width: 1px;
     height: 16px;
-    background-color: var(--bs-border-color);
+    background-color: var(--wx-border-color);
     margin: 0 2px;
 }
- 
-/*  Placeholder */
- 
-/*
-   The placeholder is a real <span class="wx-editor-placeholder"> element
-   injected into empty editor blocks by the placeholder plugin. The default
-   rule below hides it everywhere - so when the editor's stored HTML is
-   rendered outside an editor context (in a preview pane, a blog post, an
-   e-mail, …) the hint never appears.
-*/
-/* Hide instruction texts outside the editor */
+
+/* author instructions are omitted from the published reading surface */
 .wx-editor-instruction {
     display: none;
 }
- 
-/*
-   Inside the editor itself we make the placeholder visible and style it as a
-   soft, italic hint. `contenteditable="false"` on the span prevents the caret
-   from landing inside it, so typing always happens around the placeholder and
-   the plugin removes it on the first keystroke.
-*/
-/* Show instruction texts inside the editor prominently */
+
+/* atomic instructions use the bubble menu or a double click for editing */
 .wx-editor-content .wx-editor-instruction {
     display: inline-block;
-    background-color: var(--bs-warning-bg-subtle, #fff3cd);
-    color: var(--bs-warning-text-emphasis, #664d03);
+    background-color: var(--wx-warning-bg-subtle, #fff3cd);
+    color: var(--wx-warning-text-emphasis, #664d03);
     padding: 2px 6px;
     border-radius: 4px;
     margin: 0 4px;
     font-size: 0.85em;
-    border: 1px solid var(--bs-warning-border-subtle, #ffe69c);
+    border: 1px solid var(--wx-warning-border-subtle, #ffe69c);
+    cursor: pointer;
     user-select: none;
     -webkit-user-select: none;
-    pointer-events: none;
 }
- 
+
 /* Mentions */
- 
+
 .wx-mention {
     display: inline-block;
     padding: 0 4px;
     margin: 0 1px;
     border-radius: 4px;
-    background-color: var(--bs-primary-bg-subtle, rgba(13, 110, 253, 0.12));
-    color: var(--bs-primary, #0d6efd);
+    background-color: var(--wx-primary-bg-subtle, rgba(13, 110, 253, 0.12));
+    color: var(--wx-primary, #0d6efd);
     font-weight: 500;
     text-decoration: none;
     cursor: pointer;
 }
- 
+
 .wx-mention:hover {
-    background-color: var(--bs-primary);
+    background-color: var(--wx-primary);
     color: #fff;
     text-decoration: none;
 }
- 
+
 /* Inline markdown styling */
- 
+
 .wx-editor-content code {
-    background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.06));
+    background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.06));
     padding: 1px 4px;
     border-radius: 3px;
-    font-family: var(--bs-font-monospace, monospace);
+    font-family: var(--wx-font-monospace, monospace);
     font-size: 0.92em;
 }
- 
+
 .wx-editor-content pre {
-    background-color: var(--bs-tertiary-bg, rgba(0, 0, 0, 0.06));
-    border: 1px solid var(--bs-border-color);
+    background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.06));
+    border: 1px solid var(--wx-border-color);
     border-radius: 6px;
     padding: 12px;
     overflow-x: auto;
-    font-family: var(--bs-font-monospace, monospace);
+    font-family: var(--wx-font-monospace, monospace);
     font-size: 0.9em;
     line-height: 1.45;
 }
- 
+
 .wx-editor-content blockquote {
-    border-left: 3px solid var(--bs-border-color);
+    border-left: 3px solid var(--wx-border-color);
     margin: 8px 0;
     padding: 4px 12px;
-    color: var(--bs-secondary-color);
+    color: var(--wx-secondary-color);
     font-style: italic;
 }
- 
+
 .wx-editor-content h1,
 .wx-editor-content h2,
 .wx-editor-content h3 {
@@ -577,17 +786,391 @@
     margin-top: 12px;
     margin-bottom: 6px;
 }
- 
+
 /* Dark-mode adjustments */
- 
-[data-bs-theme="dark"] .wx-editor-shortcut-popup,
-[data-bs-theme="dark"] .wx-editor-bubble {
-    background: var(--bs-body-bg);
-    border-color: var(--bs-border-color);
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-editor-shortcut-popup,
+:scope .wx-editor-bubble {
+    background: var(--wx-body-bg);
+    border-color: var(--wx-border-color);
 }
- 
-[data-bs-theme="dark"] .wx-editor-shortcut-item:hover,
-[data-bs-theme="dark"] .wx-editor-shortcut-item.active,
-[data-bs-theme="dark"] .wx-editor-bubble-btn:hover {
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-editor-shortcut-item:hover,
+:scope .wx-editor-shortcut-item.active,
+:scope .wx-editor-bubble-btn:hover {
     background-color: rgba(255, 255, 255, 0.08);
+}
+}
+
+/* Bubble context flyout */
+
+.wx-editor-bubble-menu {
+    background: var(--wx-body-bg);
+    border: 1px solid var(--wx-border-color);
+    border-radius: 8px;
+    padding: 4px;
+    min-width: 200px;
+    max-width: 280px;
+    max-height: 320px;
+    overflow-y: auto;
+    font-size: 13px;
+}
+
+.wx-editor-bubble-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    padding: 6px 10px;
+    background: transparent;
+    border: none;
+    border-radius: 4px;
+    text-align: left;
+    color: var(--wx-body-color);
+    cursor: pointer;
+    transition: background-color 0.1s ease;
+}
+
+.wx-editor-bubble-menu-item:hover {
+    background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.05));
+}
+
+.wx-editor-bubble-menu-item > i {
+    width: 18px;
+    text-align: center;
+    color: var(--wx-secondary-color);
+    flex-shrink: 0;
+}
+
+.wx-editor-bubble-menu-divider {
+    height: 1px;
+    background-color: var(--wx-border-color);
+    margin: 4px 0;
+}
+
+.wx-editor-bubble-menu-palette {
+    display: none;
+    flex-wrap: wrap;
+    gap: 5px;
+    padding: 6px 10px 8px 10px;
+}
+
+.wx-editor-bubble-swatch {
+    width: 22px;
+    height: 22px;
+    border: 1px solid var(--wx-border-color);
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.wx-editor-bubble-swatch:hover {
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.4);
+}
+
+.wx-editor-bubble-menu-custom {
+    padding: 2px 10px;
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-editor-bubble-menu {
+    background: var(--wx-body-bg);
+    border-color: var(--wx-border-color);
+}
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-editor-bubble-menu-item:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+}
+
+/* Emoji picker */
+
+.wx-emoji-picker {
+    width: 320px;
+    max-height: 400px;
+    padding: 0;
+    overflow: hidden;
+}
+
+/* only lay the picker out (and reveal it) once WebExpress adds .show; the base
+   rule must NOT set display, otherwise it overrides .dropdown-menu's display:none
+   and the picker is permanently visible. */
+.wx-emoji-picker[popover]:popover-open {
+    display: flex;
+    flex-direction: column;
+}
+
+.wx-emoji-search-wrap {
+    position: relative;
+    padding: 8px;
+    border-bottom: 1px solid var(--wx-border-color);
+    background: var(--wx-tertiary-bg);
+    flex-shrink: 0;
+}
+
+.wx-emoji-search-icon {
+    position: absolute;
+    left: 18px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--wx-secondary-color);
+    font-size: 12px;
+    pointer-events: none;
+}
+
+.wx-emoji-search {
+    width: 100%;
+    border: 1px solid var(--wx-border-color);
+    border-radius: 16px;
+    background: var(--wx-body-bg);
+    color: var(--wx-body-color);
+    padding: 6px 10px 6px 30px;
+    font-size: 13px;
+    outline: none;
+}
+
+.wx-emoji-search:focus {
+    border-color: var(--wx-primary);
+    box-shadow: none;
+}
+
+.wx-emoji-tabs {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--wx-border-color);
+    overflow-x: auto;
+    flex-shrink: 0;
+}
+
+.wx-emoji-tab {
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    width: 30px;
+    height: 30px;
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    flex: 0 0 auto;
+    opacity: 0.6;
+    transition: background-color 0.1s ease, opacity 0.1s ease;
+}
+
+.wx-emoji-tab:hover {
+    background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.05));
+    opacity: 1;
+}
+
+.wx-emoji-tab.active {
+    opacity: 1;
+    background-color: var(--wx-primary-bg-subtle, rgba(13, 110, 253, 0.12));
+    box-shadow: inset 0 -2px 0 var(--wx-primary);
+}
+
+.wx-emoji-content {
+    overflow-y: auto;
+    padding: 4px 8px 8px 8px;
+    flex: 1;
+    max-height: 300px;
+}
+
+.wx-emoji-cat-title {
+    position: sticky;
+    top: 0;
+    background: var(--wx-body-bg);
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--wx-secondary-color);
+    font-weight: 600;
+    padding: 6px 2px 4px 2px;
+    z-index: 1;
+}
+
+.wx-emoji-grid {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+}
+
+.wx-emoji-btn {
+    border: none;
+    background: transparent;
+    border-radius: 6px;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    font-size: 1.3rem;
+    line-height: 1;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.1s ease, transform 0.05s ease;
+}
+
+.wx-emoji-btn:hover {
+    background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.08));
+    transform: scale(1.15);
+}
+
+.wx-emoji-empty {
+    grid-column: 1 / -1;
+    text-align: center;
+    color: var(--wx-secondary-color);
+    padding: 24px 8px;
+    font-size: 12px;
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-emoji-tab:hover,
+:scope .wx-emoji-btn:hover {
+    background-color: rgba(255, 255, 255, 0.08);
+}
+}
+
+/* Inline date control inserted via the // command */
+
+.wx-editor-date-popup {
+    background: var(--wx-body-bg);
+    border: 1px solid var(--wx-border-color);
+    border-radius: 8px;
+    padding: 10px;
+    min-width: 280px;
+}
+
+.wx-editor-content .wx-editor-date {
+    cursor: pointer;
+}
+
+.wx-editor-content .wx-editor-date:hover {
+    outline: 1px dashed var(--wx-primary);
+    outline-offset: 2px;
+    border-radius: 3px;
+}
+/* A filling editor is the writing surface of a form whose text is the work - an article, a
+   page, a post - rather than one field among many. It takes the height its dialog or page has
+   left over.
+
+   That height is expressed against the viewport because no ancestor offers one: a form inside
+   a modal is laid out as `display: contents`, so a percentage resolves to auto the whole way
+   down. What stands above and below the surface differs per host, so the amount subtracted is
+   a custom property; the default is the chrome of a full-screen dialog (its header, the title
+   field, the editor toolbar and the footer bar the submit button sits on). */
+.wx-editor[data-fill="true"] {
+    display: flex;
+    flex-direction: column;
+}
+
+.wx-editor[data-fill="true"] > .wx-editor-container {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.wx-editor[data-fill="true"] .wx-editor-content {
+    flex: 1 1 auto;
+    height: calc(100vh - var(--wx-editor-fill-offset, 20rem));
+    min-height: 12rem;
+
+    /* the surface is already as tall as it can be; a drag handle on it could only make it
+       smaller by accident */
+    resize: none;
+}
+
+/* Where a host reserved a definite height for the editor - a dialog body carrying
+   `wx-modal-fill`, or any container that made the chain down to the editor a flex column -
+   the guess is not needed: the writing area takes exactly what is left and ends where its
+   host ends. */
+.wx-modal-fill .wx-editor[data-fill="true"] .wx-editor-content {
+    height: auto;
+    min-height: 0;
+}
+/* regions keep layout gutters outside every editing host */
+.wx-editor-row {
+    display: flex;
+    align-items: stretch;
+    gap: 0.75rem;
+    margin-block: 0.75rem;
+}
+
+.wx-editor-region {
+    flex: 1 1 0;
+    min-width: 0;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.wx-editor .wx-editor-region {
+    position: relative;
+    min-height: 6rem;
+    padding: 0;
+    border: 0;
+    outline: none;
+}
+
+.wx-editor .wx-editor-multiple-regions .wx-editor-region {
+    padding: 1.75rem 0.85rem 0.85rem;
+    border: 1px dashed var(--wx-border-color, #8b9198);
+    border-radius: 0.35rem;
+    background: var(--wx-body-bg, #fff);
+}
+
+.wx-editor .wx-editor-multiple-regions .wx-editor-region::before {
+    content: attr(data-region-label);
+    position: absolute;
+    inset-block-start: 0.3rem;
+    inset-inline-start: 0.85rem;
+    color: var(--wx-secondary-color, #687078);
+    font-size: 0.7rem;
+    pointer-events: none;
+    user-select: none;
+}
+
+.wx-editor .wx-editor-multiple-regions .wx-editor-region:focus-within {
+    border-color: var(--wx-primary, #0d6efd);
+    outline: 2px solid color-mix(in srgb, var(--wx-primary, #0d6efd) 18%, transparent);
+}
+
+.wx-editor-region-handle {
+    position: absolute;
+    inset-block-start: 0.1rem;
+    inset-inline-end: 0.5rem;
+    cursor: grab;
+    user-select: none;
+    line-height: 1.4;
+    color: var(--wx-secondary-color, #687078);
+}
+
+.wx-editor [data-wx-drop="above"] { box-shadow: 0 -3px var(--wx-primary, #0d6efd); }
+.wx-editor [data-wx-drop="below"] { box-shadow: 0 3px var(--wx-primary, #0d6efd); }
+.wx-editor [data-wx-drop="before"] { box-shadow: -3px 0 var(--wx-primary, #0d6efd); }
+.wx-editor [data-wx-drop="after"] { box-shadow: 3px 0 var(--wx-primary, #0d6efd); }
+
+.wx-editor[aria-disabled="true"] .wx-editor-region {
+    background: var(--wx-tertiary-bg, #f2f3f5);
+    opacity: 0.7;
+}
+
+.wx-editor-regions-toolbar button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    width: auto;
+}
+
+.wx-editor-regions-toolbar .dropdown-item {
+    width: 100%;
+}
+
+@media (max-width: 600px) {
+    .wx-editor-row { flex-wrap: wrap; }
+    .wx-editor-region { flex-basis: 100%; }
 }

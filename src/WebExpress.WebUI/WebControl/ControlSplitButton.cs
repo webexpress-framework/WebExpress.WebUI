@@ -1,9 +1,11 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.WebPage;
+using WebExpress.WebUI.WebIcon;
 
 namespace WebExpress.WebUI.WebControl
 {
@@ -20,7 +22,7 @@ namespace WebExpress.WebUI.WebControl
         public new Func<IRenderControlContext, PropertyColorButton> BackgroundColor
         {
             get => (Func<IRenderControlContext, PropertyColorButton>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(Outline?.Invoke(null) ?? false), () => value?.Invoke(null)?.ToStyle(Outline?.Invoke(null) ?? false));
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(Outline?.Invoke(null) ?? false), (renderContext) => value?.Invoke(renderContext)?.ToStyle(Outline?.Invoke(renderContext) ?? false));
         }
 
         /// <summary>
@@ -29,7 +31,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeSizeButton> Size
         {
             get => (Func<IRenderControlContext, TypeSizeButton>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -43,7 +45,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeBlockButton> Block
         {
             get => (Func<IRenderControlContext, TypeBlockButton>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -67,17 +69,17 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeActive> Active
         {
             get => (Func<IRenderControlContext, TypeActive>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
-        /// Gets or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a
         /// click to open a modal or similar target.
         /// </summary>
         public Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
-        /// Gets or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a
         /// double‑click to open a modal or similar target.
         /// </summary>
         public Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
@@ -176,8 +178,8 @@ namespace WebExpress.WebUI.WebControl
             var button = new HtmlElementFieldButton()
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_btn",
-                Class = Css.Concatenate("btn", Css.Remove(GetClasses(), margin?.ToClass())),
-                Style = GetStyles()
+                Class = Css.Concatenate("btn", Css.Remove(GetClasses(renderContext), margin?.ToClass())),
+                Style = GetStyles(renderContext)
             };
 
             if (icon is not null)
@@ -204,15 +206,20 @@ namespace WebExpress.WebUI.WebControl
             PrimaryAction?.Invoke(renderContext)?.ApplyUserAttributes(button, TypeAction.Primary);
             SecondaryAction?.Invoke(renderContext)?.ApplyUserAttributes(button, TypeAction.Secondary);
 
-            var dropdownButton = new HtmlElementFieldButton(new HtmlElementTextSemanticsSpan() { Class = "caret" })
+            var menuId = (string.IsNullOrWhiteSpace(Id) ? DeterministicId.Create() : Id) + "_menu";
+            var anchorName = "--wx-menu-" + Guid.NewGuid().ToString("N");
+            var dropdownButton = new HtmlElementFieldButton(new HtmlElementTextSemanticsI() { Class = Css.Concatenate(new IconAngleDown().Class, "wx-dropdown-caret") })
             {
                 Id = string.IsNullOrWhiteSpace(Id) ? "" : Id + "_toggle",
-                Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(), "btn-block", margin?.ToClass())),
-                Style = GetStyles(),
-                DataToggle = "dropdown"
+                Class = Css.Concatenate("btn dropdown-toggle dropdown-toggle-split", Css.Remove(GetClasses(renderContext), "btn-block", margin?.ToClass())),
+                Style = GetStyles(renderContext)
             };
-            dropdownButton.AddUserAttribute("data-bs-toggle", "dropdown");
-            dropdownButton.AddUserAttribute("aria-expanded", "false");
+            dropdownButton.AddUserAttribute("popovertarget", menuId);
+            dropdownButton.AddUserAttribute("type", "button");
+            // the toggle shows a caret alone: it says what it opens, and which list that is
+            dropdownButton.AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:splitbutton.toggle"));
+            dropdownButton.AddUserAttribute("aria-haspopup", "true");
+            dropdownButton.AddUserAttribute("aria-controls", menuId);
 
             var dropdownElements = new HtmlElementTextContentUl
                 (
@@ -229,6 +236,12 @@ namespace WebExpress.WebUI.WebControl
             {
                 Class = horizontalAlignment == TypeHorizontalAlignment.Right ? "dropdown-menu dropdown-menu-right" : "dropdown-menu"
             };
+
+            dropdownElements.Id = menuId;
+            dropdownElements.AddUserAttribute("popover", "auto");
+            dropdownElements.Class = Css.Concatenate(dropdownElements.Class, "wx-native-menu");
+            dropdownButton.Style = (string.IsNullOrWhiteSpace(dropdownButton.Style) ? "" : dropdownButton.Style.TrimEnd(';') + ";") + "anchor-name:" + anchorName;
+            dropdownElements.Style = "position-anchor:" + anchorName;
 
             var html = new HtmlElementTextContentDiv
             (

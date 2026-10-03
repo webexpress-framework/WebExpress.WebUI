@@ -41,6 +41,11 @@ namespace WebExpress.WebUI.WebNotification.Model
         public string Icon { get; set; }
 
         /// <summary>
+        /// Gets or sets the address the notification is about. Can be null.
+        /// </summary>
+        public string Link { get; set; }
+
+        /// <summary>
         /// Returns the creation time.
         /// </summary>
         [JsonPropertyName("created")]

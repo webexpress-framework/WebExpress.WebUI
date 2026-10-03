@@ -10,7 +10,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a move input form.
+    /// A single entry in a move/transfer input, where items can be moved between two lists.
     /// </summary>
     public class ControlFormItemInputMoveItem : IControlFormItemInputMoveItem
     {
@@ -54,7 +54,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var html = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(Text?.Invoke(renderContext))))
+            var html = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, Text?.Invoke(renderContext))))
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-move-option"),

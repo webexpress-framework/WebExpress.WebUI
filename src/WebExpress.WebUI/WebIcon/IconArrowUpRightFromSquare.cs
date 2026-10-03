@@ -1,4 +1,4 @@
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a arrow-up-right-from-square.
@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconArrowUpRightFromSquare : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-arrow-up-right-from-square";
+        public override string Symbol => "arrow-up-right-from-square";
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the size of a modal dialog.
+    /// The predefined sizes of a modal dialog (for example small, normal, or large).
     /// </summary>
     public enum TypeModalSize
     {

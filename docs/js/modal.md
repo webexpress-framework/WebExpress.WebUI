@@ -2,7 +2,7 @@
 
 # ModalCtrl
 
-The `ModalCtrl` component is used to create modal dialog windows based on the Bootstrap framework. It allows for the display of content in an overlay window that blocks the rest of the page until a user interaction occurs. The structure and content of the modal are defined declaratively directly in the HTML by using specific CSS classes to mark the header, content, and footer sections. The component takes these declared sections and constructs the required Bootstrap modal DOM structure at runtime.
+The `ModalCtrl` component is used to create modal dialog windows using native HTML dialog elements. It allows for the display of content in an overlay window that blocks the rest of the page until a user interaction occurs. The structure and content of the modal are defined declaratively directly in the HTML by using specific CSS classes to mark the header, content, and footer sections. The component takes these declared sections and constructs a direct header, body and footer at runtime.
 
 ```
    ┌──────────────────────────────────────────────────┐
@@ -26,22 +26,24 @@ The configuration and content of the modal are defined directly in the HTML mark
 
 | Attribute         | Description
 |-------------------|--------------------------------------------------------------------------------------------------------------
-| `data-size`       | Defines the size of the modal. Accepts standard Bootstrap classes like `modal-sm`, `modal-lg`, or `modal-xl`.
+| `data-size`       | Defines the size of the modal. Accepts WebExpress size classes like `modal-sm`, `modal-lg`, or `modal-xl`.
 | `data-close-label`| Sets the text for the automatically generated "Close" button in the footer.
 | `data-auto-show`  | If set to `"true"`, the modal will be displayed automatically when the page loads.
+| `data-scrollable` | Whether the dialog body scrolls independently. Defaults to `"true"`. Native menus use the top layer and remain visible outside the scrollable body. |
 
 To define the content, the following CSS classes are used within the host element:
 
-- **`.wx-modal-header`**: The content of this element is adopted as the title in the modal's header.
+- **`.wx-modal-header`**: The content of this element is adopted as the title in the modal's header. The title is a second-level heading (`h2.modal-title`): a dialog is content of the page it opens on, whose first level is taken, and a first level here would break the outline of that page.
 - **`.wx-modal-content`**: The content of this element is placed into the main body of the modal.
 - **`.wx-modal-footer`**: The content of this element is inserted into the modal's footer, preceding the default "Close" button.
 
 ## Functionality
 
-The `ModalCtrl` is designed as a wrapper around the native Bootstrap modal functionality to allow for simple, declarative usage.
+The `ModalCtrl` is designed as a controller for the browser’s native dialog lifecycle to allow for simple, declarative usage.
 
-- **Dynamic DOM Construction**: Upon initialization, the component reads the content marked with the `.wx-modal-*` classes, removes it from the original DOM, and inserts it into a newly created, Bootstrap-compliant modal structure.
+- **Dynamic DOM Construction**: Upon initialization, the component reads the content marked with the `.wx-modal-*` classes, removes it from the original DOM, and inserts it into the native dialog as header, body and footer.
 - **Automatic Controls**: A "Close" button (X) in the header and a "Close" button with text and an icon in the footer are automatically generated to ensure accessibility and consistent user guidance.
+- **Scrollable Body**: `data-scrollable="true"` adds `wx-dialog-scrollable`. Native popovers stay above the body even when it scrolls.
 - **Programmatic Control**: Through the `show()` and `hide()` methods, the visibility of the modal can be dynamically controlled via JavaScript.
 
 ## Programmatic Control
@@ -94,7 +96,7 @@ The following example shows the complete declarative configuration of a modal th
     The main container for the modal control.
     It is configured with a large size and will not show automatically.
 -->
-<div id="my-modal"
+<dialog id="my-modal"
      class="wx-webui-modal"
      data-size="modal-lg"
      data-close-label="Cancel">
@@ -113,7 +115,7 @@ The following example shows the complete declarative configuration of a modal th
     <div class="wx-modal-footer">
         <button type="button" class="btn btn-primary">Confirm Action</button>
     </div>
-</div>
+</dialog>
 ```
 
 # ModalPageCtrl
@@ -149,7 +151,7 @@ Configuration is handled via `data-` attributes on the host element. The compone
 
 ## Functionality
 
-The `ModalPageCtrl` builds upon the lifecycle of a Bootstrap modal to implement an asynchronous loading process.
+The `ModalPageCtrl` builds upon the native dialog lifecycle to implement an asynchronous loading process.
 
 - **Inheritance Model**: As a direct extension of `ModalCtrl`, it inherits all of its logic for creating the basic modal structure, including the header, footer, and default close buttons.
 - **Asynchronous Loading Cycle**: When the `show()` method is called, the following occurs:
@@ -214,7 +216,7 @@ The following example shows the configuration of a modal that loads its content 
     'data-selector' specifies that only the element with the ID '#profile-details'
     from the response should be used as the modal's body.
 -->
-<div id="user-profile-modal"
+<dialog id="user-profile-modal"
      class="wx-webui-modalpage"
      data-uri="/users/ReneSchwarzer/details"
      data-selector="#profile-details"
@@ -224,7 +226,7 @@ The following example shows the configuration of a modal that loads its content 
     <div class="wx-modal-header">
         User Profile
     </div>
-</div>
+</dialog>
 ```
 
 # ModalFormCtrl
@@ -235,7 +237,7 @@ The `ModalFormCtrl` is a specialized component that combines the functionality o
    ┌──────────────────────────────────────────────────┐
    │                                                  │
    │  ┌────────────────────────────────────────────┐  │
-   │  │ [Form Title]                           [x] │  │
+   │  │ [Form Header]                          [x] │  │
    │  ├────────────────────────────────────────────┤  │
    │  │  ┌──────────────────────────────────────┐  │  │
    │  │  │ [Validation Errors Alert]            │  │  │
@@ -245,7 +247,7 @@ The `ModalFormCtrl` is a specialized component that combines the functionality o
    │  │  │                                      │  │  │
    │  │  └──────────────────────────────────────┘  │  │
    │  ├────────────────────────────────────────────┤  │
-   │  │     [Submit Button] [Reset Button] [Close] │  │
+   │  │ [Form Footer]  [Submit] [Reset]    [Close] │  │
    │  └────────────────────────────────────────────┘  │
    │                                                  │
    └──────────────────────────────────────────────────┘
@@ -258,7 +260,22 @@ The component builds upon `ModalPageCtrl` and extends its functionality to provi
 - **Asynchronous Form Submission**: The `ModalFormCtrl` intercepts the form's `submit` event. Instead of reloading the page, it serializes the form data and sends it via a `fetch` request to the URL defined in the form's `action` attribute.
 - **Dynamic Content Updates**: After submission, the component expects an HTML response from the server. This response is parsed, and the new form state contained within it is extracted and used to update the modal's content.
 - **Intelligent DOM Restructuring**: During initialization and each update, the component restructures the DOM. It wraps the entire modal dialog in a `<form>` element. Buttons of type `submit` or `reset` contained in the server-provided HTML are automatically moved to the modal's footer.
-- **Programmatic Error Display**: A dedicated method, `showValidationErrors`, allows for the programmatic display of a list of validation errors. This method generates a summary warning (Bootstrap Alert) at the top of the modal body.
+- **Form Header**: A `<header>` element that the server renders as a direct child of the form becomes the dialog's title, replacing the served page's `<title>`. A form header names what is being edited, which is what a title bar is for; and because the header stays inside the form, an input placed in it — the edited record's own name, say — is loaded and submitted with every other field. Without a form header the page title is used, as before.
+- **Title Input**: An input in that header that the author marks `wx-modal-title-input` is drawn as the title rather than as a box standing in it: no frame, the title bar's font, the full width, with the frame and the focus ring offered on hover and focus. The mark is required and never inferred from "an input inside the header", because a header may also carry a switch or a filter that has to go on looking like the control it is. The mark may also sit on a composite control whose client controller builds the input inside a host - a uniqueness check with its status, say: the host carries the mark, the input it builds is the one drawn as the title, and the host lays its parts out as one row so the status stands at the trailing end of the title. A validity class the control writes onto that input (`is-valid`, `is-invalid`) still colours the frame on the title bar.
+- **Form Footer**: A `<footer>` element that the server renders as a direct child of the form is moved onto the dialog's footer bar, ahead of the submit buttons, and takes the free space to their left. This is where a form states what comments on the decision the buttons take — a save state, a hint, a validation summary — so it belongs on that bar rather than at the end of the scrolling body. It is laid out as a row, so a form can put a state on the left and a secondary control on the right of its own box. Content declared through the form footer sections therefore reads the same whether the form is rendered as a page or opened as a modal.
+- **Reserved Body**: When the served form contains an element marked `data-fill="true"` — a filling `EditorCtrl`, for instance — the modal body is given the class `wx-modal-fill`: it stops scrolling and passes its height down through every element between it and the filling one. The writing area then ends exactly where the dialog does, instead of the editor having to guess at the chrome around it.
+- **Programmatic Error Display**: A dedicated method, `showValidationErrors`, allows for the programmatic display of a list of validation errors. This method generates a summary warning (WebExpress alert) at the top of the modal body.
+
+### What the controller does with each part of the form
+
+| Part of the served form                     | Where it ends up
+|---------------------------------------------|---------------------------------------------------------
+| Hidden metadata islands (`[hidden]` children)| Stay direct children of the `<form>`, so the injected form still hydrates from them
+| `<header>` (direct child)                    | The dialog's title bar, in place of the page title
+| `<footer>` (direct child)                    | The dialog's footer bar, left of the buttons
+| `button[type=submit]` / `button[type=reset]` | The dialog's footer bar, before the generated close button
+| Everything else visible                      | The modal body
+| CSS classes on the `<form>`                  | Only those beginning with `wx` are kept; the rest belong to the page layout the form was served in
 
 ## Programmatic Control
 
@@ -322,16 +339,93 @@ The configuration is declarative. The host element requires a URI from which the
     The 'data-uri' attribute specifies where to load the form from.
     The controller will automatically handle the form submission found at that URI.
 -->
-<div id="create-user-modal"
+<dialog id="create-user-modal"
      class="wx-webui-modalform"
      data-uri="/users/create/form"
      data-size="modal-lg">
-</div>
+</dialog>
 ```
 
-# ModalSidebarPanel
+# ModalLoginCtrl
 
-The `ModalSidebarPanel` component provides a modal dialog with a left-hand navigation tree and a right-hand content area. It extends the `ModalCtrl` base component and builds the modal body into a two-pane layout, using SplitCtrl for a resizable sidebar and TreeCtrl for hierarchical navigation. Pages (panels) can be autoloaded via a registry key or added programmatically. Validation can be scoped to either all pages or only the currently active one. A submit button is managed by the base class and is wired into `ModalSidebarPanel` via an element ID; on successful validation the modal closes, otherwise an error alert is shown above the split control.
+The `ModalLoginCtrl` frames the login control (`LoginCtrl`, `wx-webui-login`) with a dialog, so signing in happens on top of the page the user is on instead of on a page of its own. The dialog lends the login what its card would otherwise supply - the title bar names it, the footer carries its submit button ahead of the close button, which closes the bar - and leaves the login what is its: the fields, the request and what follows success and failure. The C# counterpart is `ControlModalLogin`, which renders a real `ControlLogin` into the content section of the dialog.
+
+```
+   ┌──────────────────────────────────────────────────┐
+   │                                                  │
+   │  ┌────────────────────────────────────────────┐  │
+   │  │ Login                                  [x] │  │
+   │  ├────────────────────────────────────────────┤  │
+   │  │  Username                                  │  │
+   │  │  [                                      ]  │  │
+   │  │  Password                                  │  │
+   │  │  [                                      ]  │  │
+   │  ├────────────────────────────────────────────┤  │
+   │  │                          [Login] [Close]   │  │
+   │  └────────────────────────────────────────────┘  │
+   │                                                  │
+   └──────────────────────────────────────────────────┘
+```
+
+## Configuration
+
+The dialog takes the attributes of `ModalCtrl` (`data-size`, `data-close-label`, `data-auto-show`, `data-scrollable`). The login inside the `.wx-modal-content` section is configured as the login control always is; only `data-username`, the prefilled login name, matters here, because the dialog's title bar replaces the login's own title.
+
+```html
+<dialog id="signin" class="wx-webui-modal-login" data-close-label="Close">
+    <div class="wx-modal-header">Login</div>
+    <div class="wx-modal-content">
+        <div id="signin_login" class="wx-webui-login" data-username="WebExpress"></div>
+    </div>
+    <div class="wx-modal-footer"></div>
+</dialog>
+```
+
+## Functionality
+
+- **A plain login**: a login control inside the body of a dialog (`.wx-modal-content` or `.modal-body`) renders its form without the card and the heading it draws on a page, because the dialog is the card and its title bar the heading. The host carries `wx-login-plain` instead of `wx-login`, so the page styling of the login card does not reach into the dialog.
+- **The submit button on the footer**: the dialog takes the login's submit button onto its footer bar, in front of the close button: the cancelling action is rightmost on every dialog, so the submit stands ahead of it. The button stays wired to the form through the `form` attribute, so a click on the bar submits and Enter in a field still triggers it. The group that held the button inside the form leaves with it.
+- **One login instance**: the controller framework mounts children ahead of their parent, so the login the server rendered already stands when the dialog is assembled around it; a dialog created by hand mounts the login itself. Either way the dialog holds the very `LoginCtrl` instance the page can reach through `getInstanceByElement`.
+- **Focus on show**: once the dialog stands (`webexpress.webui.modal.show`) the caret is put into the login name, or into the password when the name is prefilled.
+- **What the login does is the login's**: the request, the session cookie, the reload on success and the message on failure are those of `LoginCtrl`. A variant of the login - the REST-backed `webexpress.webapp.LoginCtrl` of the application layer, for instance - is framed unchanged, because the dialog only takes the button the mounted login hands over through `liftSubmitButton(bar)`.
+
+## Programmatic Control
+
+```javascript
+const element = document.getElementById("signin");
+const dialog = webexpress.webui.Controller.getInstanceByElement(element);
+
+// the login the dialog frames, for example to prefill the name
+dialog.login._usernameInput.value = "WebExpress";
+
+dialog.show();
+```
+
+## Events
+
+The dialog dispatches the events of `ModalCtrl` on its host element: `webexpress.webui.Event.MODAL_SHOW_EVENT` and `webexpress.webui.Event.MODAL_HIDE_EVENT`.
+
+## Use Case Example
+
+The C# page declares an activator and the dialog; the dialog opens on the click, or right away when the page cannot be used without signing in:
+
+```csharp
+new ControlButton()
+{
+    Text = _ => "Sign in",
+    Icon = _ => new IconRightToBracket(),
+    PrimaryAction = _ => new ActionModal("signin")
+},
+new ControlModalLogin("signin")
+{
+    Username = _ => "WebExpress",
+    AutoShow = _ => false
+}
+```
+
+# ModalSidebarPanelCtrl
+
+The `ModalSidebarPanelCtrl` component provides a modal dialog with a left-hand navigation tree and a right-hand content area. It extends the `ModalCtrl` base component and builds the modal body into a two-pane layout, using SplitCtrl for a resizable sidebar and TreeCtrl for hierarchical navigation. Pages (panels) can be autoloaded via a registry key or added programmatically. Validation can be scoped to either all pages or only the currently active one. A submit button is managed by the base class and is wired into `ModalSidebarPanelCtrl` via an element ID; on successful validation the modal closes, otherwise an error alert is shown above the split control.
 
 ```
    ┌──────────────────────────────────────────────────────┐
@@ -362,7 +456,7 @@ Configuration is declared on the host element through data attributes. The heade
 | `data-key`                  | Registry key used to autoload pages from DialogPanels.
 | `data-side-width`           | Initial sidebar width in pixels (default: 280).
 | `data-min-side-width`       | Minimum sidebar width in pixels (default: 180).
-| `data-submit-id`            | The ID of the submit button managed by the base class in the modal footer. ModalSidebarPanel only wires this button.
+| `data-submit-id`            | The ID of the submit button managed by the base class in the modal footer. ModalSidebarPanelCtrl only wires this button.
 | `data-validate-active-only` | When set to `"true"`, only the currently active page is validated and hidden pages are ignored (default: `"false"` = validate all pages).
 
 Content markers inside the host element:
@@ -373,31 +467,31 @@ Content markers inside the host element:
 
 ## Functionality
 
-ModalSidebarPanel wraps the Bootstrap modal behavior from ModalCtrl and adds a navigable, two-pane layout.
+ModalSidebarPanelCtrl wraps the native dialog behavior from ModalCtrl and adds a navigable, two-pane layout.
 
 - Dynamic body construction: The modal body is cleared and rebuilt into a split layout with a sidebar and a main area. SplitCtrl provides resizing; TreeCtrl renders the navigation tree.
 - Page model and navigation: Pages are managed as a flat list and projected as a hierarchy in the tree via optional `parentId`. A node index is maintained for quick lookups; ancestors are expanded automatically to reveal selected nodes, and the active node is tracked and highlighted.
 - Page API: Pages can expose `render(pane, ctrl)`, `onShow(ctrl)`, `validate(ctrl)`, and `onSubmit(ctrl)`. Each page receives its own pane element that is shown/hidden as the active page changes.
 - Autoload from registry: Using `data-panels-key`/`data-key`, panels registered in `webexpress.webui.DialogPanels` are loaded. If a registered panel specifies `modalId`, it is loaded only when it matches the current modal’s ID. Missing or conflicting IDs are resolved by generating a unique, safe ID.
-- Validation and submit: The submit button is created and managed by the base class; ModalSidebarPanel wires it via `data-submit-id`. On click, validation is performed. If validation fails, a Bootstrap alert (`alert alert-danger`) is shown above the split control and remains visible as long as errors persist. If validation passes, optional `onSubmit` hooks are invoked and the modal closes.
+- Validation and submit: The submit button is created and managed by the base class; ModalSidebarPanelCtrl wires it via `data-submit-id`. On click, validation is performed. If validation fails, a WebExpress alert (`alert alert-danger`) is shown above the split control and remains visible as long as errors persist. If validation passes, optional `onSubmit` hooks are invoked and the modal closes.
 - Robust tree click handling: The global click listener for TreeCtrl is managed idempotently and reattached when the modal is shown. Sender checks are tolerant to ensure page switching remains reliable.
 
 ## Page Object API
 
-Pages supplied to ModalSidebarPanel (either autoloaded or added programmatically) follow this shape:
+Pages supplied to ModalSidebarPanelCtrl (either autoloaded or added programmatically) follow this shape:
 
 - `id: string` – unique page ID. If omitted or duplicated, a safe ID is generated.
 - `title?: string` – label shown in the navigation tree (defaults to `id`).
 - `iconClass?: string` – optional icon CSS class for the node.
 - `image?: string` – optional image URL/class used by the tree control.
 - `parentId?: string|null` – optional parent page ID to form a hierarchy.
-- `render?: (pane: HTMLElement, ctrl: ModalSidebarPanel) => void` – render hook to populate the page pane.
-- `onShow?: (ctrl: ModalSidebarPanel) => void` – called when the page becomes visible.
-- `validate?: (ctrl: ModalSidebarPanel) => boolean | string | { valid: boolean, message?: string }` – validation hook. Returning:
+- `render?: (pane: HTMLElement, ctrl: ModalSidebarPanelCtrl) => void` – render hook to populate the page pane.
+- `onShow?: (ctrl: ModalSidebarPanelCtrl) => void` – called when the page becomes visible.
+- `validate?: (ctrl: ModalSidebarPanelCtrl) => boolean | string | { valid: boolean, message?: string }` – validation hook. Returning:
   - `true` means valid,
   - `false` or a non-empty `string` means invalid (string is used as message),
   - an object can specify `{ valid: false, message: '...' }` for details.
-- `onSubmit?: (ctrl: ModalSidebarPanel) => void` – optional hook executed after successful validation and before the modal closes.
+- `onSubmit?: (ctrl: ModalSidebarPanelCtrl) => void` – optional hook executed after successful validation and before the modal closes.
 
 ## Public Methods
 
@@ -469,7 +563,7 @@ sidebarCtrl.submit();
 
 ```html
 <!-- only the currently visible page is validated; hidden pages are ignored -->
-<div id="settings-modal"
+<dialog id="settings-modal"
      class="wx-webui-modal-sidebar-panel"
      data-size="modal-lg"
      data-close-label="Close"
@@ -485,12 +579,12 @@ sidebarCtrl.submit();
         <!-- base class manages this button; id must match data-submit-id -->
         <button id="settings-submit" type="button" class="btn btn-primary">Save</button>
     </div>
-</div>
+</dialog>
 ```
 
 ## Registering pages via DialogPanels
 
-Pages can be registered centrally and autoloaded into any `ModalSidebarPanel` that specifies a matching `data-panels-key`. The following example registers a page under the key `"key"`. Any modal with `data-panels-key="key"` will automatically load this page.
+Pages can be registered centrally and autoloaded into any `ModalSidebarPanelCtrl` that specifies a matching `data-panels-key`. The following example registers a page under the key `"key"`. Any modal with `data-panels-key="key"` will automatically load this page.
 
 ```javascript
 // register a page under a registry key; will be autoloaded by modals with data-panels-key="key"
@@ -498,7 +592,7 @@ webexpress.webui.DialogPanels.register("key", {
     id: "info-pane",
     parentId: null,
     title: "Example Page",
-    iconClass: "fas fa-info-circle",
+    iconClass: "circle-info",
     render: function(pane, ctrl) {
         // render content for this page
         pane.innerHTML = '<div class="p-2"><p>This is an example page loaded via DialogPanels.register().</p></div>';
@@ -516,10 +610,10 @@ webexpress.webui.DialogPanels.register("key", {
 
 ## Events
 
-ModalSidebarPanel integrates with Bootstrap’s modal events and the base component’s events.
+ModalSidebarPanelCtrl integrates with native dialog close and cancel events and the base component’s events.
 
-- `shown.bs.modal`: After the modal is shown; renders the tree, ensures an active page, wires the submit button, and fits the sidebar.
-- `hidden.bs.modal`: After the modal is hidden; cleans up event handlers and hides any validation alert.
+- `webexpress.webui.modal.show`: After the modal is shown; renders the tree, ensures an active page, wires the submit button, and fits the sidebar.
+- `webexpress.webui.modal.hide`: After the modal is hidden; cleans up event handlers and hides any validation alert.
 - `webexpress.webui.Event.MODAL_SHOW_EVENT`: Emitted by the base class when opening.
 - `webexpress.webui.Event.MODAL_HIDE_EVENT`: Emitted by the base class when closing.
 - `webexpress.webui.Event.CLICK_EVENT`: Global tree click events; managed idempotently and reattached as needed.
@@ -529,7 +623,7 @@ ModalSidebarPanel integrates with Bootstrap’s modal events and the base compon
 A declarative setup with autoloaded pages, a base-managed submit button bound via `data-submit-id`, and active-only validation:
 
 ```html
-<div id="account-modal"
+<dialog id="account-modal"
      class="wx-webui-modal-sidebar-panel"
      data-size="modal-lg"
      data-close-label="Cancel"
@@ -546,7 +640,7 @@ A declarative setup with autoloaded pages, a base-managed submit button bound vi
             Save Changes
         </button>
     </div>
-</div>
+</dialog>
 ```
 
 At runtime, the body is composed into a split layout with a navigation tree and a content area. The first page is activated by default. Navigating in the tree switches the visible pane and expands ancestor nodes. On submit, validation runs either on all pages or only the active one, depending on the configuration; an error alert remains visible above the split control while errors persist. On success, any `onSubmit` hooks are executed and the modal closes.

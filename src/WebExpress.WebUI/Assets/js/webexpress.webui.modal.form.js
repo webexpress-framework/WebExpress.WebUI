@@ -30,8 +30,6 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
         const doc = parser.parseFromString(response, "text/html");
         const form = doc.querySelector(this._selector);
 
-        this._titleH1.textContent = doc.title?.trim();
-
         if (form) {
             // remove previous submit handler to avoid duplicate bindings
             if (this._submitHandler && this._form) {
@@ -52,6 +50,15 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             const buttons = Array.from(form.querySelectorAll("button[type='submit'], button[type='reset']"))
                 .map(btn => this._detachElement(btn));
 
+            // hidden metadata elements the server emits as direct children of
+            // the form (for example the wx-state / wx-service islands a data
+            // bound form carries) are not visible content and must stay direct
+            // children of the form: a form controller that hydrates the form
+            // after it is injected reads them from the form's direct children,
+            // so relocating them into the modal body would leave the form
+            // without its endpoint and the fields empty.
+            const islands = [...form.children].filter(el => el.hasAttribute("hidden"));
+
             const method = form.getAttribute("method") || "POST";
             const action = form.getAttribute("action") || this._uri;
 
@@ -62,39 +69,73 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
                 event.preventDefault();
                 const formData = new FormData(this._form);
 
-                fetch(action, { method, body: formData })
-                    .then(r => r.text())
-                    .then(data => this._update(data))
-                    .catch(error => {
-                        this._bodyDiv.innerHTML =
-                            error.message ||
+                // the served page is shown whatever the status says: a refused submission
+                // comes back as the form with its validation messages, which is what the
+                // dialog has to show; only an answer that never arrived is an error
+                webexpress.webui.Transport.request(action, { method, body: formData }).then((result) => {
+                    const html = result.data && result.data.text !== undefined ? result.data.text : null;
+
+                    if (html !== null) {
+                        this._update(html);
+                    } else if (result.error && result.error.kind !== "abort") {
+                        this._bodyDiv.textContent =
+                            result.error.message ||
                             this._i18n("webexpress.webui:modal.form.error", "An error occurred.");
-                    });
+                    }
+                });
             };
 
             this._form.addEventListener("submit", this._submitHandler);
 
-            // extract all content except <footer>
-            const formContent = [...form.children].filter(el => !el.matches("footer"));
+            // the bars are emptied before the served form's sections are lifted onto them, so
+            // nothing of the previously shown form is left behind them
+            this._footerDiv.innerHTML = "";
+            this._titleHeading.innerHTML = "";
+
+            // a form header names what is being edited, which is what the dialog's title bar is
+            // for, and a form footer holds what belongs beside its buttons. Both are lifted by
+            // the base dialog, which owns what a dialog is made of; because they stay inside the
+            // form, an input in the header (the edited record's own name, say) is still loaded
+            // and submitted with the rest.
+            const titled = this.liftTitle(form);
+            this.liftFooter(form);
+
+            // extract all visible content except the metadata islands; the sections are already
+            // gone from the form's children by now
+            const formContent = [...form.children].filter(el => !el.hasAttribute("hidden"));
+
+            // a form whose body is one filling element gets the whole body reserved for it: the
+            // body stops scrolling and passes its height down, so a writing surface ends exactly
+            // where the dialog does instead of guessing at the chrome around it. asked here,
+            // while the form still holds its content - the emptying below detaches it.
+            const fills = !!form.querySelector("[data-fill=\"true\"]");
 
             form.innerHTML = "";
-            this._footerDiv.innerHTML = "";
+
+            if (!titled) {
+                this._titleHeading.textContent = doc.title?.trim() ?? "";
+            }
 
             buttons.forEach(btn => this._footerDiv.appendChild(btn));
             this._footerDiv.appendChild(this._cancelButton);
+
+            this._bodyDiv.classList.toggle("wx-modal-fill", fills);
 
             // fill modal body with form content
             this._bodyDiv.innerHTML = "";
             formContent.forEach(el => this._bodyDiv.appendChild(el));
 
             this._form.innerHTML = "";
-            this._form.appendChild(this._dialogDiv);
+            // keep the metadata islands as direct children of the form, ahead of
+            // the dialog, so the injected form hydrates from them
+            islands.forEach(el => this._form.appendChild(el));
+            this._form.append(this._headerDiv, this._bodyDiv, this._footerDiv);
 
             this._element.innerHTML = "";
             this._element.appendChild(this._form);
 
             // bind dismiss buttons
-            this._dialogDiv.querySelectorAll("[data-wx-dismiss='modal']").forEach(button => {
+            this._element.querySelectorAll("[data-wx-dismiss='modal']").forEach(button => {
                 button.addEventListener("click", () => this.hide());
             });
 
@@ -105,6 +146,8 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
 
             return;
         }
+
+        this._titleHeading.textContent = doc.title?.trim() ?? "";
 
         // fallback: try to find a wx-content-main
         const contentMain = doc.querySelector("#wx-content-main");
@@ -117,7 +160,7 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
             this._footerDiv.appendChild(this._cancelButton);
 
             this._element.innerHTML = "";
-            this._element.appendChild(this._dialogDiv);
+            this._element.append(this._headerDiv, this._bodyDiv, this._footerDiv);
 
             return; // content successfully displayed
         }
@@ -132,11 +175,11 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
         this._footerDiv.appendChild(this._cancelButton);
 
         this._element.innerHTML = "";
-        this._element.appendChild(this._dialogDiv);
+        this._element.append(this._headerDiv, this._bodyDiv, this._footerDiv);
     }
 
     /**
-     * Displays validation errors inside a Bootstrap alert with plain paragraph formatting.
+     * Displays validation errors inside a WebExpress alert with plain paragraph formatting.
      * @param {Array<{ code: string, message: string, field: string }>} errors - List of validation error objects.
      */
     showValidationErrors(errors) {

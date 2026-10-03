@@ -4,7 +4,7 @@ using WebExpress.WebCore.WebHtml;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a action element for a filter.
+    /// An action that applies the current filter criteria to a list or table, so only matching rows are shown.
     /// </summary>
     public class ActionFilter : IAction
     {

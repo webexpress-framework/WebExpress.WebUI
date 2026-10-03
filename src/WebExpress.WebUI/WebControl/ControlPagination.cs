@@ -25,7 +25,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeSizePagination> Size
         {
             get => (Func<IRenderControlContext, TypeSizePagination>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -54,8 +54,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-pagination", Css.Remove(GetClasses(), backgroundColor?.ToClass(), borderColor?.ToClass())),
-                Style = Style.Remove(GetStyles(), backgroundColor.ToStyle()),
+                Class = Css.Concatenate("wx-webui-pagination", Css.Remove(GetClasses(renderContext), backgroundColor?.ToClass(), borderColor?.ToClass())),
+                Style = Style.Remove(GetStyles(renderContext), backgroundColor.ToStyle()),
                 Role = role
             }
                 .AddUserAttribute("data-page", page > 0 ? page.ToString() : null)

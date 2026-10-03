@@ -29,14 +29,16 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Returns a string that represents the value of the property.
+        /// Returns the binding as the client reads it from a JSON island - the same
+        /// facts the attributes carry, keyed by the names the attributes use.
         /// </summary>
-        /// <returns>A string that contains the value of the property.</returns>
+        /// <returns>The JSON representation of the binding.</returns>
         public virtual Dictionary<string, object> ToJson()
         {
-            // todo
-
-            return null;
+            return new Dictionary<string, object>
+            {
+                ["bind"] = Name
+            };
         }
     }
 }

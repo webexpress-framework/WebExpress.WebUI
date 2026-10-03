@@ -1,4 +1,4 @@
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a user-ninja.
@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconUserNinja : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-user-ninja";
+        public override string Symbol => "user-ninja";
     }
 }

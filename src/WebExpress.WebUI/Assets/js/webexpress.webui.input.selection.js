@@ -6,7 +6,12 @@
  * - webexpress.webui.Event.DROPDOWN_SHOW_EVENT
  * - webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT
  */
-webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl {
+webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
+    /**
+     * The counter behind the ids of the filter fields; a field without id or name is flagged
+     * by the browser's autofill, and a name would post the filter text with the form.
+     */
+    static _nextId = 0;
     _values = [];
     _items = [];
     _filterInput = null;
@@ -14,6 +19,10 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
     _multiselect = false;
     _stickySelection = false;
     _placeholder = "";
+    _dependsOn = null;
+    _dependencyValue = null;
+    _dependencyRoot = null;
+    _dependencyListener = null;
 
     /**
      * Constructor for initializing the selection control.
@@ -29,6 +38,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         this._placeholder = element.getAttribute("placeholder") || this._i18n("webexpress.webui:selection.placeholder", "Select an option");
         this._multiselect = element.dataset.multiselection === "true";
         this._stickySelection = element.dataset.stickySelection === "true";
+        this._dependsOn = element.dataset.dependsOn || null;
         this._values = [];
         this._items = [];
         // default filter logic
@@ -58,14 +68,32 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         element.removeAttribute("placeholder");
         element.removeAttribute("data-multiselection");
         element.removeAttribute("data-sticky-selection");
+        element.removeAttribute("data-depends-on");
         element.innerHTML = "";
         element.classList.add("wx-selection");
         element.appendChild(hiddenInput);
         element.appendChild(dropdown);
         element.appendChild(dropdownMenu);
 
-        // attach popper.js positioning for the dropdown menu
-        this._initializePopper(dropdown, dropdownMenu);
+        // attach native popover behavior for the dropdown menu
+        const trigger = dropdown.querySelector("button");
+        this._initializeMenu(dropdown, dropdownMenu, trigger);
+        dropdownMenu.addEventListener("toggle", (event) => {
+            if (event.newState === "open") { this._filterInput.focus({ preventScroll: true }); }
+        });
+        // the trigger is named by the field label and by the box that shows what is chosen,
+        // so it reads as "Country: Germany" rather than as a bare arrow
+        this._adoptFieldLabel(trigger, id, element, [this._selection]);
+        if (!trigger.hasAttribute("aria-labelledby") && !trigger.hasAttribute("aria-label")) {
+            trigger.setAttribute("aria-label", this._placeholder);
+        }
+        dropdownMenu.setAttribute("aria-label", this._placeholder);
+
+        // follow the field this selection depends on, if it names one. this has to happen
+        // after the value was applied: the initial value may itself be one the dependency
+        // no longer offers, and the reconciliation is what notices
+        this._observeDependency();
+        this._reconcileDependency(true);
 
         this.render();
     }
@@ -96,35 +124,21 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         dropdown.classList.add("form-control");
 
         const selection = document.createElement("ul");
-        const expandIcon = document.createElement("a");
-        expandIcon.className = "fas fa-angle-down";
-        expandIcon.href = "javascript:void(0);";
+        // a list this control built lays out its own entries, so it declares the
+        // role it already has: the prose list indent of .wx-content applies only
+        // to lists that leave their role implicit
+        selection.setAttribute("role", "list");
+
+        const expandIcon = document.createElement("button");
+        expandIcon.type = "button";
+        expandIcon.className = "wx-selection-trigger";
+        const drawing = document.createElement("i");
+        drawing.className = this._iconClass("angle-down");
+        expandIcon.appendChild(drawing);
 
         dropdown.appendChild(selection);
         dropdown.appendChild(expandIcon);
         this._selection = selection;
-
-        // toggle the dropdown menu on click
-        dropdown.addEventListener("click", (e) => {
-            if (this._dropdownmenu.style.display === "flex") {
-                this._dropdownmenu.dispatchEvent(new Event("hide"));
-                this._dropdownmenu.style.display = "none";
-            } else {
-                this._dropdownmenu.style.display = "flex";
-                this._dropdownmenu.dispatchEvent(new Event("show"));
-                if (this._filterInput) {
-                    this._filterInput.focus({ preventScroll: true });
-                }
-            }
-        });
-
-        // hide the dropdown menu when clicking outside
-        document.addEventListener("click", (e) => {
-            if (!dropdown.contains(e.target) && !this._dropdownmenu.contains(e.target)) {
-                this._dropdownmenu.dispatchEvent(new Event("hide"));
-                this._dropdownmenu.style.display = "none";
-            }
-        });
 
         return dropdown;
     }
@@ -138,6 +152,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         dropdownMenu.classList.add("dropdown-menu");
 
         const dropdownOptions = document.createElement("ul");
+        dropdownOptions.setAttribute("role", "list");
         this._dropdownoptions = dropdownOptions;
 
         // setup event delegation for options
@@ -163,8 +178,9 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
 
                 // close the dropdown after selection (optional logic for single select)
                 if (!this._multiselect) {
-                    this._dispatch(webexpress.webui.Event.DROPDOWN_HIDDEN_EVENT, {});
-                    this._dropdownmenu.style.display = "none";
+
+                    webexpress.webui.NativeMenu.hide(this._dropdownmenu);
+                    this._dropdown.querySelector(".wx-selection-trigger").focus({ preventScroll: true });
                 }
             }
         });
@@ -183,12 +199,23 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         const filterContainer = document.createElement("div");
         const filterInput = document.createElement("input");
         filterInput.type = "text";
+        filterInput.id = "wx-selection-filter-" + (++webexpress.webui.InputSelectionCtrl._nextId);
+        filterInput.autocomplete = "off";
+        filterInput.addEventListener("keydown", event => {
+            if (event.key !== "ArrowDown" && event.key !== "ArrowUp") { return; }
+            const options = [...this._dropdownoptions.querySelectorAll("button")];
+            const option = event.key === "ArrowUp" ? options.at(-1) : options[0];
+            if (option) { event.preventDefault(); option.focus({ preventScroll: true }); }
+        });
         filterInput.setAttribute("aria-label", this._i18n("webexpress.webui:selection.filter", "Filter"));
 
-        const clearButton = document.createElement("a");
-        clearButton.className = "fas fa-times";
+        const clearButton = document.createElement("button");
+        clearButton.type = "button";
+        clearButton.className = "wx-selection-clear";
+        const clearIcon = document.createElement("i");
+        clearIcon.className = this._iconClass("xmark");
+        clearButton.appendChild(clearIcon);
         clearButton.setAttribute("aria-label", this._i18n("webexpress.webui:selection.filter.clear", "Clear Filter"));
-        clearButton.setAttribute("role", "button");
         clearButton.style.cursor = "pointer";
 
         filterContainer.appendChild(filterInput);
@@ -241,7 +268,11 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                     icon: elem.dataset.icon,
                     image: elem.dataset.image,
                     content: elem.innerHTML || elem.dataset.label,
-                    disabled: elem.hasAttribute("disabled")
+                    disabled: elem.hasAttribute("disabled"),
+                    // an option without the attribute states no condition and is always
+                    // offered; one with it belongs to the listed values of the field this
+                    // selection depends on
+                    requires: this._parseRequires(elem.dataset.requires)
                 });
             }
         });
@@ -249,6 +280,215 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         // restore values after parsing (in case setter logic needs validation against items)
         this.value = value;
         this._items = items;
+    }
+
+    /**
+     * Parses the condition of an option into the list of values it belongs to.
+     * @param {string} value - The semicolon-separated condition, or undefined.
+     * @returns {Array|null} The values, or null when the option states no condition.
+     */
+    _parseRequires(value) {
+        if (!value) {
+            return null;
+        }
+
+        const values = String(value).split(";").map((v) => {
+            return v.trim();
+        }).filter((v) => {
+            return v.length > 0;
+        });
+
+        return values.length > 0 ? values : null;
+    }
+
+    /**
+     * Determines whether an option is offered under the value currently answered in the
+     * field this selection depends on.
+     * @param {Object} item - The option to test.
+     * @returns {boolean} True when the option is offered.
+     */
+    _isOffered(item) {
+        if (!this._dependsOn || !item || !item.requires) {
+            return true;
+        }
+
+        // an unanswered field narrows nothing. a form is filled one field at a time - a rest
+        // form even fills them one after another from its service - and hiding every
+        // conditional option until the other field is answered would be a different control
+        if (!this._dependencyValue) {
+            return true;
+        }
+
+        const dependencyValue = String(this._dependencyValue).toLowerCase();
+
+        return item.requires.some((required) => {
+            return String(required).toLowerCase() === dependencyValue;
+        });
+    }
+
+    /**
+     * Reads the value currently answered in the field this selection depends on.
+     * @returns {string|null} The value, or null when the field is absent or unanswered.
+     */
+    _resolveDependencyValue() {
+        if (!this._dependsOn) {
+            return null;
+        }
+
+        const root = this._dependencyRoot || document;
+        const name = window.CSS && CSS.escape ? CSS.escape(this._dependsOn) : this._dependsOn;
+        const field = root.querySelector(`[name="${name}"]`);
+
+        if (!field) {
+            return null;
+        }
+
+        // a selection that has already been initialized carries its value on the hidden input
+        // it built; one that has not still carries it on its host element, and either may be
+        // the state of the field at the moment this is asked
+        const raw = field.matches("input, select, textarea")
+            ? field.value
+            : (field.dataset ? field.dataset.value : null);
+
+        const first = String(raw || "").split(";")[0].trim();
+
+        return first.length > 0 ? first : null;
+    }
+
+    /**
+     * Subscribes to the changes of the field this selection depends on.
+     *
+     * The subscription is made on the form rather than on that field, because the field may
+     * not exist yet - form items are built in document order and the one depended on may
+     * follow this one - and because a value written by a service arrives as a change of a
+     * control that replaced the element the field was parsed from. Every change in the form
+     * is answered by reading the dependency again, which costs a query and is otherwise
+     * silent.
+     */
+    _observeDependency() {
+        if (!this._dependsOn) {
+            return;
+        }
+
+        this._dependencyRoot = this._element.closest("form") || document;
+        this._dependencyListener = () => {
+            this._reconcileDependency(false);
+        };
+
+        this._dependencyRoot.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, this._dependencyListener);
+        this._dependencyRoot.addEventListener("change", this._dependencyListener);
+    }
+
+    /**
+     * Brings the offered options and the current selection back in line with the field this
+     * selection depends on, dropping a value that is no longer offered.
+     * @param {boolean} force - True to reconcile even when the depended-on value is unchanged,
+     * which is what a change of this control's own value needs.
+     */
+    _reconcileDependency(force) {
+        if (!this._dependsOn) {
+            return;
+        }
+
+        const resolved = this._resolveDependencyValue();
+        const changed = resolved !== this._dependencyValue;
+
+        if (!changed && !force) {
+            return;
+        }
+
+        this._dependencyValue = resolved;
+
+        // a value this control cannot offer must not be submitted either - the form would be
+        // refused for a combination the user was never shown
+        const kept = this._values.filter((id) => {
+            const item = this._items.find((x) => {
+                return x.id === id;
+            });
+
+            return !item || this._isOffered(item);
+        });
+
+        if (kept.length !== this._values.length) {
+            if (kept.length === 0 && !this._multiselect && this._stickySelection) {
+                // a sticky selection may not be emptied, so it takes the first option that is
+                // still offered rather than being left without one
+                const fallback = this._items.find((x) => {
+                    return !x.type && !x.disabled && this._isOffered(x);
+                });
+
+                this.value = fallback ? [fallback.id] : [];
+            } else {
+                this.value = kept;
+            }
+
+            return;
+        }
+
+        if (changed) {
+            this.render();
+        }
+    }
+
+    /**
+     * Releases the subscription on the field this selection depends on.
+     */
+    destroy() {
+        if (this._dependencyRoot && this._dependencyListener) {
+            this._dependencyRoot.removeEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, this._dependencyListener);
+            this._dependencyRoot.removeEventListener("change", this._dependencyListener);
+            this._dependencyRoot = null;
+            this._dependencyListener = null;
+        }
+
+        super.destroy();
+    }
+
+    /**
+     * Returns the items the menu shows for a filter text: the options that pass it and are not
+     * chosen yet, and only the headers and dividers that still structure something.
+     *
+     * A header stands for the group of options below it and a divider for a boundary between
+     * two groups; once the filter or the selection has taken the options of a group away, the
+     * header names nothing and the divider separates nothing. Left in, the menu of a narrow
+     * filter is a column of captions and rules with a single option somewhere in between.
+     * @param {string} filterText - The filter text.
+     * @returns {Array<object>} The items in menu order.
+     */
+    _visibleItems(filterText) {
+        const kept = this._items.filter((item) => {
+            if (item.type === "divider" || item.type === "header") {
+                return true;
+            }
+
+            // an option the depended-on field does not offer is left out rather than
+            // shown disabled: it is not unavailable for now, it does not belong to what
+            // was chosen there, and a list of struck-through impossibilities is noise
+            return this._isOffered(item)
+                && this._optionfilter(item.label, filterText)
+                && !this._values.includes(item.id);
+        });
+
+        // a header whose group holds no option any more - the next structural item or the
+        // end follows it directly - is dropped
+        const withGroups = kept.filter((item, index) => {
+            if (item.type !== "header") {
+                return true;
+            }
+
+            const next = kept[index + 1];
+
+            return next !== undefined && next.type !== "header" && next.type !== "divider";
+        });
+
+        // a divider at either end or next to another divider separates nothing
+        return withGroups.filter((item, index) => {
+            if (item.type !== "divider") {
+                return true;
+            }
+
+            return index > 0 && index < withGroups.length - 1 && withGroups[index - 1].type !== "divider";
+        });
     }
 
     /**
@@ -260,18 +500,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
         const filterText = this._filterInput ? this._filterInput.value : "";
 
         // render each selection item or structural item
-        this._items.forEach((item) => {
-            // apply filter logic
-            if (item.type !== "divider" && item.type !== "header") {
-                 const isVisible = this._optionfilter(item.label, filterText);
-                 if (!isVisible) {
-                     return;
-                 }
-            }
-
-            // prevent rendering dividers/headers if they are adjacent or at start/end due to filtering
-            // (simple logic: just render all structure for now, complex logic omitted for brevity)
-
+        this._visibleItems(filterText).forEach((item) => {
             if (item.type === "divider") {
                 const li = document.createElement("li");
                 li.className = "dropdown-divider";
@@ -281,7 +510,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 li.className = "dropdown-header";
                 li.innerHTML = item.content;
                 fragment.appendChild(li);
-            } else if (!this._values.includes(item.id)) {
+            } else {
                 const li = document.createElement("li");
                 li.className = "dropdown-item";
                 // store id for event delegation
@@ -292,6 +521,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 }
 
                 const contentWrapper = document.createElement(item.disabled ? "span" : "button");
+                if (!item.disabled) { contentWrapper.type = "button"; }
                 if (item.disabled) {
                     contentWrapper.setAttribute("disabled", "disabled");
                 }
@@ -327,7 +557,13 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 if (item.color) {
                     li.className = item.color;
                 }
+                // a user-defined color has no class; the cssom assignment passes the
+                // content security policy that blocks style attributes in markup
+                if (item.style) {
+                    li.style.cssText = item.style;
+                }
 
+                li.classList.add("wx-chip");
                 const span = document.createElement("span");
                 const isStickyActive = this._stickySelection && this._values.length > 0;
 
@@ -349,9 +585,15 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 li.appendChild(span);
 
                 if (!isStickyActive) {
-                    const closeButton = document.createElement("a");
-                    closeButton.className = "fas fa-times";
-                    closeButton.style.cursor = "pointer";
+                    const closeButton = document.createElement("button");
+                    closeButton.type = "button";
+                    closeButton.className = "wx-chip-remove";
+                    // the glyph needs its own background because the button remains transparent
+                    const closeIcon = document.createElement("i");
+                    closeIcon.className = this._iconClass("xmark");
+                    closeIcon.setAttribute("aria-hidden", "true");
+                    closeButton.appendChild(closeIcon);
+                    closeButton.setAttribute("aria-label", this._i18n("webexpress.webui:selection.remove", "Remove {0}").replace("{0}", () => item.label));
                     closeButton.addEventListener("click", (e) => {
                         e.stopPropagation();
                         this.value = this._values.filter((v) => { return v !== value; });
@@ -363,12 +605,16 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
             }
         });
 
-        // show placeholder if nothing is selected
+        // show placeholder if nothing is selected; as an entry of the list, since a list
+        // holds nothing but entries
         if (this._values.length === 0) {
+            const li = document.createElement("li");
+            li.className = "wx-selection-placeholder";
             const span = document.createElement("span");
             span.textContent = this._placeholder;
+            li.appendChild(span);
             this._selection.innerHTML = "";
-            this._selection.appendChild(span);
+            this._selection.appendChild(li);
         }
 
         // update the value of the hidden input
@@ -510,6 +756,14 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.PopperCtrl 
                 this._hidden.value = newSerialized;
             }
             this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: [...this._values] });
+
+            // a value may also be written from the outside - a rest form filling this field
+            // from its service, for example - and the order in which the fields of one form
+            // are filled is not the order the dependency between them runs in. so the value
+            // is checked against the dependency here as well, not only when the depended-on
+            // field changes. the recursion this can start ends at once: the check drops what
+            // is not offered, and the value it writes back has nothing left to drop
+            this._reconcileDependency(true);
         }
     }
 };
