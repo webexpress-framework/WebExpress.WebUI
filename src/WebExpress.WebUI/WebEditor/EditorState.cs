@@ -71,6 +71,12 @@ namespace WebExpress.WebUI.WebEditor
         private static bool Flag(JsonElement node, string name) => Child(node, name).ValueKind == JsonValueKind.True;
         private static IEnumerable<JsonElement> Children(JsonElement node) => Child(node, "children") is var value && value.ValueKind == JsonValueKind.Array ? value.EnumerateArray() : [];
 
+        /// <summary>
+        /// Restricts imported document nodes to supported markup before server-side rendering.
+        /// </summary>
+        /// <param name="node">The serialized node to validate and render.</param>
+        /// <param name="count">The shared node count enforcing the document size limit.</param>
+        /// <returns>The supported HTML nodes for this document node.</returns>
         private static List<IHtmlNode> Read(JsonElement node, ref int count)
         {
             if (++count > 50000) throw new JsonException("Editor document exceeds its structural limit.");
@@ -100,7 +106,7 @@ namespace WebExpress.WebUI.WebEditor
                 {
                     var anchor = Element("a", [text]); anchor.AddUserAttribute("href", href); text = anchor;
                 }
-                return [text];
+                return [AddComment(text, marks)];
             }
             if (type == "atom") return Text(attrs, "kind") == "instruction" ? [] : [new HtmlText(WebUtility.HtmlEncode(Text(attrs, "text")))];
             if (type == "image")
@@ -132,6 +138,32 @@ namespace WebExpress.WebUI.WebEditor
                 if (attribute.ValueKind == JsonValueKind.Number && attribute.TryGetInt32(out var size) && size > 0 && size <= 100000) element.AddUserAttribute(name, size.ToString(System.Globalization.CultureInfo.InvariantCulture));
             }
             return [element];
+        }
+
+        /// <summary>
+        /// Preserves annotation metadata during HTML interchange without treating comment text as markup.
+        /// </summary>
+        /// <param name="content">The formatted text referenced by the annotation.</param>
+        /// <param name="marks">The serialized marks that may contain a comment.</param>
+        /// <returns>The annotated text, or the original text when no valid comment exists.</returns>
+        private static IHtmlNode AddComment(IHtmlNode content, JsonElement marks)
+        {
+            var comment = Child(marks, "comment");
+            var id = Text(comment, "id");
+            var text = Text(comment, "text").Trim();
+            if (!Regex.IsMatch(id, @"^[a-zA-Z0-9_-]{1,100}$") || text.Length == 0)
+            {
+                return content;
+            }
+
+            var span = Element("span", [content]);
+            span.Class = "wx-editor-comment";
+            text = text.Length > 10000 ? text[..10000] : text;
+            span.AddUserAttribute("data-comment-id", id);
+            span.AddUserAttribute("data-comment-text", text);
+            span.AddUserAttribute("title", text);
+
+            return span;
         }
 
         private static HtmlElement Element(string tag, IEnumerable<IHtmlNode> children)

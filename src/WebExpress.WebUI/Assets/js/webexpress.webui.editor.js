@@ -297,6 +297,12 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Allows annotation removal as part of the editor's existing document editing permission.
+     * @returns {boolean} Whether this surface supports comment deletion.
+     */
+    get deleteComments() { return true; }
+
+    /**
      * Commits one validated action before any DOM or form value changes, so history, rendering
      * and form value always agree.
      * @param {object} action - The action to reduce.
@@ -716,8 +722,13 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         const cmd = String(command).toLowerCase();
         this._saveCurrentSelection();
         if (["undo", "redo"].includes(cmd)) { this._history[cmd](); return; }
+        if (cmd === "comment") { this._plugins.find(plugin => typeof plugin.openComment === "function")?.openComment(this); return; }
         if (this._codeSelection() && cmd !== "inserttext") return;
-        if (cmd === "formatpainter") { this._paintMarks = this._paintMarks ? null : webexpress.webui.EditorModel.activeMarks(this._state); return; }
+        if (cmd === "formatpainter") {
+            this._paintMarks = this._paintMarks ? null : webexpress.webui.EditorModel.activeMarks(this._state);
+            if (this._paintMarks) delete this._paintMarks.comment;
+            return;
+        }
         const mark = this.constructor.formatMark(cmd);
         if (mark) { this.dispatch({ type: "format", mark, value: mark === "link" ? { href: value } : value }); return; }
         if (cmd === "inserttext") this.dispatch({ type: "insertText", text: value });

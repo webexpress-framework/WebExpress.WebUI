@@ -2,6 +2,7 @@
  * Registers semantic containers whose presentation stays separate from editable content.
  */
 [
+    ["note", "warning", "note-sticky"],
     ["info", "info", "circle-info"],
     ["warning", "warning", "triangle-exclamation"],
     ["error", "danger", "circle-xmark"],

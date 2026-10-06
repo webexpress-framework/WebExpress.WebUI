@@ -34,7 +34,7 @@ test("disabled container bodies do not reopen nested editing hosts", () => {
 });
 
 test("semantic containers support typing, paragraphs, formatting, deletion, undo and reload", () => {
-    for (const [name, color] of [["info", "info"], ["warning", "warning"], ["error", "danger"], ["success", "success"]]) {
+    for (const [name, color] of [["note", "warning"], ["info", "info"], ["warning", "warning"], ["error", "danger"], ["success", "success"]]) {
         const r = loadEditor({ html: "<p>Before</p>", files: ["editor/addons.js", "editor/addons/default.js", "webexpress.webui.content.js"] });
         const plugin = r.editor._addonPlugin;
         plugin._openModal(r.editor, "_selectionModal", "editor-addon", "Add-ons");
@@ -113,4 +113,45 @@ test("box border properties survive insertion, editing, undo and reading convers
     assert.equal(r.root.querySelector('[data-addon-id="box"]').dataset.borderColor, "#cc2255");
     const reading = r.wx.ContentFormat.toFragment(r.editor.value);
     assert.equal(reading.querySelector(".wx-webui-box").dataset.borderColor, "#cc2255");
+});
+
+
+test("notes remain visible in ContentCtrl while author instructions stay hidden", () => {
+    const r = loadEditor({ files: ["editor/addons.js", "editor/addons/default.js", "webexpress.webui.content.js"] });
+    const plugin = r.editor._addonPlugin;
+    const definition = r.wx.EditorAddOns.get("note-box");
+    assert.equal(definition.icon, "note-sticky");
+    plugin._openModal(r.editor, "_selectionModal", "editor-addon", "Add-ons");
+    plugin._insertAddon(definition, {});
+    const note = r.wx.EditorModel.entries(r.editor._state.doc).find(entry => entry.node.type === "addon");
+    r.select(note.start, note.end - 1);
+    r.input("insertText", "Notiz für Leser <script>alert(1)</script>");
+    const saved = r.editor.value;
+    r.editor.removeNode(note.node.id);
+    assert.equal(r.root.querySelector('[data-addon-id="note-box"]'), null);
+    r.editor.execCommand("undo");
+    assert.equal(r.editor.value, saved);
+    r.editor.execCommand("redo");
+    assert.equal(r.root.querySelector('[data-addon-id="note-box"]'), null);
+    r.editor.value = saved;
+    r.editor.dispatch({ type: "insertNodes", nodes: [r.wx.EditorModel.node("atom", [], { kind: "instruction", text: "Author only" })] });
+
+    // the runtime omits unrelated child controllers; the real content converter still runs
+    r.wx.Controller.createInstances = () => {};
+    const host = r.document.createElement("div");
+    r.document.body.appendChild(host);
+    const content = new r.wx.ContentCtrl(host);
+    content.value = r.editor.value;
+    const block = host.querySelector('.wx-content-addon[data-addon-id="note-box"]');
+    assert.ok(block);
+    assert.equal(block.classList.contains("alert-warning"), true);
+    assert.equal(block.textContent, "Notiz für Leser <script>alert(1)</script>");
+    assert.equal(host.querySelector("script"), null);
+    assert.equal(host.querySelector(".wx-editor-instruction"), null);
+    assert.equal(host.querySelector(".wx-addon-header"), null);
+    assert.equal(host.querySelector("[contenteditable]"), null);
+    assert.equal(host.querySelector("[draggable]"), null);
+    assert.equal(host.querySelector("input"), null);
+    content.destroy();
+    r.editor.destroy();
 });

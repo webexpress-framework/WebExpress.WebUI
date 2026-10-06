@@ -10,7 +10,7 @@ webexpress.webui.EditorModel = class {
     static _nextId = 0;
     static TEXT_BLOCKS = new Set(["p", "h1", "h2", "h3", "h4", "h5", "h6", "pre"]);
     static CONTAINERS = new Set(["doc", "row", "region", "blockquote", "ul", "ol", "li", "table", "thead", "tbody", "tfoot", "tr", "td", "th", "addon"]);
-    static MARKS = new Set(["bold", "italic", "underline", "strikethrough", "superscript", "subscript", "code", "color", "background", "font", "size", "link"]);
+    static MARKS = new Set(["bold", "italic", "underline", "strikethrough", "superscript", "subscript", "code", "color", "background", "font", "size", "link", "comment"]);
 
     /** Keeps caller-owned objects out of transactions and published values. */
     static clone(value) { return JSON.parse(JSON.stringify(value)); }
@@ -40,12 +40,20 @@ webexpress.webui.EditorModel = class {
         return "";
     }
 
-    /** Canonical marks make equality and mixed-selection checks deterministic. */
+    /**
+     * Canonicalizes marks so comparisons and persisted annotations use validated values.
+     * @param {object} value - The untrusted inline marks supplied by a document or command.
+     * @returns {object} The supported marks with inert style and annotation values.
+     */
     static marks(value) {
         const result = {};
         for (const name of [...this.MARKS].sort()) {
             const raw = value?.[name];
-            if (name === "link") {
+            if (name === "comment") {
+                if (typeof raw?.id === "string" && /^[\w-]{1,100}$/.test(raw.id) && typeof raw.text === "string" && raw.text.trim()) {
+                    result.comment = { id: raw.id, text: raw.text.trim().slice(0, 10000) };
+                }
+            } else if (name === "link") {
                 const href = this.url(raw?.href ?? raw);
                 if (href) result.link = { href, target: raw?.target === "_blank" ? "_blank" : "" };
             } else if (["color", "background", "font", "size"].includes(name)) {
@@ -349,7 +357,13 @@ webexpress.webui.EditorModel = class {
         state.selection = { anchor: pos, focus: pos };
     }
 
-    /** Formatting changes selected text runs; collapsed selections set insertion marks. */
+    /**
+     * Applies inline changes without losing links or annotations when formatting is cleared.
+     * @param {object} state - The mutable transaction state and selection.
+     * @param {string} name - The mark or formatting removal command.
+     * @param {*} value - The explicit mark value, or null to toggle a boolean mark.
+     * @returns {void}
+     */
     static format(state, name, value) {
         const [from, to] = this.bounds(state);
         const clear = name === "removeformat", unlink = name === "unlink";
@@ -358,7 +372,7 @@ webexpress.webui.EditorModel = class {
         const enabled = toggle ? !this.query(state, name) : value;
         const change = marks => {
             let result = { ...marks };
-            if (clear) result = result.link ? { link: result.link } : {};
+            if (clear) result = Object.fromEntries(Object.entries(result).filter(([key]) => ["link", "comment"].includes(key)));
             else if (unlink) delete result.link;
             else if (!enabled) delete result[name];
             else result[name] = enabled;
@@ -375,6 +389,56 @@ webexpress.webui.EditorModel = class {
         }
         state.storedMarks = null;
         this.normalize(state.doc);
+    }
+
+    /**
+     * Creates document-local annotation identities that remain independent after clipboard imports.
+     * @returns {string} An identifier suitable for persisted comment marks.
+     */
+    static commentId() { return "c" + Date.now().toString(36) + "-" + (++this._nextId); }
+
+    /**
+     * Adds an annotation to existing text or updates every run belonging to one annotation.
+     * Overlapping comments are rejected so a selection cannot silently replace an earlier note.
+     * @param {object} state - The mutable transaction state.
+     * @param {object} action - The comment identifier, text and optional removal flag.
+     * @returns {void}
+     */
+    static comment(state, action) {
+        const entries = this.entries(state.doc).filter(e => e.node.type === "text");
+        if (action.id) {
+            const comment = this.marks({ comment: { id: action.id, text: action.text } }).comment;
+            if (!action.remove && !comment) return;
+            for (const entry of entries) {
+                if (entry.node.marks.comment?.id !== action.id) continue;
+                if (action.remove) delete entry.node.marks.comment;
+                else entry.node.marks.comment = comment;
+            }
+            state.storedMarks = null;
+            return;
+        }
+        const [from, to] = this.bounds(state);
+        const selected = entries.filter(e => e.end > from && e.start < to);
+        if (action.remove || from === to || !selected.length || selected.some(e => e.node.marks.comment)) return;
+        const comment = this.marks({ comment: { id: this.commentId(), text: action.text } }).comment;
+        if (comment) this.format(state, "comment", comment);
+    }
+
+    /**
+     * Extends annotations only when typing inside their existing text, never at their edges.
+     * @param {object} state - The document and insertion selection.
+     * @returns {object} The marks inherited by inserted text.
+     */
+    static insertionMarks(state) {
+        const marks = this.activeMarks(state);
+        const [from, to] = this.bounds(state);
+        if (marks.comment && from === to) {
+            const entries = this.entries(state.doc).filter(e => e.node.type === "text");
+            const left = entries.find(e => e.start < from && e.end >= from);
+            const right = entries.find(e => e.start <= from && e.end > from);
+            if (left?.node.marks.comment?.id !== marks.comment.id || right?.node.marks.comment?.id !== marks.comment.id) delete marks.comment;
+        }
+        return marks;
     }
 
     static query(state, name) {
@@ -465,17 +529,18 @@ webexpress.webui.EditorModel = class {
         if (action.selection) state.selection = this.clone(action.selection);
         const [from, to] = this.bounds(state);
         const region = this.region(state.doc, from), endRegion = this.region(state.doc, Math.max(from, to - 1));
-        if (action.type !== "layout" && region && endRegion && region.node !== endRegion.node) return previous;
+        if (!["layout", "comment"].includes(action.type) && region && endRegion && region.node !== endRegion.node) return previous;
         if (action.type === "batch") {
             if (!Array.isArray(action.actions) || action.actions.length > 100 || action.actions.some(a => a.type === "batch")) throw new TypeError("Invalid editor action batch.");
             return action.actions.reduce((current, next) => this.reduce(current, next), state);
         }
         switch (action.type) {
-            case "insertText": this.replace(state, [{ type: "text", text: String(action.text ?? ""), marks: this.activeMarks(state) }]); break;
+            case "insertText": this.replace(state, [{ type: "text", text: String(action.text ?? ""), marks: this.insertionMarks(state) }]); break;
             case "insertNodes": this.replace(state, this.clone(action.nodes ?? [])); state.storedMarks = null; break;
             case "delete": this.delete(state, action.direction ?? -1, action.unit); break;
             case "split": this.split(state); break;
             case "format": this.format(state, action.mark, action.value); break;
+            case "comment": this.comment(state, action); break;
             case "list": this.list(state, action.command); break;
             case "block":
                 if (action.block === "blockquote") {

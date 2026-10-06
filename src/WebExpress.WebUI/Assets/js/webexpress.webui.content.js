@@ -37,13 +37,14 @@ webexpress.webui.ContentFormat = class {
         const source = document.createElement("div");
         if (typeof html === "object" && html !== null || typeof html === "string" && html.trim().startsWith("{")) {
             const state = webexpress.webui.EditorModel.validate(typeof html === "string" ? JSON.parse(html) : html);
-            new webexpress.webui.EditorView(null).render(state, source, true);
+            (options?.view || new webexpress.webui.EditorView(null)).render(state, source, true);
         } else source.innerHTML = html || "";
 
         this._removeChrome(source, keepInstruction);
         this._unwrapBlockAddons(source);
         this._unwrapInlineAddons(source);
         this._adoptTables(source);
+        this._adoptComments(source, options?.view);
         this._stripEditAttributes(source);
         this._dropTypingSpace(source);
         this._hardenLinks(source);
@@ -207,6 +208,34 @@ webexpress.webui.ContentFormat = class {
     }
 
     /**
+     * Gives each contiguous annotation one keyboard stop even when its text has mixed formatting.
+     * @param {HTMLElement} root - The reading projection before child controllers are created.
+     * @param {object} [view] - The optional selection map for annotation-enabled reading.
+     * @returns {void}
+     */
+    static _adoptComments(root, view) {
+        root.querySelectorAll(".wx-editor-comment[data-comment-text]").forEach(element => {
+            if (!element.parentNode) return;
+            let next = element.nextSibling;
+            while (next?.nodeType === 1 && next.classList.contains("wx-editor-comment") &&
+                next.getAttribute("data-comment-id") === element.getAttribute("data-comment-id") &&
+                next.getAttribute("data-comment-text") === element.getAttribute("data-comment-text")) {
+                const firstEntry = view?.map.get(element);
+                const lastEntry = view?.map.get(next);
+                if (firstEntry && lastEntry) view.map.set(element, { ...firstEntry, end: lastEntry.end });
+                while (next.firstChild) element.appendChild(next.firstChild);
+                next.remove();
+                next = element.nextSibling;
+            }
+            element.classList.add("wx-webui-popover");
+            element.setAttribute("tabindex", "0");
+            element.setAttribute("data-wx-trigger", "hover focus");
+            element.setAttribute("data-wx-title", webexpress.webui.I18N.translate("webexpress.webui:editor.comment.title"));
+            element.setAttribute("data-wx-content", element.getAttribute("data-comment-text"));
+        });
+    }
+
+    /**
      * Removes the attributes that only serve editing, including any inline
      * event handler that reached the value from outside the editor.
      * @param {HTMLElement} root - The conversion root.
@@ -305,13 +334,16 @@ webexpress.webui.ContentCtrl = class extends webexpress.webui.Ctrl {
 
         this._placeholder = element.getAttribute("data-placeholder");
         this._instruction = element.getAttribute("data-instruction") === "true";
+        this._allowComments = element.getAttribute("data-allow-comments") === "true";
         this._value = encoded && raw ? this._decode(raw) : raw;
 
         element.removeAttribute("data-base64");
         element.removeAttribute("data-placeholder");
         element.removeAttribute("data-instruction");
+        element.removeAttribute("data-allow-comments");
         element.classList.add("wx-content");
 
+        if (this._allowComments) this._comments = new webexpress.webui.ContentComments(this);
         this.render();
     }
 
@@ -322,7 +354,8 @@ webexpress.webui.ContentCtrl = class extends webexpress.webui.Ctrl {
         const element = this._element;
         element.innerHTML = "";
 
-        const fragment = webexpress.webui.ContentFormat.toFragment(this._value, { instruction: this._instruction });
+        const state = this._comments?.read(this._value);
+        const fragment = webexpress.webui.ContentFormat.toFragment(state || this._value, { instruction: this._instruction, view: this._comments?._view });
 
         if (webexpress.webui.ContentFormat.isEmpty(fragment)) {
             // without a placeholder an unset value renders nothing at all, so
@@ -338,6 +371,15 @@ webexpress.webui.ContentCtrl = class extends webexpress.webui.Ctrl {
         // add-ons persist as the markup of a control (a chart, a game board, a
         // date); the reading view is where those controls come to life again
         webexpress.webui.Controller.createInstances(element);
+    }
+
+    /**
+     * Releases the optional annotation UI when the reading control leaves the page.
+     * @returns {void}
+     */
+    destroy() {
+        this._comments?.destroy();
+        super.destroy();
     }
 
     /**
@@ -389,7 +431,10 @@ webexpress.webui.ContentCtrl = class extends webexpress.webui.Ctrl {
      * @returns {string} The text of the reading view.
      */
     get text() {
-        return (this._element.textContent || "").trim();
+        const content = this._element.cloneNode(true);
+        // generated annotation popovers must not become part of document excerpts
+        content.querySelectorAll(".wx-popover").forEach(element => element.remove());
+        return (content.textContent || "").trim();
     }
 };
 

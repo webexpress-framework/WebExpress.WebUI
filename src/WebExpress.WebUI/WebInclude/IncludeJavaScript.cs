@@ -105,6 +105,8 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/editor/emojis.js")]
     [Asset("/assets/js/editor/formatting.js")]
     [Asset("/assets/js/editor/instruction.js")]
+    [Asset("/assets/js/editor/comment.js")]
+    [Asset("/assets/js/webexpress.webui.content.comments.js")]
     [Asset("/assets/js/editor/media.js")]
     [Asset("/assets/js/editor/shortcut.js")]
     [Asset("/assets/js/editor/table.js")]

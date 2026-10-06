@@ -10,14 +10,14 @@ Beyond plain formatting, the editor ships with inline triggers for mentions, lin
 
 The editor is initialized directly in the HTML. The initial content is taken from the `innerHTML` of the host element, and the editor can be bound to a form using the `name` attribute.
 
-| Attribute               | Description                                                                                          | Example
-|-------------------------|------------------------------------------------------------------------------------------------------|-----------------
-| `name`                  | Defines the name for a hidden input field that submits the editor's content with a form submission.  | `name="content"`
-| `data-image-upload-uri` | The URI endpoint for image uploads.                                                                  | `data-image-upload-uri="/api/upload"`
-| `data-image-base-uri`   | The base URI for resolving image paths.                                                              | `data-image-base-uri="/images/"`
-| `data-mention-uri`      | REST endpoint for the `@`-mention search. The presence of this attribute enables the mention picker. | `data-mention-uri="/api/users/search"`
-| `data-fill`             | Set to `"true"` to let the writing area take the height its dialog or page has left over.            | `data-fill="true"`
-| Text Content            | The initial HTML content of the editor.                                                              | `<div class="wx-webui-editor">Initial <b>text</b>.</div>`
+|Attribute               |Description                                                                                          | Example
+|------------------------|-----------------------------------------------------------------------------------------------------|-----------------
+|`name`                  |Defines the name for a hidden input field that submits the editor's content with a form submission.  | `name="content"`
+|`data-image-upload-uri` |The URI endpoint for image uploads.                                                                  | `data-image-upload-uri="/api/upload"`
+|`data-image-base-uri`   |The base URI for resolving image paths.                                                              | `data-image-base-uri="/images/"`
+|`data-mention-uri`      |REST endpoint for the `@`-mention search. The presence of this attribute enables the mention picker. | `data-mention-uri="/api/users/search"`
+|`data-fill`             |Set to `"true"` to let the writing area take the height its dialog or page has left over.            | `data-fill="true"`
+|Text Content            |The initial HTML content of the editor.                                                              | `<div class="wx-webui-editor">Initial <b>text</b>.</div>`
 
 ## Filling the Available Height
 
@@ -55,13 +55,13 @@ On the server the mode is declared through `ControlFormItemInputText.Fill`; it a
 
 The editor recognises direct triggers that map to specific actions or pickers:
 
-| Trigger | Action
-|---------|---------------------------------------------------------------
-| `@`     | Opens the mention picker (only when `data-mention-uri` is set)
-| `[`    | Opens the link dialog
-| `{`    | Opens the AddOn library
-| `//`    | Inserts a date control at the cursor
-| `:`     | Opens the searchable emoji picker
+|Trigger |Action
+|--------|-----------------------------------------------------------
+|`@`     |Opens the mention picker (only when `data-mention-uri` is set)
+|`[`     |Opens the link dialog
+|`{`     |Opens the AddOn library
+|`//`    |Inserts a date control at the cursor
+|`:`     |Opens the searchable emoji picker
 
 Trigger handling starts at the beginning of a text token and is disabled inside code. Link, AddOn and date dialogs replace their trigger only when insertion is confirmed. Cancelling either the AddOn selection or its property dialog leaves the original text and caret intact. Mention and emoji pickers also retain their query until an item is selected, so Escape preserves the typed text.
 
@@ -73,25 +73,25 @@ The editor auto-formats common markdown patterns inline. Block patterns fire on 
 
 ### Block-level patterns
 
-| Pattern        | Result
-|----------------|---------------------
-| `# `           | Heading 1
-| `## `          | Heading 2
-| `### `         | Heading 3
-| `> `           | Block quote
-| ` ``` `        | Code block
-| `- ` or `* `   | Bullet list
-| `1. `          | Numbered list
-| `--- `         | Horizontal rule
+|Pattern      |Result
+|-------------|---------------------
+|`# `         |Heading 1
+|`## `        |Heading 2
+|`### `       |Heading 3
+|`> `         |Block quote
+|` ``` `      |Code block
+|`- ` or `* ` |Bullet list
+|`1. `        |Numbered list
+|`--- `       |Horizontal rule
 
 ### Inline patterns
 
-| Pattern                 | Result
+|Pattern                  |Result
 |-------------------------|--------------------------
-| `**bold**`              | `<strong>bold</strong>`
-| `*italic*` or `_italic_`| `<em>italic</em>`
-| `~~strike~~`            | `<s>strike</s>`
-| `` `code` ``            | `<code>code</code>`
+|`**bold**`               |`<strong>bold</strong>`
+|`*italic*` or `_italic_` |`<em>italic</em>`
+|`~~strike~~`             |`<s>strike</s>`
+|`` `code` ``             |`<code>code</code>`
 
 ## Bubble Menu
 
@@ -107,13 +107,27 @@ The toolbar provides a format painter that transfers the inline formatting of on
 
 The editor provides a tool to insert instruction texts (Anweisungstexte) for authors via a toolbar button. Clicking the button opens a prompt asking for the text. The entered text is inserted into the editor as a highly visible, distinct block. This block is read-only (`contenteditable="false"`) to prevent accidental editing of the structure. Outside the editor context, the instruction text is hidden via CSS, making it completely invisible on the published page.
 
+## Notes
+
+The note add-on inserts an editable block for information that belongs in the published document. Open the add-on library from the toolbar or type `{`, then choose **Note**. The block uses a yellow background and supports paragraphs, lists, links and inline formatting through the existing editor tools. Its frame provides the standard movement and removal actions.
+
+The document model stores notes as `note-box` container add-ons. Insertion, editing and removal use the editor history, and loading the stored JSON restores the note content. `ControlContent` displays notes by default with the same background and formatting while removing the editing frame. The `Instruction` setting does not affect notes.
+
+## Inline Comments
+
+The comment command attaches a plain-text annotation to selected document text. Select existing text and use **Comment** in the selection bubble. The selected text remains editable and keeps its formatting. A comment can span multiple formatted runs and paragraphs. Each text position belongs to at most one comment, so a selection overlapping a different comment must be narrowed before another annotation can be added.
+
+The comment dialog edits the annotation when the caret is inside its text or the existing annotation is selected. Double-clicking annotated text also opens the dialog. **Remove comment** removes the annotation from all its text runs without deleting the text. Closing the dialog without saving leaves the document and selection unchanged. The removal action appears at the far left of the footer, while the standard modal close action dismisses the dialog. Adding, editing and removing comments are separate undoable transactions.
+
+The document model stores annotations in a `comment` text mark containing `id` and `text`. Typing inside annotated text extends the annotation, while typing at either edge does not. Deleting all referenced text removes its annotation. Clearing formatting retains comments, and the format painter does not copy them. JSON persistence and HTML interchange retain comment metadata. Clipboard imports assign new identities so pasted comments can be edited independently.
+
 ## Reading view
 
 The editor value contains the validated JSON document model. Frame titles, drag handles, column resizers and selection indicators belong to the editing view and are excluded from that value. The [content control](content.md) renders the document for reading. HTML interchange is available through `exportHtml()`, which also omits the editing controls.
 
 ```javascript
 editorElement.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, (e) => {
-    preview.value = e.detail.value;   // preview is a ContentCtrl
+    preview.value = JSON.stringify(e.detail.value);   // preview is a ContentCtrl
 });
 ```
 
@@ -148,13 +162,13 @@ The endpoint must respond with a JSON array of mention candidates:
 ]
 ```
 
-| Field         | Type   | Description
-|---------------|--------|---------------------------------------------------------
-| `id`          | string | **Required.** Stored as `data-id` on the inserted mention.
-| `label`       | string | Display text. Falls back to `name`, then `id`.
-| `image`       | string | Optional avatar URL.
-| `uri`         | string | Optional link target.
-| `description` | string | Optional secondary line in the picker.
+|Field         |Type   |Description
+|--------------|-------|---------------------------------------------------------
+|`id`          |string |**Required.** Stored as `data-id` on the inserted mention.
+|`label`       |string |Display text. Falls back to `name`, then `id`.
+|`image`       |string |Optional avatar URL.
+|`uri`         |string |Optional link target.
+|`description` |string |Optional secondary line in the picker.
 
 When the user picks an entry, the editor inserts:
 
@@ -215,9 +229,9 @@ Input HTML is sanitized through the editor's allow-list before insertion. Unknow
 
 The `EditorCtrl` dispatches a change event whenever its content is modified, enabling external components to react to content updates.
 
-| Event                 | Description                                                                                    |
-|-----------------------|------------------------------------------------------------------------------------------------|
-| `change_value_event`  | Dispatched whenever the editor content changes. The event detail contains the current content. |
+|Event                |Description                                                                                    |
+|---------------------|----------------------------------------------------------------------------------------------|
+|`change_value_event` |Dispatched whenever the editor content changes. The event detail contains the current content. |
 
 ```javascript
 const editorElement = document.getElementById('myEditor');
@@ -234,21 +248,21 @@ Synchronization with a form occurs automatically on the `submit` event of the en
 
 The editor supports the following keyboard shortcuts:
 
-| Shortcut                     | Action
+|Shortcut                      | Action
 |------------------------------|---------------------------
-| `Ctrl+B` / `⌘+B`             | Bold
-| `Ctrl+I` / `⌘+I`             | Italic
-| `Ctrl+U` / `⌘+U`             | Underline
-| `Ctrl+Z` / `⌘+Z`             | Undo
-| `Ctrl+Y` / `⌘+Y`             | Redo
-| `Ctrl+Shift+Z` / `⌘+Shift+Z` | Redo
-| `@`                          | Open mention picker (when `data-mention-uri` is set)
-| `[`                         | Open link dialog
-| `{`                         | Open AddOn library
-| `:`                          | Open the emoji picker
-| `//`                         | Insert date control
-| `Tab` (in list)              | Indent list item
-| `Shift+Tab` (in list)        | Outdent list item
+|`Ctrl+B` / `⌘+B`             |Bold
+|`Ctrl+I` / `⌘+I`             |Italic
+|`Ctrl+U` / `⌘+U`             |Underline
+|`Ctrl+Z` / `⌘+Z`             |Undo
+|`Ctrl+Y` / `⌘+Y`             |Redo
+|`Ctrl+Shift+Z` / `⌘+Shift+Z` |Redo
+|`@`                           |Open mention picker (when `data-mention-uri` is set)
+|`[`                           |Open link dialog
+|`{`                           |Open AddOn library
+|`:`                           |Open the emoji picker
+|`//`                          |Insert date control
+|`Tab` (in list)               |Indent list item
+|`Shift+Tab` (in list)         |Outdent list item
 
 ### Deletion Behavior
 
@@ -440,3 +454,5 @@ Frame controls use theme colors and compact headers for tables and block AddOns.
 Instruction editing starts with a click on the instruction. The bubble provides editing and removal actions, and a double click opens the instruction dialog directly. Delete or Backspace removes the selected instruction through the document model. Cancelling the dialog preserves the instruction, and committed edits and removals support undo.
 
 Color attributes use `webexpress.webui.InputColorCtrl` for text colors, highlights, cell backgrounds and AddOn properties. The shared control provides a compact toolbar presentation, the same native dropdown pattern as the other toolbar controls and a custom color picker. A separate indicator beneath each light icon reflects the color at the active caret or selection endpoint. The removal action clears only the corresponding text color or highlight mark, retaining other formatting. The indicators also update after loading, undo and redo. Selection changes synchronize the picker silently and never create an edit.
+
+The editor includes comment removal in its existing document editing permission. It does not require or evaluate `data-delete-comments`. The separate `DeleteComments` permission and its data attribute apply only to the reading surface provided by `ControlContent`. Disabled editors continue to reject editing and comment removal.

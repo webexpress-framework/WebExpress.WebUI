@@ -35,6 +35,7 @@ webexpress.webui.EditorHtml = class {
         template.innerHTML = html;
         const root = template.content || template;
         let count = 0;
+        const commentIds = new Map();
         const read = (node, marks = {}, depth = 0) => {
             if (++count > Model.MAX_NODES || depth > Model.MAX_DEPTH) throw new RangeError("Editor HTML exceeds its structural limit.");
             if (node.nodeType === 3) return [{ type: "text", text: node.textContent, marks: Model.marks(marks) }];
@@ -64,6 +65,14 @@ webexpress.webui.EditorHtml = class {
             const kind = node.matches(".wx-editor-instruction") ? "instruction" : node.matches(".wx-mention") ? "mention" : node.matches(".wx-editor-date,.wx-webui-date,.wx-date") ? "date" : null;
             if (kind) return [Model.node("atom", [], { kind, text: node.textContent, value: node.getAttribute("data-value") || node.getAttribute("data-id") || "", format: node.getAttribute("data-format") || "" })];
             const inherited = { ...marks };
+            if (node.matches(".wx-editor-comment")) {
+                let id = node.getAttribute("data-comment-id");
+                if (options.clipboard) {
+                    if (!commentIds.has(id)) commentIds.set(id, Model.commentId());
+                    id = commentIds.get(id);
+                }
+                inherited.comment = { id, text: node.getAttribute("data-comment-text") };
+            }
             const mark = { b: "bold", strong: "bold", i: "italic", em: "italic", u: "underline", ins: "underline", s: "strikethrough", strike: "strikethrough", del: "strikethrough", sup: "superscript", sub: "subscript", code: "code", kbd: "code", samp: "code" }[tag];
             if (mark) inherited[mark] = true;
             if (tag === "a") inherited.link = { href: node.getAttribute("href"), target: node.getAttribute("target") };
@@ -170,6 +179,15 @@ webexpress.webui.EditorView = class {
                 span.appendChild(element); element = span;
             }
             if (marks.link) element = this._link(element, marks.link);
+            if (marks.comment) {
+                const span = document.createElement("span");
+                span.className = "wx-editor-comment";
+                span.setAttribute("data-comment-id", marks.comment.id);
+                span.setAttribute("data-comment-text", marks.comment.text);
+                span.setAttribute("title", marks.comment.text);
+                span.appendChild(element);
+                element = span;
+            }
             const entry = { start, end, node, text };
             for (let n = text; n; n = n.parentNode) { this.map.set(n, entry); if (n === element) break; }
             this.points.push({ start, end, text });

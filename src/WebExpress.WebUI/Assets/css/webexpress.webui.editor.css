@@ -1174,3 +1174,16 @@
     .wx-editor-row { flex-wrap: wrap; }
     .wx-editor-region { flex-basis: 100%; }
 }
+
+/* annotations retain their highlight across editor and reading projections */
+.wx-editor-comment {
+    background-color: var(--wx-warning-bg-subtle, #fff3cd);
+    text-decoration: underline dotted var(--wx-warning-text-emphasis, #664d03);
+    text-underline-offset: 0.2em;
+    cursor: help;
+}
+
+.wx-content .wx-editor-comment:focus-visible {
+    outline: 2px solid var(--wx-primary, #0d6efd);
+    outline-offset: 2px;
+}

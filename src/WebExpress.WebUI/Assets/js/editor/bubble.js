@@ -208,6 +208,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         const root = editor.getEditorElement();
         const candidates = [
             target.closest(".wx-editor-instruction"),
+            target.closest(".wx-editor-comment"),
             target.closest(".wx-editor-date"),
             target.tagName === "IMG" ? target : null,
             target.closest("a")
@@ -272,6 +273,11 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
             bubble.appendChild(this._makeBtn("link",
                 this._i18n("webexpress.webui:editor.insert.link", "Insert Link"),
                 () => { this._openLinkDialog(); }));
+            if (editor._plugins.some(plugin => typeof plugin.openComment === "function")) {
+                bubble.appendChild(this._makeBtn("comment",
+                    this._i18n("webexpress.webui:editor.comment.title", "Comment"),
+                    () => { this._execOnCurrent("comment"); this._hide(); }));
+            }
             bubble.appendChild(this._makeBtn("eraser",
                 this._i18n("webexpress.webui:editor.clearformat", "Clear Format"),
                 () => { this._execOnCurrent("removeFormat"); this._reposition(); }));

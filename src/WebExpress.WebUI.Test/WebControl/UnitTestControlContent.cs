@@ -15,6 +15,39 @@ namespace WebExpress.WebUI.Test.WebControl
     public class UnitTestControlContent
     {
         /// <summary>
+        /// Ensures annotation removal is enabled only by an explicit permission on a supported surface.
+        /// </summary>
+        /// <param name="permission">The deletion permission supplied by the application.</param>
+        /// <param name="allowed">Whether comment authoring is enabled.</param>
+        /// <param name="format">The control format to render.</param>
+        /// <param name="expected">Whether the deletion attribute should be emitted.</param>
+        [Theory]
+        [InlineData(null, true, TypeFormatContent.RichText, false)]
+        [InlineData(false, true, TypeFormatContent.RichText, false)]
+        [InlineData(true, true, TypeFormatContent.RichText, true)]
+        [InlineData(true, true, TypeFormatContent.Markdown, false)]
+        [InlineData(true, false, TypeFormatContent.RichText, false)]
+        public void DeleteCommentsPermission(bool? permission, bool allowed, TypeFormatContent format, bool expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlContent
+            {
+                Format = _ => format,
+                AllowComments = _ => allowed,
+                DeleteComments = permission.HasValue ? _ => permission.Value : null
+            };
+
+            // act
+            var html = control.Render(context, visualTree).ToString();
+
+            // validation
+            Assert.Equal(expected, html.Contains("data-delete-comments=\"true\""));
+        }
+
+        /// <summary>
         /// Tests the id property of the content control.
         /// </summary>
         [Theory]
@@ -35,6 +68,37 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Enables annotation changes only when the host explicitly permits them for rich text.
+        /// </summary>
+        /// <param name="allowed">Whether the host grants comment authoring.</param>
+        /// <param name="format">The persisted content format.</param>
+        /// <param name="expected">Whether the rendered control should enable comments.</param>
+        [Theory]
+        [InlineData(false, TypeFormatContent.RichText, false)]
+        [InlineData(true, TypeFormatContent.RichText, true)]
+        [InlineData(true, TypeFormatContent.Markdown, false)]
+        public void AllowCommentsRequiresRichText(bool allowed, TypeFormatContent format, bool expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlContent
+            {
+                Content = _ => "Text",
+                Format = _ => format,
+                AllowComments = _ => allowed
+            };
+
+            // act
+            var html = control.Render(context, visualTree).ToString();
+
+            // validation
+            Assert.Equal(expected, html.Contains("data-allow-comments=\"true\"", StringComparison.Ordinal));
+            Assert.DoesNotContain("contenteditable", html);
         }
 
         /// <summary>

@@ -70,6 +70,18 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> Instruction { get; set; }
 
         /// <summary>
+        /// Gets or sets whether readers may add and edit inline comments in rich text.
+        /// Changes are emitted by the client for the host application to persist without enabling text editing.
+        /// </summary>
+        public Func<IRenderControlContext, bool> AllowComments { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the current reader may explicitly remove inline comments.
+        /// Deletion actions are hidden unless the host grants this permission.
+        /// </summary>
+        public Func<IRenderControlContext, bool> DeleteComments { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -111,6 +123,8 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-placeholder", I18N.Translate(renderContext, placeholder))
                 .AddUserAttribute("data-instruction", instruction ? "true" : null)
+                .AddUserAttribute("data-allow-comments", format == TypeFormatContent.RichText && (AllowComments?.Invoke(renderContext) ?? false) ? "true" : null)
+                .AddUserAttribute("data-delete-comments", format == TypeFormatContent.RichText && (AllowComments?.Invoke(renderContext) ?? false) && (DeleteComments?.Invoke(renderContext) ?? false) ? "true" : null)
                 .AddUserAttribute("data-base64", "true");
 
             return html;
