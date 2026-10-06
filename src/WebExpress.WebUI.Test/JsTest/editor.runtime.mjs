@@ -12,7 +12,7 @@ export function loadEditor(options = {}) {
         return new Proxy({}, { get(_, key) { return element.getAttribute("data-" + String(key).replace(/[A-Z]/g, c => "-" + c.toLowerCase())) ?? undefined; }, set(_, key, value) { element.setAttribute("data-" + String(key).replace(/[A-Z]/g, c => "-" + c.toLowerCase()), value); return true; } });
     } });
     elementPrototype.focus = function() { document.activeElement = this; };
-    const plugins = new Map(), panels = new Map(), addons = new Map(), classes = new Map(), instances = new Map();
+    const plugins = new Map(), panels = new Map(), panelKeys = new Map(), addons = new Map(), classes = new Map(), instances = new Map();
     const timers = new Map(); let timerId = 0;
     const windowListeners = {};
     window.addEventListener = (type, fn) => (windowListeners[type] ??= new Set()).add(fn);
@@ -24,8 +24,12 @@ export function loadEditor(options = {}) {
         EditorPlugins: { register(name, order, plugin) { plugins.set(name, plugin); }, getAll: () => [...plugins.values()] },
         EditorAddOns: { register(id, definition) { addons.set(id, { ...definition, id }); }, get: id => addons.get(id) },
         EditorShortcuts: { getAll: () => [], register() {} },
-        DialogPanels: { register(key, definition) { panels.set(definition.id || key, definition); } },
-        ModalSidebarPanelCtrl: class { show() {} hide() {} selectPage() {} destroy() {} },
+        DialogPanels: {
+            register(key, definition) { panels.set(definition.id || key, definition); (panelKeys.get(key) ?? panelKeys.set(key, []).get(key)).push(definition); },
+            get: key => (panelKeys.get(key) ?? []).map(definition => ({ ...definition }))
+        },
+        // records its pages and renders them like the real control, so a case sees what a dialog shows
+        ModalSidebarPanelCtrl: class { constructor() { this.pages = []; } addPage(page) { this.pages.push(page); page.render?.(document.createElement("div"), this); } show() {} hide() {} selectPage() {} destroy() {} },
         ModalCtrl: class { show() {} hide() {} destroy() {} }
     };
     const observers = [];

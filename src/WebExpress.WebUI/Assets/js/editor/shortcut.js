@@ -540,7 +540,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         const Model = webexpress.webui.EditorModel, pos = editor.selection.focus;
         if (editor.selection.anchor !== pos) return null;
         const block = Model.block(editor._state.doc, pos);
-        if (!block || block.node.type === "pre" || Model.activeMarks(editor._state).code) return null;
+        if (!block || block.node.type === "pre" || Model.activeMarks(editor._state).code || editor._codeSelection()) return null;
         return Model.slice(block.node.children, 0, pos - block.start).map(node => node.text || "\ufffc").join("");
     },
 
@@ -601,11 +601,10 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {object} [selection=editor.selection] - The model range replaced on confirmation.
      */
     _triggerLinkDialog: function(editor, selection = editor.selection) {
-        const media = editor._plugins.find((p) => p && p.linkModal !== undefined);
-        if (media && typeof media._openModal === "function") {
-            const range = editor._savedRange?.cloneRange?.() || null;
-            media._openModal(editor, "linkModal", "editor-link", "webexpress.webui:editor.insert.link.title", { url: "", text: "" }, range);
-            media.linkModal.ctrl._insertionSelection = selection;
+        const media = editor._plugins.find(p => typeof p?.openLink === "function");
+        if (media) {
+            // the trigger is replaced, never linked, so it does not count as selected text
+            media.openLink(editor, { ...selection, text: "" });
             return;
         }
         const url = prompt(this._i18n("webexpress.webui:editor.link.url.label", "URL"));
@@ -632,8 +631,10 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * control (webexpress.webui.DateCtrl) at the saved caret position.
      * @param {object} editor - The editor owning the date picker.
      * @param {object} [selection=editor.selection] - The model range replaced on confirmation.
+     * @param {string|null} [targetId=null] - The date atom to change instead of inserting one;
+     * it belongs to this popup, so a cancelled edit cannot redirect a later insertion.
      */
-    _triggerDateDialog: function(editor, selection = editor.selection) {
+    _triggerDateDialog: function(editor, selection = editor.selection, targetId = null) {
         this._closeDatePopup();
 
         const format = this._i18n("webexpress.webui:calendar.format", "DD.MM.YYYY");
@@ -650,7 +651,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
         popup.appendChild(host);
 
         document.body.appendChild(popup);
-        this._datePopup = { popup: popup, editor: editor, format: format, done: false, selection };
+        this._datePopup = { popup: popup, editor: editor, format: format, done: false, selection, targetId };
 
         // position at the saved caret (fall back to the live selection)
         const range = editor._savedRange?.cloneRange?.() || this._currentSelectionRange(editor);
@@ -705,7 +706,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {string} format - The date format used for the display control.
      */
     _commitDate: function(editor, value, format) {
-        const id = this._dateTargetId; this._dateTargetId = null;
+        const id = this._datePopup?.targetId;
         const selection = this._datePopup?.selection || editor.selection;
         if (this._datePopup) this._datePopup.done = true;
         this._closeDatePopup();
@@ -815,8 +816,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @param {HTMLElement} dateEl - The .wx-editor-date element.
      */
     _editDate: function(editor, dateEl) {
-        this._dateTargetId = editor.nodeId(dateEl);
-        this._triggerDateDialog(editor);
+        this._triggerDateDialog(editor, editor.selection, editor.nodeId(dateEl));
     },
 
     // ------------------------------------------------------------------
@@ -1075,7 +1075,7 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      */
     _applyMarkdownBlock: function(editor) {
         const Model = webexpress.webui.EditorModel, block = Model.block(editor._state.doc, editor.selection.focus);
-        if (!block) return;
+        if (!block || this._textBeforeCaret(editor) === null) return;
         const text = block.node.children.map(n => n.text || "\ufffc").join("");
         const blocks = { "# ": "h1", "## ": "h2", "### ": "h3", "``` ": "pre", "> ": "blockquote" };
         const command = blocks[text] ? { type: "block", block: blocks[text] } : ["- ", "* ", "1. "].includes(text) ? { type: "list", command: text === "1. " ? "insertorderedlist" : "insertunorderedlist" } : null;
@@ -1093,13 +1093,22 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      */
     _applyMarkdownInline: function(editor) {
         const Model = webexpress.webui.EditorModel, pos = editor.selection.focus, block = Model.block(editor._state.doc, pos);
-        if (!block) return;
-        const text = Model.slice(block.node.children, 0, pos - block.start).map(n => n.text || "\ufffc").join("");
+        const text = this._textBeforeCaret(editor);
+        if (!block || text === null) return;
         const patterns = [[/\*\*([^*\n]+)\*\* $/, "bold"], [/__([^_\n]+)__ $/, "bold"], [/\*([^*\n]+)\* $/, "italic"], [/(?<=^|[\s(])_([^_\n]+)_ $/, "italic"], [/~~([^~\n]+)~~ $/, "strikethrough"], [/`([^`\n]+)` $/, "code"]];
         for (const [regex, mark] of patterns) {
             const match = text.match(regex);
             if (!match) continue;
-            editor.dispatch({ type: "insertNodes", selection: { anchor: pos - match[0].length, focus: pos }, nodes: [{ type: "text", text: match[1], marks: { [mark]: true } }, { type: "text", text: " ", marks: {} }], source: "markdown" });
+            // the delimiters are removed around the content instead of retyping it, so atoms and
+            // existing marks such as links and comments inside the match survive
+            const delimiter = (match[0].length - match[1].length - 1) / 2, start = pos - match[0].length, end = start + match[1].length;
+            const space = Model.slice(block.node.children, pos - 1 - block.start, pos - block.start)[0];
+            delete space.marks[mark];
+            editor.dispatch({ type: "batch", source: "markdown", actions: [
+                { type: "delete", selection: { anchor: start, focus: start + delimiter } },
+                { type: "format", mark, value: true, selection: { anchor: start, focus: end } },
+                { type: "insertNodes", nodes: [space], selection: { anchor: end, focus: end + delimiter + 1 } }
+            ] });
             break;
         }
     }

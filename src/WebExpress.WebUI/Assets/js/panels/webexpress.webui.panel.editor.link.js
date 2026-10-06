@@ -1,5 +1,6 @@
 /**
- * Registers the link page.
+ * Registers the page for entering a link address. Other modules add pages under the same
+ * "editor-link" key and apply their result through modal.editorDialog in the same way.
  */
 webexpress.webui.DialogPanels.register("editor-link", {
     id: "editor-link-page",
@@ -41,156 +42,84 @@ webexpress.webui.DialogPanels.register("editor-link", {
         textGroup.appendChild(textLabel);
         textGroup.appendChild(textInput);
 
+        const newTabGroup = document.createElement("div");
+        newTabGroup.className = "form-check mb-3";
+        const newTabInput = document.createElement("input");
+        newTabInput.type = "checkbox";
+        newTabInput.className = "form-check-input";
+        newTabInput.id = "wx-editor-link-newtab-" + Date.now();
+        const newTabLabel = document.createElement("label");
+        newTabLabel.className = "form-check-label";
+        newTabLabel.htmlFor = newTabInput.id;
+        newTabLabel.textContent = webexpress.webui.I18N.translate("webexpress.webui:editor.link.newtab.label");
+        newTabGroup.appendChild(newTabInput);
+        newTabGroup.appendChild(newTabLabel);
+
         wrapper.appendChild(urlGroup);
         wrapper.appendChild(textGroup);
+        wrapper.appendChild(newTabGroup);
         container.appendChild(wrapper);
 
-        if (!modal._link) {
-            modal._link = {};
-        }
-        modal._link.urlInput = urlInput;
-        modal._link.textInput = textInput;
+        modal._link = { urlInput, textInput, textGroup, newTabInput, newTabChosen: false };
 
-        urlInput.addEventListener("input", function () {
-            const modalWrapper = this.closest(".modal") || this.closest("[data-key]") || document;
-            const submitBtn = modalWrapper.querySelector(".submit-btn");
+        newTabInput.addEventListener("change", () => {
+            modal._link.newTabChosen = true;
+        });
 
-            if (submitBtn) {
-                if (this.value.trim() !== "") {
-                    submitBtn.disabled = false;
-                } else {
-                    submitBtn.disabled = true;
-                }
+        urlInput.addEventListener("input", () => {
+            // until the user decides, only links that leave the site open in a new tab
+            if (!modal._link.newTabChosen) {
+                newTabInput.checked = webexpress.webui.EditorLink.external(webexpress.webui.EditorModel.completeUrl(urlInput.value));
             }
         });
     },
 
     /**
-     * Called when the page becomes active.
-     * Resets or prefills inputs and attaches the explicit click handler.
+     * Prefills the page from the dialog context on every show.
      * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      */
     onShow: function (modal) {
-        if (!(modal && modal._link && modal._link.urlInput)) {
+        const dialog = modal?.editorDialog;
+        const page = modal?._link;
+        if (!dialog || !page) {
             return;
         }
 
-        const urlInput = modal._link.urlInput;
-        const textInput = modal._link.textInput;
+        page.urlInput.value = dialog.prefill.url;
+        page.textInput.value = dialog.prefill.text;
+        // an image link has no text of its own
+        page.textGroup.hidden = dialog.prefill.image;
+        page.newTabChosen = dialog.prefill.newTab != null;
+        page.newTabInput.checked = dialog.prefill.newTab ?? webexpress.webui.EditorLink.external(webexpress.webui.EditorModel.completeUrl(page.urlInput.value));
 
-        // reset or prefill fields on every show
-        if (modal._linkPrefill) {
-            urlInput.value = modal._linkPrefill.url || "";
-            if (textInput) {
-                textInput.value = modal._linkPrefill.text || "";
-            }
-        } else {
-            urlInput.value = "";
-            if (textInput) {
-                textInput.value = "";
-            }
-        }
-
-        urlInput.focus();
-        urlInput.select();
-
-        const modalWrapper = urlInput.closest(".modal") || urlInput.closest("[data-key]") || document;
-        const submitBtn = modalWrapper.querySelector(".submit-btn");
-
-        if (submitBtn) {
-            if (urlInput.value.trim() !== "") {
-                submitBtn.disabled = false;
-            } else {
-                submitBtn.disabled = true;
-            }
-
-            // cleanly bind to this active tab
-            submitBtn.onclick = () => {
-                const validationResult = this.validate(modal);
-                if (validationResult === true) {
-                    this.onSubmit(modal);
-                } else if (validationResult && validationResult.message) {
-                    alert(validationResult.message);
-                }
-            };
-        }
+        page.urlInput.focus({ preventScroll: true });
+        page.urlInput.select();
     },
 
     /**
-     * Validates current page data.
+     * Rejects an address the document would drop, so the link is never lost silently.
      * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      * @returns {true|{valid:false,message:string}}
      */
     validate: function (modal) {
-        const editor = modal ? modal._editor : null;
-        const urlInput = modal && modal._link ? modal._link.urlInput : null;
-
-        if (!editor || !urlInput) {
+        if (!modal?.editorDialog || !modal._link) {
             return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.link.error.internal") };
         }
-
-        const urlVal = urlInput.value.trim();
-        if (urlVal === "") {
+        if (!modal.editorDialog.address(modal._link.urlInput.value)) {
             return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.link.error.url") };
         }
-
-        if (urlVal.toLowerCase().startsWith("javascript:")) {
-            return { valid: false, message: webexpress.webui.I18N.translate("webexpress.webui:editor.link.error.url") };
-        }
-
         return true;
     },
 
     /**
-     * Handles submit and inserts the link into the editor.
+     * Applies the link; the dialog closes once this returns.
      * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
-     * @returns {void}
      */
     onSubmit: function (modal) {
-        const editor = modal ? modal._editor : null;
-        const urlInput = modal && modal._link ? modal._link.urlInput : null;
-        const textInput = modal && modal._link ? modal._link.textInput : null;
-
-        if (!editor || !urlInput) {
-            return;
-        }
-
-        let urlVal = urlInput.value.trim();
-        if (urlVal === "") {
-            return;
-        }
-
-        if (urlVal.toLowerCase().startsWith("javascript:")) {
-            return;
-        }
-
-        // append protocol if missing to prevent sanitizer from stripping
-        if (!/^https?:\/\//i.test(urlVal) && !urlVal.startsWith("/") && !urlVal.startsWith("#") && !urlVal.startsWith("mailto:")) {
-            urlVal = "https://" + urlVal;
-        }
-
-        const rawText = String((textInput && textInput.value) || "").trim() || urlVal.replace(/^https?:\/\//i, "");
-        const safeUrl = urlVal.replace(/"/g, "%22");
-
-        const escapeHtml = function (text) {
-            const div = document.createElement("div");
-            div.textContent = text;
-            return div.innerHTML;
-        };
-
-        // editor restores the saved range internally on focus/insert
-        editor.insertHtmlAtCursor('<a href="' + safeUrl + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(rawText) + "</a>", modal._insertionSelection);
-
-        // close modal
-        if (typeof modal.hide === "function") {
-            modal.hide();
-        } else if (modal.ctrl && typeof modal.ctrl.hide === "function") {
-            modal.ctrl.hide();
-        } else {
-            const modalWrapper = urlInput.closest(".modal");
-            if (modalWrapper?.open) {
-                modalWrapper.close();
-            }
+        const page = modal._link;
+        const applied = modal.editorDialog.apply({ href: page.urlInput.value, text: page.textInput.value, newTab: page.newTabInput.checked });
+        if (!applied) {
+            throw new Error(webexpress.webui.I18N.translate("webexpress.webui:editor.link.error.url"));
         }
     }
 });

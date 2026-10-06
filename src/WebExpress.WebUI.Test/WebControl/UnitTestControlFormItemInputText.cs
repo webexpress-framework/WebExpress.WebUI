@@ -1,4 +1,5 @@
 ﻿using WebExpress.WebCore.WebParameter;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
@@ -155,6 +156,35 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-editor form-control""></div>", html);
+        }
+
+        /// <summary>
+        /// Tests that the endpoints of the link and image pages other modules add to the
+        /// editor's dialogs reach the rich-text host, and only that host.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeEditTextFormat.Wysiwyg, @"<div class=""wx-webui-editor form-control"" data-image-upload-uri=""/api/upload"" data-image-library-uri=""/api/images"" data-link-library-uri=""/api/links""></div>")]
+        [InlineData(TypeEditTextFormat.Multiline, @"<textarea class=""form-control"" rows=""8""></textarea>")]
+        [InlineData(TypeEditTextFormat.Default, @"<input type=""text"" class=""form-control"">")]
+        public void EditorPageEndpoints(TypeEditTextFormat format, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputText(null)
+            {
+                Format = _ => format,
+                ImageUploadUri = _ => new UriEndpoint("/api/upload"),
+                ImageLibraryUri = _ => new UriEndpoint("/api/images"),
+                LinkLibraryUri = _ => new UriEndpoint("/api/links")
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
         /// <summary>

@@ -495,13 +495,13 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
             return;
         }
 
-        // normal action item
+        // normal action item; inside a submenu it belongs to the submenu's palette, not to the menu
         const row = this._makeFlyoutRow(item.label, item.icon);
         row.addEventListener("click", (e) => {
             e.preventDefault();
             this._runAction(editor, item.action);
         });
-        menu.appendChild(row);
+        (menu._activePalette || menu).appendChild(row);
     },
 
     /**
@@ -593,12 +593,9 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
             return;
         }
         editor._saveCurrentSelection?.();
-        const media = (editor._plugins || []).find(p => p && p.linkModal !== undefined);
-        if (media && typeof media._openModal === "function") {
-            const range = editor._savedRange?.cloneRange?.() || null;
-            const selectedText = window.getSelection()?.toString() || "";
-            media._openModal(editor, "linkModal", "editor-link", "webexpress.webui:editor.insert.link.title",
-                { url: "", text: selectedText }, range);
+        const media = (editor._plugins || []).find(p => typeof p?.openLink === "function");
+        if (media) {
+            media.openLink(editor);
         } else {
             const url = prompt(this._i18n("webexpress.webui:editor.link.url.label", "URL"));
             if (url) {

@@ -36,9 +36,8 @@ test("single link and add-on triggers remain literal until a dialog confirms ins
     r.editor.execCommand("undo");
     assert.equal(r.editor.exportHtml({ layout: false }), "<p>prefix [ { tail {</p>");
     r.select(8);
-    media._openModal(r.editor, "linkModal", "editor-link", "link", null, null);
-    media.linkModal.ctrl._insertionSelection = { anchor: 7, focus: 8 };
-    media.linkModal.ctrl._link = { urlInput: { value: "https://example.test" }, textInput: { value: "Example" } };
+    media.openLink(r.editor, { anchor: 7, focus: 8, text: "" });
+    media.linkModal.ctrl._link = { urlInput: { value: "https://example.test" }, textInput: { value: "Example" }, newTabInput: { checked: false } };
     r.panels.get("editor-link-page").onSubmit(media.linkModal.ctrl);
     assert.equal(r.root.querySelector("a").textContent, "Example");
     assert.ok(r.root.querySelector("p").textContent.startsWith("prefix Example { tail {"));

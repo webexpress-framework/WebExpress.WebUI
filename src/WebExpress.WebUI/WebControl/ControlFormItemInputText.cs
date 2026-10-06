@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebEditor;
 using WebExpress.WebUI.WebPage;
 
@@ -67,6 +68,32 @@ namespace WebExpress.WebUI.WebControl
         /// </para>
         /// </remarks>
         public Func<IRenderControlContext, bool> Fill { get; set; }
+
+        /// <summary>
+        /// Gets or sets the endpoint an image page of another module uploads images to.
+        /// </summary>
+        /// <remarks>
+        /// The editor itself only inserts image addresses; a page that uploads - such as the one
+        /// WebApp adds to the image dialog - is offered only to an editor that names this
+        /// endpoint. Applies to <see cref="TypeEditTextFormat.Wysiwyg"/> only.
+        /// </remarks>
+        public Func<IRenderControlContext, IUri> ImageUploadUri { get; set; }
+
+        /// <summary>
+        /// Gets or sets the endpoint that lists the images an image page of another module offers.
+        /// </summary>
+        /// <remarks>
+        /// Applies to <see cref="TypeEditTextFormat.Wysiwyg"/> only.
+        /// </remarks>
+        public Func<IRenderControlContext, IUri> ImageLibraryUri { get; set; }
+
+        /// <summary>
+        /// Gets or sets the endpoint that lists the link targets a link page of another module offers.
+        /// </summary>
+        /// <remarks>
+        /// Applies to <see cref="TypeEditTextFormat.Wysiwyg"/> only.
+        /// </remarks>
+        public Func<IRenderControlContext, IUri> LinkLibraryUri { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -162,7 +189,10 @@ namespace WebExpress.WebUI.WebControl
                     .AddUserAttribute("value", value?.Text)
                     .AddUserAttribute("data-disabled", disabled ? "true" : null)
                     .AddUserAttribute("aria-disabled", disabled ? "true" : null)
-                    .AddUserAttribute("data-fill", fill ? "true" : null),
+                    .AddUserAttribute("data-fill", fill ? "true" : null)
+                    .AddUserAttribute("data-image-upload-uri", ImageUploadUri?.Invoke(renderContext)?.ToString())
+                    .AddUserAttribute("data-image-library-uri", ImageLibraryUri?.Invoke(renderContext)?.ToString())
+                    .AddUserAttribute("data-link-library-uri", LinkLibraryUri?.Invoke(renderContext)?.ToString()),
                 _ => new HtmlElementFieldInput()
                 {
                     Id = Id,

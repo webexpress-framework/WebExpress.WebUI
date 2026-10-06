@@ -11,6 +11,7 @@ webexpress.webui.EditorModel = class {
     static TEXT_BLOCKS = new Set(["p", "h1", "h2", "h3", "h4", "h5", "h6", "pre"]);
     static CONTAINERS = new Set(["doc", "row", "region", "blockquote", "ul", "ol", "li", "table", "thead", "tbody", "tfoot", "tr", "td", "th", "addon"]);
     static MARKS = new Set(["bold", "italic", "underline", "strikethrough", "superscript", "subscript", "code", "color", "background", "font", "size", "link", "comment"]);
+    static FILE_TYPES = /\.(?:html?|php|aspx?|jsp|md|txt|json|xml|pdf|png|jpe?g|gif|svg|webp|avif|bmp|ico|css|js)$/i;
 
     /** Keeps caller-owned objects out of transactions and published values. */
     static clone(value) { return JSON.parse(JSON.stringify(value)); }
@@ -27,6 +28,22 @@ webexpress.webui.EditorModel = class {
         if (/^(?:https?:)/i.test(text)) return text;
         if (!image && /^(?:mailto:|tel:)/i.test(text)) return text;
         return !/^[^/?#]*:/.test(text) && !text.startsWith("//") ? text : "";
+    }
+
+    /**
+     * Completes an address typed into a dialog before url() judges it. Only a bare host gets a
+     * scheme, because relative, query and fragment addresses are how internal pages and site files
+     * are reached; a first segment ending in a file type stays relative for the same reason.
+     * Characters url() rejects are percent-encoded, so a path with spaces stays usable.
+     * @param {string} value - The address as entered.
+     * @returns {string} The completed address.
+     */
+    static completeUrl(value) {
+        const text = String(value ?? "").trim().replace(/[\u0000- \u007f-\u009f\\]/g, c => encodeURIComponent(c));
+        if (/^[\w.+-]+@[\w-]+(?:\.[\w-]+)+$/.test(text)) return "mailto:" + text;
+        const segment = text.split(/[/?#]/, 1)[0], host = segment.replace(/:\d{1,5}$/, "");
+        const isHost = /^(?:localhost|\d{1,3}(?:\.\d{1,3}){3}|(?:[a-z\d-]+\.)+[a-z]{2,63})$/i.test(host) && (/^www\./i.test(host) || !this.FILE_TYPES.test(host));
+        return isHost ? "https://" + text : text;
     }
 
     /** Restricts CSS values to inert values supported by the document schema. */
@@ -559,7 +576,10 @@ webexpress.webui.EditorModel = class {
             case "updateNode": {
                 const e = this.find(state.doc, action.id);
                 if (e) {
-                    e.node.attrs = this.attributes(e.node.type, { ...e.node.attrs, ...action.attrs });
+                    const attrs = this.attributes(e.node.type, { ...e.node.attrs, ...action.attrs });
+                    // validation drops an image without a source, so a rejected address must not delete it
+                    if (e.node.type === "image" && !attrs.src) return previous;
+                    e.node.attrs = attrs;
                     if (action.children) e.node.children = this.clone(action.children);
                 }
                 break;

@@ -13,8 +13,9 @@ The editor is initialized directly in the HTML. The initial content is taken fro
 |Attribute               |Description                                                                                          | Example
 |------------------------|-----------------------------------------------------------------------------------------------------|-----------------
 |`name`                  |Defines the name for a hidden input field that submits the editor's content with a form submission.  | `name="content"`
-|`data-image-upload-uri` |The URI endpoint for image uploads.                                                                  | `data-image-upload-uri="/api/upload"`
-|`data-image-base-uri`   |The base URI for resolving image paths.                                                              | `data-image-base-uri="/images/"`
+|`data-image-upload-uri` |Upload endpoint for image pages of other modules (`editor.imageUploadUri`). WebUI does not upload.   | `data-image-upload-uri="/api/upload"`
+|`data-image-library-uri`|Image list for those pages (`editor.imageLibraryUri`). WebUI does not read it.                       | `data-image-library-uri="/api/images"`
+|`data-link-library-uri` |Link target list for link pages of other modules (`editor.linkLibraryUri`). WebUI does not read it.  | `data-link-library-uri="/api/links"`
 |`data-mention-uri`      |REST endpoint for the `@`-mention search. The presence of this attribute enables the mention picker. | `data-mention-uri="/api/users/search"`
 |`data-fill`             |Set to `"true"` to let the writing area take the height its dialog or page has left over.            | `data-fill="true"`
 |Text Content            |The initial HTML content of the editor.                                                              | `<div class="wx-webui-editor">Initial <b>text</b>.</div>`
@@ -312,6 +313,24 @@ stored in the value or history.
 
 Toolbar availability follows the selected cells within each table. Cell actions are disabled when the selection is outside that table. Merge requires a complete rectangle within one row group. Split requires one cell spanning multiple rows or columns. The table deletion action remains available for its own frame. The background color picker uses `InputColorCtrl`, shows the common selected color and can remove backgrounds from mixed selections.
 
+### Editing links
+
+The link dialog adds a destination to the selected text. If the text field is left
+unchanged, only the link is applied, so formatting, paragraphs, images and mentions in
+the selection stay intact. Entering a different text replaces the selection. With a
+selected image, the dialog links the image itself.
+
+Addresses are kept as entered unless they name a bare host: `example.com/a` becomes
+`https://example.com/a` and `a@b.de` becomes `mailto:a@b.de`. Relative, query and
+fragment addresses such as `page.html`, `../docs`, `?tab=2` or `#top` stay relative, so
+internal links keep pointing into the site. Spaces are percent-encoded. An address the
+document does not accept, such as `javascript:`, is reported in the dialog.
+
+"Open in a new tab" follows the address for a new link (checked for `http(s)` addresses)
+until it is changed by hand. Existing links keep their own setting. Edit Link and
+Remove Link in the context menu cover the whole link, including runs with different
+formatting. Removing the link from an image keeps the image.
+
 ### Editing images
 
 Click an image to select it and display the floating popover used for contextual
@@ -325,9 +344,62 @@ means pixels. Leave a dimension empty for automatic sizing, for example to
 preserve the aspect ratio while changing only the width.
 
 Changes update the existing image, preserving its position, surrounding link and
-unrelated attributes. Choosing a replacement from the site library also preserves
-its existing dimensions. Cancelling leaves the image unchanged. Image edits,
-alignment, resizing and removal participate in undo/redo.
+unrelated attributes. Image addresses follow the same rules as links, except that
+`data:` and `mailto:` addresses are rejected with a message, so an invalid source never
+removes an existing image. Saving without changes closes the dialog. Cancelling leaves
+the image unchanged. Image edits, alignment, resizing and removal participate in undo/redo.
+
+WebUI only offers the address page. Pages that pick images from a site library or upload
+them belong to the modules that own those files (see below).
+
+### Link and image pages from other modules
+
+The link and image dialogs show every page registered under the `editor-link` and
+`editor-image` keys of `webexpress.webui.DialogPanels`. A module adds a page, for example
+a page picker or an image library, by registering it while its script loads. Each editor
+gets its own dialog when the dialog is first opened, with the pages registered until then.
+A page with an `available(editor)` member is only added if that returns `true`, for example
+only for editors that name an upload address.
+
+On every opening, the dialog carries a context in `modal.editorDialog`:
+
+|Member           |Description
+|-----------------|------------------------------------------------------------------------------------------------
+|`editor`         |The editor the dialog was opened for.
+|`mode`           |`"insert"` or `"edit"`.
+|`prefill`        |Link: `url`, `text`, `newTab` (`null` for a new link), `image` (the link belongs to an image). Image: `url`, `alt`, `width`, `height`.
+|`address(value)` |Returns the address as the document will store it, or `""` if the document rejects it.
+|`apply(values)`  |Link: `{ href, text?, newTab? }`. Image: `{ src, alt?, width?, height? }`. Returns `false` for a rejected address or size.
+
+`apply()` inserts at the caret the dialog was opened for, or changes the link or image being
+edited, as one undoable step. Link text left empty keeps the selected text, and an omitted
+`newTab` opens only `http(s)` addresses in a new tab. An omitted image dimension keeps the
+current one.
+
+The dialog validates and submits only the active page and closes after `onSubmit`. A page
+therefore implements `validate` and `onSubmit` and needs no button wiring. If `onSubmit` throws,
+the dialog stays open and shows the error. `render` runs once per editor and can read
+`modal.editorDialog.editor`. Read everything else in `onShow`, `validate` and `onSubmit`,
+because it changes with each opening.
+
+```javascript
+webexpress.webui.DialogPanels.register("editor-image", {
+    id: "myapp-image-library",
+    title: "Library",
+    iconClass: "image",
+    render(container, modal) {
+        // build the library list; store the chosen file on modal._library
+    },
+    validate(modal) {
+        return modal._library?.src ? true : { valid: false, message: "Please choose an image." };
+    },
+    onSubmit(modal) {
+        if (!modal.editorDialog.apply({ src: modal._library.src, alt: modal._library.name })) {
+            throw new Error("The image address is not supported.");
+        }
+    }
+});
+```
 
 ### Regression checks
 

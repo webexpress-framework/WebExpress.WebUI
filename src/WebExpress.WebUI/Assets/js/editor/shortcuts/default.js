@@ -144,9 +144,9 @@ webexpress.webui.EditorShortcuts.register("insert.link", {
     category: "Insert",
     keywords: ["link", "url", "anchor", "verweis"],
     execute: (editor) => {
-        const media = (webexpress.webui.EditorPlugins.getAll() || []).find(p => p && p.linkModal !== undefined);
-        if (media && typeof media._openModal === "function") {
-            media._openModal(editor, "linkModal", "editor-link", "webexpress.webui:editor.insert.link.title", { url: "", text: "" }, editor._savedRange?.cloneRange?.() || null);
+        const media = editor._plugins.find(p => typeof p?.openLink === "function");
+        if (media) {
+            media.openLink(editor);
             return;
         }
         const url = prompt("URL");
@@ -163,9 +163,9 @@ webexpress.webui.EditorShortcuts.register("insert.image", {
     category: "Insert",
     keywords: ["image", "img", "picture", "bild", "foto"],
     execute: (editor) => {
-        const media = (webexpress.webui.EditorPlugins.getAll() || []).find(p => p && p.imageModal !== undefined);
-        if (media && typeof media._openModal === "function") {
-            media._openModal(editor, "imageModal", "editor-image", "webexpress.webui:editor.insert.image.title", null, editor._savedRange?.cloneRange?.() || null);
+        const media = editor._plugins.find(p => typeof p?.openImage === "function");
+        if (media) {
+            media.openImage(editor);
             return;
         }
         const url = prompt("Image URL");
@@ -181,9 +181,10 @@ webexpress.webui.EditorShortcuts.register("insert.addon", {
     category: "Insert",
     keywords: ["addon", "widget", "embed", "einfügen"],
     execute: (editor) => {
-        const addons = (webexpress.webui.EditorPlugins.getAll() || []).find(p => p && typeof p._openModal === "function" && p._selectionModal !== undefined);
+        // the editor's own plugin copy, because the add-on dialog submits through editor._addonPlugin
+        const addons = editor._addonPlugin;
         if (addons) {
-            addons._openModal(editor, "_selectionModal", "editor-addon", "webexpress.webui:editor.insert.addon.title", editor._savedRange?.cloneRange?.() || null);
+            addons._openModal(editor, "_selectionModal", "editor-addon", "webexpress.webui:editor.insert.addon.title");
         }
     }
 });

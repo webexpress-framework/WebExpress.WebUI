@@ -70,6 +70,9 @@
     border: 0;
     color: var(--wx-link-color);
     text-decoration: none;
+    /* a label is a button where it is no link, and a button centres its text: a label that
+       wraps would stand apart from its neighbours instead of lining up with them */
+    text-align: start;
 }
 
 .wx-tree-label-container:focus-visible {

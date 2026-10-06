@@ -176,7 +176,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this._state = this._readValue(raw);
         this._view = new webexpress.webui.EditorView(this);
         this._formFieldName = element.getAttribute("name") || element.dataset.name;
-        this.imageUploadUri = element.dataset.imageUploadUri || ""; this.imageBaseUri = element.dataset.imageBaseUri || "";
+        // read by the pages other modules add to the link and image dialogs; the editor itself neither uploads nor lists
+        this.imageUploadUri = element.dataset.imageUploadUri || ""; this.imageLibraryUri = element.dataset.imageLibraryUri || "";
+        this.linkLibraryUri = element.dataset.linkLibraryUri || "";
         element.removeAttribute("value"); element.removeAttribute("name"); element.removeAttribute("data-wx-state");
         element.innerHTML = ""; element.classList.add("wx-editor");
         if (!element.id) element.id = "wx-editor-" + (++webexpress.webui.EditorModel._nextId);

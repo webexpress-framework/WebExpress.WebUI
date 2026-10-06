@@ -453,11 +453,14 @@ webexpress.webui.ModalSidebarPanelCtrl = class extends webexpress.webui.ModalCtr
      * @private
      */
     _createTreeNode(page) {
+        // a page names its icon the way every control does; the tree takes css classes, so the
+        // name is resolved here - a class the page resolved itself passes through unchanged
+        const icon = page.iconClass ? webexpress.webui.IconSet.resolve(page.iconClass) : null;
         const node = {
             id: page.id,
             label: page.title || page.id,
-            iconOpen: page.iconClass || null,
-            iconClose: page.iconClass || null,
+            iconOpen: icon,
+            iconClose: icon,
             imageOpen: page.image || null,
             imageClose: page.image || null,
             active: false,
