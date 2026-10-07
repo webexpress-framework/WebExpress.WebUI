@@ -179,8 +179,8 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
 
         // append label text
         if (tab.label !== "") {
-            const textNode = document.createTextNode(tab.label);
-            btn.appendChild(textNode);
+            tab.labelNode = document.createTextNode(tab.label);
+            btn.appendChild(tab.labelNode);
         }
 
         // append the trailing badge if configured; a color class or an inline
@@ -251,6 +251,37 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         }
 
         this._dispatchTabSelectedEvent(tabId);
+    }
+
+    /**
+     * Changes the label of a tab in the model and in its header. The header knows
+     * where it put the label, so subclasses rename through here instead of
+     * searching the header markup for it.
+     * @param {string} tabId The id of the tab to relabel.
+     * @param {string} label The new label.
+     * @returns {boolean} Whether the tab exists.
+     */
+    setTabLabel(tabId, label) {
+        const tab = this._tabs.find(item => item.id === tabId);
+        if (!tab) {
+            return false;
+        }
+
+        tab.label = label;
+
+        if (tab.labelNode) {
+            tab.labelNode.textContent = label;
+            return true;
+        }
+
+        // a tab created without a label has no text node yet; it belongs ahead of the badge
+        const btn = Array.from(this._navElement.querySelectorAll(".nav-link")).find(link => link.dataset.tabId === tabId);
+        if (btn) {
+            tab.labelNode = document.createTextNode(label);
+            btn.insertBefore(tab.labelNode, btn.querySelector(".wx-tab-badge"));
+        }
+
+        return true;
     }
 
     /**

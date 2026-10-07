@@ -63,3 +63,25 @@ test("wx-webui-tab applies a user-defined badge color as an inline style", () =>
     assert.ok(badge, "the tab carries a badge");
     assert.ok((badge.style.cssText || "").includes("#7c3aed"), "the user color lands as an inline style");
 });
+
+test("wx-webui-tab relabels a tab in place, ahead of its badge", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.tab.js"] });
+    const host = rt.document.createElement("div");
+    host.appendChild(tabView(rt, "tab-inbox", { label: "Inbox", badge: "12" }));
+    host.appendChild(tabView(rt, "tab-blank", { badge: "1" }));
+    rt.document.body.appendChild(host);
+
+    const ctrl = new rt.wx.TabCtrl(host);
+    const link = (id) => host.querySelectorAll(".nav-link").find((l) => l.dataset.tabId === id);
+    const text = (id) => link(id).childNodes.filter((n) => n.nodeType === 3).map((n) => n.textContent);
+
+    assert.equal(ctrl.setTabLabel("tab-inbox", "Mail"), true);
+    assert.deepEqual(text("tab-inbox"), ["Mail"], "the label is replaced, not added");
+    assert.equal(ctrl._tabs[0].label, "Mail", "the model follows");
+
+    assert.equal(ctrl.setTabLabel("tab-blank", "Named"), true);
+    assert.deepEqual(text("tab-blank"), ["Named"], "a tab without a label gets one");
+    assert.equal(link("tab-blank").childNodes.at(-1).classList.contains("wx-tab-badge"), true, "the badge stays last");
+
+    assert.equal(ctrl.setTabLabel("unknown", "X"), false);
+});
