@@ -43,12 +43,16 @@ A card is a child node carrying the class `wx-kanban-card` (or a `data-card-id`)
 
 | Attribute                | Description
 |--------------------------|----------------------------------------------------------------------
-| `data-card-id`           | Unique card id.
+| `data-card-id`           | Unique card id; falls back to the element `id`.
 | `data-column-id`         | Id of the column the card sits in.
 | `data-swimlane-id`       | Id of the swimlane (when swimlanes are configured).
 | `data-label`             | Card title.
 | `data-html`              | Card body (HTML).
-| `data-color-css`         | Color hint for the top border (`success`, `warning`, `danger`, `info`).
+| `data-color`             | Accent color of the top border, any CSS color (`orange`, `#7c3aed`).
+| `data-color-css`         | Color hint for the top border when no `data-color` is set (`success`, `warning`, `danger`, `info`, `primary`).
+| `data-icon`              | Icon in front of the title, as a CSS class.
+| `data-image`             | Image uri in front of the title; takes precedence over the icon.
+| `data-wx-primary-action`, `data-wx-secondary-action` | Actions of the card (with their `-target`, `-uri`, `-size`), bound like on any other element.
 | `data-assignee-id`       | Id of the assigned person; without an assignee no avatar is rendered.
 | `data-assignee-name`     | Display name, used as the avatar tooltip.
 | `data-assignee-initials` | Short text inside the avatar; derived from the name when omitted.
@@ -79,7 +83,7 @@ While a column is dragged by its grip, the header under the pointer shows an ins
 
 Three `…` menus mirror the dashboard control; the per-column and per-swimlane triggers reveal on hover, while the board menu (top right) stays visible.
 
-- **Board `…` menu** — **Settings** (`data-configurable-board`, opens the board settings dialog with the WQL filter), **New column** (`data-addable-column`) and **New swimlane** (`data-addable-swimlane`). Adding the first swimlane moves the existing (lane-less) cards into it so they stay visible.
+- **Board `…` menu** — **Settings** (`data-configurable-board`, opens the board settings dialog with the WQL filter), **New column** (`data-addable-column`) and **New swimlane** (`data-addable-swimlane`). Adding the first swimlane moves every card into it so they stay visible; the server does the same for the cards the filter hides.
 - **Column `…` menu** — **Rename** (inline edit), **Size** (drill-down: Auto / 25 % / 33 % / 50 % / 66 % / 75 %), **Color** (drill-down palette + None), **Delete**. Rename, size and color require `data-editable-column`; delete requires `data-deletable-column`. Delete asks first through the framework confirmation dialog (`webexpress.webui.ModalConfirm`, the same one the tabs use), naming the column and its cards; the column is only removed and persisted once confirmed.
 - **Swimlane `…` menu** — **Rename** and **Color** (drill-down palette + None, both behind `data-editable-swimlane`), **Settings** (`data-configurable-swimlane`, the per-swimlane WQL filter), **Move up** / **Move down** (`data-movable-swimlane`) and **Delete** (`data-deletable-swimlane`, removes the lane and its cards after the same confirmation as a column). Only the direction with room is offered, so the first and last lanes never carry a dead move entry.
 
@@ -175,11 +179,11 @@ On the server, the endpoint extends `RestApiKanban<TIndexItem>` and returns `Res
 
 | `action`     | Body                                                              | Hook                                    |
 |--------------|-------------------------------------------------------------------|-----------------------------------------|
-| `"columns"`  | `{ "columns": [{ id, title, size, color }] }`                     | `UpdtaeColumns(layout, request)`        |
+| `"columns"`  | `{ "columns": [{ id, title, size, color }] }`                     | `UpdateColumns(layout, request)`        |
 | `"swimlanes"`| `{ "swimlanes": [{ id, title, filter, color }] }`                 | `UpdateSwimlanes(layout, request)`      |
 | `"settings"` | `{ "filter": "…" }`                                               | `UpdateSettings(layout, request)`       |
 
-The full ordered list is sent for columns and swimlanes: an absent entry is deleted, an unknown id is created, and the swimlane order defines the new lane order (Move up / Move down). The `settings` filter narrows the card query on the next load; override `ApplyWql(wql, query, request)` to apply it and `RetrieveFilter(wql, request)` to seed a persisted filter across full page reloads. A card move is a `PUT` without an `action` and carries `{ cardId, columnId, swimlaneId }`.
+The full ordered list is sent for columns and swimlanes: an absent entry is deleted together with its cards, an unknown id is created, and the swimlane order defines the new lane order (Move up / Move down). No card is named in these payloads, because the board only knows the cards its filter lets through: the server removes the cards of a deleted column or lane itself, and when the first lane of a board without lanes arrives, it puts every card into that lane. The `settings` filter narrows the card query on the next load; override `ApplyWql(wql, query, request)` to apply it and `RetrieveFilter(wql, request)` to seed a persisted filter across full page reloads. A card move is a `PUT` without an `action` and carries `{ cardId, columnId, swimlaneId }`.
 
 ## Events
 

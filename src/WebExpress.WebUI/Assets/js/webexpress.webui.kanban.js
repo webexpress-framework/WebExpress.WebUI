@@ -36,6 +36,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     _movableColumn = false;
     _deletableColumn = false;
     _dragColumnIndex = null;
+    // aborts the inline column rename in progress, or null
     _activeColumnEdit = null;
 
     // board "…" menu (settings / add column / add swimlane) and swimlane menu
@@ -51,6 +52,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     // seeded from the loaded board (REST) or the static data-filter attribute
     _filter = "";
     _settingsDialog = null;
+    // aborts the inline swimlane rename in progress, or null
     _activeSwimlaneEdit = null;
 
     // the delete confirmation; owned dialog outside the host, created on first use
@@ -280,11 +282,14 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const cardNodes = el.querySelectorAll(".wx-kanban-card, [data-card-id]");
         cardNodes.forEach((cardEl, idx) => {
             const cardData = {
-                id: cardEl.dataset.cardId || "c_" + idx,
+                // a server-rendered card carries its id as the element id; the
+                // positional fallback is only for markup that names no card at all
+                id: cardEl.dataset.cardId || cardEl.id || "c_" + idx,
                 columnId: cardEl.dataset.columnId || null,
                 swimlaneId: cardEl.dataset.swimlaneId || null,
                 label: cardEl.dataset.label || cardEl.querySelector(".card-title")?.textContent || "",
                 html: cardEl.dataset.html || cardEl.querySelector(".card-text")?.innerHTML || cardEl.innerHTML,
+                color: cardEl.dataset.color || null,
                 colorCss: cardEl.dataset.colorCss || "",
                 icon: cardEl.dataset.icon || null,
                 image: cardEl.dataset.image || null,
@@ -362,6 +367,16 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
      */
     render() {
         const el = this._element;
+
+        // a rebuild drops a header that is being renamed. its input must not commit
+        // into the rebuilt board (chromium blurs it on removal, in the middle of this
+        // render), and since firefox does not blur it at all, the guard is released
+        // here instead of waiting for an event that may never come
+        this._activeColumnEdit?.();
+        this._activeSwimlaneEdit?.();
+        this._activeColumnEdit = null;
+        this._activeSwimlaneEdit = null;
+
         el.innerHTML = "";
 
         // the board "…" menu (settings / add column / add swimlane) sits above the
@@ -809,9 +824,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Appends a new swimlane and persists the new swimlane layout. When the
-     * board had no swimlane yet, the existing cards (which carry no swimlane) are
-     * moved into the new lane so they stay visible after the board switches into
-     * the swimlane layout.
+     * board had no swimlane yet, every card is moved into the new lane so it stays
+     * visible once the board switches into the swimlane layout; a lane a card may
+     * still name is not shown on a board without lanes, so it does not count.
+     *
+     * The board only sees the cards its filter lets through, so the server applies
+     * the same rule to all cards when it stores the first lane; the local move
+     * merely shows its outcome without a reload.
      */
     _addSwimlane() {
         const label = this._i18n("webexpress.webapp:swimlane.new", "New swimlane");
@@ -823,9 +842,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         if (wasEmpty) {
             for (let i = 0; i < this._cards.length; i++) {
-                if (!this._cards[i].swimlaneId) {
-                    this._cards[i].swimlaneId = id;
-                }
+                this._cards[i].swimlaneId = id;
             }
         }
 
@@ -1183,7 +1200,6 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        this._activeColumnEdit = headerEl;
         const current = col.label ?? col.title ?? "";
 
         const input = document.createElement("input");
@@ -1191,12 +1207,16 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         input.className = "wx-board-col-input";
         input.value = current;
 
+        let done = false;
+        this._activeColumnEdit = () => {
+            done = true;
+        };
+
         headerEl.innerHTML = "";
         headerEl.appendChild(input);
         input.focus();
         input.select();
 
-        let done = false;
         const finish = (save) => {
             if (done) {
                 return;
@@ -1243,7 +1263,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             "webexpress.webapp:column.delete.title",
             this._i18n("webexpress.webapp:kanban.column.delete.message", "Delete column “{name}” and all of its cards? This action cannot be undone.")
                 .replace("{name}", () => col.label ?? col.title ?? ""),
-            () => this._removeColumn(index),
+            () => this._removeColumn(col.id),
             {
                 confirmLabel: this._i18n("webexpress.webapp:column.delete.confirm", "Delete"),
                 // the trigger that opened the menu is gone with the column, so a
@@ -1258,17 +1278,21 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Removes a confirmed column together with its cards and persists the new
-     * column layout.
-     * @param {number} index - The column index.
+     * column layout. The column is looked up by id, because a reload while the
+     * dialog was open may have reordered the columns or dropped this one.
+     *
+     * Only the column list goes out; the server drops the cards of a column the
+     * list no longer names, including those the board's filter hides.
+     * @param {string} id - The column id.
      */
-    _removeColumn(index) {
-        if (index < 0 || index >= this._columns.length) {
+    _removeColumn(id) {
+        const index = this._columns.findIndex((column) => column.id === id);
+        if (index < 0) {
             return;
         }
 
-        const removed = this._columns[index];
         this._columns.splice(index, 1);
-        this._cards = this._cards.filter((card) => card.columnId !== removed.id);
+        this._cards = this._cards.filter((card) => card.columnId !== id);
 
         this.render();
         this._dispatchColumnChange();
@@ -1564,7 +1588,6 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        this._activeSwimlaneEdit = headerSpan;
         const current = lane.label ?? "";
 
         const input = document.createElement("input");
@@ -1574,12 +1597,16 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         // the header label toggles the lane on click; stop the input from doing so
         input.addEventListener("click", (e) => e.stopPropagation());
 
+        let done = false;
+        this._activeSwimlaneEdit = () => {
+            done = true;
+        };
+
         headerSpan.innerHTML = "";
         headerSpan.appendChild(input);
         input.focus();
         input.select();
 
-        let done = false;
         const finish = (save) => {
             if (done) {
                 return;
@@ -1643,7 +1670,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             "webexpress.webapp:swimlane.delete.title",
             this._i18n("webexpress.webapp:swimlane.delete.message", "Delete swimlane “{name}” and all of its cards? This action cannot be undone.")
                 .replace("{name}", () => lane.label ?? ""),
-            () => this._removeSwimlane(index),
+            () => this._removeSwimlane(lane.id),
             {
                 confirmLabel: this._i18n("webexpress.webapp:swimlane.delete.confirm", "Delete"),
                 // the trigger that opened the menu is gone with the lane, so a
@@ -1658,17 +1685,21 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Removes a confirmed swimlane together with its cards and persists the new
-     * swimlane layout.
-     * @param {number} index - The swimlane index.
+     * swimlane layout. The lane is looked up by id, because a reload while the
+     * dialog was open may have reordered the lanes or dropped this one.
+     *
+     * Only the swimlane list goes out; the server drops the cards of a lane the
+     * list no longer names, including those the board's filter hides.
+     * @param {string} id - The swimlane id.
      */
-    _removeSwimlane(index) {
-        if (index < 0 || index >= this._swimlanes.length) {
+    _removeSwimlane(id) {
+        const index = this._swimlanes.findIndex((lane) => lane.id === id);
+        if (index < 0) {
             return;
         }
 
-        const removed = this._swimlanes[index];
         this._swimlanes.splice(index, 1);
-        this._cards = this._cards.filter((card) => card.swimlaneId !== removed.id);
+        this._cards = this._cards.filter((card) => card.swimlaneId !== id);
 
         this.render();
         this._dispatchSwimlaneChange();
@@ -1694,7 +1725,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         this._settingsDialog.open(
             settings,
             () => {
-                lane.filter = settings.filter;
+                // a reload while the dialog was open replaces the lane objects, so
+                // the filter goes onto the lane that carries this id now
+                const current = this._swimlanes.find((item) => item.id === lane.id);
+                if (!current) {
+                    return;
+                }
+                current.filter = settings.filter;
                 this._dispatchSwimlaneChange();
             },
             this._i18n("webexpress.webui:kanban.settings.swimlane.title", "Swimlane settings")
@@ -1777,25 +1814,42 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             cardEl.setAttribute("aria-pressed", "true");
         }
 
-        // map WebExpress colors to hex for the top border highlight
-        const colorCss = card.colorCss || "";
-        let colorHex = "transparent";
-
-        if (colorCss.includes("success")) {
-            colorHex = "#198754";
-        } else if (colorCss.includes("warning")) {
-            colorHex = "#ffc107";
-        } else if (colorCss.includes("danger")) {
-            colorHex = "#dc3545";
-        } else if (colorCss.includes("info")) {
-            colorHex = "#0d6efd";
+        // the global action wiring binds by attribute, and the card element is
+        // rebuilt on every render, so the attributes go onto each new element
+        for (const kind of ["primary", "secondary"]) {
+            const action = card[kind + "Action"];
+            if (!action || !action.action) {
+                continue;
+            }
+            for (const [key, value] of Object.entries(action)) {
+                if (value) {
+                    cardEl.setAttribute(`data-wx-${kind}-${key.toLowerCase()}`, value);
+                }
+            }
         }
 
-        cardEl.style.setProperty("--kanban-color", colorHex);
+        cardEl.style.setProperty("--kanban-color", card.color || this._cardColorFromCss(card.colorCss));
 
         // build card header
         const header = document.createElement("div");
         header.className = "card-header";
+
+        if (card.image) {
+            const img = document.createElement("img");
+            img.src = card.image;
+            img.alt = "";
+            img.className = "card-image";
+            header.appendChild(img);
+        } else if (card.icon) {
+            const icon = webexpress.webui.Icon.create(card.icon);
+            if (icon) {
+                const iconWrapper = document.createElement("div");
+                iconWrapper.className = "card-icon";
+                iconWrapper.appendChild(icon);
+                header.appendChild(iconWrapper);
+            }
+        }
+
         const title = document.createElement("div");
         title.className = "card-title";
         title.textContent = card.label;
@@ -1916,6 +1970,28 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Maps the system color class a REST card carries to the accent of its top
+     * border; the class itself would color the whole card.
+     * @param {string} colorCss - The color class of the card.
+     * @returns {string} The accent color.
+     */
+    _cardColorFromCss(colorCss) {
+        const css = colorCss || "";
+
+        if (css.includes("success")) {
+            return "#198754";
+        } else if (css.includes("warning")) {
+            return "#ffc107";
+        } else if (css.includes("danger")) {
+            return "#dc3545";
+        } else if (css.includes("info") || css.includes("primary")) {
+            return "#0d6efd";
+        }
+
+        return "transparent";
+    }
+
+    /**
      * Selects or moves a card from the keyboard. Enter and space select it; alt with left
      * or right moves it to the neighbouring column, alt with up or down one place among the
      * cards of its cell. The focus follows the card through the re-render.
@@ -1934,17 +2010,24 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         }
         e.preventDefault();
 
+        // without swimlanes render() ignores the lane a card still carries, so the
+        // neighbours on screen are those of the column alone, and a move lands in
+        // no lane, the same as a drop does
+        const ignoreLane = this._swimlanes.length === 0;
+        const swimlaneId = ignoreLane ? null : card.swimlaneId;
+
         if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
             const target = this._columns.findIndex((column) => column.id === card.columnId)
                 + (e.key === "ArrowLeft" ? -1 : 1);
             if (target >= 0 && target < this._columns.length) {
-                this._moveCard(card, this._columns[target].id, card.swimlaneId);
+                this._moveCard(card, this._columns[target].id, swimlaneId);
             }
         } else {
-            const siblings = this._cards.filter((item) => item.columnId === card.columnId && item.swimlaneId === card.swimlaneId);
+            const siblings = this._cards.filter((item) => item.columnId === card.columnId
+                && (ignoreLane || item.swimlaneId === card.swimlaneId));
             const position = siblings.indexOf(card) + (e.key === "ArrowUp" ? -1 : 1);
             if (position >= 0 && position < siblings.length) {
-                this._moveCard(card, card.columnId, card.swimlaneId, siblings[position], e.key === "ArrowUp");
+                this._moveCard(card, card.columnId, swimlaneId, siblings[position], e.key === "ArrowUp");
             }
         }
     }

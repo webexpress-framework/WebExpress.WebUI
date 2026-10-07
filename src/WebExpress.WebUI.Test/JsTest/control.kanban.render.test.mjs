@@ -616,3 +616,120 @@ test("the board settings open as a native dialog in the top layer, not as a bloc
     dialog._cancelButton.click();
     assert.equal(dialog._element.open, false);
 });
+
+test("a card that names itself by its element id keeps that id", () => {
+    const runtime = load();
+    const host = runtime.document.createElement("div");
+    host.dataset.columns = "todo";
+    const card = runtime.document.createElement("div");
+    card.className = "wx-kanban-card";
+    card.id = "task1";
+    Object.assign(card.dataset, { columnId: "todo", label: "Card" });
+    host.appendChild(card);
+    const ctrl = new runtime.wx.KanbanCtrl(host);
+
+    assert.equal(ctrl._cards[0].id, "task1", "moves and selections report the card's own id");
+    assert.equal(host.querySelector(".wx-kanban-card").dataset.cardId, "task1");
+});
+
+test("a card shows its color and its icon, and an image takes the icon's place", () => {
+    const runtime = load();
+
+    let cardEl = build(runtime, { color: "orange", icon: "fas fa-bug" }).host.querySelector(".wx-kanban-card");
+    assert.equal(cardEl.style.getPropertyValue("--kanban-color"), "orange", "any css color reaches the top border");
+    assert.ok(cardEl.querySelector(".card-header .card-icon i"), "the icon sits in the header");
+
+    cardEl = build(runtime, { icon: "fas fa-bug", image: "/img/card.png" }).host.querySelector(".wx-kanban-card");
+    assert.equal(cardEl.querySelector(".card-image").src, "/img/card.png");
+    assert.equal(cardEl.querySelector(".card-icon"), null);
+
+    cardEl = build(runtime, { colorCss: "border-danger" }).host.querySelector(".wx-kanban-card");
+    assert.equal(cardEl.style.getPropertyValue("--kanban-color"), "#dc3545", "a system color class still maps to its accent");
+});
+
+test("a card carries its actions onto every rebuilt element", () => {
+    const runtime = load();
+    const { ctrl, host } = build(runtime, { wxPrimaryAction: "modal", wxPrimaryTarget: "#detail" });
+
+    ctrl.render();
+    const cardEl = host.querySelector(".wx-kanban-card");
+    assert.equal(cardEl.getAttribute("data-wx-primary-action"), "modal");
+    assert.equal(cardEl.getAttribute("data-wx-primary-target"), "#detail");
+    assert.equal(cardEl.getAttribute("data-wx-secondary-action"), null);
+});
+
+test("a confirmed deletion drops the column it named, even after a reload reordered the board", async () => {
+    const runtime = loadWithConfirm();
+    const { ctrl, host } = buildBoard(runtime, {
+        columns: "todo,doing,done", deletableColumn: "true"
+    });
+    runtime.document.body.appendChild(host);
+
+    clickEntry(entry(host.querySelectorAll(".wx-board-col-menu")[0], "webexpress.webapp:column.delete"));
+
+    // a reload while the dialog is open hands over fresh column objects in a new order
+    ctrl._columns = ["done", "todo", "doing"].map((id) => ({ id, label: id, size: "1fr" }));
+    ctrl.render();
+
+    await ctrl._confirm._confirmButton.onclick();
+    assert.deepEqual(ctrl._columns.map((c) => c.id), ["done", "doing"]);
+
+    // a column the reload already dropped is not replaced by whatever took its place
+    clickEntry(entry(host.querySelectorAll(".wx-board-col-menu")[0], "webexpress.webapp:column.delete"));
+    ctrl._columns = [{ id: "doing", label: "doing", size: "1fr" }];
+    ctrl.render();
+    await ctrl._confirm._confirmButton.onclick();
+    assert.deepEqual(ctrl._columns.map((c) => c.id), ["doing"]);
+});
+
+test("a rebuild during a rename releases it without committing the abandoned input", () => {
+    const runtime = load();
+    const { ctrl, host } = buildBoard(runtime, { columns: "todo", editableColumn: "true" });
+    let changes = 0;
+    host.addEventListener(runtime.wx.Event.CHANGE_VALUE_EVENT, () => changes++);
+
+    clickEntry(entry(host.querySelector(".wx-board-col-menu"), "webexpress.webapp:column.edit"));
+    const input = host.querySelector(".wx-board-col-input");
+    input.value = "Renamed";
+
+    // a reload replaces the header; firefox reports no blur for the removed input,
+    // chromium reports one into the rebuilt board
+    ctrl.render();
+    input.dispatchEvent({ type: "blur" });
+
+    assert.equal(ctrl._columns[0].label, "todo");
+    assert.equal(changes, 0, "nothing is persisted from the abandoned input");
+
+    clickEntry(entry(host.querySelector(".wx-board-col-menu"), "webexpress.webapp:column.edit"));
+    assert.ok(host.querySelector(".wx-board-col-input"), "a new rename can start");
+});
+
+test("on a board without swimlanes alt+up passes the card above it, whatever lane the cards still name", () => {
+    const runtime = load();
+    const host = runtime.document.createElement("div");
+    host.dataset.columns = "todo";
+    for (const [id, lane] of [["c1", "gone"], ["c2", ""]]) {
+        const card = runtime.document.createElement("div");
+        card.className = "wx-kanban-card";
+        Object.assign(card.dataset, { cardId: id, columnId: "todo", swimlaneId: lane, label: id });
+        host.appendChild(card);
+    }
+    const ctrl = new runtime.wx.KanbanCtrl(host);
+
+    const second = host.querySelectorAll(".wx-kanban-card")[1];
+    second.dispatchEvent({ type: "keydown", key: "ArrowUp", altKey: true, target: second, preventDefault() { } });
+
+    assert.deepEqual(ctrl._cards.map((c) => c.id), ["c2", "c1"]);
+});
+
+test("the first swimlane takes in every card, including those naming a lane that is gone", () => {
+    const runtime = loadFull();
+    const { ctrl, host } = build(runtime, { swimlaneId: "gone" });
+    ctrl._addableSwimlane = true;
+    ctrl.render();
+
+    clickEntry(entry(host.querySelector(".wx-kanban-toolbar"), "webexpress.webapp:swimlane.add"));
+
+    assert.equal(ctrl._cards[0].swimlaneId, ctrl._swimlanes[0].id);
+    assert.equal(host.querySelectorAll(".wx-kanban-card").length, 1, "the card stays on the board");
+});

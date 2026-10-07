@@ -36,7 +36,8 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
-        /// Gets or sets the color associated with the card.
+        /// Gets or sets the accent color of the card's top border. Any CSS color is
+        /// accepted, a named one as well as a hex value.
         /// </summary>
         public Func<IRenderControlContext, string> Color { get; set; }
 
@@ -128,6 +129,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = "wx-kanban-card"
             }
+                .AddUserAttribute("data-card-id", Id)
                 .AddUserAttribute("data-label", I18N.Translate(renderContext, Title?.Invoke(renderContext)))
                 .AddUserAttribute("data-icon", (Icon?.Invoke(renderContext) as Icon)?.Class)
                 .AddUserAttribute("data-image", Image?.Invoke(renderContext)?.ToString() ?? (Icon?.Invoke(renderContext) as ImageIcon)?.Uri?.ToString())

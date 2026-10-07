@@ -148,6 +148,29 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that a card carries its id as the card id the client reads, so moves and
+        /// selections report the id the application gave the card.
+        /// </summary>
+        [Fact]
+        public void AddCardWithId()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlKanban(null);
+
+            // act
+            control.Add(new ControlKanbanCard("task1") { Color = _ => "orange" });
+
+            // validation
+            var html = control.Render(context, visualTree);
+            var expected = @"<div class=""wx-webui-kanban""><div id=""task1"" class=""wx-kanban-card"" data-card-id=""task1"" data-color=""orange""></div></div>";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests adding a card with an assignee to the kanban control.
         /// </summary>
         [Fact]
