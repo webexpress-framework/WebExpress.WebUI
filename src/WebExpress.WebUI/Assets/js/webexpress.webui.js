@@ -2210,7 +2210,12 @@ webexpress.webui.Ctrl = class {
      */
     _i18n(key, fallback) {
         if (key) {
-            return (webexpress?.webui?.I18N?.translate(key)) ?? fallback;
+            const text = webexpress?.webui?.I18N?.translate(key);
+            // translate answers a missing key with the key itself, which would never reach the fallback
+            if (text != null && text !== key) {
+                return text;
+            }
+            return fallback ?? text;
         }
         return fallback;
     }

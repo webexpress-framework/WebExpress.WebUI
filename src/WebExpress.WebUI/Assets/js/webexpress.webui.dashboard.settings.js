@@ -89,6 +89,17 @@ webexpress.webui.DashboardWidgetSettings = class extends webexpress.webui.ModalC
     }
 
     /**
+     * Removes the dialog from the document body, where it outlives the dashboard
+     * that owns it.
+     */
+    destroy() {
+        this.hide();
+        this._okButton.onclick = null;
+        this._element.remove();
+        super.destroy();
+    }
+
+    /**
      * Builds a labelled text-like input row (text or number) and appends it to
      * the form.
      * @param {HTMLElement} form - The form to append to.

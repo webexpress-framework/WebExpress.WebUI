@@ -619,7 +619,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const container = document.createElement("div");
         container.className = "wx-kanban-menu";
 
-        const button = this._buildMenuButton(this._i18n("webexpress.webapp:kanban.menu", "Options"));
+        const button = this._buildMenuButton(this._i18n("webexpress.webui:kanban.menu", "Options"));
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
@@ -627,7 +627,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         if (this._configurableBoard) {
             menu.appendChild(this._buildMenuEntry(
                 this._iconClass("gear"),
-                this._i18n("webexpress.webapp:board.settings", "Settings"),
+                this._i18n("webexpress.webui:kanban.board.settings", "Settings"),
                 null,
                 () => this._openBoardSettings()
             ));
@@ -643,7 +643,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             if (this._addableColumn) {
                 menu.appendChild(this._buildMenuEntry(
                     this._iconClass("table-columns"),
-                    this._i18n("webexpress.webapp:column.add", "New column"),
+                    this._i18n("webexpress.webui:kanban.column.add", "New column"),
                     null,
                     () => this._addColumn()
                 ));
@@ -652,7 +652,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             if (this._addableSwimlane) {
                 menu.appendChild(this._buildMenuEntry(
                     this._iconClass("bars"),
-                    this._i18n("webexpress.webapp:swimlane.add", "New swimlane"),
+                    this._i18n("webexpress.webui:kanban.swimlane.add", "New swimlane"),
                     null,
                     () => this._addSwimlane()
                 ));
@@ -809,7 +809,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
      * Appends a new empty column and persists the new column layout.
      */
     _addColumn() {
-        const label = this._i18n("webexpress.webapp:column.new", "New column");
+        const label = this._i18n("webexpress.webui:kanban.column.new", "New column");
         this._columns.push({
             id: "col_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
             label: label,
@@ -833,7 +833,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
      * merely shows its outcome without a reload.
      */
     _addSwimlane() {
-        const label = this._i18n("webexpress.webapp:swimlane.new", "New swimlane");
+        const label = this._i18n("webexpress.webui:kanban.swimlane.new", "New swimlane");
         const id = "lane_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
         const wasEmpty = this._swimlanes.length === 0;
@@ -889,7 +889,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const grip = document.createElement("span");
         grip.className = "wx-board-col-grip";
         grip.textContent = "⠿";
-        grip.title = this._i18n("webexpress.webapp:column.move", "Reorder column");
+        grip.title = this._i18n("webexpress.webui:kanban.column.move", "Reorder column");
         grip.setAttribute("aria-label", grip.title);
         grip.draggable = true;
         grip.addEventListener("click", (e) => e.stopPropagation());
@@ -949,7 +949,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const container = document.createElement("span");
         container.className = "wx-kanban-menu wx-board-col-menu";
 
-        const button = this._buildMenuButton(this._i18n("webexpress.webapp:column.menu", "Column options"));
+        const button = this._buildMenuButton(this._i18n("webexpress.webui:kanban.column.menu", "Column options"));
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
@@ -980,18 +980,18 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         if (this._editableColumn) {
             menu.appendChild(this._buildMenuEntry(
                 this._iconClass("pen"),
-                this._i18n("webexpress.webapp:column.edit", "Rename column"),
+                this._i18n("webexpress.webui:kanban.column.edit", "Rename column"),
                 null,
                 () => this._startColumnEdit(headerEl, index)
             ));
             menu.appendChild(this._buildSubmenuEntry(
                 this._iconClass("expand"),
-                this._i18n("webexpress.webapp:column.size", "Size"),
+                this._i18n("webexpress.webui:kanban.column.size", "Size"),
                 (m) => this._populateColumnMenuSizes(m, headerEl, index)
             ));
             menu.appendChild(this._buildSubmenuEntry(
                 this._iconClass("palette"),
-                this._i18n("webexpress.webapp:column.color", "Color"),
+                this._i18n("webexpress.webui:kanban.column.color", "Color"),
                 (m) => this._populateColumnMenuColors(m, headerEl, index)
             ));
         }
@@ -1004,7 +1004,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             }
             menu.appendChild(this._buildMenuEntry(
                 this._iconClass("trash"),
-                this._i18n("webexpress.webapp:column.delete", "Delete column"),
+                this._i18n("webexpress.webui:kanban.column.delete", "Delete column"),
                 null,
                 () => this._deleteColumn(index)
             ));
@@ -1062,7 +1062,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         button.type = "button";
         button.className = "dropdown-item text-muted d-flex align-items-center";
         button.innerHTML = `<i class="${this._iconClass("chevron-left")} me-2"></i>`;
-        button.appendChild(document.createTextNode(this._i18n("webexpress.webapp:back", "Back")));
+        button.appendChild(document.createTextNode(this._i18n("webexpress.webui:kanban.back", "Back")));
         button.addEventListener("click", (e) => {
             e.preventDefault();
             e.stopPropagation();
@@ -1086,7 +1086,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         const col = this._columns[index];
         const presets = [
-            { label: this._i18n("webexpress.webapp:column.size.auto", "Auto"), value: "1fr" },
+            { label: this._i18n("webexpress.webui:kanban.column.size.auto", "Auto"), value: "1fr" },
             { label: "25 %", value: "25%" },
             { label: "33 %", value: "33%" },
             { label: "50 %", value: "50%" },
@@ -1115,7 +1115,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const col = this._columns[index];
 
         menu.appendChild(this._buildMenuCheckEntry(
-            this._i18n("webexpress.webapp:column.color.none", "None"),
+            this._i18n("webexpress.webui:kanban.column.color.none", "None"),
             col && !col.color,
             () => this._setColumnColor(index, null)
         ));
@@ -1260,12 +1260,12 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         this._confirm = this._confirm || new webexpress.webui.ModalConfirm();
         const accepted = this._confirm.confirmation(
-            "webexpress.webapp:column.delete.title",
-            this._i18n("webexpress.webapp:kanban.column.delete.message", "Delete column “{name}” and all of its cards? This action cannot be undone.")
+            "webexpress.webui:kanban.column.delete.title",
+            this._i18n("webexpress.webui:kanban.column.delete.message", "Delete column “{name}” and all of its cards? This action cannot be undone.")
                 .replace("{name}", () => col.label ?? col.title ?? ""),
             () => this._removeColumn(col.id),
             {
-                confirmLabel: this._i18n("webexpress.webapp:column.delete.confirm", "Delete"),
+                confirmLabel: this._i18n("webexpress.webui:kanban.column.delete.confirm", "Delete"),
                 // the trigger that opened the menu is gone with the column, so a
                 // cancelled or finished dialog hands the focus to the board's first menu
                 fallbackFocus: () => this._element.querySelector(".wx-kanban-menu-btn")
@@ -1428,7 +1428,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const container = document.createElement("span");
         container.className = "wx-kanban-menu wx-kanban-swimlane-menu";
 
-        const button = this._buildMenuButton(this._i18n("webexpress.webapp:swimlane.menu", "Swimlane options"));
+        const button = this._buildMenuButton(this._i18n("webexpress.webui:kanban.swimlane.menu", "Swimlane options"));
 
         const menu = document.createElement("ul");
         menu.className = "dropdown-menu dropdown-menu-end";
@@ -1460,13 +1460,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         if (this._editableSwimlane) {
             menu.appendChild(this._buildMenuEntry(
                 this._iconClass("pen"),
-                this._i18n("webexpress.webapp:swimlane.edit", "Rename swimlane"),
+                this._i18n("webexpress.webui:kanban.swimlane.edit", "Rename swimlane"),
                 null,
                 () => this._startSwimlaneEdit(headerSpan, index)
             ));
             menu.appendChild(this._buildSubmenuEntry(
                 this._iconClass("palette"),
-                this._i18n("webexpress.webapp:swimlane.color", "Color"),
+                this._i18n("webexpress.webui:kanban.swimlane.color", "Color"),
                 (m) => this._populateSwimlaneMenuColors(m, headerSpan, index)
             ));
         }
@@ -1474,7 +1474,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         if (this._configurableSwimlane) {
             menu.appendChild(this._buildMenuEntry(
                 this._iconClass("gear"),
-                this._i18n("webexpress.webapp:swimlane.settings", "Settings"),
+                this._i18n("webexpress.webui:kanban.swimlane.settings", "Settings"),
                 null,
                 () => this._openSwimlaneSettings(index)
             ));
@@ -1486,7 +1486,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             if (index > 0) {
                 menu.appendChild(this._buildMenuEntry(
                     this._iconClass("arrow-up"),
-                    this._i18n("webexpress.webapp:swimlane.moveup", "Move up"),
+                    this._i18n("webexpress.webui:kanban.swimlane.moveup", "Move up"),
                     null,
                     () => this._moveSwimlane(index, -1)
                 ));
@@ -1494,7 +1494,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             if (index < this._swimlanes.length - 1) {
                 menu.appendChild(this._buildMenuEntry(
                     this._iconClass("arrow-down"),
-                    this._i18n("webexpress.webapp:swimlane.movedown", "Move down"),
+                    this._i18n("webexpress.webui:kanban.swimlane.movedown", "Move down"),
                     null,
                     () => this._moveSwimlane(index, 1)
                 ));
@@ -1509,7 +1509,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             }
             menu.appendChild(this._buildMenuEntry(
                 this._iconClass("trash"),
-                this._i18n("webexpress.webapp:swimlane.delete", "Delete swimlane"),
+                this._i18n("webexpress.webui:kanban.swimlane.delete", "Delete swimlane"),
                 null,
                 () => this._deleteSwimlane(index)
             ));
@@ -1529,7 +1529,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         const lane = this._swimlanes[index];
 
         menu.appendChild(this._buildMenuCheckEntry(
-            this._i18n("webexpress.webapp:swimlane.color.none", "None"),
+            this._i18n("webexpress.webui:kanban.swimlane.color.none", "None"),
             lane && !lane.color,
             () => this._setSwimlaneColor(index, null)
         ));
@@ -1667,12 +1667,12 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
         this._confirm = this._confirm || new webexpress.webui.ModalConfirm();
         const accepted = this._confirm.confirmation(
-            "webexpress.webapp:swimlane.delete.title",
-            this._i18n("webexpress.webapp:swimlane.delete.message", "Delete swimlane “{name}” and all of its cards? This action cannot be undone.")
+            "webexpress.webui:kanban.swimlane.delete.title",
+            this._i18n("webexpress.webui:kanban.swimlane.delete.message", "Delete swimlane “{name}” and all of its cards? This action cannot be undone.")
                 .replace("{name}", () => lane.label ?? ""),
             () => this._removeSwimlane(lane.id),
             {
-                confirmLabel: this._i18n("webexpress.webapp:swimlane.delete.confirm", "Delete"),
+                confirmLabel: this._i18n("webexpress.webui:kanban.swimlane.delete.confirm", "Delete"),
                 // the trigger that opened the menu is gone with the lane, so a
                 // cancelled or finished dialog hands the focus to the board's first menu
                 fallbackFocus: () => this._element.querySelector(".wx-kanban-menu-btn")

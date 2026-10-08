@@ -50,10 +50,9 @@ function clickEntry(el) {
 
 /**
  * Finds a dropdown entry by its exact label. The headless runtime loads no
- * webapp i18n, so an unresolved key resolves to the key itself; the tests match
- * that stable key.
+ * i18n dictionary, so an entry shows the english fallback of its control.
  * @param {object} root - The subtree to search.
- * @param {string} label - The entry label (an i18n key).
+ * @param {string} label - The entry label.
  * @returns {object|undefined} The matching button, or undefined.
  */
 function entry(root, label) {
@@ -234,9 +233,9 @@ test("the board menu offers settings, add column and add swimlane", () => {
     const toolbar = host.querySelector(".wx-kanban-toolbar");
     assert.ok(toolbar, "the board toolbar exists");
 
-    assert.ok(entry(toolbar, "webexpress.webapp:board.settings"), "the settings entry exists");
-    assert.ok(entry(toolbar, "webexpress.webapp:column.add"), "the add-column entry exists");
-    assert.ok(entry(toolbar, "webexpress.webapp:swimlane.add"), "the add-swimlane entry exists");
+    assert.ok(entry(toolbar, "Settings"), "the settings entry exists");
+    assert.ok(entry(toolbar, "New column"), "the add-column entry exists");
+    assert.ok(entry(toolbar, "New swimlane"), "the add-swimlane entry exists");
 });
 
 test("a read-only board offers no board menu", () => {
@@ -251,7 +250,7 @@ test("adding a column from the board menu grows the board", () => {
     const { ctrl, host } = buildBoard(runtime, { columns: "todo", addableColumn: "true" });
 
     assert.equal(ctrl._columns.length, 1);
-    clickEntry(entry(host.querySelector(".wx-kanban-toolbar"), "webexpress.webapp:column.add"));
+    clickEntry(entry(host.querySelector(".wx-kanban-toolbar"), "New column"));
     assert.equal(ctrl._columns.length, 2);
 });
 
@@ -260,7 +259,7 @@ test("adding a swimlane from the board menu switches the board into swimlane mod
     const { ctrl, host } = buildBoard(runtime, { columns: "todo", addableSwimlane: "true" });
 
     assert.equal(ctrl._swimlanes.length, 0);
-    clickEntry(entry(host.querySelector(".wx-kanban-toolbar"), "webexpress.webapp:swimlane.add"));
+    clickEntry(entry(host.querySelector(".wx-kanban-toolbar"), "New swimlane"));
     assert.equal(ctrl._swimlanes.length, 1);
 });
 
@@ -286,9 +285,9 @@ test("the column menu asks before deleting and drops the column only once confir
 
     // the wording ships with the webapp dictionary; the test supplies the shape
     // so the name substitution is what is checked, not the sentence
-    runtime.wx.I18N.register("en", "webexpress.webapp", { "kanban.column.delete.message": "Delete “{name}”?" });
+    runtime.wx.I18N.register("en", "webexpress.webui", { "kanban.column.delete.message": "Delete “{name}”?" });
 
-    const askToDelete = () => clickEntry(entry(host.querySelectorAll(".wx-board-col-menu")[0], "webexpress.webapp:column.delete"));
+    const askToDelete = () => clickEntry(entry(host.querySelectorAll(".wx-board-col-menu")[0], "Delete column"));
 
     askToDelete();
     const confirm = ctrl._confirm;
@@ -316,7 +315,7 @@ test("the column menu starts an inline rename", () => {
     const runtime = load();
     const { host } = buildBoard(runtime, { columns: "todo", editableColumn: "true" });
 
-    clickEntry(entry(host.querySelector(".wx-board-col-menu"), "webexpress.webapp:column.edit"));
+    clickEntry(entry(host.querySelector(".wx-board-col-menu"), "Rename column"));
     assert.ok(host.querySelector(".wx-board-col-input"), "the rename input appears");
 });
 
@@ -327,13 +326,13 @@ test("the column menu applies a size preset and a color", () => {
     const menu = host.querySelector(".wx-board-col-menu").querySelector(".dropdown-menu");
 
     // drill into Size, then pick a preset
-    clickEntry(entry(menu, "webexpress.webapp:column.size"));
+    clickEntry(entry(menu, "Size"));
     clickEntry(entry(menu, "50 %"));
     assert.equal(ctrl._columns[0].size, "50%");
 
     // the menu was re-rendered by the size change; reacquire it and drill into Color
     const menu2 = host.querySelector(".wx-board-col-menu").querySelector(".dropdown-menu");
-    clickEntry(entry(menu2, "webexpress.webapp:column.color"));
+    clickEntry(entry(menu2, "Color"));
     clickEntry(menu2.querySelector(".wx-board-col-swatch"));
     assert.ok(ctrl._columns[0].color, "a column color is set");
 });
@@ -347,7 +346,7 @@ test("the swimlane menu applies a color", () => {
     const menu = host.querySelector(".wx-kanban-swimlane-menu").querySelector(".dropdown-menu");
 
     // drill into Color and pick a swatch
-    clickEntry(entry(menu, "webexpress.webapp:swimlane.color"));
+    clickEntry(entry(menu, "Color"));
     clickEntry(menu.querySelector(".wx-board-col-swatch"));
     assert.ok(ctrl._swimlanes[0].color, "a swimlane color is set");
 
@@ -370,13 +369,13 @@ test("the swimlane color menu clears the color via None", () => {
     });
 
     let menu = host.querySelector(".wx-kanban-swimlane-menu").querySelector(".dropdown-menu");
-    clickEntry(entry(menu, "webexpress.webapp:swimlane.color"));
+    clickEntry(entry(menu, "Color"));
     clickEntry(menu.querySelector(".wx-board-col-swatch"));
     assert.ok(ctrl._swimlanes[0].color);
 
     menu = host.querySelector(".wx-kanban-swimlane-menu").querySelector(".dropdown-menu");
-    clickEntry(entry(menu, "webexpress.webapp:swimlane.color"));
-    clickEntry(entry(menu, "webexpress.webapp:swimlane.color.none"));
+    clickEntry(entry(menu, "Color"));
+    clickEntry(entry(menu, "None"));
     assert.equal(ctrl._swimlanes[0].color, null);
 });
 
@@ -390,9 +389,9 @@ test("the swimlane menu asks before deleting and drops the lane only once confir
 
     // the wording ships with the webapp dictionary; the test supplies the shape
     // so the name substitution is what is checked, not the sentence
-    runtime.wx.I18N.register("en", "webexpress.webapp", { "swimlane.delete.message": "Delete “{name}”?" });
+    runtime.wx.I18N.register("en", "webexpress.webui", { "kanban.swimlane.delete.message": "Delete “{name}”?" });
 
-    const askToDelete = () => clickEntry(entry(host.querySelectorAll(".wx-kanban-swimlane-menu")[0], "webexpress.webapp:swimlane.delete"));
+    const askToDelete = () => clickEntry(entry(host.querySelectorAll(".wx-kanban-swimlane-menu")[0], "Delete swimlane"));
 
     assert.equal(ctrl._swimlanes.length, 2);
     askToDelete();
@@ -419,7 +418,7 @@ test("the swimlane menu starts an inline rename", () => {
 
     const menu = host.querySelector(".wx-kanban-swimlane-menu");
     assert.ok(menu, "the swimlane menu exists");
-    clickEntry(entry(menu, "webexpress.webapp:swimlane.edit"));
+    clickEntry(entry(menu, "Rename swimlane"));
     assert.ok(host.querySelector(".wx-board-col-input"), "the rename input appears");
 });
 
@@ -458,12 +457,12 @@ test("the swimlane move entries are bounded by the lane position", () => {
     const labels = (m) => m.querySelectorAll(".dropdown-item").map((b) => b.textContent);
 
     // first lane: only move down; middle: both; last: only move up
-    assert.equal(labels(menus[0]).includes("webexpress.webapp:swimlane.moveup"), false);
-    assert.ok(labels(menus[0]).includes("webexpress.webapp:swimlane.movedown"));
-    assert.ok(labels(menus[1]).includes("webexpress.webapp:swimlane.moveup"));
-    assert.ok(labels(menus[1]).includes("webexpress.webapp:swimlane.movedown"));
-    assert.ok(labels(menus[2]).includes("webexpress.webapp:swimlane.moveup"));
-    assert.equal(labels(menus[2]).includes("webexpress.webapp:swimlane.movedown"), false);
+    assert.equal(labels(menus[0]).includes("Move up"), false);
+    assert.ok(labels(menus[0]).includes("Move down"));
+    assert.ok(labels(menus[1]).includes("Move up"));
+    assert.ok(labels(menus[1]).includes("Move down"));
+    assert.ok(labels(menus[2]).includes("Move up"));
+    assert.equal(labels(menus[2]).includes("Move down"), false);
 });
 
 test("moving a swimlane down reorders the lanes", () => {
@@ -472,7 +471,7 @@ test("moving a swimlane down reorders the lanes", () => {
 
     assert.deepEqual(ctrl._swimlanes.map((s) => s.id), ["a", "b", "c"]);
     const firstMenu = host.querySelectorAll(".wx-kanban-swimlane-menu")[0];
-    clickEntry(entry(firstMenu, "webexpress.webapp:swimlane.movedown"));
+    clickEntry(entry(firstMenu, "Move down"));
     assert.deepEqual(ctrl._swimlanes.map((s) => s.id), ["b", "a", "c"]);
 });
 
@@ -535,7 +534,7 @@ test("an open column menu keeps its trigger visible, stays open while drilling d
     assert.ok(container.classList.contains("wx-menu-open"), "the open state is mirrored onto the container");
     assert.equal(menu.style.position, undefined, "the top layer needs no fixed positioning to escape the board clip");
 
-    clickEntry(entry(menu, "webexpress.webapp:column.size"));
+    clickEntry(entry(menu, "Size"));
     assert.equal(menu.matches(":popover-open"), true, "drilling down keeps the menu open");
     assert.ok(backEntry(menu), "the sub-level leads back");
 
@@ -554,7 +553,7 @@ test("a reopened column or swimlane menu starts at its top level again", () => {
         const rootCount = menu.querySelectorAll(".dropdown-item").length;
 
         runtime.wx.NativeMenu.show(menu);
-        clickEntry(entry(menu, selector === ".wx-board-col-menu" ? "webexpress.webapp:column.color" : "webexpress.webapp:swimlane.color"));
+        clickEntry(entry(menu, selector === ".wx-board-col-menu" ? "Color" : "Color"));
         assert.ok(backEntry(menu), `${selector} drilled into the colors`);
 
         runtime.wx.NativeMenu.hide(menu);
@@ -591,7 +590,7 @@ test("opening or using the swimlane menu does not fold the lane whose header car
     assert.equal(lane.classList.contains("wx-section-collapsed"), false, "the trigger is not a click on the header");
 
     runtime.wx.NativeMenu.show(menu);
-    bubbleClick(entry(menu, "webexpress.webapp:swimlane.color"));
+    bubbleClick(entry(menu, "Color"));
     assert.equal(lane.classList.contains("wx-section-collapsed"), false, "an entry is not a click on the header either");
 
     // the header itself still folds the lane, so the guard is scoped to the menu
@@ -606,7 +605,7 @@ test("the board settings open as a native dialog in the top layer, not as a bloc
     const { ctrl, host } = buildBoard(runtime, { columns: "todo", configurableBoard: "true" });
     runtime.document.body.appendChild(host);
 
-    clickEntry(entry(host.querySelector(".wx-kanban-toolbar"), "webexpress.webapp:board.settings"));
+    clickEntry(entry(host.querySelector(".wx-kanban-toolbar"), "Settings"));
 
     const dialog = ctrl._settingsDialog;
     assert.equal(dialog._element.tagName, "DIALOG", "only a dialog element is styled and layered as a modal");
@@ -665,7 +664,7 @@ test("a confirmed deletion drops the column it named, even after a reload reorde
     });
     runtime.document.body.appendChild(host);
 
-    clickEntry(entry(host.querySelectorAll(".wx-board-col-menu")[0], "webexpress.webapp:column.delete"));
+    clickEntry(entry(host.querySelectorAll(".wx-board-col-menu")[0], "Delete column"));
 
     // a reload while the dialog is open hands over fresh column objects in a new order
     ctrl._columns = ["done", "todo", "doing"].map((id) => ({ id, label: id, size: "1fr" }));
@@ -675,7 +674,7 @@ test("a confirmed deletion drops the column it named, even after a reload reorde
     assert.deepEqual(ctrl._columns.map((c) => c.id), ["done", "doing"]);
 
     // a column the reload already dropped is not replaced by whatever took its place
-    clickEntry(entry(host.querySelectorAll(".wx-board-col-menu")[0], "webexpress.webapp:column.delete"));
+    clickEntry(entry(host.querySelectorAll(".wx-board-col-menu")[0], "Delete column"));
     ctrl._columns = [{ id: "doing", label: "doing", size: "1fr" }];
     ctrl.render();
     await ctrl._confirm._confirmButton.onclick();
@@ -688,7 +687,7 @@ test("a rebuild during a rename releases it without committing the abandoned inp
     let changes = 0;
     host.addEventListener(runtime.wx.Event.CHANGE_VALUE_EVENT, () => changes++);
 
-    clickEntry(entry(host.querySelector(".wx-board-col-menu"), "webexpress.webapp:column.edit"));
+    clickEntry(entry(host.querySelector(".wx-board-col-menu"), "Rename column"));
     const input = host.querySelector(".wx-board-col-input");
     input.value = "Renamed";
 
@@ -700,7 +699,7 @@ test("a rebuild during a rename releases it without committing the abandoned inp
     assert.equal(ctrl._columns[0].label, "todo");
     assert.equal(changes, 0, "nothing is persisted from the abandoned input");
 
-    clickEntry(entry(host.querySelector(".wx-board-col-menu"), "webexpress.webapp:column.edit"));
+    clickEntry(entry(host.querySelector(".wx-board-col-menu"), "Rename column"));
     assert.ok(host.querySelector(".wx-board-col-input"), "a new rename can start");
 });
 
@@ -728,7 +727,7 @@ test("the first swimlane takes in every card, including those naming a lane that
     ctrl._addableSwimlane = true;
     ctrl.render();
 
-    clickEntry(entry(host.querySelector(".wx-kanban-toolbar"), "webexpress.webapp:swimlane.add"));
+    clickEntry(entry(host.querySelector(".wx-kanban-toolbar"), "New swimlane"));
 
     assert.equal(ctrl._cards[0].swimlaneId, ctrl._swimlanes[0].id);
     assert.equal(host.querySelectorAll(".wx-kanban-card").length, 1, "the card stays on the board");

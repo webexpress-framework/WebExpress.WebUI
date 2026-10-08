@@ -86,11 +86,9 @@ webexpress.webui.DashboardWidgets.register("widget_chart", {
             }
         }
 
-        // append the configured element to the widget container
+        // the controller creates the chart once the card is attached, which also
+        // tears it down with the card; a hand-made instance would be built twice
         container.appendChild(chartBox);
-
-        // instantiate the chart controller which automatically parses the data-* attributes
-        new webexpress.webui.ChartCtrl(chartBox);
     }
 });
 

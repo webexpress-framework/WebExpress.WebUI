@@ -50,12 +50,12 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets a value indicating whether the widget can be moved.
         /// </summary>
-        public Func<IRenderControlContext, bool> Movable { get; set; } = _ => false;
+        public Func<IRenderControlContext, bool> Movable { get; set; } = _ => true;
 
         /// <summary>
         /// Gets or sets a value indicating whether the widget can be closed.
         /// </summary>
-        public Func<IRenderControlContext, bool> Closeable { get; set; } = _ => false;
+        public Func<IRenderControlContext, bool> Closeable { get; set; } = _ => true;
 
         /// <summary>
         /// Gets or sets the collection of controls that make up the content of the container.
@@ -131,8 +131,8 @@ namespace WebExpress.WebUI.WebControl
             var icon = Icon?.Invoke(renderContext);
             var image = Image?.Invoke(renderContext);
             var column = Column?.Invoke(renderContext) ?? uint.MaxValue;
-            var movable = Movable?.Invoke(renderContext) ?? false;
-            var closeable = Closeable?.Invoke(renderContext) ?? false;
+            var movable = Movable?.Invoke(renderContext) ?? true;
+            var closeable = Closeable?.Invoke(renderContext) ?? true;
 
             var html = new HtmlElementTextContentDiv()
             {
@@ -144,8 +144,8 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-color", color)
                 .AddUserAttribute("data-column", column < uint.MaxValue ? column.ToString() : null)
-                .AddUserAttribute("data-movable", movable ? "true" : null)
-                .AddUserAttribute("data-closeable", closeable ? "true" : null)
+                .AddUserAttribute("data-movable", movable ? null : "false")
+                .AddUserAttribute("data-closeable", closeable ? null : "false")
                 .Add(content.Select(x => x.Render(renderContext, visualTree)));
 
             return html;
