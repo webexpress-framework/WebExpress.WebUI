@@ -15,7 +15,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertyColorTag> Color
         {
             get => (Func<IRenderControlContext, PropertyColorTag>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -46,8 +46,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = "wx-webui-tag",
-                Role = "tag"
+                // the tags are a list, which the markup the client builds already says
+                Class = "wx-webui-tag"
             }
                 .AddUserAttribute("data-color-css", color?.ToClass())
                 .AddUserAttribute("data-color-style", color?.ToStyle())

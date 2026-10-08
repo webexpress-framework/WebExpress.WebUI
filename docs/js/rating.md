@@ -22,7 +22,7 @@ Initialization is handled declaratively through `data-` attributes on the host e
 | `data-value` | The initial numeric value of the rating.
 
 - **CSS Classes**: The component automatically adds the class `.wx-rating-view` to the host element.
-- **Icons**: It utilizes FontAwesome classes (`fas fa-star` for filled, `far fa-star` for empty) to render the stars.
+- **Icons**: It uses the `star` icon of the active icon set to render the stars.
 - **Accessibility**: The component automatically sets `aria-readonly="true"`. If no `aria-label` is provided, it generates one in the format "Rating: [value] / [total]".
 
 ## Functionality

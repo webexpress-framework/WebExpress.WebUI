@@ -10,7 +10,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a tree node for the <see cref="ControlTree"/>.
+    /// A single node within a <see cref="ControlTree"/>, which may itself contain child nodes to
+    /// form the tree hierarchy.
     /// </summary>
     public class ControlTreeItem : IControlTreeItem
     {
@@ -171,11 +172,11 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-tree-node"),
             }
-                .AddUserAttribute("data-label", I18N.Translate(text))
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, text))
                 .AddUserAttribute("data-expand", expand ? "true" : null)
                 .AddUserAttribute("data-active", active ? "true" : null)
                 .AddUserAttribute("data-color", color.ToClass())
-                .AddUserAttribute("data-tooltip", tooltip)
+                .AddUserAttribute("data-tooltip", I18N.Translate(renderContext, tooltip))
                 .AddUserAttribute("data-uri", uri?.ToString())
                 .AddUserAttribute("data-target", target.ToValue());
 

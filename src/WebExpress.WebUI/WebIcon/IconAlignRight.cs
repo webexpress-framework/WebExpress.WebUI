@@ -1,4 +1,4 @@
-﻿namespace WebExpress.WebUI.WebIcon
+namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon that aligns content to the right.
@@ -6,8 +6,8 @@
     public class IconAlignRight : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-align-right";
+        public override string Symbol => "align-right";
     }
 }

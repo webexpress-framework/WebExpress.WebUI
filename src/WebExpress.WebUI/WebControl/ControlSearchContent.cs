@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a search control.
+    /// The content area of a search control that shows its suggestions or results.
     /// </summary>
     public class ControlSearchContent : Control
     {
@@ -63,8 +63,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-search-content", GetClasses()),
-                Style = GetStyles()
+                Class = Css.Concatenate("wx-webui-search-content", GetClasses(renderContext)),
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext, placeholder))
                 .AddUserAttribute("data-target-ids", TargetIds is not null

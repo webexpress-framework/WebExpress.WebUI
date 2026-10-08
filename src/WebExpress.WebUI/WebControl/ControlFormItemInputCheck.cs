@@ -59,8 +59,8 @@ namespace WebExpress.WebUI.WebControl
 
             var html = new HtmlElementTextContentDiv()
             {
-                Class = Css.Concatenate(layout.ToClass(), inline ? "form-check-inline" : null, GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate(layout.ToClass(), inline ? "form-check-inline" : null, GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
             }
                 .Add(new HtmlElementFieldInput()
                 {

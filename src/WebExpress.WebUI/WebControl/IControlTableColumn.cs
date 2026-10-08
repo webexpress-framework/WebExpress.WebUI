@@ -7,7 +7,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a column in a control table.
+    /// Contract for one column of a table control.
     /// </summary>
     public interface IControlTableColumn : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

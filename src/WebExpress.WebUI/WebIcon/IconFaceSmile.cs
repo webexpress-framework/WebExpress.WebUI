@@ -1,13 +1,13 @@
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
-    /// Represents an icon for a face-smile.
+    /// Represents an icon for a smiling face.
     /// </summary>
     public class IconFaceSmile : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-face-smile";
+        public override string Symbol => "smile";
     }
 }

@@ -61,5 +61,53 @@ namespace WebExpress.WebUI.Test.WebControl
 
             Assert.Equal(expected, html.Trim());
         }
+
+        /// <summary>
+        /// Tests the line style property of the line control.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeStyleLine.Default, @"<hr>")]
+        [InlineData(TypeStyleLine.Solid, @"<hr class=""wx-line-solid"">")]
+        [InlineData(TypeStyleLine.Dashed, @"<hr class=""wx-line-dashed"">")]
+        [InlineData(TypeStyleLine.Dotted, @"<hr class=""wx-line-dotted"">")]
+        public void LineStyle(TypeStyleLine style, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlLine()
+            {
+                LineStyle = _ => style
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            Assert.Equal(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests that a dashed line keeps the colour it was given.
+        /// </summary>
+        [Fact]
+        public void LineStyleWithColor()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlLine()
+            {
+                Color = _ => new PropertyColorLine(TypeColorLine.Primary),
+                LineStyle = _ => TypeStyleLine.Dashed
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            Assert.Contains("text-primary", html.Trim());
+            Assert.Contains("wx-line-dashed", html.Trim());
+        }
     }
 }

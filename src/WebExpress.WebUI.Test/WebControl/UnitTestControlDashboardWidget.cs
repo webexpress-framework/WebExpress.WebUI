@@ -188,7 +188,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-dashboard-widget""></div>")]
-        [InlineData(typeof(IconFolder), @"<div class=""wx-dashboard-widget"" data-icon=""fas fa-folder""></div>")]
+        [InlineData(typeof(IconFolder), @"<div class=""wx-dashboard-widget"" data-icon=""wx-icon-light wx-icon-light-folder""></div>")]
         [InlineData(typeof(ImageIconWebExpress), @"<div class=""wx-dashboard-widget"" data-image=""/assets/img/webexpress.svg""></div>")]
         public void Icon(Type iconType, string expected)
         {

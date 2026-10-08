@@ -44,10 +44,14 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
         }
         this._element.classList.add("wx-upload");
 
-        // create dropzone
+        // create dropzone; the file input behind it is hidden, so the zone is the control
+        // the keyboard reaches and the form label names
         this._dropzone = document.createElement("div");
         this._dropzone.className = "wx-upload-dropzone";
         this._dropzone.textContent = this._placeholder;
+        this._dropzone.setAttribute("role", "button");
+        this._dropzone.tabIndex = 0;
+        this._adoptFieldLabel(this._dropzone, this._id, this._element);
 
         // create a file input for triggering the file dialog
         this._fileInput = document.createElement("input");
@@ -68,6 +72,7 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
 
         // create upload button for manual uploads
         this._uploadButton = document.createElement("button");
+        this._uploadButton.type = "button";
         this._uploadButton.textContent = this._i18n("webexpress.webui:upload.button", "Upload Files");
         this._uploadButton.className = "btn btn-primary mt-2";
         this._uploadButton.style.display = "none";
@@ -106,8 +111,14 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
             this._handleFiles(e.dataTransfer.files);
         });
 
-        // open file picker on click
+        // open file picker on click or on the keys a button answers to
         this._dropzone.addEventListener("click", () => this._fileInput.click());
+        this._dropzone.addEventListener("keydown", e => {
+            if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                this._fileInput.click();
+            }
+        });
 
         // handle selected files from the file picker
         this._fileInput.addEventListener("change", () => {
@@ -179,8 +190,10 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
         previewElement.appendChild(text);
 
         const removeBtn = document.createElement("button");
-        removeBtn.className = "fas fa-times";
-        removeBtn.title = this._i18n("webexpress.webui:upload.remove.file", "Remove file");
+        removeBtn.type = "button";
+        removeBtn.className = this._iconClass("xmark");
+        removeBtn.title = this._i18n("webexpress.webui:upload.remove.file", "Remove file") + ": " + file.name;
+        removeBtn.setAttribute("aria-label", removeBtn.title);
         removeBtn.onclick = (e) => {
             e.stopPropagation();
             this.files = this.files.filter(f => f.name !== file.name);
@@ -211,52 +224,37 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Uploads a single file using XMLHttpRequest to support progress tracking.
+     * Uploads a single file through the transport, which reports the progress on the way.
      * @param {File} file The file to upload.
      */
     _uploadFile(file) {
-        const xhr = new XMLHttpRequest();
         const formData = new FormData();
         formData.append("file", file);
         formData.append(this._name, this._id || "true");
 
-        xhr.open("POST", this._uploadUri, true);
-
-        // handle upload progress
-        xhr.upload.onprogress = e => {
-            if (e.lengthComputable && this._showProgress) {
-                const percent = Math.round((e.loaded / e.total) * 100);
-                this._dispatch(webexpress.webui.Event.UPLOAD_PROGRESS_EVENT, { file, percent });
-                this._updateProgress(file.name, percent);
+        webexpress.webui.Transport.upload(this._uploadUri, formData, {
+            onProgress: (percent) => {
+                if (this._showProgress) {
+                    this._dispatch(webexpress.webui.Event.UPLOAD_PROGRESS_EVENT, { file, percent });
+                    this._updateProgress(file.name, percent);
+                }
             }
-        };
-
-        // handle successful or failed upload
-        xhr.onload = () => {
+        }).then((result) => {
             const previewElement = this._preview.querySelector(`[data-file-name="${file.name}"]`);
-            if (xhr.status >= 200 && xhr.status < 300) {
+
+            if (result.ok) {
                 this._dispatch(webexpress.webui.Event.UPLOAD_SUCCESS_EVENT, { file });
                 if (previewElement) {
                     previewElement.remove();
                 }
-            } else {
-                this._dispatch(webexpress.webui.Event.UPLOAD_ERROR_EVENT, { file, error: xhr.statusText, status: xhr.status });
-                if (previewElement) {
-                    previewElement.classList.add("error");
-                }
+                return;
             }
-        };
 
-        // handle network errors
-        xhr.onerror = () => {
-            this._dispatch(webexpress.webui.Event.UPLOAD_ERROR_EVENT, { file, error: "Network Error", status: xhr.status });
-            const previewElement = this._preview.querySelector(`[data-file-name="${file.name}"]`);
+            this._dispatch(webexpress.webui.Event.UPLOAD_ERROR_EVENT, { file, error: result.error.message, status: result.status });
             if (previewElement) {
                 previewElement.classList.add("error");
             }
-        };
-
-        xhr.send(formData);
+        });
     }
 
     /**
@@ -306,34 +304,37 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Returns a Font Awesome icon class based on the file extension.
+     * Returns the icon class for a file extension, in the icon theme the page
+     * carries. The map is written in the legacy names because that is the
+     * vocabulary a caller reads a file glyph in; the icon set derives the light
+     * counterpart, so the two sets stay declared in one place.
      * @param {string} filename The name of the file (e.g., "report.pdf").
-     * @returns {string} The corresponding Font Awesome icon class (e.g., "fas fa-file-pdf").
+     * @returns {string} The icon class for the active theme.
      */
     _getIconForFilename(filename) {
         const ext = filename.split(".").pop().toLowerCase();
         const iconMap = {
-            "doc": "fas fa-file-word",
-            "docx": "fas fa-file-word",
-            "xls": "fas fa-file-excel",
-            "xlsx": "fas fa-file-excel",
-            "csv": "fas fa-file-csv",
-            "ppt": "fas fa-file-powerpoint",
-            "pptx": "fas fa-file-powerpoint",
-            "pdf": "fas fa-file-pdf",
-            "txt": "fas fa-file-alt",
-            "jpg": "fas fa-file-image",
-            "jpeg": "fas fa-file-image",
-            "png": "fas fa-file-image",
-            "gif": "fas fa-file-image",
-            "zip": "fas fa-file-archive",
-            "rar": "fas fa-file-archive",
-            "mp3": "fas fa-file-audio",
-            "wav": "fas fa-file-audio",
-            "mp4": "fas fa-file-video",
-            "mov": "fas fa-file-video"
+            "doc": "file-word",
+            "docx": "file-word",
+            "xls": "file-excel",
+            "xlsx": "file-excel",
+            "csv": "file-csv",
+            "ppt": "file-powerpoint",
+            "pptx": "file-powerpoint",
+            "pdf": "file-pdf",
+            "txt": "file",
+            "jpg": "file-image",
+            "jpeg": "file-image",
+            "png": "file-image",
+            "gif": "file-image",
+            "zip": "file-zipper",
+            "rar": "file-zipper",
+            "mp3": "file-audio",
+            "wav": "file-audio",
+            "mp4": "file-video",
+            "mov": "file-video"
         };
-        return iconMap[ext] || "fas fa-file";
+        return webexpress.webui.IconSet.resolve(iconMap[ext] || "file");
     }
 };
 

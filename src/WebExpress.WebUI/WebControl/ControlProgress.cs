@@ -21,7 +21,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeSizeProgress> Size
         {
             get => (Func<IRenderControlContext, TypeSizeProgress>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass(), () => value?.Invoke(null).ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass(), (renderContext) => value?.Invoke(renderContext).ToStyle());
         }
 
         /// <summary>
@@ -86,8 +86,8 @@ namespace WebExpress.WebUI.WebControl
                 return new HtmlElementFormProgress(value + "%")
                 {
                     Id = Id,
-                    Class = GetClasses(),
-                    Style = GetStyles(),
+                    Class = GetClasses(renderContext),
+                    Style = GetStyles(renderContext),
                     Role = role,
                     Min = min.ToString(),
                     Max = max.ToString(),
@@ -95,7 +95,9 @@ namespace WebExpress.WebUI.WebControl
                 };
             }
 
-            var bar = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext.Request?.Culture, text)))
+            text = I18N.Translate(renderContext.Request?.Culture, text);
+
+            var bar = new HtmlElementTextContentDiv(new HtmlText(text))
             {
                 Role = "progressbar",
                 Class = Css.Concatenate
@@ -115,6 +117,9 @@ namespace WebExpress.WebUI.WebControl
             bar.AddUserAttribute("aria-valuenow", value.ToString());
             bar.AddUserAttribute("aria-valuemin", min.ToString());
             bar.AddUserAttribute("aria-valuemax", max.ToString());
+            // a progress bar takes no name from its content, so the caption is repeated as the
+            // name; a bar without a caption is named by its value
+            bar.AddUserAttribute("aria-label", string.IsNullOrWhiteSpace(text) ? value + "%" : text);
 
             var html = new HtmlElementTextContentDiv(bar)
             {
@@ -123,9 +128,9 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate
                 (
                     "progress",
-                    GetClasses()
+                    GetClasses(renderContext)
                 ),
-                Style = GetStyles()
+                Style = GetStyles(renderContext)
             };
 
             return html;

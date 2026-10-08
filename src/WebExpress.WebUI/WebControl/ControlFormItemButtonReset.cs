@@ -3,7 +3,7 @@
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a reset button form item control.
+    /// A reset button inside a form that clears the user's input back to the form's initial values.
     /// </summary>
     public class ControlFormItemButtonReset : ControlFormItemButton
     {

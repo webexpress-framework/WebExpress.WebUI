@@ -9,7 +9,7 @@ The file `webexpress.webui.js` is the core of the WebExpress.WebUI JavaScript fr
 |Class / Singleton                   |Type      |Description
 |------------------------------------|----------|----------------------------------------------------------
 |`webexpress.webui.Controller`       |Singleton |Central controller that monitors the DOM, manages control instances, and delegates actions.
-|`webexpress.webui.FilterRegistry`   |Singleton |Manages client-side quick-filter state with group constraints and cookie persistence.
+|`webexpress.webui.FilterRegistry`   |Singleton |Manages client-side quick-filter state with group constraints and localStorage persistence.
 |`webexpress.webui.I18N`             |Singleton |Internationalization helper for translations with automatic language detection.
 |`webexpress.webui.Syntax`           |Singleton |Registry for language-specific syntax-highlighting configurations.
 |`webexpress.webui.Actions`          |Singleton |Dynamic registry for action plugins that can be extended from external files.
@@ -19,9 +19,10 @@ The file `webexpress.webui.js` is the core of the WebExpress.WebUI JavaScript fr
 |`webexpress.webui.DialogPanels`     |Singleton |Registry for modal dialog panel definitions.
 |`webexpress.webui.DashboardWidgets` |Singleton |Registry for dashboard widget definitions.
 |`webexpress.webui.TableTemplates`   |Singleton |Registry for table cell renderer templates.
-|`webexpress.webui.IconTheme`        |Singleton |Resolves icon classes against the page-wide `<html data-icon-theme>` setting and provides cross-theme fallback.
+|`webexpress.webui.IconSet`          |Singleton |Resolves an icon reference - a symbolic name, a class string or a legacy FontAwesome class - to the CSS classes of the active icon set.
+|`webexpress.webui.Transport`        |Singleton |The one door of the controls to the network: one result contract for every request, and an adapter an application installs in place of plain `fetch`.
 |`webexpress.webui.Ctrl`             |Class     |Abstract base class for all UI controls.
-|`webexpress.webui.PopperCtrl`       |Class     |Base class for controls that use Popper.js for dropdown positioning.
+|`webexpress.webui.MenuCtrl`         |Class     |Base class for controls with native anchored popover menus.
 |`webexpress.webui.Event`            |Class     |Utility class that defines all event name constants.
 
 ## Controller
@@ -396,14 +397,14 @@ webexpress.webui.Actions.register("redirect", {
 
 ## FilterRegistry
 
-The `FilterRegistry` singleton manages client-side quick-filter state. It supports group constraints, exclusive filters, reset filters, and persists state to cookies.
+The `FilterRegistry` singleton manages client-side quick-filter state. It supports group constraints, exclusive filters, reset filters, and persists state to localStorage.
 
 ### Methods
 
 |Method                     |Description
 |---------------------------|--------------------------------------------------------------
 |`registerFilters(filters)` |Registers an array of filter definitions.
-|`init()`                   |Initializes state from the cookie and broadcasts the initial state.
+|`init()`                   |Initializes state from localStorage and broadcasts the initial state.
 |`activate(id)`             |Activates a filter by ID, enforcing group exclusivity constraints.
 |`deactivate(id)`           |Deactivates a filter by ID.
 |`toggle(id)`               |Toggles the state of a filter.
@@ -459,6 +460,52 @@ Within controls that extend `Ctrl`, use the built-in `_i18n` helper:
 
 ```javascript
 const label = this._i18n("webexpress.webui:calendar.may", "May");
+```
+
+## Transport
+
+A control that talks to a server - the frame loading a page, the modal form submitting, the inline
+editor storing a value, the upload - never calls `fetch` itself. It asks the `Transport`, and the
+transport answers with one result shape whatever happened. A request never rejects: an abort, a
+network failure and a refused status are all results, so a control has one path to write and
+nothing to catch.
+
+```javascript
+const result = await webexpress.webui.Transport.request("/api/thing", { method: "POST", body: json });
+// { ok, status, data, error, response, contentType }
+//   ok          true on a 2xx answer
+//   data        the body: the parsed json for application/json, { text } for anything else,
+//               on success and failure alike - a refused form still carries the page it answered with
+//   error       null, or { kind, status, message, retriable } with kind "http" | "network" | "parse" | "abort"
+```
+
+### Methods
+
+|Method                          |Description
+|--------------------------------|--------------------------------------------------------------
+|`request(url, init)`            |Performs a request; `init` is the fetch init (method, headers, body, signal, credentials).
+|`upload(url, body, options)`    |Uploads a body with progress: `options.onProgress(percent)`, `options.signal`, `options.method`.
+|`use(adapter)`                  |Installs an adapter; `null` restores the built-in one.
+|`builtIn`                       |The built-in adapter, for an installed adapter that wraps rather than replaces it.
+|`fail(kind, status, message, retriable)` |Builds a failed result in the contract's shape.
+
+### The adapter
+
+The built-in adapter (`webexpress.webui.FetchTransport`) is plain `fetch`, with `XMLHttpRequest`
+for uploads because only that reports progress. It announces every non-abort failure on the
+document as `webexpress.webui.transport.error`, so a page without a service layer still sees
+its failures in one place.
+
+An application replaces it to route the controls' requests through its own layer. That is what
+keeps the WebUI independent of any application: it knows an adapter with a `request` method and
+an optional `upload`, nothing more. WebExpress.WebApp installs its service layer this way, so a
+frame or a dialog on a WebApp page reports on the same error channel as every data control:
+
+```javascript
+webexpress.webui.Transport.use({
+    request: (url, init) => webexpress.webapp.ServiceRegistry.request(url, init),
+    upload: (url, body, options) => webexpress.webui.Transport.builtIn.upload(url, body, { ...options, report: false })
+});
 ```
 
 ## Syntax
@@ -536,7 +583,7 @@ The `DialogPanels` singleton stores panel definitions by a modal key. Multiple p
 
 ## DashboardWidgets
 
-The `DashboardWidgets` singleton manages dashboard widget definitions.
+The `DashboardWidgets` singleton manages dashboard widget definitions. The `DashboardCtrl` looks a widget up by id to render its card and, when the board is configurable, to build its settings form. Which widget types a board may *add* is decided by the server (`availableWidgets` in the REST payload), not by the registry.
 
 ### Methods
 
@@ -545,6 +592,35 @@ The `DashboardWidgets` singleton manages dashboard widget definitions.
 |`register(id, definition)` |Registers a widget with a unique ID and definition.
 |`get(id)`                  |Returns the widget definition, or `null`.
 |`getAll()`                 |Returns all registered widget definitions.
+
+### Definition
+
+|Field          |Description
+|---------------|--------------------------------------------------------------
+|`title`        |Display title (usually an i18n string).
+|`icon`         |Symbolic icon name shown in the header and the add menu.
+|`description`  |Optional line shown under the add-menu entry.
+|`removable`    |`false` hides the **Delete** entry for this type (default `true`).
+|`configurable` |`false` hides the **Settings** entry for this type (default `true`).
+|`settings`     |Optional array of settings fields appended to the settings dialog after the shared name and color.
+|`render`       |`function(container, data)` that builds the widget body. `data.title` / `data.color` carry the name and accent, `data.params` the persisted settings.
+
+Each `settings` field is `{ key, label, type, default? }` with `type` one of `text`, `number` (`min` / `max` / `step`), `select` (`options: [{ value, label }]`), `checkbox` or `color`. Edited values are written back into the widget's `params` as strings.
+
+```javascript
+webexpress.webui.DashboardWidgets.register("widget_scrum_velocity", {
+    title: webexpress.webui.I18N.translate("webexpress.webapp:dashboard.widget.scrum_velocity.title"),
+    icon: "chart-column",
+    settings: [
+        { key: "maxSprints", label: "Number of sprints", type: "number", min: 1, max: 20, default: "6" }
+    ],
+    render: function (container, data) {
+        // data.params.maxSprints, data.title, data.color …
+    }
+});
+```
+
+See the [DashboardCtrl](../../../WebExpress.WebApp/docs/js/dashboard.md) documentation for the board menus, the column and widget "…" menus and the REST contract.
 
 ## TableTemplates
 
@@ -570,53 +646,50 @@ webexpress.webui.TableTemplates.register("currency", function (val, table, row, 
 }, { decimals: 2, symbol: "€" });
 ```
 
-## IconTheme
+## IconSet
 
-The `IconTheme` singleton resolves icon classes against the page-wide
-icon theme that the server emits on the root `<html>` element.
+The `IconSet` singleton turns an icon reference into the CSS classes that draw it.
+The framework ships one set - the light set - whose drawings live under
+`Assets/icons` and are applied as CSS masks by `webexpress.webui.icon.css`.
 
-- **Default theme** - the attribute is absent (or set to anything other than
-  `"light"`). Controls render the bundled FontAwesome glyphs (`fas fa-*` etc.).
-- **Light theme** - `<html data-icon-theme="light">`. Controls render the
-  lightweight SVG variants defined in `webexpress.webui.icon.css` (the
-  `wx-icon-light wx-icon-light-*` class pair).
+An icon is identified by its **symbolic name**, which is the file name of its
+drawing without the extension: `"anchor"`, `"calendar-day"`, `"user-pen"`.
+Resolving `"anchor"` yields the class pair `wx-icon-light wx-icon-light-anchor`;
+the first class carries the mask geometry and the sizing, the second selects the
+drawing.
 
-The C# side picks the theme up from the active `IThemeContext` (resolved
-by `VisualTreeControl` from the first theme registered for the request's
-application via `ThemeManager.Themes`). Themes declare their icon-theme
-via `[IconTheme(...)]` on the theme class, next to `[ThemeMode]` and
-`[ThemeStyle]`. The `<html data-icon-theme>` attribute is emitted by
-`VisualTreeWebApp` / `VisualTreeWebAppLogin`; individual controls no
-longer need to mirror the theme through per-control `data-icon-theme`
-attributes. Server-side `Icon` Funcs that only have a render context use
-the `IRenderContext.GetIconTheme()` extension to arrive at the same value.
+`resolve` also accepts a string that is already a resolved class pair, and a
+legacy FontAwesome class such as `"fas fa-calendar-days"`. The latter is kept on
+purpose: such strings survive in stored dashboards, add-on definitions and other
+user data written before the set changed, and are mapped onto the current name
+(here, `calendar`).
 
 ### Methods
 
-|Method                       |Description
-|-----------------------------|--------------------------------------------------------------
-|`current()`                  |Returns the active theme: `"light"` or `"default"`.
-|`resolve(faClass, lightClass)` |Returns the CSS class string for the current theme. When the preferred variant is missing or empty, falls back to the other one. The light value accepts either the full class (`"wx-icon-light wx-icon-light-pen"`), just the modifier (`"wx-icon-light-pen"`) or the bare icon name (`"pen"`); the `"wx-icon-light "` prefix is added automatically.
+|Method            |Description
+|------------------|--------------------------------------------------------------
+|`resolve(icon)`   |Returns the CSS class string for an icon reference - a symbolic name, an already resolved class string, or a legacy FontAwesome class. Returns `""` for an empty reference.
 
 ### Usage from controls
 
-Controls should not read `document.documentElement.dataset.iconTheme`
-directly - the inherited `_iconClass()` / `_iconTheme()` helpers on
-[`Ctrl`](#ctrl) forward to the singleton:
+Controls should not build class names themselves - the inherited `_iconClass()`
+helper on [`Ctrl`](#ctrl) forwards to the singleton:
 
 ```javascript
 const xmark = document.createElement("i");
-xmark.className = this._iconClass("fas fa-xmark", "wx-icon-light-xmark");
-// default theme -> "fas fa-xmark"
-// light theme   -> "wx-icon-light wx-icon-light-xmark"
-// light theme with no light variant supplied -> falls back to "fas fa-xmark"
+xmark.className = this._iconClass("xmark");
+// -> "wx-icon-light wx-icon-light-xmark"
 ```
 
 Stand-alone code (binds, utilities) calls the singleton directly:
 
 ```javascript
-const moonIcon = webexpress.webui.IconTheme.resolve("fas fa-moon", "wx-icon-light-moon");
+const moonIcon = webexpress.webui.IconSet.resolve("moon");
 ```
+
+Anything that builds a whole icon element should go through
+[`Icon.create`](#icon) instead, which resolves the reference itself and decides
+between an `<i>` and an `<img>`.
 
 ## Ctrl
 
@@ -633,8 +706,7 @@ The `Ctrl` class is the abstract base class for all WebExpress.WebUI controls. I
 |`_dispatch(type, detail)`       |Dispatches a custom event from the control's element.
 |`_i18n(key, fallback)`          |Returns the translated text for an i18n key, or the fallback.
 |`_isVisible()`                  |Returns `true` if the control's element is currently visible.
-|`_iconTheme()`                  |Returns the active icon theme (`"light"` or `"default"`) as read from `<html data-icon-theme>`.
-|`_iconClass(faClass, lightClass)`|Resolves an icon CSS class for the active theme. Falls back to the other variant when the preferred one is missing - see [IconTheme](#icontheme).
+|`_iconClass(icon)`              |Resolves an icon reference to the CSS classes of the active icon set - see [IconSet](#iconset).
 
 ### Usage
 
@@ -654,17 +726,19 @@ webexpress.webui.MyCtrl = class extends webexpress.webui.Ctrl {
 webexpress.webui.Controller.registerClass("wx-webui-myctrl", webexpress.webui.MyCtrl);
 ```
 
-## PopperCtrl
+## NativeMenu and MenuCtrl
 
-The `PopperCtrl` class extends `Ctrl` and provides base functionality for controls that use [Popper.js](https://popper.js.org/) for positioning dropdown menus.
+`NativeMenu.bind(anchor, menu, invoker = anchor)` assigns a unique CSS anchor, adds
+`popover="auto"` to the menu and connects a button with `popovertarget`. The browser
+handles the top layer, light dismissal, Escape and focus restoration. CSS owns all
+placement through `anchor-name`, `position-anchor`, `position-area` and
+`position-try-fallbacks: flip-block`.
 
-### Methods
+`NativeMenu.show(menu)` and `NativeMenu.hide(menu)` serve keyboard navigation,
+typeahead and selection commits using the native Popover API. They never measure
+or move the menu. `MenuCtrl._initializeMenu(anchor, menu, invoker)` also publishes
+`DROPDOWN_SHOW_EVENT` and `DROPDOWN_HIDDEN_EVENT` for native lifecycle changes.
 
-|Method                                       |Description
-|---------------------------------------------|--------------------------------------------------------------
-|`_initializePopper(container, dropdownmenu)` |Initializes Popper.js for a dropdown menu. Sets up click-outside and ESC-key handlers.
-
-The initialized dropdown menu receives `show()` and `hide()` methods for programmatic control. Events `DROPDOWN_SHOW_EVENT` and `DROPDOWN_HIDDEN_EVENT` are dispatched accordingly.
 
 ## Event
 
@@ -732,3 +806,36 @@ document.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, (e) => {
 // dispatch an event from a control
 this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: selectedItem });
 ```
+
+
+## Browser UI preferences
+
+`webexpress.webui.LocalStorage` provides `getItem(key)`, `setItem(key, value)`,
+`getJson(key)` and `setJson(key, value)` for optional UI preferences. Reads return
+`null` when storage is blocked, absent or (for JSON) malformed. Failed writes
+leave the UI usable. A null or empty key disables persistence. Structured state
+is plain JSON, without URI encoding. Controls validate the values they restore.
+
+Preferences remain on the current origin across browser sessions until the user
+clears site storage. They are never sent as UI cookies. Existing UI cookies are
+not read or migrated; the next interaction records the preference in localStorage.
+Authentication cookies and application-owned server theme selection are independent.
+
+| State | localStorage key |
+| --- | --- |
+| Light/dark scheme | `wx_darkmode` |
+| Active quickfilter identifiers | `wx_quickfilters` (JSON array) |
+| Splitter size and collapsed state | `wx-split-{id}` |
+| Active view | `data-persist-key` or `wx_view_state_{id}` |
+| Active tab | `data-persist-key` or `wx-tab:{id}` |
+| Calendar presentation | `data-persist-key` or `wx-schedule-view:{id}` |
+| List order, tile order/visibility, table layout | `data-persist-key` or the control id |
+| Section folding | `wx-section:{id}` (honors `data-persist="false"`) |
+| WebApp file presentation | `data-persist-key` or `wx_file_view_{id}` |
+| WebApp AdvancedSearch mode | `data-persist-key` or `wx_search_mode_{id}` |
+| WebApp comment sort direction | `wx_comment_sort_dir` |
+
+Give controls stable, unique ids across page loads, or an explicit stable
+`data-persist-key` where supported. Controls without either do not share a fallback
+key. The color scheme, quickfilters and comment sort direction are origin-wide.
+Stored selections that no longer exist fall back to the declared defaults.

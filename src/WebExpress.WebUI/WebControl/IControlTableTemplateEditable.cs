@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a template control.
+    /// Contract for a table template whose cells can be edited inline.
     /// </summary>
     public interface IControlTableTemplateEditable : IControlTableTemplate
     {

@@ -7,6 +7,12 @@
  */
 webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
     /**
+     * The counter behind the ids of the entry fields; a field without id or name is flagged by
+     * the browser's autofill, and a name would post the half-typed tag with the form.
+     */
+    static _nextId = 0;
+
+    /**
      * Constructor: Initializes the control and DOM structure.
      * @param {HTMLElement} element - Host element for the tag control.
      */
@@ -60,30 +66,25 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
         // input field for new tags
         this._input = document.createElement("input");
         this._input.type = "text";
+        this._input.id = "wx-tag-input-" + (++webexpress.webui.InputTagCtrl._nextId);
+        this._input.autocomplete = "off";
         this._input.className = "input";
-        // placeholder will be set dynamically depending on tags present
-        this._input.setAttribute("aria-label", this._i18n("webexpress.webui:tag.add", "add Tag"));
+        // placeholder will be set dynamically depending on tags present; the field label
+        // names the input where the form rendered one, the generic name is the fallback
+        this._adoptFieldLabel(this._input, fieldId, element);
+        if (!this._input.hasAttribute("aria-labelledby") && !this._input.hasAttribute("aria-label")) {
+            this._input.setAttribute("aria-label", this._i18n("webexpress.webui:tag.add", "add Tag"));
+        }
 
         // initial rendering
         this.render();
 
         // event: Add tag by separator
         this._input.addEventListener("keyup", (event) => {
-            const value = this._input.value;
             // check for separator key
             if (event.key === "," || event.key === ";" || event.key === " ") {
-                const tags = value.split(/[,; ]+/)
-                    .map(t => t.trim())
-                    .filter(t => t.length > 0);
-                tags.forEach(tag => {
-                    if (tag && !this._tags.includes(tag)) {
-                        this._tags.push(tag);
-                        // fire add event when a tag is added
-                        this._dispatch(webexpress.webui.Event.ADD_EVENT, { detail: tag });
-                    }
-                });
+                this._commitInput(this._input.value);
                 this._input.value = "";
-                this.render();
             }
         });
 
@@ -101,6 +102,53 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
         });
 
         element.appendChild(this._input);
+    }
+
+    /**
+     * Adds a single tag to the control unless it is empty or already present.
+     * Fires ADD_EVENT and re-renders on success. Derived classes can override
+     * this method to hook into the add behavior (e.g. to persist the tag).
+     * @param {string} tag - The tag to add.
+     * @returns {boolean} True when the tag was added; false on empty or duplicate.
+     */
+    _addTag(tag) {
+        const value = (tag || "").trim();
+        if (!value || this._tags.includes(value)) {
+            return false;
+        }
+        this._tags.push(value);
+        // fire add event when a tag is added
+        this._dispatch(webexpress.webui.Event.ADD_EVENT, { detail: value });
+        this.render();
+        return true;
+    }
+
+    /**
+     * Splits a raw input value by the tag separators and adds each resulting tag.
+     * @param {string} rawValue - The raw input string.
+     */
+    _commitInput(rawValue) {
+        (rawValue || "").split(/[,; ]+/)
+            .map(t => t.trim())
+            .filter(t => t.length > 0)
+            .forEach(tag => this._addTag(tag));
+    }
+
+    /**
+     * Removes the given tag from the control. Fires REMOVE_EVENT and re-renders.
+     * Derived classes can override this method to hook into the remove behavior
+     * (e.g. to persist the deletion).
+     * @param {string} tag - The tag to remove.
+     */
+    _removeTag(tag) {
+        const index = this._tags.indexOf(tag);
+        if (index < 0) {
+            return;
+        }
+        this._tags.splice(index, 1);
+        // fire remove event when a tag is removed
+        this._dispatch(webexpress.webui.Event.REMOVE_EVENT, { detail: tag });
+        this.render();
     }
 
     /**
@@ -135,23 +183,21 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
             if (this._colorCss) {
                 tagElement.classList.add(this._colorCss);
             } else if (this._colorStyle) {
-                tagElement.style.cssText = this._colorStyle;
+                webexpress.webui.ContrastColor.paint(tagElement, this._colorStyle);
             } else {
                 tagElement.classList.add("wx-tag-primary");
             }
 
-            // x-button to remove tag
-            const removeBtn = document.createElement("a");
+            // the remove control is a button, not a link to nowhere: it acts, it does not navigate
+            const removeBtn = document.createElement("button");
+            removeBtn.type = "button";
+            removeBtn.className = "wx-tag-remove";
             removeBtn.innerHTML = "&times;";
-            removeBtn.href = "#";
             removeBtn.title = this._i18n("webexpress.webui:remove");
             removeBtn.setAttribute("aria-label", `Tag "${tag}" ${removeBtn.title}`);
             removeBtn.addEventListener("click", (e) => {
                 e.preventDefault();
-                this._tags.splice(index, 1);
-                // fire remove event when a tag is removed by click
-                this._dispatch(webexpress.webui.Event.REMOVE_EVENT, { detail: tag });
-                this.render();
+                this._removeTag(tag);
             });
 
             tagElement.appendChild(removeBtn);

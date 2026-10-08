@@ -10,8 +10,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a visual component capable of displaying a graph consisting of
-    /// nodes and edges.
+    /// Represents a single edge of a <see cref="ControlGraphViewer"/>: a connection from a source
+    /// node to a target node, with an optional label, color and waypoints the line is routed through.
     /// </summary>
     public class ControlGraphItemEdge : IControlGraphItemEdge
     {

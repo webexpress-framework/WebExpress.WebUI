@@ -2,9 +2,11 @@
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using System.Text.Json;
 using WebExpress.WebCore;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebApplication;
+using WebExpress.WebCore.WebCluster;
 using WebExpress.WebCore.WebComponent;
 using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebScope;
@@ -21,6 +23,14 @@ namespace WebExpress.WebUI.WebNotification
         private readonly IComponentHub _componentHub;
         private readonly IHttpServerContext _httpServerContext;
         private readonly NotificationDictionary _globalNotifications = new();
+
+        /// <summary>
+        /// The scope global notifications are kept under in the cluster store.
+        /// </summary>
+        internal const string StoreScope = "notification";
+
+        // an indefinite notification still needs a bound in a shared store
+        private static readonly TimeSpan IndefiniteLifetime = TimeSpan.FromDays(365);
 
         /// <summary>
         /// An event that fires when an notification is created.
@@ -72,8 +82,10 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="icon">An icon.</param>
         /// <param name="type">The notification type.</param>
         /// <param name="scops">The scopes for the notification.</param>
+        /// <param name="link">The address the notification is about, so the reader can go
+        /// there instead of having to find it. Null for a notification without a page.</param>
         /// <returns>The created notification.</returns>
-        public INotification AddNotification(IApplicationContext applicationContext, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, IEnumerable<IScope> scops = null)
+        public INotification AddNotification(IApplicationContext applicationContext, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, IEnumerable<IScope> scops = null, string link = null)
         {
             var notification = new Notification()
             {
@@ -81,11 +93,12 @@ namespace WebExpress.WebUI.WebNotification
                 Durability = durability,
                 Heading = heading,
                 Icon = icon,
+                Link = link,
                 Type = type,
                 Scops = scops ?? []
             };
 
-            _globalNotifications.AddNotificationItem(applicationContext, notification);
+            AddGlobal(applicationContext, notification);
             OnCreateNotification(notification);
             OnDispatchNotification(notification, applicationContext, null);
 
@@ -103,8 +116,10 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="icon">An icon.</param>
         /// <param name="type">The notification type.</param>
         /// <param name="scops">The scopes for the notification.</param>
+        /// <param name="link">The address the notification is about, so the reader can go
+        /// there instead of having to find it. Null for a notification without a page.</param>
         /// <returns>The created notification.</returns>
-        public INotification AddNotification(IApplicationContext applicationContext, Request request, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, IEnumerable<IScope> scops = null)
+        public INotification AddNotification(IApplicationContext applicationContext, Request request, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, IEnumerable<IScope> scops = null, string link = null)
         {
             var notification = new Notification()
             {
@@ -112,6 +127,7 @@ namespace WebExpress.WebUI.WebNotification
                 Durability = durability,
                 Heading = I18N.Translate(request, heading),
                 Icon = icon?.ToString(),
+                Link = link,
                 Type = type,
                 Scops = scops ?? []
             };
@@ -148,14 +164,7 @@ namespace WebExpress.WebUI.WebNotification
         {
             var list = new List<INotification>();
 
-            var scrapGlobal = _globalNotifications.GetNotifications(applicationContext).Where(x => x.Durability >= 0 && x.Created.AddMilliseconds(x.Durability) < DateTime.Now).ToList();
-            lock (_globalNotifications)
-            {
-                // remove expired notifications
-                scrapGlobal.ForEach(x => _globalNotifications.RemoveNotification(x.Id));
-            }
-
-            list.AddRange(_globalNotifications.GetNotifications(applicationContext));
+            list.AddRange(GetGlobal(applicationContext));
 
             if (request.Session.Properties.ContainsKey(typeof(SessionPropertyNotification)) &&
                 request.Session.Properties[typeof(SessionPropertyNotification)] is SessionPropertyNotification notificationProperty)
@@ -181,7 +190,7 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="applicationContext">The application context.</param>
         public void RemoveNotifications(IApplicationContext applicationContext)
         {
-            foreach (var globalNotification in _globalNotifications.RemoveNotifications(applicationContext))
+            foreach (var globalNotification in RemoveGlobal(applicationContext))
             {
                 OnDestroyNotification(globalNotification);
             }
@@ -194,7 +203,7 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="request">The request.</param>
         public void RemoveNotifications(IApplicationContext applicationContext, Request request)
         {
-            foreach (var globalNotification in _globalNotifications.RemoveNotifications(applicationContext))
+            foreach (var globalNotification in RemoveGlobal(applicationContext))
             {
                 OnDestroyNotification(globalNotification);
             }
@@ -217,6 +226,13 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="id">The notification id.</param>
         public void RemoveNotifications(Guid id)
         {
+            if (SharedStore is { } store)
+            {
+                store.Remove(StoreScope, id.ToString());
+
+                return;
+            }
+
             _globalNotifications.RemoveNotification(id);
         }
 
@@ -257,9 +273,118 @@ namespace WebExpress.WebUI.WebNotification
             DestroyNotification?.Invoke(this, notification);
         }
 
-        // <summary>
-        // Disposes the resources used by the NotificationManager.
-        // </summary>
+        /// <summary>
+        /// Returns the cluster store when other instances share it. Global notifications are
+        /// then kept there, since a notification raised on one instance must show on the pages
+        /// every other instance renders.
+        /// </summary>
+        private IClusterStore SharedStore => _componentHub?.ClusterManager?.Store is { IsShared: true } store ? store : null;
+
+        /// <summary>
+        /// Adds a global notification.
+        /// </summary>
+        /// <param name="applicationContext">The application the notification belongs to.</param>
+        /// <param name="notification">The notification.</param>
+        private void AddGlobal(IApplicationContext applicationContext, INotification notification)
+        {
+            if (SharedStore is { } store)
+            {
+                var lifetime = notification.Durability >= 0 ? TimeSpan.FromMilliseconds(notification.Durability) : IndefiniteLifetime;
+                var record = NotificationRecord.From(notification, applicationContext?.ApplicationId);
+
+                store.Set(StoreScope, notification.Id.ToString(), JsonSerializer.SerializeToUtf8Bytes(record), lifetime);
+
+                return;
+            }
+
+            lock (_globalNotifications)
+            {
+                _globalNotifications.AddNotificationItem(applicationContext, notification);
+            }
+        }
+
+        /// <summary>
+        /// Returns the live global notifications of an application, dropping the expired ones.
+        /// </summary>
+        /// <param name="applicationContext">The application.</param>
+        /// <returns>The notifications.</returns>
+        private IEnumerable<INotification> GetGlobal(IApplicationContext applicationContext)
+        {
+            if (SharedStore is { } store)
+            {
+                // the store expires notifications with a durability on its own
+                return ReadShared(store)
+                    .Where(x => string.Equals(x.ApplicationId, applicationContext?.ApplicationId, StringComparison.OrdinalIgnoreCase))
+                    .Select(x => x.ToNotification())
+                    .ToList();
+            }
+
+            lock (_globalNotifications)
+            {
+                var scrap = _globalNotifications.GetNotifications(applicationContext)
+                    .Where(x => x.Durability >= 0 && x.Created.AddMilliseconds(x.Durability) < DateTime.Now)
+                    .ToList();
+
+                scrap.ForEach(x => _globalNotifications.RemoveNotification(x.Id));
+
+                return _globalNotifications.GetNotifications(applicationContext).ToList();
+            }
+        }
+
+        /// <summary>
+        /// Removes every global notification of an application.
+        /// </summary>
+        /// <param name="applicationContext">The application.</param>
+        /// <returns>The removed notifications.</returns>
+        private IEnumerable<INotification> RemoveGlobal(IApplicationContext applicationContext)
+        {
+            if (SharedStore is { } store)
+            {
+                var removed = ReadShared(store)
+                    .Where(x => string.Equals(x.ApplicationId, applicationContext?.ApplicationId, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                removed.ForEach(x => store.Remove(StoreScope, x.Id.ToString()));
+
+                return removed.Select(x => x.ToNotification()).ToList();
+            }
+
+            lock (_globalNotifications)
+            {
+                return _globalNotifications.RemoveNotifications(applicationContext).ToList();
+            }
+        }
+
+        /// <summary>
+        /// Reads the global notifications of every application from the cluster store.
+        /// </summary>
+        /// <param name="store">The cluster store.</param>
+        /// <returns>The stored records.</returns>
+        private static IEnumerable<NotificationRecord> ReadShared(IClusterStore store)
+        {
+            foreach (var item in store.List(StoreScope))
+            {
+                NotificationRecord record;
+
+                try
+                {
+                    record = JsonSerializer.Deserialize<NotificationRecord>(item.Value);
+                }
+                catch (JsonException)
+                {
+                    continue;
+                }
+
+                if (record is not null)
+                {
+                    yield return record;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Disposes the resources used by the NotificationManager.
+        /// </summary>
         public void Dispose()
         {
             GC.SuppressFinalize(this);

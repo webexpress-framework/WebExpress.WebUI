@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a vertical column group of form items.
+    /// Arranges a group of form items vertically, with the fields stacked top to bottom.
     /// </summary>
     public class ControlFormItemGroupColumnVertical : ControlFormItemGroupColumn
     {
@@ -42,13 +42,15 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            EnsureInputIds();
+
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-form-group-column", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-form-group-column", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
             };
 
             var max = 100;
@@ -134,10 +136,10 @@ namespace WebExpress.WebUI.WebControl
                     }
                     else if (icon.Icon is not null)
                     {
-                        icon.Classes = ["me-2", "pt-1"];
+                        icon.Classes = ["me-2"];
                         fieldset.Add(new HtmlElementTextSemanticsSpan(icon.Render(renderGroupContext, visualTree), label)
                         {
-                            Style = "display: flex;"
+                            Class = "wx-form-label-row"
                         });
                     }
                     else if (label is not null)

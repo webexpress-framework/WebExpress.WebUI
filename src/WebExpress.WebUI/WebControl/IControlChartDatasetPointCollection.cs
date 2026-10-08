@@ -3,7 +3,7 @@
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a collection of control chart dataset points.
+    /// A collection of the data points that make up one dataset of a chart control.
     /// </summary>
     /// <remarks>
     /// This interface provides access to a collection of <see cref="IControlChartDatasetPoint"/>

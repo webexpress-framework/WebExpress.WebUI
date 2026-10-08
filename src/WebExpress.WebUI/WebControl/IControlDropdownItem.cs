@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Interface for a dropdown item control.
+    /// Contract for an entry that can appear inside a dropdown menu.
     /// </summary>
     public interface IControlDropdownItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

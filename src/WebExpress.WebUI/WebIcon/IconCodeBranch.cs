@@ -6,8 +6,8 @@
     public class IconCodeBranch : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-code-branch";
+        public override string Symbol => "branch";
     }
 }

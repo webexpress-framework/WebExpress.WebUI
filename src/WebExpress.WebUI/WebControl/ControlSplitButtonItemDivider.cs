@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a divider item in a split button control.
+    /// A divider line within a split button's dropdown menu, separating groups of entries.
     /// </summary>
     public class ControlSplitButtonItemDivider : Control, IControlSplitButtonItem
     {
@@ -30,8 +30,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("dropdown-divider", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("dropdown-divider", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             };
 

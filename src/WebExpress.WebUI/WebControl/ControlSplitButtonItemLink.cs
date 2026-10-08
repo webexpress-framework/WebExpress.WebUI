@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a link item within a split button control.
+    /// A clickable link entry within a split button's dropdown menu.
     /// </summary>
     public class ControlSplitButtonItemLink : ControlLink, IControlSplitButtonItem
     {

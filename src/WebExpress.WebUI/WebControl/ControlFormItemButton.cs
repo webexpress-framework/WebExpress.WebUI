@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a button form item control.
+    /// A button placed inside a form.
     /// </summary>
     public class ControlFormItemButton : ControlFormItem, IControlFormItemButton
     {
@@ -26,7 +26,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertyColorButton> Color
         {
             get => (Func<IRenderControlContext, PropertyColorButton>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -35,7 +35,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeSizeButton> Size
         {
             get => (Func<IRenderControlContext, TypeSizeButton>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -49,7 +49,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeBlockButton> Block
         {
             get => (Func<IRenderControlContext, TypeBlockButton>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -183,8 +183,8 @@ namespace WebExpress.WebUI.WebControl
             var icon = Icon?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
 
-            var classes = Css.Replace(GetClasses(), color?.ToClass(), color?.ToClass(outline));
-            var styles = Style.Replace(GetStyles(), color?.ToStyle(), color?.ToStyle(outline));
+            var classes = Css.Replace(GetClasses(renderContext), color?.ToClass(), color?.ToClass(outline));
+            var styles = Style.Replace(GetStyles(renderContext), color?.ToStyle(), color?.ToStyle(outline));
 
             var html = new HtmlElementFieldButton()
             {

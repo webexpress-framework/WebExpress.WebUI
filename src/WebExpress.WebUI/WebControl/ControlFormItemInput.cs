@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.WebPage;
 
@@ -89,6 +90,30 @@ namespace WebExpress.WebUI.WebControl
             : base(id)
         {
             Name = _ => id;
+        }
+
+        /// <summary>
+        /// Gives the input an id when it was created without one. A label a form group renders
+        /// beside the input can only name it through its id, so an input that has none would be
+        /// left unnamed however clearly it is captioned.
+        /// </summary>
+        public void EnsureId()
+        {
+            if (string.IsNullOrEmpty(Id))
+            {
+                Id = DeterministicId.Create();
+            }
+        }
+
+        /// <summary>
+        /// Determines whether the field carries its id on a native, labelable element. Inputs
+        /// rendering a native field keep the default; custom inputs override it.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>True if a label element may point at the field.</returns>
+        public virtual bool IsLabelable(IRenderControlFormContext renderContext)
+        {
+            return true;
         }
 
         /// <summary>

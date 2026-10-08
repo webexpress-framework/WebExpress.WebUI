@@ -1,4 +1,4 @@
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a circle-arrow-up.
@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconCircleArrowUp : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-circle-arrow-up";
+        public override string Symbol => "circle-arrow-up";
     }
 }

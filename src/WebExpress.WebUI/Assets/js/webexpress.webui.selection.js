@@ -1,5 +1,5 @@
 /**
- * Read-only selection list that displays all provided items.
+ * Read-only chips for the selected values.
  */
 webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
 
@@ -26,6 +26,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
 
         // create list node
         this._list = document.createElement("ul");
+        this._list.setAttribute("role", "list");
         element.appendChild(this._list);
 
         this.render();
@@ -44,7 +45,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
             items.push({
                 id: elem.getAttribute("id") || null,
                 label: ds.label || elem.textContent.trim(),
-                labelColor: ds.labelColor || null,
+                color: ds.color || null,
                 icon: ds.icon || null,
                 image: ds.image || null,
                 // keep original rich content if needed later
@@ -114,20 +115,19 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
             const li = document.createElement("li");
 
             // apply styles and state
-            if (item.labelColor) { li.classList.add(item.labelColor); }
+            li.classList.add("wx-chip");
+            if (item.color) { li.classList.add(...item.color.split(/\s+/).filter(Boolean)); }
             if (item.disabled) { li.classList.add("is-disabled"); }
             if (this._values.includes(String(item.id))) {
                 li.classList.add("selected");
             }
 
             // apply action attributes to the rendered list item
-            if (item.primaryAction) { li.dataset.wxPrimaryAction = item.primaryAction; }
-            if (item.primaryTarget) { li.dataset.wxPrimaryTarget = item.primaryTarget; }
-            if (item.primaryUri) { li.dataset.wxPrimaryUri = item.primaryUri; }
-
-            if (item.secondaryAction) { li.dataset.wxSecondaryAction = item.secondaryAction; }
-            if (item.secondaryTarget) { li.dataset.wxSecondaryTarget = item.secondaryTarget; }
-            if (item.secondaryUri) { li.dataset.wxSecondaryUri = item.secondaryUri; }
+            for (const prefix of ["primary", "secondary"]) {
+                for (const [key, value] of Object.entries(item[prefix + "Action"] || {})) {
+                    li.dataset["wx" + prefix[0].toUpperCase() + prefix.slice(1) + key[0].toUpperCase() + key.slice(1)] = String(value);
+                }
+            }
 
             const wrapper = document.createElement("span");
             // optional image

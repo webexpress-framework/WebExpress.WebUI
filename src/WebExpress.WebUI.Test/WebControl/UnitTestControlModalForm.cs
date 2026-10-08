@@ -1,4 +1,4 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -37,8 +37,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("abc", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><div class=""wx-webui-modal"" role=""dialog"" *><div class=""wx-modal-header"">abc</div>*</div></form>")]
-        [InlineData("webexpress.webui:plugin.name", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><div class=""wx-webui-modal"" role=""dialog"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</div></form>")]
+        [InlineData("abc", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><dialog class=""wx-webui-modal"" *><div class=""wx-modal-header"">abc</div>*</dialog></form>")]
+        [InlineData("webexpress.webui:plugin.name", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><dialog class=""wx-webui-modal"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</dialog></form>")]
         public void Header(string header, string expected)
         {
             // arrange

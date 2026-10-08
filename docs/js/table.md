@@ -25,7 +25,7 @@ The following core features define the structure, behavior, and extensibility of
 - **Declarative Configuration:** Structure and settings are provided via `data-` attributes and a set of nested `<div>` elements following a semantic hierarchy.
 - **CSS Grid Layout:** Tables use CSS Grid instead of HTML `<table>`, allowing flexible, responsive layouts and programmatic control of column widths (`--wx-grid-template`).
 - **Hierarchical Trees:** Nested `.wx-table-row` elements represent parent-child relationships; toggles for collapse/expand are automatically inserted.
-- **Cell Templating:** Cell content is delegated to the global `TableTemplates` registry, supporting both built-in and user-defined renderers via `<template data-type="...">` nodes or programmatically via JS. Built-in types: `date`, `tag`, `selection`, `combo`, `text`, `numeric`, `move`, `rating`, `editor`. Options/choices can be passed via nested children and `data-*`.
+- **Cell Templating:** Cell content is delegated to the global `TableTemplates` registry, supporting both built-in and user-defined renderers via `<template data-type="...">` nodes or programmatically via JS. Built-in types: `date`, `tag`, `selection`, `combo`, `text`, `numeric`, `move`, `rating`, `editor`. The `editor` template renders an editable column through `SmartEditCtrl` and a read-only one through [ContentCtrl](content.md), so a non-editable cell shows the document rather than the editor markup. Options/choices can be passed via nested children and `data-*`.
 - **Sorting:** Column header click cycles between ascending, descending, and none; sort state is visualized and `TABLE_SORT_EVENT` is fired.
 - **Resizable Columns:** All columns except the last visible and columns with `resizable=false` have a draggable resize grip. Autosize is supported via double click.
 - **Change Highlighting:** When data updates via API or program logic, rows with signature change flash (`wx-change-flash`), and new rows flash with (`wx-new-flash`).
@@ -42,7 +42,7 @@ Wenn du möchtest, kann ich es noch technischer, kürzer oder stärker an API‑
 
 | Attribute            | Description
 |----------------------|----------------------------------------
-| `data-color`         | Sets table color scheme (Bootstrap etc.)
+| `data-color`         | Sets table color scheme using the framework theme
 | `data-border`        | Adds border style
 | `data-striped`       | Enables zebra striping for rows
 
@@ -69,9 +69,9 @@ The following example illustrates a minimal declarative setup, showing how colum
     </div>
     <div data-id="status" data-label="Status">
       <template data-type="move">
-        <div id="open" data-icon="far fa-circle">Open</div>
-        <div id="shipped" data-icon="fas fa-truck">Shipped</div>
-        <div id="closed" data-icon="fas fa-check">Closed</div>
+        <div id="open" data-icon="circle">Open</div>
+        <div id="shipped" data-icon="truck">Shipped</div>
+        <div id="closed" data-icon="check">Closed</div>
       </template>
     </div>
   </div>
@@ -120,13 +120,13 @@ ctrl.insertRow({ id: 'p01', cells: [{ text: 'Sample' }, { text: '2025-05-01' }] 
 document.body.appendChild(div);
 ```
 
-# TableCtrlReorderable
+# TableReorderableCtrl
 
-`TableCtrlReorderable` extends `TableCtrl` with interactive manipulation abilities and persistence. It enables users to reorder columns and rows, hide columns, manage view state, and move rows within hierarchical structures (trees). It is ideal for UIs where table structure needs to be configurable and persistent across sessions.
+`TableReorderableCtrl` extends `TableCtrl` with interactive manipulation abilities and persistence. It enables users to reorder columns and rows, hide columns, manage view state, and move rows within hierarchical structures (trees). It is ideal for UIs where table structure needs to be configurable and persistent across sessions.
 
 ```
    ┌─┬──────────────────┬──────────────────┬─────┐
-   │≡│ [Icon] Column 1 ▼│ [Icon] Column 2  │ [+] │  // Drag & Drop, Sortable, resizable Headers
+   │ │ [Icon] Column 1 ▼│ [Icon] Column 2  │ [+] │  // Sortable, resizable Headers
    ├─┼──────────────────┼──────────────────┼─────┤
    │≡│ ▼ Row 1          │ Cell 1.2         │ […] │  // Row drag handle, Collapsible, Options
    ├─┼──────────────────┼──────────────────┼─────┤
@@ -143,13 +143,26 @@ document.body.appendChild(div);
 Beyond its core functionality, the table control component offers a range of advanced features that enhance usability, customization, and interaction.
 
 - **Column Drag & Drop:** CTRL+drag header to move columns; indicator visualizes destination.
-- **Column Modal:** Button in rightmost header cell opens a column management modal (reorder, show/hide, resize, sort). Can use an external DialogPanel via key `table-columns`.
-- **Column Visibility Management:** Easily hide or show columns via modal; modal can search/filter columns.
-- **Persistence:** View state (columns, widths, tree collapsed/expanded, sort) is saved in a cookie using `data-persist-key` and restored on initialization.
+- **Column Modal:** Button in rightmost header cell opens a column management modal (reorder, show/hide, resize, sort). The button is there whenever the header is shown; hiding columns in it needs `data-allow-column-remove`. Can use an external DialogPanel via key `table-columns`.
+- **Column Visibility Management:** With `data-allow-column-remove`, hide or show columns via modal; modal can search/filter columns.
+- **Persistence:** View state (columns, widths, tree collapsed/expanded, sort) is saved in localStorage using `data-persist-key` and restored on initialization.
 - **Row Reordering:** Drag handle (`≡`) in leftmost column when `data-movable-row="true"`; support for hierarchical drag and drop including reparenting.
 - **Auto-Expand on Row Hover:** When dragging a row, hovering for >2 seconds over a collapsed parent with children auto-expands the parent to enable dropping as a child.
 - **Action/Options Column:** Automatically handled; supports per-row or global action dropdowns for contextual table actions.
 - **All base features:** Hierarchy, cell templates, flexible, responsive rendering.
+
+## Filling the pane
+
+Growing with its rows is right for a table among other blocks on a page. Where the table *is* the view, it is wrong: inside an application shell the page does not scroll, the panes do, and a growing table takes the column header out of view with the page — the reader then scrolls through rows whose columns no longer say what they hold. A table wider than the pane pushes the pane sideways for the same reason. `Fill` takes the height from the host instead — on `ControlTable` as on the REST-backed `ControlDataTable`:
+
+```csharp
+new ControlDataTable("items")
+{
+    Fill = _ => true
+};
+```
+
+The host is marked `wx-fill`, and a flex column host then drives the table: it grows into the free space and shrinks with it, and the rows scroll under a header that stays, sideways as well as down. Anything the data table keeps beside the table — the pager, the info line, the progress bar — holds its height. In a `WebExpress.WebApp` shell the content panel becomes a flex column on its own as soon as a filling control is on the page, so `Fill` is all a page there has to set; elsewhere, make the host a flex column with `min-height: 0`. A host that hands nothing down leaves the table at `--wx-table-height` (default `70vh`), **never at its content height** — the rows only scroll while the table is bounded. `max-height: 100%` keeps it inside a host that does have an extent.
 
 ## Additional Configuration
 
@@ -162,7 +175,7 @@ In addition to its interactive features, the table control component can be furt
 | `data-allow-column-remove`   | allows columns to be hidden via modal
 | `data-columns-modal-key`     | links modal to external DialogPanel
 
-## Events 
+## Events
 
 In addition to the core event set, the table control component emits several extended events that capture user-driven structural changes—such as reordering columns, toggling visibility, or rearranging rows—while still supporting all base interaction events.
 
@@ -184,9 +197,9 @@ The following example demonstrates a minimal yet fully functional table control 
     <div data-id="customer" data-label="Customer"></div>
     <div data-id="status" data-label="Status">
       <template data-type="move">
-        <div id="open" data-icon="far fa-circle">Open</div>
-        <div id="shipped" data-icon="fas fa-truck">Shipped</div>
-        <div id="closed" data-icon="fas fa-check">Closed</div>
+        <div id="open" data-icon="circle">Open</div>
+        <div id="shipped" data-icon="truck">Shipped</div>
+        <div id="closed" data-icon="check">Closed</div>
       </template>
     </div>
   </div>
@@ -200,7 +213,7 @@ The following example demonstrates a minimal yet fully functional table control 
 
 Programmatic control allows you to interact with the table and customize its structure, data, and behavior directly via JavaScript APIs. This is especially useful for building dynamic applications, updating data on the fly, or integrating with other JavaScript modules.
 
-You can access automatically created instances or instantiate a new TableCtrlReorderable explicitly.
+You can access automatically created instances or instantiate a new TableReorderableCtrl explicitly.
 
 ### Accessing Instance
 
@@ -219,7 +232,7 @@ Dynamically creating new table controller instances gives you full control over 
 const div = document.createElement('div');
 div.dataset.movableRow = "true";
 div.dataset.persistKey = "demo-table";
-const reorderCtrl = new webexpress.webui.TableCtrlReorderable(div);
+const reorderCtrl = new webexpress.webui.TableReorderableCtrl(div);
 reorderCtrl.setColumns([
     { id: 'name', label: 'Name' },
     { id: 'date', label: 'Date', rendererType: 'date', rendererOptions: { format: 'yyyy-MM-dd' } }
@@ -234,5 +247,5 @@ document.body.appendChild(div);
 # Best Practices & Advanced Integration
 
 - Use `TableCtrl` for pure data presentation with custom rendering and trees.
-- Use `TableCtrlReorderable` for interactive, user-configurable layout with drag & drop, persistent views, and hierarchical editing.
+- Use `TableReorderableCtrl` for interactive, user-configurable layout with drag & drop, persistent views, and hierarchical editing.
 - Integrate external modal panels via `table-columns` for advanced workflows.

@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Interface for a control.
+    /// Base contract for all WebUI controls: visual building blocks that render themselves into a page's HTML.
     /// </summary>
     public interface IControl : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

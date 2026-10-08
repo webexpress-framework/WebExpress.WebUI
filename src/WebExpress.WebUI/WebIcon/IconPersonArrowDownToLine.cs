@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconPersonArrowDownToLine : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-person-arrow-down-to-line";
+        public override string Symbol => "person-arrow-down-to-line";
     }
 }

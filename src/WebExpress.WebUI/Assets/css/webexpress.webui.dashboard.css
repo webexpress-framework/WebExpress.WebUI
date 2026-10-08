@@ -4,6 +4,82 @@
 .wx-dashboard {
 }
 
+/* Fill mode: the board takes the height its host offers instead of growing with
+   its longest column, which is what an application shell asks of the content of
+   a pane. The "…" menu above the columns then stays reachable while the widgets
+   scroll, instead of leaving the screen with the page.
+
+   Both the basis and the height are stated: a flex column host drives the basis,
+   and where a host hands nothing down the height still has to come from the
+   environment rather than from the content. 100% would resolve to auto against
+   an auto-height host, which is the content - the one answer this mode must not
+   give. */
+.wx-dashboard.wx-fill {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 var(--wx-dashboard-height, 70vh);
+    height: var(--wx-dashboard-height, 70vh);
+    max-height: 100%;
+    min-height: 12rem;
+    overflow: hidden;
+}
+
+.wx-dashboard.wx-fill > .wx-dashboard-toolbar {
+    flex: 0 0 auto;
+}
+
+/* the columns are what scrolls, all of them together: they are read as one board
+   rather than as lanes with a scrollbar each */
+.wx-dashboard.wx-fill > .wx-dashboard-row {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* board "…" menu bar, right aligned above the columns, sharing the tab-add feel */
+.wx-dashboard-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+/* the "…" menu container; its dropdown is a native popover anchored to the
+   trigger, so the container only sizes the trigger */
+.wx-dashboard-menu {
+    display: inline-flex;
+}
+
+/* the board and per-widget "…" trigger buttons */
+.wx-dashboard-menu-btn {
+    border: none;
+    background: transparent;
+    padding: 0.15rem 0.4rem;
+    line-height: 1;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    color: var(--wx-secondary-color, #6c757d);
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.wx-dashboard-menu-btn:hover,
+.wx-dashboard-menu-btn:focus {
+    color: var(--wx-body-color);
+    background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.05));
+}
+
+/* the per-widget trigger stays subtle until the card is hovered */
+.wx-dashboard-widget-menu-btn {
+    font-size: 0.9em;
+}
+
+/* the framework color control in the widget settings dialog keeps a compact,
+   fixed width beside the enable checkbox */
+.wx-dashboard-settings-color {
+    flex: 0 0 auto;
+    width: 6rem;
+}
+
 /* dashboard lane layout */
 .wx-dashboard-row {
     display: grid;
@@ -20,21 +96,198 @@
     }
 }
 
-/* wrapper for the lane to hold the title and the dropzone */
+/* wrapper for the lane to hold the title and the dropzone; it is the anchor of
+   the width divider on its right edge */
 .wx-dashboard-lane-wrapper {
+    position: relative;
     display: flex;
     flex-direction: column;
     gap: 0.75rem;
 }
 
-/* Lane title styling */
+/* the divider between two columns sits in the middle of the gap; it is hidden
+   while the columns stack, where there is no width to share */
+.wx-dashboard-col-resizer {
+    display: none;
+}
+
+@media (min-width: 768px) {
+    /* the wrapper reaches down the whole row, so the divider does too, however
+       short the column on its left is; the lane inside keeps its own height */
+    .wx-dashboard-lane-wrapper {
+        align-self: stretch;
+    }
+
+    .wx-dashboard-col-resizer {
+        display: block;
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        right: calc(-0.75rem - 6px);
+        width: 12px;
+        z-index: 1;
+        cursor: col-resize;
+        /* a touch drag moves the divider instead of scrolling the page */
+        touch-action: none;
+    }
+
+    /* the visible line, drawn only when the divider is in play */
+    .wx-dashboard-col-resizer::after {
+        content: "";
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 5px;
+        width: 2px;
+        border-radius: 1px;
+        background-color: transparent;
+        transition: background-color 0.15s;
+    }
+
+    .wx-dashboard-col-resizer:hover::after,
+    .wx-dashboard-col-resizer:focus-visible::after,
+    .wx-dashboard-col-resizer.wx-dashboard-col-resizer-active::after {
+        background-color: var(--wx-primary, #0d6efd);
+    }
+
+    .wx-dashboard-col-resizer:focus-visible {
+        outline: none;
+    }
+
+    /* the drag keeps its cursor and selects no text while the pointer crosses the cards */
+    .wx-dashboard-resizing {
+        cursor: col-resize;
+        user-select: none;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wx-dashboard-col-resizer::after {
+        transition: none;
+    }
+}
+
+/* Lane title styling; a flex row so the grip, title and "…" menu align and the
+   title can truncate between them */
 .wx-dashboard-lane-title {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--bs-border-color, #dee2e6);
-    color: var(--bs-heading-color, #495057);
+    border-bottom: 2px solid var(--wx-border-color, #dee2e6);
+    color: var(--wx-heading-color, var(--wx-body-color));
+}
+
+/* the heading inside the row takes the row typography, so the name reads as before; it stays
+   a box of its own rather than display: contents, which some readers drop from the tree */
+.wx-dashboard-lane-heading {
+    display: flex;
+    min-width: 0;
+    margin: 0;
+    font: inherit;
+    line-height: inherit;
+}
+
+.wx-board-col-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* trailing badges (column widget count, widget-header count) share the same
+   look as the tab badge */
+.wx-board-col-badge,
+.wx-dashboard-widget-badge {
+    margin-left: 0.4rem;
+    font-size: 0.7em;
+    font-weight: 600;
+    line-height: 1;
+    flex: 0 0 auto;
+}
+
+/* neutral fallback when no color utility class is supplied */
+.wx-board-col-badge:not([class*="text-bg-"]):not([class*="bg-"]),
+.wx-dashboard-widget-badge:not([class*="text-bg-"]):not([class*="bg-"]) {
+    color: var(--wx-secondary-color, #6c757d);
+    background-color: var(--wx-tertiary-bg, #eef0f2);
+}
+
+/* the column "…" menu sits at the far end of the header */
+.wx-board-col-menu {
+    margin-left: auto;
+}
+
+/* the per-column and per-widget "…" triggers and the widget move handle stay
+   hidden until the header or card is hovered; an open menu keeps its trigger
+   visible even once the pointer leaves. the board (add) menu is unaffected. */
+.wx-dashboard-lane-title .wx-dashboard-menu-btn,
+.wx-dashboard-widget-card .wx-dashboard-menu-btn,
+.wx-dashboard-widget-card .wx-drag-handle {
+    /* faded rather than hidden: a hidden button cannot take the focus, so the keyboard
+       could never reach the menu or the grip */
+    opacity: 0;
+}
+
+.wx-dashboard-lane-title:hover .wx-dashboard-menu-btn,
+.wx-dashboard-lane-title:focus-within .wx-dashboard-menu-btn,
+.wx-dashboard-widget-card:hover .wx-dashboard-menu-btn,
+.wx-dashboard-widget-card:hover .wx-drag-handle,
+.wx-dashboard-widget-card:focus-within .wx-dashboard-menu-btn,
+.wx-dashboard-widget-card:focus-within .wx-drag-handle,
+.wx-dashboard-menu.wx-menu-open .wx-dashboard-menu-btn {
+    opacity: 1;
+}
+
+/* column drag: dim the dragged header and mark the side the column would land
+   on, mirroring the tab reorder affordance */
+.wx-board-col-header.wx-board-col-drop-before {
+    box-shadow: inset 3px 0 0 0 var(--wx-primary, #0d6efd);
+}
+
+.wx-board-col-header.wx-board-col-drop-after {
+    box-shadow: inset -3px 0 0 0 var(--wx-primary, #0d6efd);
+}
+
+/* short landing flash after a column reorder so the user sees where it went,
+   mirroring the kanban feedback */
+.wx-dashboard-lane-title.wx-board-col-moved {
+    animation: wx-board-col-moved 0.8s ease-out;
+}
+
+@keyframes wx-board-col-moved {
+    0% { background-color: rgba(13, 110, 253, 0.18); }
+    100% { background-color: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wx-dashboard-lane-title.wx-board-col-moved {
+        animation: none;
+    }
+}
+
+/* the color palette shown in the column menu */
+.wx-board-col-color-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    padding: 0.25rem 1rem 0.5rem;
+}
+
+.wx-board-col-swatch {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.wx-board-col-swatch.active {
+    outline: 2px solid var(--wx-body-color, #212529);
+    outline-offset: 1px;
 }
 
 /* A vertical column (lane) that holds the widgets */
@@ -61,10 +314,16 @@
     position: relative;
 }
 
+/* the header is part of the card surface, not a cap of its own: the accent is
+   the colored top border, so neither a fill nor a rule separates it from the
+   body */
 .wx-dashboard-widget-card > .card-header {
     display: flex;
     border-bottom: none;
-    background-color: var(--bs-body);
+    background-color: transparent;
+    color: var(--wx-body-color);
+    min-width: 0;
+    gap: 0.5rem;
     justify-content: space-between;
     align-items: center;
 }
@@ -103,6 +362,10 @@
 
 .wx-drag-handle {
     cursor: grab;
+    border: 0;
+    background: transparent;
+    padding: 0;
+    color: inherit;
 }
 
 .wx-drag-handle:active {
@@ -123,11 +386,76 @@
 }
 
 .wx-remove-widget i {
-    color: var(--bs-secondary, #adb5bd);
+    color: var(--wx-secondary, #adb5bd);
     transition: color 0.2s;
 }
 
 .wx-remove-widget:hover i,
 .wx-remove-widget:focus i {
-    color: var(--bs-danger, #dc3545);
+    color: var(--wx-danger, #dc3545);
 }
+
+/* ---- editable / movable / deletable column headers ----
+   shared affordance classes also used by the kanban control. the grip, pencil
+   and delete icons stay hidden until the header is hovered (visibility, not
+   display, so the header does not jump). */
+.wx-board-col-grip {
+    cursor: grab;
+    user-select: none;
+    margin-right: 0.25rem;
+    vertical-align: middle;
+    line-height: 1;
+    color: var(--wx-secondary-color, #6c757d);
+    /* faded rather than hidden: a hidden control cannot take the focus */
+    opacity: 0;
+}
+
+.wx-board-col-grip:active {
+    cursor: grabbing;
+}
+
+.wx-board-col-edit,
+.wx-board-col-delete {
+    border: none;
+    background: transparent;
+    padding: 0 0.15rem;
+    margin-left: 0.15rem;
+    vertical-align: middle;
+    line-height: 1;
+    font-size: 0.85em;
+    cursor: pointer;
+    color: var(--wx-secondary-color, #6c757d);
+    opacity: 0;
+}
+
+.wx-board-col-grip:hover,
+.wx-board-col-edit:hover,
+.wx-board-col-delete:hover {
+    color: var(--wx-body-color);
+}
+
+.wx-board-col-header:hover .wx-board-col-grip,
+.wx-board-col-header:hover .wx-board-col-edit,
+.wx-board-col-header:hover .wx-board-col-delete,
+.wx-board-col-header:focus-within .wx-board-col-grip,
+.wx-board-col-header:focus-within .wx-board-col-edit,
+.wx-board-col-header:focus-within .wx-board-col-delete {
+    opacity: 1;
+}
+
+.wx-board-col-header.wx-board-col-dragging {
+    opacity: 0.5;
+}
+
+.wx-board-col-input {
+    font: inherit;
+    color: inherit;
+    max-width: 100%;
+    padding: 0.05rem 0.3rem;
+    border: 1px solid var(--wx-border-color, #ced4da);
+    border-radius: 0.2rem;
+    background: var(--wx-body-bg);
+}
+
+.wx-dashboard-widget-card > .card-header > :first-child { min-width: 0; }
+.wx-dashboard-widget-card > .card-header > :last-child { flex-shrink: 0; }

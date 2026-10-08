@@ -1,7 +1,9 @@
 ﻿namespace WebExpress.WebUI.WebNotification
 {
     /// <summary>
-    /// The layout options of the notification.
+    /// The color scheme of a notification, which tells the reader at a glance what kind of
+    /// message it carries (for example success, warning or danger). It does not change the
+    /// layout of the notification.
     /// </summary>
     public enum TypeNotification
     {
@@ -64,26 +66,28 @@
     /// <summary>
     /// Provides extension methods for the <see cref="TypeNotification"/> enum.
     /// </summary>
-    public static class TypeLayoutTabExtensions
+    public static class TypeNotificationExtensions
     {
         /// <summary>
-        /// Conversion to a string.
+        /// Converts the notification type to the alert class that colors it. The class is also the
+        /// wire format of the type, so it must stay unique per value for the json converter to
+        /// read it back.
         /// </summary>
-        /// <param name="layout">The layout to be converted.</param>
-        /// <returns>The converted layout.</returns>
-        public static string ToClass(this TypeNotification layout)
+        /// <param name="type">The notification type to be converted.</param>
+        /// <returns>The css class, or an empty string for the default type.</returns>
+        public static string ToClass(this TypeNotification type)
         {
-            return layout switch
+            return type switch
             {
-                TypeNotification.Primary => "bg-primary",
-                TypeNotification.Secondary => "bg-secondary",
+                TypeNotification.Primary => "alert-primary",
+                TypeNotification.Secondary => "alert-secondary",
                 TypeNotification.Success => "alert-success",
                 TypeNotification.Info => "alert-info",
                 TypeNotification.Warning => "alert-warning",
                 TypeNotification.Danger => "alert-danger",
                 TypeNotification.Light => "alert-light",
                 TypeNotification.Dark => "alert-dark",
-                TypeNotification.White => "bg-white",
+                TypeNotification.White => "alert-white",
                 TypeNotification.Transparent => "bg-transparent",
                 _ => string.Empty,
             };

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
@@ -32,7 +34,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual TypeOrientationToolBar Orientation
         {
             get => (TypeOrientationToolBar)GetProperty(TypeOrientationToolBar.Default);
-            set => SetProperty(value, () => value.ToClass());
+            set => SetProperty(value, (renderContext) => value.ToClass());
         }
 
         /// <summary>
@@ -41,7 +43,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual TypeFixed Fixed
         {
             get => (TypeFixed)GetProperty(TypeFixed.None);
-            set => SetProperty(value, () => value.ToClass());
+            set => SetProperty(value, (renderContext) => value.ToClass());
         }
 
         /// <summary>
@@ -50,8 +52,14 @@ namespace WebExpress.WebUI.WebControl
         public virtual TypeSticky Sticky
         {
             get => (TypeSticky)GetProperty(TypeSticky.None);
-            set => SetProperty(value, () => value.ToClass());
+            set => SetProperty(value, (renderContext) => value.ToClass());
         }
+
+        /// <summary>
+        /// Gets or sets the name assistive technology announces for the toolbar. A page
+        /// holding several toolbars needs a distinct name for each so they can be told apart.
+        /// </summary>
+        public Func<IRenderControlContext, string> Label { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -230,13 +238,17 @@ namespace WebExpress.WebUI.WebControl
                 return null;
             }
 
-            var html = new HtmlElementSectionNav()
+            // a toolbar is not a navigation landmark: it groups commands, which is what the
+            // toolbar role says, and it is named so several on a page are told apart
+            var label = Label?.Invoke(renderContext) ?? "webexpress.webui:toolbar.label";
+            var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-toolbar", GetClasses()),
-                Style = GetStyles(),
-                Role = role
+                Class = Css.Concatenate("wx-webui-toolbar", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
+                Role = role ?? "toolbar"
             }
+                .AddUserAttribute("aria-label", I18N.Translate(renderContext, label))
                 .Add(items.Select(x => x.Render(renderContext, visualTree)))
                 .Add
                 (

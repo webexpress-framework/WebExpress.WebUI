@@ -1,22 +1,25 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the type of layout for a flexbox.
+    /// Whether a control is a flex container, and whether it behaves as a block or as an inline
+    /// element towards its surroundings. The direction its children are laid out in is set
+    /// separately with <see cref="TypeDirection"/>.
     /// </summary>
     public enum TypeLayoutFlex
     {
         /// <summary>
-        /// No layout specified.
+        /// The control is not a flex container.
         /// </summary>
         None,
 
         /// <summary>
-        /// Default flexbox layout.
+        /// For a container that takes the full width and starts on its own line, such as a toolbar row.
         /// </summary>
         Default,
 
         /// <summary>
-        /// Inline flexbox layout.
+        /// For a container that sits within a line of text and is only as wide as its children,
+        /// such as an icon next to a label.
         /// </summary>
         Inline
     }

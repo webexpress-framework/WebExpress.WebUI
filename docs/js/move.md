@@ -71,7 +71,7 @@ const dynamicMoveCtrl = new webexpress.webui.MoveCtrl(container);
 // set the properties programmatically
 dynamicMoveCtrl.options = [
     { id: 'opt1', label: 'Option 1' },
-    { id: 'opt2', label: 'Option 2', icon: 'fas fa-check' }
+    { id: 'opt2', label: 'Option 2', icon: 'check' }
 ];
 dynamicMoveCtrl.value = ['opt2'];
 ```
@@ -90,10 +90,10 @@ The following example shows how to declare a read-only list where "Editor" and "
      data-value="item-2;item-3">
 
     <!-- Each option is declared as a child element. -->
-    <div id="item-1" class="wx-webui-move-option" data-icon="fas fa-user-shield">Administrator</div>
-    <div id="item-2" class="wx-webui-move-option" data-icon="fas fa-user-edit">Editor</div>
-    <div id="item-3" class="wx-webui-move-option" data-icon="fas fa-user">Viewer</div>
-    <div id="item-4" class="wx-webui-move-option" data-icon="fas fa-cog" disabled>System</div>
+    <div id="item-1" class="wx-webui-move-option" data-icon="user-shield">Administrator</div>
+    <div id="item-2" class="wx-webui-move-option" data-icon="user-pen">Editor</div>
+    <div id="item-3" class="wx-webui-move-option" data-icon="user">Viewer</div>
+    <div id="item-4" class="wx-webui-move-option" data-icon="cog" disabled>System</div>
 </div>
 ```
 
@@ -180,7 +180,7 @@ const dynamicMoveCtrl = new webexpress.webui.InputMoveCtrl(container);
 dynamicMoveCtrl.name = 'dynamic-roles';
 dynamicMoveCtrl.options = [
     { id: 'new1', label: 'New Option 1' },
-    { id: 'new2', label: 'New Option 2', icon: 'fas fa-star' }
+    { id: 'new2', label: 'New Option 2', icon: 'star' }
 ];
 dynamicMoveCtrl.value = ['new2'];
 ```
@@ -207,8 +207,8 @@ The component dispatches events to inform other parts of the application about u
      data-header-available="Available Roles">
 
     <!-- Each option is declared as a child element. -->
-    <div id="item-1" class="wx-webui-move-option" data-icon="fas fa-user-shield">Administrator</div>
-    <div id="item-2" class="wx-webui-move-option" data-icon="fas fa-user-edit">Editor</div>
-    <div id="item-3" class="wx-webui-move-option" data-icon="fas fa-user">Viewer</div>
+    <div id="item-1" class="wx-webui-move-option" data-icon="user-shield">Administrator</div>
+    <div id="item-2" class="wx-webui-move-option" data-icon="user-pen">Editor</div>
+    <div id="item-3" class="wx-webui-move-option" data-icon="user">Viewer</div>
 </div>
 ```

@@ -21,6 +21,13 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
+        /// Gets or sets the outline level of the title. On a page of its own the dialog is the
+        /// page, so its title is a second-level heading by default; embedded under other
+        /// headings it needs a deeper level to keep the outline in order.
+        /// </summary>
+        public Func<IRenderControlContext, int?> HeadingLevel { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -36,15 +43,17 @@ namespace WebExpress.WebUI.WebControl
         {
             var username = Username?.Invoke(renderContext);
             var title = Title?.Invoke(renderContext);
+            var headingLevel = HeadingLevel?.Invoke(renderContext);
 
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-login", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-login", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
             }
-                .AddUserAttribute("dataset-username", username)
-                .AddUserAttribute("dataset-title", I18N.Translate(renderContext, title));
+                .AddUserAttribute("data-username", username)
+                .AddUserAttribute("data-title", I18N.Translate(renderContext, title))
+                .AddUserAttribute("data-heading-level", headingLevel?.ToString());
         }
     }
 }

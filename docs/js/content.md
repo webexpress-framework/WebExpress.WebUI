@@ -1,0 +1,166 @@
+![WebExpress](https://raw.githubusercontent.com/webexpress-framework/.github/main/docs/assets/img/banner.png)
+
+# ContentCtrl
+
+The `ContentCtrl` is the reading view of stored text. Document text is not editable and the control never contributes a form input. Inline comment authoring is disabled by default and can be enabled explicitly for rich text.
+
+Its server-side counterpart `ControlContent` accepts a value in either of two formats:
+
+|Format                                 |The stored value                    |Who converts it
+|---------------------------------------|------------------------------------|-----------------
+|`TypeFormatContent.RichText` (default) |what the [editor](editor.md) stores |this control, on the client
+|`TypeFormatContent.Markdown`           |Markdown as plain text              |the server, through the same `MarkdownParser` that backs `ControlText`
+
+Markdown is parsed on the server on purpose: the framework already has a full Markdown implementation there, and a second one on the client would be a subset of it and would drift away from it. The client therefore always receives markup, and the conversion described below is the one that turns the *editor's* working surface into a document.
+
+A value authored in the editor can be brought into the Markdown format with `EditorContent.ConvertToMarkdown`, so the same document can be stored either way.
+
+For rich text, the editor does not store a document. It stores its whole **working surface**. An add-on is persisted inside the card frame that names it, moves it and opens its settings; a table is persisted framed and with the column resizers in its header cells; every block that must not be typed into carries `contenteditable="false"` and is fenced by the empty paragraphs the caret needs to get past it. Publishing that value as it stands shows the reader the scaffolding instead of the document.
+
+`ContentCtrl` removes the scaffolding and leaves the document, which lets one stored value serve both the author and the reader instead of forcing a second, hand-maintained representation.
+
+## What the conversion does
+
+|Editor markup                                                                |Reading view
+|-----------------------------------------------------------------------------|--------------
+|`.wx-addon-frame` (card, header, drag handle, settings button)               |`div.wx-content-addon` holding only what the add-on renders
+|`.wx-addon-inline-frame` (draggable, tooltip naming the type)                |`span.wx-content-inline` holding only the inline markup
+|Framed table with `.wx-col-resizer` handles and `.wx-native-table`           |`table.wx-content-table`, column widths kept
+|`.wx-editor-instruction` (a note to whoever edits)                           |dropped, unless instruction texts are requested
+|`.wx-editor-placeholder`, `[data-wx-caret]`, `.wx-drop-marker`               |dropped
+|`contenteditable`, `draggable`, `spellcheck`, `data-wx-focus-new`            |dropped
+|`<p><br></p>` guard paragraphs around a non-editable block, and at the edges |dropped
+|`<a target="_blank">` without a `rel`                                        |`rel="noopener noreferrer"` added
+|any inline `on…` handler that reached the value from outside                 |dropped
+
+An empty paragraph *between* two paragraphs of text was typed by the author and survives — only the guards the editor itself inserts are removed.
+
+Persisted add-on configuration (`data-*` on the frame) is carried onto the reading element, and the rendered result is handed back to `webexpress.webui.Controller.createInstances`, so an add-on that persists as the markup of a control (a chart, a date, a game board) comes to life in the reading view too.
+
+## Notes
+
+The reading view renders the editor's `note-box` add-on as an `alert alert-warning` content block. Authored paragraphs, lists, links and inline formatting remain visible, while the frame title, movement handle and editing actions are removed. Notes are part of the document and remain visible with the default `Instruction` setting.
+
+## Inline Comments
+
+The reading view highlights text carrying an editor comment and exposes the annotation through the existing popover control. Hover over the text or focus it with the keyboard to read the comment. By default the reading view does not offer annotation actions. Comment content is treated as plain text, including any HTML-like characters entered by an author.
+
+The optional comment mode is enabled by `ControlContent.AllowComments` or `data-allow-comments="true"`. Selecting text then shows a bubble with a comment button. The shared comment dialog supports adding annotations, editing a selected annotation and removing it without changing the document text. The main editor toolbar does not contain a comment button.
+
+The permission applies to rich text. Markdown remains a reading format because comment marks are stored in the editor document model. Comment edits update `ContentCtrl.value` to serialized JSON and emit `webexpress.webui.Event.CHANGE_VALUE_EVENT` with the document object in `event.detail.value`. The host application persists that value through its existing service integration. Merely loading a value or closing the dialog does not emit a change event.
+
+```csharp
+var content = new ControlContent("description")
+{
+    Content = _ => storedDocument,
+    Format = _ => TypeFormatContent.RichText,
+    AllowComments = _ => true
+};
+```
+
+```javascript
+contentElement.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, event => {
+    const updatedDocument = JSON.stringify(event.detail.value);
+    // persist updatedDocument through the application's existing service
+});
+```
+
+## Declarative Configuration
+
+|Attribute             |Description                                                                                                   | Example
+|----------------------|--------------------------------------------------------------------------------------------------------------|-----------------
+|`data-base64`         |The content is transported base64 encoded. This is how the server-side `ControlContent` delivers it, so the browser never lays out the editing markup before the reading view replaces it. | `data-base64="true"`
+|`data-placeholder`    |Text shown when there is no content. Without it an empty value renders nothing at all.                        | `data-placeholder="No description yet"`
+|`data-instruction`    |Keeps the author's instruction texts in the reading view. They are dropped by default.                        | `data-instruction="true"`
+|`data-allow-comments` |Enables the comment bubble for selections in rich text while keeping document text read-only.                 | `data-allow-comments="true"`
+|Text content          |The raw editor value, either base64 encoded or as markup.                                                     | `<div class="wx-webui-content"><p>Hello <b>World</b></p></div>`
+
+```html
+<div id="article" class="wx-webui-content" data-placeholder="No description yet">
+    <p>Hello <b>World</b></p>
+</div>
+```
+
+## Programmatic Control
+
+```javascript
+const element = document.getElementById("article");
+const content = webexpress.webui.Controller.getInstanceByElement(element);
+
+// the raw value, exactly as the editor stores it
+const stored = content.value;
+
+// replacing it rebuilds the reading view
+content.value = "<p>New <b>content</b></p>";
+
+// the reading text, for an excerpt, a tooltip or a sort key
+const excerpt = content.text.slice(0, 140);
+```
+
+|Member     |Description
+|-----------|--------------------------------------------------------------------------
+|`value`    |Gets or sets the content in the raw format the editor stores. Setting it rebuilds the view.
+|`text`     |Gets the reading text of the converted content — the raw value would answer with its markup.
+|`render()` |Rebuilds the reading view from the current value.
+
+## Converting without the control
+
+The conversion itself is a static class, so a host that already owns its container can use it directly:
+
+```javascript
+// returns a DocumentFragment holding the reading view
+const fragment = webexpress.webui.ContentFormat.toFragment(value, { instruction: false });
+
+// true when there is nothing a reader would see - an image or an add-on counts
+// as content even though it contributes no text
+if (!webexpress.webui.ContentFormat.isEmpty(fragment)) {
+    container.appendChild(fragment);
+}
+```
+
+## Where it is used
+
+- [SmartEdit](smartedit.md) shows it in place of the editor while the pen is untouched, so the value reads as a document instead of as editor markup. The SmartEdit placeholder is passed through, so an unset value still names the field.
+- The `editor` cell template of the [table](table.md) shows it in a column that is not `Editable`.
+- A page shows it wherever stored rich text is published — the server-side counterpart is `ControlContent`.
+
+## Server-side counterpart
+
+```csharp
+// rich text, as the editor stores it
+new ControlContent()
+{
+    Content = _ => article.Description,
+    Placeholder = _ => "No description yet"
+}
+
+// markdown, as a plain text field or an imported document stores it
+new ControlContent()
+{
+    Content = _ => readme.Text,
+    Format = _ => TypeFormatContent.Markdown
+}
+```
+
+|Property      |Description
+|--------------|-------------
+|`Content`     |The value in the raw format it is stored in.
+|`Format`      |`RichText` (default) or `Markdown`.
+|`Placeholder` |Stands in for a value that is not set. Without it an empty value renders nothing.
+|`Instruction` |Keeps the author's instruction texts. Rich text only — Markdown has none.
+
+## Reading a stored value on the server
+
+Away from a browser - converting a stored value to Markdown or PDF, indexing it, mailing it - there is no client to build the reading view. `EditorContent` (`WebExpress.WebUI.WebEditor`) applies the same rules on the server, on the stored value alone and without a control or render context:
+
+```csharp
+var markdown = EditorContent.ConvertToMarkdown(article.Description);
+var nodes = EditorContent.ReadDocument(article.Description);
+var pdf = EditorContent.ConvertToPdf(article.Description);
+```
+
+The two implementations are held together by a shared fixture rather than by shared code: `Data/editor-content.fixture.json` is read by the C# tests and by `content.scaffolding.test.mjs`, so a rule added on one side and forgotten on the other fails on the other side. See the [Markdown guide](../md-guide.md) for the conversion itself.
+
+`ControlContent` encodes the markup and emits the host element; the reading-view conversion happens on the client. It is display only and never contributes a value to a form — the editing side is `ControlFormItemInputText` with `Format = _ => TypeEditTextFormat.Wysiwyg`.
+
+The deletion permission applies only to `ControlContent` and is separate from comment authoring. Set `data-delete-comments="true"` on the reading control host to show the remove action in the comment dialog and context menu. Missing, false or other values hide removal and reject explicit comment removal transactions. The corresponding C# property is `DeleteComments = context => ...` on `ControlContent`; it defaults to disabled and also requires `AllowComments`. Applications resolve this permission for the current user and enforce it again when persisting changes. The editor already has document editing permission and requires no additional deletion attribute.

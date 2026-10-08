@@ -48,6 +48,10 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         this._allowRemove = ds.allowRemove === "true";
         this._persistKey = ds.persistKey || element.id || null;
 
+        // the outline level of the card titles: fifth by default, as a card title is, or what the
+        // page asks for to keep its outline without a gap
+        this._headingLevel = Math.min(6, Math.max(1, parseInt(ds.headingLevel, 10) || 5));
+
         // check for large icon option
         this._largeIcon = ds.largeIcon === "true";
         if (this._largeIcon) {
@@ -281,10 +285,25 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         const list = [];
         root.querySelectorAll(":scope > .wx-tile-card").forEach(div => {
             const id = div.dataset.id || div.id || null;
+
+            // the footer is authored as a child of the card, but is rendered after the
+            // body, so it is taken out of the markup that becomes the body
+            const source = div.cloneNode(true);
+            const footerElement = source.querySelector(".wx-tile-card-footer");
+            const footer = footerElement ? footerElement.innerHTML.trim() : null;
+            if (footerElement) {
+                footerElement.remove();
+            }
+
             list.push({
                 id: id,
                 label: div.dataset.label || "",
-                html: div.innerHTML.trim(),
+                badge: div.dataset.badge || null,
+                badgeColorCss: div.dataset.badgeColorCss || null,
+                badgeColorStyle: div.dataset.badgeColorStyle || null,
+                chip: div.dataset.chip || null,
+                footer: footer,
+                html: source.innerHTML.trim(),
                 class: div.dataset.class || "",
                 icon: div.dataset.icon || null,
                 image: div.dataset.image || null,
@@ -359,7 +378,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         if (this._allowRemove) {
             const btn = document.createElement("button");
             btn.type = "button";
-            btn.className = "wx-tile-remove-btn fas fa-times";
+            btn.className = "wx-tile-remove-btn wx-icon-light wx-icon-light-xmark";
             btn.setAttribute("aria-label", this._i18n("webexpress.webui:tile.close", "Close tile"));
             btn.addEventListener("click", e => {
                 e.stopPropagation();
@@ -372,10 +391,45 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             card.appendChild(btn);
         }
 
+        // add the kicker row carrying the kind of the card and its qualifier
+        if (tile.badge || tile.chip) {
+            const kicker = document.createElement("div");
+            kicker.className = "wx-tile-card-kicker";
+
+            if (tile.badge) {
+                const badge = document.createElement("span");
+                badge.className = "wx-tile-card-badge";
+
+                const dot = document.createElement("span");
+                dot.className = "wx-tile-card-badge-dot";
+                if (tile.badgeColorCss) {
+                    dot.classList.add(...tile.badgeColorCss.split(/\s+/).filter(Boolean));
+                }
+                if (tile.badgeColorStyle) {
+                    dot.style.cssText = tile.badgeColorStyle;
+                }
+                badge.appendChild(dot);
+                badge.append(document.createTextNode(tile.badge));
+                kicker.appendChild(badge);
+            }
+
+            if (tile.chip) {
+                const chip = document.createElement("span");
+                chip.className = "wx-tile-card-chip";
+                chip.textContent = tile.chip;
+                kicker.appendChild(chip);
+            }
+
+            card.appendChild(kicker);
+        }
+
         // render header with icon/image/label and supporting large icons
         if (tile.label || tile.icon || tile.image) {
-            const header = document.createElement("h5");
-            header.className = "card-title";
+            // a card with a picture but no words has nothing to head: a heading with no text is
+            // an empty entry in the outline, so the picture goes into a plain title row
+            const header = document.createElement(tile.label ? "h" + this._headingLevel : "div");
+            // the h5 class keeps the look of a card title whatever level the outline asks for
+            header.className = "card-title h5";
             if (tile.icon) {
                 const icon = document.createElement("i");
                 icon.className = tile.icon;
@@ -408,6 +462,14 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             body.innerHTML = tile.html;
         }
         card.appendChild(body);
+
+        // add the metadata footer
+        if (tile.footer) {
+            const footer = document.createElement("div");
+            footer.className = "wx-tile-card-footer";
+            footer.innerHTML = tile.footer;
+            card.appendChild(footer);
+        }
 
         // add drag and drop support if movable
         if (this._movable) {
@@ -745,26 +807,25 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
                 order: this._tiles.map(t => t.id),
                 visible: this._tiles.filter(t => t.visible).map(t => t.id)
             };
-            const json = encodeURIComponent(JSON.stringify(state));
-            document.cookie = `${this._persistKey}=${json}; path=/; SameSite=Lax`;
+            webexpress.webui.LocalStorage.setJson(this._persistKey, state);
         } catch (_) {
             // ignore
         }
     }
 
     /**
-     * Loads persisted state from cookie.
+     * Loads persisted state from localStorage.
      */
     _loadState() {
         if (!this._persistKey) {
             return;
         }
-        const raw = this._readCookie(this._persistKey);
+        const raw = webexpress.webui.LocalStorage.getJson(this._persistKey);
         if (!raw) {
             return;
         }
         try {
-            const obj = JSON.parse(decodeURIComponent(raw));
+            const obj = raw;
             if (!obj || obj.v !== 1) {
                 return;
             }
@@ -774,6 +835,7 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
                 for (const id of obj.order) {
                     if (map.has(id)) {
                         reordered.push(map.get(id));
+                        map.delete(id);
                     }
                 }
                 for (const t of this._tiles) {
@@ -785,33 +847,17 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
             }
             if (Array.isArray(obj.visible)) {
                 const vis = new Set(obj.visible);
+                const known = new Set(Array.isArray(obj.order) ? obj.order : obj.visible);
                 for (const t of this._tiles) {
-                    t.visible = t.id ? vis.has(t.id) : t.visible;
+                    t.visible = t.id && known.has(t.id) ? vis.has(t.id) : t.visible;
                 }
             }
             this._markSearchDirty();
         } catch (_) {
-            // ignore malformed cookie
+            // ignore malformed localStorage
         }
     }
 
-    /**
-     * Reads a cookie by name.
-     * @param {string} name - Cookie name.
-     * @returns {string|null} Value.
-     */
-    _readCookie(name) {
-        if (!name) {
-            return null;
-        }
-        const parts = document.cookie.split(";").map(s => s.trim());
-        for (const p of parts) {
-            if (p.startsWith(name + "=")) {
-                return p.substring(name.length + 1);
-            }
-        }
-        return null;
-    }
 };
 
 // register controller class

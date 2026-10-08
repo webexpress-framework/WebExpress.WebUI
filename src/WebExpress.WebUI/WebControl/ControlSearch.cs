@@ -11,7 +11,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a search control.
+    /// Renders a search box the user can type into to search.
     /// </summary>
     public class ControlSearch : Control
     {
@@ -43,7 +43,8 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, IUri> Image { get; set; }
 
         /// <summary>
-        /// Gets or sets the footer control displayed below the search suggestions.
+        /// Gets or sets the footer control displayed below the search suggestions. It is rendered
+        /// into a <c>wx-search-footer</c> element, which the client moves into the suggestion menu.
         /// </summary>
         public IControl Footer { get; set; }
 
@@ -88,9 +89,9 @@ namespace WebExpress.WebUI.WebControl
             var icon = Icon?.Invoke(renderContext);
             var image = Image?.Invoke(renderContext);
 
-            var html = new HtmlElementTextContentDiv
+            var children = new List<IHtmlNode>
             (
-                [.. _suggestion.Select(x =>
+                _suggestion.Select(x =>
                 {
                     var label = x.Label?.Invoke(renderContext);
                     var xIcon = x.Icon?.Invoke(renderContext);
@@ -125,12 +126,26 @@ namespace WebExpress.WebUI.WebControl
                     }
 
                     return div;
-                })]
-            )
+                })
+            );
+
+            // the footer travels as a marked element inside the host; the client lifts its content
+            // into the suggestion menu, where it stays visible below the suggestions
+            var footer = Footer?.Render(renderContext, visualTree);
+
+            if (footer != null)
+            {
+                children.Add(new HtmlElementTextContentDiv(footer)
+                {
+                    Class = "wx-search-footer"
+                });
+            }
+
+            var html = new HtmlElementTextContentDiv([.. children])
             {
                 Id = Id,
                 Class = string.Join(" ", classes.Where(x => !string.IsNullOrWhiteSpace(x))),
-                Style = GetStyles()
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext, placeholder))
                 .AddUserAttribute("data-favorited", enableFavorited ? "true" : null)

@@ -262,8 +262,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form text control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form *>*<input type=""text"" class=""form-control"">*</form>")]
-        [InlineData("abc", @"<form *>*<input value=""abc"" type=""text"" class=""form-control"">*</form>")]
+        [InlineData(null, @"<form *>*<input id=""*"" type=""text"" class=""form-control"">*</form>")]
+        [InlineData("abc", @"<form *>*<input id=""*"" value=""abc"" type=""text"" class=""form-control"">*</form>")]
         public void Value(string value, string expected)
         {
             // arrange
@@ -281,6 +281,31 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that an input created without an id is still named by its label: the form gives
+        /// it an id, because a label can only point at an input through one.
+        /// </summary>
+        [Fact]
+        public void LabelNamesInputWithoutId()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var form = new ControlForm().Add(new ControlFormItemInputCheck(null)
+            {
+                Label = _ => "Subscribe"
+            });
+
+            // act
+            var html = form.Render(context, visualTree).ToString();
+            var id = System.Text.RegularExpressions.Regex.Match(html, @"<input id=""(id_[^""]+)""").Groups[1].Value;
+
+            // validation
+            Assert.NotEmpty(id);
+            Assert.Contains($@"for=""{id}"">Subscribe:</label>", html);
         }
     }
 }

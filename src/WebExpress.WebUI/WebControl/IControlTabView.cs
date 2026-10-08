@@ -8,7 +8,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a view in a tab control.
+    /// Contract for a single tab and its content panel within a tab control.
     /// </summary>
     public interface IControlTabView : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

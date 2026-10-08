@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         public new Func<IRenderControlContext, PropertyColorBackgroundBadge> BackgroundColor
         {
             get => (Func<IRenderControlContext, PropertyColorBackgroundBadge>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypePillBadge> Pill
         {
             get => (Func<IRenderControlContext, TypePillBadge>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeVerticalAlignment> VerticalAlignment
         {
             get => (Func<IRenderControlContext, TypeVerticalAlignment>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertySizeText> Size
         {
             get => (Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -82,8 +82,8 @@ namespace WebExpress.WebUI.WebControl
                 return new HtmlElementTextSemanticsA(new HtmlText(value))
                 {
                     Id = Id,
-                    Class = Css.Concatenate("badge link", GetClasses()),
-                    Style = GetStyles(),
+                    Class = Css.Concatenate("badge link", GetClasses(renderContext)),
+                    Style = GetStyles(renderContext),
                     Href = uri?.ToString(),
                     Role = role
                 };
@@ -92,8 +92,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextSemanticsSpan(new HtmlText(value))
             {
                 Id = Id,
-                Class = Css.Concatenate("badge", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("badge", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             };
         }

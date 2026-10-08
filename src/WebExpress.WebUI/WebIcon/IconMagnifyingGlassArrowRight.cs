@@ -1,4 +1,4 @@
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a magnifying-glass-arrow-right.
@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconMagnifyingGlassArrowRight : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-magnifying-glass-arrow-right";
+        public override string Symbol => "magnifying-glass-arrow-right";
     }
 }

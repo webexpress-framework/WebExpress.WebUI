@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a header item in a dropdown control.
+    /// A non-clickable heading inside a dropdown menu, used to label a group of items.
     /// </summary>
     public class ControlDropdownItemHeader : IControlDropdownItem
     {

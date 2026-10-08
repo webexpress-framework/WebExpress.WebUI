@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a divider item within a dropdown control.
+    /// A horizontal divider line inside a dropdown menu, used to separate groups of items.
     /// </summary>
     /// <remarks>
     /// This class is used to create a visual separation between dropdown items.

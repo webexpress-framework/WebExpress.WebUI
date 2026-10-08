@@ -206,7 +206,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<button type=""button"" class=""btn""></button>")]
-        [InlineData(typeof(IconStar), @"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>")]
+        [InlineData(typeof(IconStar), @"<button type=""button"" class=""btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -255,12 +255,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>", html1.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>", html2.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>", html3.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>", html4.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>", html5.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<button type=""button"" class=""btn""><i class=""fas fa-star""></i></button>", html6.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<button type=""button"" class=""btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html1.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<button type=""button"" class=""btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html2.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<button type=""button"" class=""btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html3.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<button type=""button"" class=""btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html4.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<button type=""button"" class=""btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html5.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<button type=""button"" class=""btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html6.Trim());
         }
     }
 }

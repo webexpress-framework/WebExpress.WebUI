@@ -5,7 +5,7 @@ The `View` control acts as an intelligent container for applications with multip
 The control supports two layouts that determine how view switching is presented to the user:
 
 - **Default** &mdash; The host renders a toolbar that displays the title and description of the active view. Switching is performed through a dropdown menu.
-- **ToggleGroup** &mdash; The host renders a compact toggle bar in which all available views can be selected directly. The title and description of the active view are intentionally omitted, so switching only requires a single click on the corresponding label or icon.
+- **ToggleGroup** &mdash; Title and description are intentionally omitted; the views are offered on the shared presentation switch (`webexpress.webui.ViewSwitcher`), the same segmented control every surface with several views of one subject uses, so a user who learned it on one recognises it on the next. A switch over a single view offers no choice and steps aside.
 
 The header area, search bar, main content area and footer remain fully intact in both layouts; only the navigation itself differs.
 
@@ -63,7 +63,7 @@ Attributes on the `.wx-view` elements control the appearance and behavior:
 
 |Attribute          |Description
 |-------------------|------------------------------------------------------------------------------
-|`data-title`       |The display name of the view (shown in the toolbar, dropdown or toggle bar).
+|`data-title`       |The display name of the view (shown in the toolbar, dropdown or on its entry of the switch).
 |`data-description` |A short description displayed below the title in the default toolbar. Ignored by the `togglegroup` layout.
 |`data-icon-css`    |CSS class for an icon (e.g., `fa fa-list`).
 |`data-icon-img`    |URL to an image icon (alternative to CSS icon).
@@ -72,7 +72,7 @@ Attributes on the `.wx-view` elements control the appearance and behavior:
 
 - **Dynamic Layout**: The controller restructures the DOM, moving `.wx-view` contents into a managed container structure (`.wx-main-pane`).
 - **View Switching**: Only one view is visible at a time. Switching is instant and preserves the DOM state of the hidden views.
-- **State Persistence**: The index of the active view is stored in a cookie (Key: `wx_view_state_{elementId}`). On reload, the last active view is restored.
+- **State Persistence**: The index of the active view is stored in localStorage (Key: `wx_view_state_{elementId}`). On reload, the last active view is restored.
 - **External Integration**: If `.wx-header` or `.wx-footer` elements are provided, they are preserved and placed outside the scrollable view area, ensuring they remain visible.
 
 ## Programmatic Control

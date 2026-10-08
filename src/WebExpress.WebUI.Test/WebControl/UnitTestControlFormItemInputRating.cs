@@ -88,8 +88,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form rating control.
         /// </summary>
         [Theory]
-        [InlineData(uint.MaxValue, @"*<div class=""wx-webui-input-rating""></div>*")]
-        [InlineData(5, @"*<div class=""wx-webui-input-rating"" data-value=""5""></div>*")]
+        [InlineData(uint.MaxValue, @"*<div id=""*"" class=""wx-webui-input-rating""></div>*")]
+        [InlineData(5, @"*<div id=""*"" class=""wx-webui-input-rating"" data-value=""5""></div>*")]
         public void Value(uint value, string expected)
         {
             // arrange

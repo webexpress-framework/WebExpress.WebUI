@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a control tree.
+    /// Contract for a single node within a tree control.
     /// </summary>
     public interface IControlTreeItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

@@ -1,5 +1,3 @@
-using WebExpress.WebCore.WebIcon;
-
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
@@ -8,16 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconAddRowAbove : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the class with the light theme.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public IconAddRowAbove()
-            : base(TypeIconTheme.Light)
-        {
-        }
-
-        /// <summary>
-        /// Returns the CSS class associated with the icon.
-        /// </summary>
-        public override string Class => "wx-icon-light wx-icon-light-add-row-above";
+        public override string Symbol => "add-row-above";
     }
 }

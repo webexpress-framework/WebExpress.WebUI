@@ -1,7 +1,8 @@
 namespace WebExpress.WebUI.WebMarkdown.Element
 {
     /// <summary>
-    /// Represents an image element.
+    /// An inline image node in the parsed Markdown tree, written as <c>![alt](url)</c>. It holds the
+    /// image source and its alternative text.
     /// </summary>
     public class MarkdownInlineElementImage : MarkdownInlineElement
     {

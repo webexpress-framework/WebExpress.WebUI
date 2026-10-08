@@ -1,4 +1,4 @@
-﻿namespace WebExpress.WebUI.WebIcon
+namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents a horizontal ellipsis icon.
@@ -6,8 +6,8 @@
     public class IconEllipsisHorizontal : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-ellipsis-h";
+        public override string Symbol => "more";
     }
 }

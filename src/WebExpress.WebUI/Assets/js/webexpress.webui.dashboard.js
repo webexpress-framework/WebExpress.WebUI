@@ -5,9 +5,35 @@
  */
 webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
 
+    // the narrowest a column can be dragged: narrower, its header shrinks to an ellipsis
+    // and its cards break every word. the pixel width rules where the row can be
+    // measured, the weight (a part of an average column) where it cannot
+    static MIN_WIDTH = 160;
+    static MIN_WEIGHT = 0.25;
+
     _columns = [];
     _dragWidget = null;
     _dragColIndex = -1;
+
+    // column header editing / reordering / deleting
+    _editableColumn = false;
+    _movableColumn = false;
+    _deletableColumn = false;
+    _dragColumnIndex = null;
+    _activeColumnEdit = null;
+
+    // board "…" menu (add column / add widget) and per-widget settings
+    _addableColumn = false;
+    _addableWidget = false;
+    _configurableWidget = false;
+    _settingsDialog = null;
+
+    // the delete confirmation; owned dialog outside the host, created on first use
+    _confirm = null;
+
+    // the widget types offered in the add menu, supplied by the REST layer; the
+    // base leaves it empty so a standalone board offers nothing until told
+    _availableWidgets = [];
 
     /**
      * Initializes the dashboard control.
@@ -18,8 +44,34 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
 
         element.classList.add("wx-dashboard");
 
+        // column capabilities (the REST host element carries these attributes,
+        // so they apply to both the dom-driven and the rest-driven path)
+        this._editableColumn = element.dataset.editableColumn === "true";
+        this._movableColumn = element.dataset.movableColumn === "true";
+        this._deletableColumn = element.dataset.deletableColumn === "true";
+
+        // board menu capabilities; the offered widget types come from the REST
+        // layer (_availableWidgets), the registry only supplies their display
+        this._addableColumn = element.dataset.addableColumn === "true";
+        this._addableWidget = element.dataset.addableWidget === "true";
+        this._configurableWidget = element.dataset.configurableWidget === "true";
+        // the outline level of the column titles; the widget titles sit one level below
+        this._headingLevel = Math.min(6, Math.max(1, parseInt(element.dataset.headingLevel, 10) || 5));
+
         this._parseStaticConfig();
         this.render();
+    }
+
+    /**
+     * Releases the separately owned confirmation and settings dialogs, which sit
+     * on the document body and do not go away with the host element.
+     */
+    destroy() {
+        this._confirm?.destroy();
+        this._confirm = null;
+        this._settingsDialog?.destroy();
+        this._settingsDialog = null;
+        super.destroy();
     }
 
     /**
@@ -35,8 +87,12 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             columnNodes.forEach((node) => {
                 columns.push({
                     id: node.id || node.dataset.id,
-                    title: node.dataset.title || node.id || "column",
+                    // ControlDashboardColumn renders its translated title as data-label
+                    title: node.dataset.label || node.dataset.title || node.id || "column",
                     size: node.dataset.size || "1fr",
+                    badge: node.dataset.badge || null,
+                    badgeColor: node.dataset.badgeColor || null,
+                    badgeStyle: node.dataset.badgeStyle || null,
                     widgets: []
                 });
             });
@@ -101,14 +157,20 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             const wEl = widgetElements[i];
             const dataset = wEl.dataset;
             const widgetId = dataset.widget || null;
-            const htmlContent = wEl.innerHTML.trim();
+            // the content is kept as live nodes, not as markup: the controller has already
+            // set up the controls inside it and removed their selector class, so a copy
+            // re-parsed from a string would come back without any behaviour
+            const content = (wEl.children.length > 0 || wEl.textContent.trim())
+                ? Array.from(wEl.childNodes)
+                : null;
 
-            if (widgetId || htmlContent) {
+            if (widgetId || content) {
                 const params = {};
 
                 const reservedKeys = [
                     "widget", "color", "closeable", "movable",
-                    "label", "icon", "image", "column", "columnId"
+                    "label", "icon", "image", "column", "columnId",
+                    "badge", "badgeColor", "badgeStyle"
                 ];
 
                 for (const key in dataset) {
@@ -126,9 +188,12 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
                     icon: dataset.icon || null,
                     image: dataset.image || null,
                     color: dataset.color || null,
+                    badge: dataset.badge || null,
+                    badgeColor: dataset.badgeColor || null,
+                    badgeStyle: dataset.badgeStyle || null,
                     removable: dataset.closeable !== "false",
                     movable: dataset.movable !== "false",
-                    html: htmlContent,
+                    content: content,
                     params: params,
                     columnId: dataset.columnId || dataset.column || null
                 };
@@ -166,17 +231,24 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
      */
     render() {
         const el = this._element;
+        // a re-render (e.g. a reload) discards a pending inline rename, and a removed
+        // input does not reliably fire blur, so its finish would never clear the flag
+        this._activeColumnEdit = null;
         el.innerHTML = "";
+
+        // the board "…" menu shares the tab-add look and feel and gathers the
+        // add-column and add-widget affordances above the columns
+        const menuBar = this._buildBoardMenu();
+        if (menuBar) {
+            el.appendChild(menuBar);
+        }
 
         const row = document.createElement("div");
         row.className = "wx-dashboard-row";
 
-        // apply columns and custom template
         row.style.setProperty("--wx-board-cols", this._columns.length);
-        const sizes = this._columns.map((c) => {
-            return c.size === "*" ? "1fr" : c.size;
-        });
-        row.style.setProperty("--wx-board-template", sizes.join(" "));
+        const weights = this._columnWeights();
+        row.style.setProperty("--wx-board-template", this._template(weights));
 
         for (let colIdx = 0; colIdx < this._columns.length; colIdx++) {
             const colData = this._columns[colIdx];
@@ -184,10 +256,37 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             const wrapperEl = document.createElement("div");
             wrapperEl.className = "wx-dashboard-lane-wrapper";
 
-            if (colData.title) {
-                const titleEl = document.createElement("h5");
+            const colTitle = colData.title ?? colData.label ?? "";
+            const hasColTools = this._editableColumn || this._movableColumn || this._deletableColumn;
+            if (colTitle || hasColTools) {
+                const titleEl = document.createElement("div");
                 titleEl.className = "wx-dashboard-lane-title";
-                titleEl.textContent = colData.title;
+
+                // the heading is the name alone: the grip, the count and the menu sit beside it
+                // in the row, so a reader that walks the headings hears the lane, not its tools
+                const heading = document.createElement("h" + this._headingLevel);
+                heading.className = "wx-dashboard-lane-heading";
+                const titleText = document.createElement("span");
+                titleText.className = "wx-board-col-title";
+                titleText.textContent = colTitle;
+                heading.appendChild(titleText);
+                titleEl.appendChild(heading);
+
+                // optional trailing badge (e.g. the widget count), coloured by a
+                // css class (system color) or an inline style, like the tab badge
+                const colBadge = this._makeBadge(colData, "wx-board-col-badge");
+                if (colBadge) {
+                    titleEl.appendChild(colBadge);
+                }
+
+                // the column color tints the header underline so the column reads
+                // as a labelled, colored lane
+                if (colData.color) {
+                    titleEl.style.borderBottomColor = colData.color;
+                    titleEl.classList.add("wx-board-col-has-color");
+                }
+
+                this._decorateColumnHeader(titleEl, colIdx);
                 wrapperEl.appendChild(titleEl);
             }
 
@@ -196,30 +295,31 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             laneEl.dataset.columnIndex = colIdx;
             laneEl.dataset.columnId = colData.id;
 
-            if (colData.movable) {
-                laneEl.addEventListener("dragover", (e) => {
-                    e.preventDefault();
-                    if (laneEl.children.length === 0) {
-                        laneEl.classList.add("wx-drag-over-empty");
-                    } else {
-                        // highlight the bottom of the last widget when dragging in empty space below
-                        const lastChild = laneEl.lastElementChild;
-                        if (lastChild && !lastChild.classList.contains("wx-drag-over-top")) {
-                            lastChild.classList.add("wx-drag-over-bottom");
-                        }
-                    }
-                });
-                laneEl.addEventListener("dragleave", (e) => {
-                    laneEl.classList.remove("wx-drag-over-empty");
+            // the lane is always a drop target: a drop only acts while a movable
+            // widget is being dragged, and gating this on a per-column flag left
+            // empty columns (including freshly added ones) unable to receive widgets
+            laneEl.addEventListener("dragover", (e) => {
+                e.preventDefault();
+                if (laneEl.children.length === 0) {
+                    laneEl.classList.add("wx-drag-over-empty");
+                } else {
+                    // highlight the bottom of the last widget when dragging in empty space below
                     const lastChild = laneEl.lastElementChild;
-                    if (lastChild) {
-                        lastChild.classList.remove("wx-drag-over-bottom");
+                    if (lastChild && !lastChild.classList.contains("wx-drag-over-top")) {
+                        lastChild.classList.add("wx-drag-over-bottom");
                     }
-                });
-                laneEl.addEventListener("drop", (e) => {
-                    this._onDropLane(e, colIdx, laneEl);
-                });
-            }
+                }
+            });
+            laneEl.addEventListener("dragleave", (e) => {
+                laneEl.classList.remove("wx-drag-over-empty");
+                const lastChild = laneEl.lastElementChild;
+                if (lastChild) {
+                    lastChild.classList.remove("wx-drag-over-bottom");
+                }
+            });
+            laneEl.addEventListener("drop", (e) => {
+                this._onDropLane(e, colIdx, laneEl);
+            });
 
             const columnWidgets = colData.widgets;
             for (let i = 0; i < columnWidgets.length; i++) {
@@ -229,10 +329,1031 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             }
 
             wrapperEl.appendChild(laneEl);
+
+            // the divider sits between a column and its right neighbour, so the last column
+            // has none: the outer edges of the board are not movable. it follows the lane so
+            // the keyboard reaches it after the column's content
+            if (this._editableColumn && colIdx < this._columns.length - 1) {
+                wrapperEl.appendChild(this._buildResizer(row, colIdx, weights));
+            }
+
             row.appendChild(wrapperEl);
         }
 
         el.appendChild(row);
+    }
+
+    /**
+     * Builds an optional trailing badge from a data object carrying badge,
+     * badgeColor and badgeStyle (columns and widgets both share it). The color
+     * arrives either as a css class (system color) or an inline style
+     * (user-defined color). Returns null when the data carries no badge.
+     * @param {object} data - The data object with badge fields.
+     * @param {string} className - The element class distinguishing the badge kind.
+     * @returns {HTMLElement|null} The badge element, or null.
+     */
+    _makeBadge(data, className) {
+        if (!data || data.badge == null || data.badge === "") {
+            return null;
+        }
+
+        const badge = document.createElement("span");
+        badge.className = className + " badge";
+        if (data.badgeColor) {
+            badge.classList.add(...String(data.badgeColor).split(/\s+/).filter(Boolean));
+        }
+        if (data.badgeStyle) {
+            badge.style.cssText = data.badgeStyle;
+        }
+        badge.textContent = data.badge;
+        return badge;
+    }
+
+    /**
+     * Builds the board "…" menu bar carrying the add-column entry and the
+     * add-widget entries. Returns null when neither affordance is enabled, so
+     * the board stays unchanged for read-only dashboards. The button toggles a
+     * dropdown that mirrors the tab add (+) control.
+     * @returns {HTMLElement|null} The menu bar, or null when no menu is offered.
+     */
+    _buildBoardMenu() {
+        if (!this._addableColumn && !this._addableWidget) {
+            return null;
+        }
+
+        const bar = document.createElement("div");
+        bar.className = "wx-dashboard-toolbar";
+
+        const container = document.createElement("div");
+        container.className = "wx-dashboard-menu";
+
+        const button = this._buildMenuButton(this._i18n("webexpress.webui:dashboard.menu", "Options"));
+
+        const menu = document.createElement("ul");
+        menu.className = "dropdown-menu dropdown-menu-end";
+
+        if (this._addableColumn) {
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("table-columns"),
+                this._i18n("webexpress.webui:dashboard.column.add", "New column"),
+                null,
+                () => this._addColumn()
+            ));
+        }
+
+        if (this._addableWidget) {
+            const widgets = this._availableWidgets || [];
+
+            if (widgets.length > 0) {
+                if (this._addableColumn) {
+                    const divider = document.createElement("li");
+                    divider.innerHTML = "<hr class=\"dropdown-divider\">";
+                    menu.appendChild(divider);
+                }
+
+                const heading = document.createElement("li");
+                heading.className = "dropdown-header";
+                heading.textContent = this._i18n("webexpress.webui:dashboard.widget.add", "Add item");
+                menu.appendChild(heading);
+
+                for (let i = 0; i < widgets.length; i++) {
+                    const widget = widgets[i];
+                    // the REST entry defines availability; its display falls back
+                    // to the registered widget definition when not overridden
+                    const definition = webexpress.webui.DashboardWidgets.get(widget.id) || {};
+                    const iconClass = widget.icon || definition.icon;
+                    const icon = iconClass ? webexpress.webui.IconSet.resolve(iconClass) : null;
+                    menu.appendChild(this._buildMenuEntry(
+                        icon,
+                        widget.title || definition.title || widget.id,
+                        widget.description || definition.description || null,
+                        () => this._addWidget(widget.id)
+                    ));
+                }
+            }
+        }
+
+        // an enabled add-widget menu with no registered items would render an
+        // empty dropdown, so drop the whole bar when nothing can be added
+        if (menu.children.length === 0) {
+            return null;
+        }
+
+        this._attachMenu(container, button, menu);
+        bar.appendChild(container);
+
+        return bar;
+    }
+
+    /**
+     * Builds the "…" trigger shared by the board, column and widget menus.
+     * @param {string} label - The accessible name and tooltip of the trigger.
+     * @returns {HTMLButtonElement} The trigger button.
+     */
+    _buildMenuButton(label) {
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "wx-dashboard-menu-btn";
+        button.title = label;
+        button.setAttribute("aria-label", label);
+        button.innerHTML = `<i class="${this._iconClass("more")}"></i>`;
+
+        return button;
+    }
+
+    /**
+     * Mounts a menu as a native popover under its trigger. The browser owns the
+     * toggle, the placement and the light dismissal; the control only mirrors
+     * the open state onto the container so a hover-only trigger stays visible
+     * while its menu is open, even once the pointer leaves the header or card.
+     * @param {HTMLElement} container - The menu container holding trigger and menu.
+     * @param {HTMLButtonElement} button - The trigger button.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     */
+    _attachMenu(container, button, menu) {
+        container.appendChild(button);
+        container.appendChild(menu);
+
+        webexpress.webui.NativeMenu.bind(button, menu);
+
+        // the column menu drills down in place, so a click on one of its entries
+        // must not close it; every entry that leaves the menu closes it itself
+        menu.setAttribute("data-wx-keep-open", "");
+
+        // neither the trigger nor an entry is a click on the header or card the
+        // container sits in; the menu is a child of the container even while it
+        // is shown in the top layer, and the popover opens through the trigger's
+        // own activation, which does not depend on the click bubbling
+        container.addEventListener("click", (e) => e.stopPropagation());
+
+        menu.addEventListener("toggle", (e) => {
+            container.classList.toggle("wx-menu-open", e.newState === "open");
+        });
+    }
+
+    /**
+     * Builds a single dropdown entry with an optional icon, a title and an
+     * optional description line, mirroring the tab template chooser.
+     * @param {string|null} iconClass - The resolved icon class, or null.
+     * @param {string} title - The entry title.
+     * @param {string|null} description - The optional description line.
+     * @param {Function} onClick - The click handler.
+     * @returns {HTMLElement} The list item element.
+     */
+    _buildMenuEntry(iconClass, title, description, onClick) {
+        const li = document.createElement("li");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dropdown-item";
+
+        const titleLine = document.createElement("div");
+        titleLine.className = "fw-semibold";
+        if (iconClass) {
+            const icon = document.createElement("i");
+            icon.className = iconClass + " me-2";
+            titleLine.appendChild(icon);
+        }
+        titleLine.appendChild(document.createTextNode(title));
+        button.appendChild(titleLine);
+
+        if (description) {
+            const descLine = document.createElement("small");
+            descLine.className = "d-block text-muted";
+            descLine.textContent = description;
+            button.appendChild(descLine);
+        }
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._closeAllMenus();
+            onClick();
+        });
+
+        li.appendChild(button);
+
+        return li;
+    }
+
+    /**
+     * Closes every open board, column or widget dropdown of this dashboard.
+     */
+    _closeAllMenus() {
+        const menus = this._element.querySelectorAll(".wx-dashboard-menu > .dropdown-menu");
+        for (let i = 0; i < menus.length; i++) {
+            webexpress.webui.NativeMenu.hide(menus[i]);
+        }
+    }
+
+    /**
+     * Appends a new empty column and persists the new column layout. When the
+     * headers are editable the new column is named from a translated default so
+     * it is visible immediately and can be renamed inline afterwards.
+     */
+    _addColumn() {
+        const label = this._i18n("webexpress.webui:dashboard.column.new", "New column");
+        const weights = this._columnWeights();
+        this._columns.push({
+            id: "col_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
+            title: label,
+            label: label,
+            size: "1fr",
+            color: null,
+            widgets: []
+        });
+
+        // a percentage would keep its share and leave the new column a sliver, so the
+        // board moves to weights first; the columns keep their proportions and the new
+        // one gets the width of an average column
+        this._applyWeights([...weights, 1]);
+
+        this.render();
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Adds a widget of the given type to the board and persists the change. The
+     * widget lands in the first column; when the board has no column yet and
+     * columns may be added, one is created first so the widget has a home.
+     * @param {string} widgetId - The registered widget type id.
+     */
+    _addWidget(widgetId) {
+        if (!widgetId) {
+            return;
+        }
+
+        // only widgets the REST layer marks available may be used on the board
+        const available = this._availableWidgets || [];
+        if (!available.some((w) => w.id === widgetId)) {
+            return;
+        }
+
+        if (this._columns.length === 0) {
+            if (!this._addableColumn) {
+                return;
+            }
+            this._addColumn();
+        }
+
+        const definition = webexpress.webui.DashboardWidgets.get(widgetId) || {};
+
+        this._columns[0].widgets.push({
+            instanceId: "wx_inst_" + Date.now() + "_" + Math.random().toString(36).slice(2, 6),
+            id: widgetId,
+            title: definition.title || null,
+            icon: definition.icon || null,
+            image: null,
+            color: null,
+            removable: definition.removable !== false,
+            movable: definition.movable !== false,
+            html: "",
+            params: {}
+        });
+
+        this.render();
+        this._dispatchChangeEvent("add");
+    }
+
+    /**
+     * Decorates a column header with the ⠿ reorder grip and the "…" menu
+     * (rename, size, color, delete), depending on the enabled column flags. The
+     * grip and menu trigger reveal on hover; an inline rename is started from the
+     * menu rather than a pencil or double-click.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index in this._columns.
+     */
+    _decorateColumnHeader(headerEl, index) {
+        const hasMenu = this._editableColumn || this._deletableColumn;
+        if (!this._movableColumn && !hasMenu) {
+            return;
+        }
+
+        headerEl.classList.add("wx-board-col-header");
+
+        if (this._movableColumn) {
+            headerEl.classList.add("wx-board-col-movable");
+            this._addColumnGrip(headerEl, index);
+        }
+
+        if (hasMenu) {
+            headerEl.appendChild(this._buildColumnMenu(headerEl, index));
+        }
+    }
+
+    /**
+     * Adds the ⠿ reorder grip and wires the column drag and drop, including the
+     * before/after drop indicators that visualise where the dragged column would
+     * land - the same affordance the tabs use.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _addColumnGrip(headerEl, index) {
+        const grip = document.createElement("span");
+        grip.className = "wx-board-col-grip";
+        grip.textContent = "⠿";
+        grip.title = this._i18n("webexpress.webui:dashboard.column.move", "Reorder column");
+        grip.setAttribute("aria-label", grip.title);
+        grip.draggable = true;
+        grip.addEventListener("click", (e) => e.stopPropagation());
+        grip.addEventListener("dragstart", (e) => {
+            this._dragColumnIndex = index;
+            headerEl.classList.add("wx-board-col-dragging");
+            if (e.dataTransfer) {
+                e.dataTransfer.effectAllowed = "move";
+                try { e.dataTransfer.setData("text/plain", String(index)); } catch (err) { /* noop */ }
+            }
+        });
+        grip.addEventListener("dragend", () => {
+            headerEl.classList.remove("wx-board-col-dragging");
+            this._clearColumnDropIndicators();
+            this._dragColumnIndex = null;
+        });
+        headerEl.insertBefore(grip, headerEl.firstChild);
+
+        headerEl.addEventListener("dragover", (e) => {
+            if (this._dragColumnIndex === null) {
+                return;
+            }
+            e.preventDefault();
+            if (e.dataTransfer) {
+                e.dataTransfer.dropEffect = "move";
+            }
+            const rect = headerEl.getBoundingClientRect();
+            const after = e.clientX > rect.left + rect.width / 2;
+            this._clearColumnDropIndicators();
+            headerEl.classList.add(after ? "wx-board-col-drop-after" : "wx-board-col-drop-before");
+        });
+        headerEl.addEventListener("dragleave", () => {
+            headerEl.classList.remove("wx-board-col-drop-before", "wx-board-col-drop-after");
+        });
+        headerEl.addEventListener("drop", (e) => {
+            if (this._dragColumnIndex === null) {
+                return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            const rect = headerEl.getBoundingClientRect();
+            const after = e.clientX > rect.left + rect.width / 2;
+            this._clearColumnDropIndicators();
+            this._moveColumn(this._dragColumnIndex, index, after);
+        });
+    }
+
+    /**
+     * Clears the column drop indicators from every column header.
+     */
+    _clearColumnDropIndicators() {
+        const marked = this._element.querySelectorAll(".wx-board-col-drop-before, .wx-board-col-drop-after");
+        for (let i = 0; i < marked.length; i++) {
+            marked[i].classList.remove("wx-board-col-drop-before", "wx-board-col-drop-after");
+        }
+    }
+
+    /**
+     * Builds the column "…" menu offering rename, size, color and delete. The
+     * size and color entries drill down into the same dropdown so no nested
+     * flyout positioning is needed.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     * @returns {HTMLElement} The menu container element.
+     */
+    _buildColumnMenu(headerEl, index) {
+        const container = document.createElement("span");
+        container.className = "wx-dashboard-menu wx-board-col-menu";
+
+        const button = this._buildMenuButton(this._i18n("webexpress.webui:dashboard.column.menu", "Column options"));
+
+        const menu = document.createElement("ul");
+        menu.className = "dropdown-menu dropdown-menu-end";
+
+        this._populateColumnMenuRoot(menu, headerEl, index);
+
+        // a re-opened menu always starts at the top level
+        menu.addEventListener("beforetoggle", (e) => {
+            if (e.newState === "open") {
+                this._populateColumnMenuRoot(menu, headerEl, index);
+            }
+        });
+
+        this._attachMenu(container, button, menu);
+
+        return container;
+    }
+
+    /**
+     * Populates the column menu with its top-level entries.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _populateColumnMenuRoot(menu, headerEl, index) {
+        menu.replaceChildren();
+
+        if (this._editableColumn) {
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("pen"),
+                this._i18n("webexpress.webui:dashboard.column.edit", "Rename column"),
+                null,
+                () => this._startColumnEdit(headerEl, index)
+            ));
+            // the widths themselves are dragged at the dividers; the menu only offers
+            // the way back to an even board, which a drag can hardly hit exactly
+            if (this._columns.length > 1) {
+                menu.appendChild(this._buildMenuEntry(
+                    this._iconClass("arrows-left-right-to-line"),
+                    this._i18n("webexpress.webui:dashboard.column.equalize", "Equal column widths"),
+                    null,
+                    () => this._equalizeColumns()
+                ));
+            }
+            menu.appendChild(this._buildColumnSubmenuEntry(
+                this._iconClass("palette"),
+                this._i18n("webexpress.webui:dashboard.column.color", "Color"),
+                (m) => this._populateColumnMenuColors(m, headerEl, index)
+            ));
+        }
+
+        if (this._deletableColumn) {
+            if (this._editableColumn) {
+                const divider = document.createElement("li");
+                divider.innerHTML = "<hr class=\"dropdown-divider\">";
+                menu.appendChild(divider);
+            }
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("trash"),
+                this._i18n("webexpress.webui:dashboard.column.delete", "Delete column"),
+                null,
+                () => this._deleteColumn(index)
+            ));
+        }
+    }
+
+    /**
+     * Builds a drill-down entry that repopulates the menu in place with a
+     * sub-level, keeping the dropdown open.
+     * @param {string|null} iconClass - The resolved icon class.
+     * @param {string} label - The entry label.
+     * @param {Function} populate - Repopulates the menu; receives the menu element.
+     * @returns {HTMLElement} The list item element.
+     */
+    _buildColumnSubmenuEntry(iconClass, label, populate) {
+        const li = document.createElement("li");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dropdown-item d-flex align-items-center";
+
+        if (iconClass) {
+            const icon = document.createElement("i");
+            icon.className = iconClass + " me-2";
+            button.appendChild(icon);
+        }
+        button.appendChild(document.createTextNode(label));
+
+        const chevron = document.createElement("i");
+        chevron.className = this._iconClass("chevron-right") + " ms-auto ps-3";
+        button.appendChild(chevron);
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            populate(li.closest(".dropdown-menu"));
+        });
+
+        li.appendChild(button);
+
+        return li;
+    }
+
+    /**
+     * Prepends the "back" entry that returns a drilled-down menu to its root.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _buildColumnMenuBack(menu, headerEl, index) {
+        const li = document.createElement("li");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dropdown-item text-muted d-flex align-items-center";
+        button.innerHTML = `<i class="${this._iconClass("chevron-left")} me-2"></i>`;
+        button.appendChild(document.createTextNode(this._i18n("webexpress.webui:dashboard.back", "Back")));
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._populateColumnMenuRoot(menu, headerEl, index);
+        });
+
+        li.appendChild(button);
+
+        return li;
+    }
+
+    /**
+     * Populates the column menu with the color palette and a "none" option.
+     * @param {HTMLElement} menu - The dropdown menu element.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _populateColumnMenuColors(menu, headerEl, index) {
+        menu.replaceChildren();
+        menu.appendChild(this._buildColumnMenuBack(menu, headerEl, index));
+
+        const col = this._columns[index];
+
+        menu.appendChild(this._buildMenuCheckEntry(
+            this._i18n("webexpress.webui:dashboard.column.color.none", "None"),
+            col && !col.color,
+            () => this._setColumnColor(index, null)
+        ));
+
+        const li = document.createElement("li");
+        const grid = document.createElement("div");
+        grid.className = "wx-board-col-color-grid";
+
+        const palette = this._colorPalette();
+        for (let i = 0; i < palette.length; i++) {
+            const color = palette[i];
+            const swatch = document.createElement("button");
+            swatch.type = "button";
+            swatch.className = "wx-board-col-swatch";
+            swatch.style.backgroundColor = color;
+            swatch.title = color;
+            if (col && col.color && col.color.toLowerCase() === color.toLowerCase()) {
+                swatch.classList.add("active");
+            }
+            swatch.addEventListener("click", (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this._closeAllMenus();
+                this._setColumnColor(index, color);
+            });
+            grid.appendChild(swatch);
+        }
+
+        li.appendChild(grid);
+        menu.appendChild(li);
+    }
+
+    /**
+     * Builds a menu entry with a leading check mark reflecting the active state.
+     * @param {string} label - The entry label.
+     * @param {boolean} active - Whether the entry is the current selection.
+     * @param {Function} onClick - The click handler.
+     * @returns {HTMLElement} The list item element.
+     */
+    _buildMenuCheckEntry(label, active, onClick) {
+        const li = document.createElement("li");
+
+        const button = document.createElement("button");
+        button.type = "button";
+        button.className = "dropdown-item d-flex align-items-center";
+        if (active) {
+            button.classList.add("active");
+        }
+
+        const check = document.createElement("i");
+        check.className = active ? this._iconClass("check") : "";
+        check.style.width = "1.25em";
+        button.appendChild(check);
+        button.appendChild(document.createTextNode(label));
+
+        button.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            this._closeAllMenus();
+            onClick();
+        });
+
+        li.appendChild(button);
+
+        return li;
+    }
+
+    /**
+     * The column color palette offered in the column menu.
+     * @returns {Array<string>} The hex colors.
+     */
+    _colorPalette() {
+        return [
+            "#0d6efd", "#6610f2", "#6f42c1", "#d63384", "#dc3545", "#fd7e14",
+            "#ffc107", "#198754", "#20c997", "#0dcaf0", "#6c757d", "#343a40"
+        ];
+    }
+
+    /**
+     * Reads the column widths as relative weights, scaled so that an average
+     * column weighs 1. Weights share the row among themselves, so the board
+     * always fills the row exactly, whatever the user sets; percentages could not
+     * promise that, since each column claimed its share regardless of the others
+     * and three columns at 75 % ran far past the edge. Percentages from the
+     * server or from a board stored before are converted in proportion: a board
+     * that fitted keeps its look, an overfull one is scaled down until it fits.
+     * @returns {Array<number>} One weight per column.
+     */
+    _columnWeights() {
+        const parsed = this._columns.map((c) => {
+            const size = String(c.size ?? "").trim();
+            const percent = /^(\d+(?:\.\d+)?)%$/.exec(size);
+            if (percent) {
+                return { percent: parseFloat(percent[1]) };
+            }
+            const fraction = /^(\d+(?:\.\d+)?)fr$/.exec(size);
+            // "*", "auto" and any size without a share count as one average column
+            return { fraction: fraction ? parseFloat(fraction[1]) : 1 };
+        });
+
+        const percents = parsed.filter((p) => p.percent !== undefined);
+        const percentSum = percents.reduce((sum, p) => sum + p.percent, 0);
+        const fractionSum = parsed.reduce((sum, p) => sum + (p.fraction ?? 0), 0);
+
+        // the fractions share what the percentages leave of the row; when the
+        // percentages already claim all of it, a fraction is worth an average
+        // percentage column instead of nothing
+        let fractionShare = 100 - percentSum;
+        if (fractionShare <= 0 && percents.length > 0) {
+            fractionShare = percentSum / percents.length * fractionSum;
+        }
+
+        const raw = parsed.map((p) => p.percent ?? (fractionSum > 0 ? fractionShare * p.fraction / fractionSum : 0));
+        const total = raw.reduce((sum, w) => sum + w, 0);
+        if (!(total > 0)) {
+            return parsed.map(() => 1);
+        }
+
+        // a column without width would vanish, and with it the divider to pull it back
+        return raw.map((w) => Math.max(w * parsed.length / total, webexpress.webui.DashboardCtrl.MIN_WEIGHT));
+    }
+
+    /**
+     * Builds the grid template from the column weights. minmax(0, …) lets a
+     * column shrink below the width of its content; a bare fr track grows with a
+     * long word or a wide chart and pushes the board past the row again.
+     * @param {Array<number>} weights - One weight per column.
+     * @returns {string} The grid-template-columns value.
+     */
+    _template(weights) {
+        return weights.map((w) => `minmax(0, ${this._roundWeight(w)}fr)`).join(" ");
+    }
+
+    /**
+     * Rounds a weight to the precision it is stored and rendered with.
+     * @param {number} weight - The weight.
+     * @returns {number} The rounded weight.
+     */
+    _roundWeight(weight) {
+        return Math.round(weight * 1000) / 1000;
+    }
+
+    /**
+     * Stores the weights as the column sizes. From then on the board is kept as
+     * weights, including any column that still came as a percentage.
+     * @param {Array<number>} weights - One weight per column.
+     */
+    _applyWeights(weights) {
+        for (let i = 0; i < this._columns.length; i++) {
+            this._columns[i].size = this._roundWeight(weights[i]) + "fr";
+        }
+    }
+
+    /**
+     * Gives every column the same width and persists the column layout.
+     */
+    _equalizeColumns() {
+        this._applyWeights(this._columns.map(() => 1));
+        this.render();
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Moves width between a column and its right neighbour. Only the pair
+     * changes, so every other column keeps its width and the board keeps filling
+     * the row; neither of the two shrinks below the minimum weight.
+     * @param {Array<number>} weights - The weights to start from.
+     * @param {number} index - The index of the left column of the pair.
+     * @param {number} delta - The part of the pair's width the left column gains (negative: loses).
+     * @param {number} [span] - The width of the pair in pixels, when it could be measured.
+     * @returns {Array<number>} The new weights.
+     */
+    _resizePair(weights, index, delta, span) {
+        const pair = weights[index] + weights[index + 1];
+        const minWidth = span > 0 ? pair * webexpress.webui.DashboardCtrl.MIN_WIDTH / span : 0;
+        const min = Math.min(Math.max(webexpress.webui.DashboardCtrl.MIN_WEIGHT, minWidth), pair / 2);
+        const left = Math.min(Math.max(weights[index] + delta * pair, min), pair - min);
+
+        const next = weights.slice();
+        next[index] = left;
+        next[index + 1] = pair - left;
+        return next;
+    }
+
+    /**
+     * Shows weights on a rendered row without rebuilding it, so a drag stays
+     * smooth and the divider keeps the pointer capture and the focus.
+     * @param {HTMLElement} row - The dashboard row.
+     * @param {Array<number>} weights - One weight per column.
+     */
+    _showWeights(row, weights) {
+        row.style.setProperty("--wx-board-template", this._template(weights));
+
+        // a column between two dividers belongs to both pairs, so every divider is updated
+        const wrappers = Array.from(row.children);
+        for (let i = 0; i < wrappers.length; i++) {
+            const resizer = Array.from(wrappers[i].children).find((c) => c.classList.contains("wx-dashboard-col-resizer"));
+            if (resizer) {
+                resizer.setAttribute("aria-valuenow", String(this._pairShare(weights, i)));
+            }
+        }
+    }
+
+    /**
+     * The share of a pair's width the left column takes, in percent; the value a
+     * divider announces.
+     * @param {Array<number>} weights - One weight per column.
+     * @param {number} index - The index of the left column of the pair.
+     * @returns {number} The share in whole percent.
+     */
+    _pairShare(weights, index) {
+        return Math.round(100 * weights[index] / (weights[index] + weights[index + 1]));
+    }
+
+    /**
+     * Builds the divider between a column and its right neighbour. Dragging it
+     * moves width from one of the two to the other, the arrow keys do the same in
+     * steps, and a double click splits the pair evenly again.
+     * @param {HTMLElement} row - The row whose grid template the divider adjusts.
+     * @param {number} index - The index of the column left of the divider.
+     * @param {Array<number>} weights - The weights the row is rendered with.
+     * @returns {HTMLElement} The divider.
+     */
+    _buildResizer(row, index, weights) {
+        const name = (col) => col.title ?? col.label ?? "";
+        const resizer = document.createElement("div");
+        resizer.className = "wx-dashboard-col-resizer";
+        resizer.tabIndex = 0;
+        resizer.setAttribute("role", "separator");
+        resizer.setAttribute("aria-orientation", "vertical");
+        resizer.setAttribute("aria-valuemin", "0");
+        resizer.setAttribute("aria-valuemax", "100");
+        resizer.setAttribute("aria-valuenow", String(this._pairShare(weights, index)));
+        resizer.setAttribute("aria-label", this._i18n("webexpress.webui:dashboard.column.resize", "Width of “{left}” and “{right}”")
+            .replace("{left}", () => name(this._columns[index]))
+            .replace("{right}", () => name(this._columns[index + 1])));
+        resizer.title = this._i18n("webexpress.webui:dashboard.column.resize.hint", "Drag to change the widths, double-click to split them evenly");
+
+        const commit = (next) => {
+            this._showWeights(row, next);
+            this._applyWeights(next);
+            this._dispatchColumnChange();
+        };
+
+        // the pixel width of the pair, 0 where nothing is laid out
+        const measure = () => {
+            const leftEl = row.children[index];
+            const rightEl = row.children[index + 1];
+            return leftEl && rightEl
+                ? leftEl.getBoundingClientRect().width + rightEl.getBoundingClientRect().width
+                : 0;
+        };
+
+        resizer.addEventListener("pointerdown", (e) => {
+            if (e.button > 0) {
+                return;
+            }
+
+            const span = measure();
+            if (!(span > 0)) {
+                return;
+            }
+            e.preventDefault();
+
+            // the weights are read when the drag starts, not when the row was rendered:
+            // the neighbouring divider may have moved the shared column since
+            const start = this._columnWeights();
+            const startX = e.clientX;
+            let current = start;
+
+            resizer.setPointerCapture?.(e.pointerId);
+            row.classList.add("wx-dashboard-resizing");
+            resizer.classList.add("wx-dashboard-col-resizer-active");
+
+            const move = (ev) => {
+                current = this._resizePair(start, index, (ev.clientX - startX) / span, span);
+                this._showWeights(row, current);
+            };
+            const end = (ev) => {
+                resizer.removeEventListener("pointermove", move);
+                resizer.removeEventListener("pointerup", end);
+                resizer.removeEventListener("pointercancel", end);
+                row.classList.remove("wx-dashboard-resizing");
+                resizer.classList.remove("wx-dashboard-col-resizer-active");
+
+                // a cancelled drag (the system took the pointer) leaves the board as it was
+                if (ev.type === "pointercancel") {
+                    this._showWeights(row, start);
+                } else if (current !== start) {
+                    commit(current);
+                }
+            };
+
+            resizer.addEventListener("pointermove", move);
+            resizer.addEventListener("pointerup", end);
+            resizer.addEventListener("pointercancel", end);
+        });
+
+        resizer.addEventListener("keydown", (e) => {
+            const step = { ArrowLeft: -0.05, ArrowRight: 0.05 }[e.key];
+            if (step === undefined) {
+                return;
+            }
+            e.preventDefault();
+            commit(this._resizePair(this._columnWeights(), index, step, measure()));
+        });
+
+        resizer.addEventListener("dblclick", () => {
+            const weights = this._columnWeights();
+            const half = (weights[index] + weights[index + 1]) / 2;
+            weights[index] = half;
+            weights[index + 1] = half;
+            commit(weights);
+        });
+
+        return resizer;
+    }
+
+    /**
+     * Sets a column color and persists the new column layout.
+     * @param {number} index - The column index.
+     * @param {string|null} color - The color, or null to clear it.
+     */
+    _setColumnColor(index, color) {
+        const col = this._columns[index];
+        if (!col) {
+            return;
+        }
+        col.color = color;
+        this.render();
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Starts inline editing of a column title.
+     * @param {HTMLElement} headerEl - The column header element.
+     * @param {number} index - The column index.
+     */
+    _startColumnEdit(headerEl, index) {
+        const col = this._columns[index];
+        if (!col || this._activeColumnEdit) {
+            return;
+        }
+
+        this._activeColumnEdit = headerEl;
+        const current = col.title ?? col.label ?? "";
+
+        const input = document.createElement("input");
+        input.type = "text";
+        input.className = "wx-board-col-input";
+        input.value = current;
+
+        headerEl.innerHTML = "";
+        headerEl.appendChild(input);
+        input.focus();
+        input.select();
+
+        let done = false;
+        const finish = (save) => {
+            // a render in between replaced the board, so this input edits a stale column
+            if (done || this._activeColumnEdit !== headerEl) {
+                return;
+            }
+            done = true;
+            this._activeColumnEdit = null;
+
+            const value = input.value.trim();
+            if (save && value && value !== current) {
+                col.title = value;
+                col.label = value;
+                this.render();
+                this._dispatchColumnChange();
+            } else {
+                this.render();
+            }
+        };
+
+        input.addEventListener("keydown", (e) => {
+            if (e.key === "Enter") {
+                e.preventDefault();
+                finish(true);
+            } else if (e.key === "Escape") {
+                e.preventDefault();
+                finish(false);
+            }
+        });
+        input.addEventListener("blur", () => finish(true));
+    }
+
+    /**
+     * Asks before a column is dropped: the deletion takes the widgets with it and
+     * cannot be undone, yet its entry sits next to harmless ones in the same menu.
+     * @param {number} index - The column index.
+     */
+    _deleteColumn(index) {
+        const col = this._columns[index];
+        if (!col) {
+            return;
+        }
+
+        this._confirm = this._confirm || new webexpress.webui.ModalConfirm();
+        const accepted = this._confirm.confirmation(
+            "webexpress.webui:dashboard.column.delete.title",
+            this._i18n("webexpress.webui:dashboard.column.delete.message", "Delete column “{name}” and all of its widgets? This action cannot be undone.")
+                .replace("{name}", () => col.title ?? col.label ?? ""),
+            // a reload while the dialog is open can reorder the columns, so the column is
+            // looked up again by its id rather than by the index the menu was built with
+            () => this._removeColumn(col.id),
+            {
+                confirmLabel: this._i18n("webexpress.webui:dashboard.column.delete.confirm", "Delete"),
+                // the trigger that opened the menu is gone with the column, so a
+                // cancelled or finished dialog hands the focus to the board's first menu
+                fallbackFocus: () => this._element.querySelector(".wx-dashboard-menu-btn")
+            }
+        );
+        if (accepted) {
+            this._confirm.show();
+        }
+    }
+
+    /**
+     * Removes a confirmed column together with its widgets and persists the new
+     * column layout. A column that is gone by then is left alone.
+     * @param {string} columnId - The column id.
+     */
+    _removeColumn(columnId) {
+        const index = this._columns.findIndex((c) => c.id === columnId);
+        if (index < 0) {
+            return;
+        }
+
+        this._columns.splice(index, 1);
+
+        this.render();
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Moves a column to a new position and persists the new column order.
+     * @param {number} from - The source column index.
+     * @param {number} to - The target column index.
+     * @param {boolean} after - Whether to insert after the target.
+     */
+    _moveColumn(from, to, after) {
+        if (from === to || from < 0 || from >= this._columns.length) {
+            return;
+        }
+
+        const [moved] = this._columns.splice(from, 1);
+        let target = from < to ? to - 1 : to;
+        if (after) {
+            target += 1;
+        }
+        target = Math.max(0, Math.min(target, this._columns.length));
+        this._columns.splice(target, 0, moved);
+
+        this.render();
+        this._flashMovedColumn(target);
+        this._dispatchColumnChange();
+    }
+
+    /**
+     * Briefly highlights a column header after a reorder so the user sees where
+     * the column landed. The headers are re-created by render(), so the flash
+     * targets the header at the new index. Mirrors the kanban landing feedback.
+     * @param {number} index - The new column index.
+     */
+    _flashMovedColumn(index) {
+        const header = this._element.querySelectorAll(".wx-dashboard-lane-title")[index];
+        if (!header) {
+            return;
+        }
+        header.classList.add("wx-board-col-moved");
+        setTimeout(() => header.classList.remove("wx-board-col-moved"), 800);
+    }
+
+    /**
+     * Dispatches a column-layout change so the REST layer can persist it.
+     */
+    _dispatchColumnChange() {
+        const columns = this._columns.map((c) => {
+            return { id: c.id, title: c.title ?? c.label ?? "", size: c.size, color: c.color ?? null };
+        });
+
+        this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+            id: this._element ? this._element.id : null,
+            action: "columns",
+            columns: columns
+        });
     }
 
     /**
@@ -262,14 +1383,20 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         const isWidgetMovable = widgetData.movable !== false && registeredWidget.movable !== false;
 
         if (isWidgetMovable) {
-            const dragHandle = document.createElement("span");
+            // the grip is a button to the keyboard: the arrow keys move the widget among its
+            // neighbours and across the columns, because a drag is a pointer gesture only
+            const dragHandle = document.createElement("button");
+            dragHandle.type = "button";
             dragHandle.className = "text-muted wx-drag-handle";
-            dragHandle.innerHTML = `<i class="${this._iconClass("fas fa-grip-horizontal", "wx-icon-light-drag")}"></i>`;
+            dragHandle.title = this._i18n("webexpress.webui:dashboard.widget.move", "Move widget");
+            dragHandle.setAttribute("aria-label", dragHandle.title + ": " + (widgetData.title || widgetData.name || ""));
+            dragHandle.innerHTML = `<i class="${this._iconClass("drag")}"></i>`;
+            dragHandle.addEventListener("keydown", (e) => this._onHandleKeyDown(e, widgetData, colIdx));
             leftArea.appendChild(dragHandle);
 
             cardEl.setAttribute("draggable", "true");
             cardEl.addEventListener("dragstart", (e) => {
-                this._onDragStart(e, widgetData, colIdx);
+                this._onDragStart(e, widgetData, colIdx, cardEl);
             });
             cardEl.addEventListener("dragend", (e) => {
                 this._onDragEnd(e, cardEl);
@@ -297,10 +1424,21 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             titleArea.appendChild(icon);
         }
 
-        const widgetTitle = widgetData.title || registeredWidget.title || "";
-        const titleText = document.createElement("span");
+        // the widget is a section of its column, so its title is a heading one level below the
+        // column title; the classes keep the look of the bold row it sat in
+        const widgetTitle = widgetData.title || widgetData.label || registeredWidget.title || "";
+        // a widget without a title gets no heading: an empty one is an empty entry in the outline
+        const titleText = document.createElement(widgetTitle ? "h" + Math.min(6, this._headingLevel + 1) : "span");
+        titleText.className = "d-inline m-0 fs-6 fw-bold";
         titleText.textContent = widgetTitle;
         titleArea.appendChild(titleText);
+
+        // optional trailing badge in the widget header (e.g. an item count),
+        // coloured by a css class or an inline style
+        const widgetBadge = this._makeBadge(widgetData, "wx-dashboard-widget-badge");
+        if (widgetBadge) {
+            titleArea.appendChild(widgetBadge);
+        }
 
         leftArea.appendChild(titleArea);
         header.appendChild(leftArea);
@@ -308,16 +1446,14 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
         const rightArea = document.createElement("div");
         rightArea.className = "d-flex gap-2";
 
-        if (widgetData.removable !== false && registeredWidget.removable !== false) {
-            const removeBtn = document.createElement("button");
-            removeBtn.type = "button";
-            removeBtn.className = "btn wx-button-close";
-            removeBtn.setAttribute("aria-label", this._i18n("webexpress.webui:remove", "Remove"));
-            removeBtn.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")}"></i>`;
-            removeBtn.addEventListener("click", () => {
-                this._removeWidget(colIdx, widgetData.instanceId);
-            });
-            rightArea.appendChild(removeBtn);
+        // the widget "…" menu offers the type-dependent settings (name and color
+        // plus any declared fields) and the delete entry; either affordance can
+        // be absent, so the menu is skipped when it would be empty
+        const canConfigure = this._configurableWidget && registeredWidget.configurable !== false;
+        const canRemove = widgetData.removable !== false && registeredWidget.removable !== false;
+
+        if (canConfigure || canRemove) {
+            rightArea.appendChild(this._buildWidgetMenu(widgetData, canConfigure, canRemove));
         }
 
         header.appendChild(rightArea);
@@ -328,6 +1464,12 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
 
         if (typeof registeredWidget.render === "function") {
             registeredWidget.render(body, widgetData);
+        } else if (widgetData.content) {
+            // moving the nodes out of the previous card keeps their control instances:
+            // the controller only tears down what is still in the discarded subtree
+            for (const node of widgetData.content) {
+                body.appendChild(node);
+            }
         } else if (widgetData.html) {
             body.innerHTML = widgetData.html;
         } else {
@@ -375,19 +1517,148 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Removes a widget from the specified column and re-renders the dashboard.
-     * @param {number} colIdx - Index of the column containing the widget.
+     * Builds the per-widget "…" kebab menu carrying the settings and delete
+     * entries. The dropdown mirrors the board menu look and feel. The entries
+     * address the widget by its instance id, because a reload can move it to
+     * another column while the menu or a dialog opened from it is still open.
+     * @param {Object} widgetData - The widget configuration object.
+     * @param {boolean} canConfigure - Whether the settings entry is offered.
+     * @param {boolean} canRemove - Whether the delete entry is offered.
+     * @returns {HTMLElement} The menu container element.
+     */
+    _buildWidgetMenu(widgetData, canConfigure, canRemove) {
+        const container = document.createElement("div");
+        container.className = "wx-dashboard-menu";
+
+        const button = this._buildMenuButton(this._i18n("webexpress.webui:dashboard.widget.menu", "Options"));
+        button.classList.add("wx-dashboard-widget-menu-btn");
+
+        const menu = document.createElement("ul");
+        menu.className = "dropdown-menu dropdown-menu-end";
+
+        if (canConfigure) {
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("gear"),
+                this._i18n("webexpress.webui:dashboard.widget.settings", "Settings"),
+                null,
+                () => this._openWidgetSettings(widgetData.instanceId)
+            ));
+        }
+
+        if (canRemove) {
+            menu.appendChild(this._buildMenuEntry(
+                this._iconClass("trash"),
+                this._i18n("webexpress.webui:remove", "Remove"),
+                null,
+                () => this._confirmRemoveWidget(widgetData.instanceId)
+            ));
+        }
+
+        this._attachMenu(container, button, menu);
+
+        return container;
+    }
+
+    /**
+     * Asks before a widget is removed: a widget carries the settings a user made
+     * for it, which are gone with it, and the entry sits next to the harmless
+     * settings entry in the same menu.
      * @param {string} instanceId - Unique instance identifier of the widget.
      */
-    _removeWidget(colIdx, instanceId) {
-        const index = this._columns[colIdx].widgets.findIndex((w) => {
-            return w.instanceId === instanceId;
-        });
-        if (index > -1) {
-            this._columns[colIdx].widgets.splice(index, 1);
-            this.render();
-            this._dispatchChangeEvent("remove");
+    _confirmRemoveWidget(instanceId) {
+        const widget = this._findWidget(instanceId)?.widget;
+        if (!widget) {
+            return;
         }
+
+        // the header resolves the shown name the same way, down to the registry title
+        const registeredWidget = webexpress.webui.DashboardWidgets.get(widget.id) || {};
+        const name = widget.title || widget.label || registeredWidget.title || "";
+
+        this._confirm = this._confirm || new webexpress.webui.ModalConfirm();
+        const accepted = this._confirm.confirmation(
+            "webexpress.webui:dashboard.widget.remove.title",
+            this._i18n("webexpress.webui:dashboard.widget.remove.message", "Remove widget “{name}”? This action cannot be undone.")
+                .replace("{name}", () => name),
+            () => this._removeWidget(instanceId),
+            {
+                confirmLabel: this._i18n("webexpress.webui:dashboard.widget.remove.confirm", "Remove"),
+                // the trigger that opened the menu is gone with the widget, so a
+                // cancelled or finished dialog hands the focus to the board's first menu
+                fallbackFocus: () => this._element.querySelector(".wx-dashboard-menu-btn")
+            }
+        );
+        if (accepted) {
+            this._confirm.show();
+        }
+    }
+
+    /**
+     * Opens the settings dialog for a widget. The dialog always carries the
+     * name and color and appends any type-specific fields the widget declares
+     * through its settings schema. On save the widget re-renders and the change
+     * is persisted.
+     * @param {string} instanceId - Unique instance identifier of the widget.
+     */
+    _openWidgetSettings(instanceId) {
+        const widget = this._findWidget(instanceId)?.widget;
+        if (!widget) {
+            return;
+        }
+
+        const definition = webexpress.webui.DashboardWidgets.get(widget.id) || {};
+
+        if (!this._settingsDialog) {
+            this._settingsDialog = new webexpress.webui.DashboardWidgetSettings();
+        }
+
+        this._settingsDialog.open(widget, definition, () => {
+            // a reload while the dialog was open hands over a fresh copy of the widget;
+            // the dialog edited the old one, so the edit moves over, and a widget the
+            // reload dropped has nothing left to persist
+            const current = this._findWidget(instanceId)?.widget;
+            if (!current) {
+                return;
+            }
+            if (current !== widget) {
+                current.title = widget.title;
+                current.label = widget.label;
+                current.color = widget.color;
+                current.params = widget.params;
+            }
+            this.render();
+            this._dispatchChangeEvent("settings");
+        });
+    }
+
+    /**
+     * Removes a confirmed widget and re-renders the dashboard. A widget a reload
+     * has replaced in the meantime is left alone rather than guessed at.
+     * @param {string} instanceId - Unique instance identifier of the widget.
+     */
+    _removeWidget(instanceId) {
+        const found = this._findWidget(instanceId);
+        if (!found) {
+            return;
+        }
+        found.column.widgets.splice(found.index, 1);
+        this.render();
+        this._dispatchChangeEvent("remove");
+    }
+
+    /**
+     * Locates a widget on the board by its instance id.
+     * @param {string} instanceId - Unique instance identifier of the widget.
+     * @returns {{column: object, index: number, widget: object}|null} The location, or null.
+     */
+    _findWidget(instanceId) {
+        for (const column of this._columns) {
+            const index = column.widgets.findIndex((w) => w.instanceId === instanceId);
+            if (index > -1) {
+                return { column: column, index: index, widget: column.widgets[index] };
+            }
+        }
+        return null;
     }
 
     /**
@@ -396,18 +1667,14 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
      * @param {DragEvent} e - The dragstart event.
      * @param {Object} widgetData - The widget being dragged.
      * @param {number} colIdx - Index of the column the widget originates from.
+     * @param {HTMLElement} cardEl - The widget card element.
      */
-    _onDragStart(e, widgetData, colIdx) {
+    _onDragStart(e, widgetData, colIdx, cardEl) {
         this._dragWidget = widgetData;
         this._dragColIndex = colIdx;
 
         // timeout ensures the drag image doesn't glitch
-        setTimeout(() => {
-            const el = this._element.querySelector(`[data-instance-id="${widgetData.instanceId}"]`);
-            if (el) {
-                el.classList.add("opacity-50");
-            }
-        }, 0);
+        setTimeout(() => cardEl.classList.add("opacity-50"), 0);
 
         try {
             e.dataTransfer.effectAllowed = "move";
@@ -502,6 +1769,49 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Moves a widget from the keyboard: up and down among the widgets of its column, left
+     * and right into the neighbouring column. The focus follows the grip through the
+     * re-render.
+     * @param {KeyboardEvent} e - The key event on the grip.
+     * @param {Object} widgetData - The widget model.
+     * @param {number} colIdx - The index of the column the widget sits in.
+     */
+    _onHandleKeyDown(e, widgetData, colIdx) {
+        if (!["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(e.key)) {
+            return;
+        }
+        e.preventDefault();
+
+        const widgets = this._columns[colIdx].widgets;
+        const index = widgets.indexOf(widgetData);
+        if (index < 0) {
+            return;
+        }
+
+        if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+            const target = colIdx + (e.key === "ArrowLeft" ? -1 : 1);
+            if (target < 0 || target >= this._columns.length) {
+                return;
+            }
+            widgets.splice(index, 1);
+            this._columns[target].widgets.push(widgetData);
+        } else {
+            const target = index + (e.key === "ArrowUp" ? -1 : 1);
+            if (target < 0 || target >= widgets.length) {
+                return;
+            }
+            widgets.splice(index, 1);
+            widgets.splice(target, 0, widgetData);
+        }
+
+        this.render();
+        this._dispatchChangeEvent("reorder");
+        Array.from(this._element.querySelectorAll(".wx-dashboard-widget-card"))
+            .find((card) => card.dataset.instanceId === String(widgetData.instanceId))
+            ?.querySelector(".wx-drag-handle")?.focus({ preventScroll: true });
+    }
+
+    /**
      * Clears all visual drop indicators from lanes and widget cards.
      */
     _clearDropTargets() {
@@ -514,7 +1824,7 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Dispatches a change event containing the updated dashboard layout.
      * Used to persist layout changes on the server.
-     * @param {string} action - The type of change (e.g., "remove", "reorder").
+     * @param {string} action - The type of change (e.g. "remove", "reorder", "add", "settings").
      */
     _dispatchChangeEvent(action) {
         // map the columns array to layout structure for server persistence
@@ -527,9 +1837,38 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
             };
         });
 
+        // the board serialization carries the per-widget settings (name, color,
+        // params) the legacy layout drops, so add and settings changes persist
         this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
             action: action,
-            layout: structure
+            layout: structure,
+            board: this._serializeBoard()
+        });
+    }
+
+    /**
+     * Serializes the full board - columns with their widgets including the
+     * per-widget name, color and params - so the server can persist widget
+     * additions, deletions and settings, not just the arrangement by type.
+     * @returns {Array<object>} The board columns with their widgets.
+     */
+    _serializeBoard() {
+        return this._columns.map((col) => {
+            return {
+                id: col.id,
+                title: col.title ?? col.label ?? "",
+                size: col.size,
+                color: col.color ?? null,
+                widgets: col.widgets.map((w) => {
+                    return {
+                        id: w.id,
+                        instanceId: w.instanceId,
+                        title: w.title ?? w.label ?? null,
+                        color: w.color ?? null,
+                        params: w.params || {}
+                    };
+                })
+            };
         });
     }
 };

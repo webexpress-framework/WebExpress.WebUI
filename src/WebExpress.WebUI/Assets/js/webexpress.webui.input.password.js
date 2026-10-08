@@ -1,6 +1,7 @@
-/// <summary>
-/// Represents a native password input control relying on the browser's built-in show/hide functionality.
-/// </summary>
+/**
+ * Represents a native password input control relying on the browser's
+ * built-in show/hide functionality.
+ */
 webexpress.webui.InputPasswordCtrl = class extends webexpress.webui.Ctrl {
     _value = "";
     _disabled = false;
@@ -17,11 +18,11 @@ webexpress.webui.InputPasswordCtrl = class extends webexpress.webui.Ctrl {
         this._value = element.dataset.value || "";
         this._disabled = element.dataset.disabled === "true";
 
-        var id = element.getAttribute("id") || "";
-        var name = element.getAttribute("name") || element.dataset.name || "";
-        var placeholder = element.dataset.placeholder || "";
-        var minLength = element.dataset.minlength || null;
-        var maxLength = element.dataset.maxlength || null;
+        const id = element.getAttribute("id") || "";
+        const name = element.getAttribute("name") || element.dataset.name || "";
+        const placeholder = element.dataset.placeholder || "";
+        const minLength = element.dataset.minlength || null;
+        const maxLength = element.dataset.maxlength || null;
 
         // clean up data attributes
         element.removeAttribute("id");
@@ -59,6 +60,9 @@ webexpress.webui.InputPasswordCtrl = class extends webexpress.webui.Ctrl {
             this._input.maxLength = parseInt(maxLength, 10);
         }
 
+        // the label reaches the input by its id; a help text referenced on the host does not
+        this._adoptFieldLabel(this._input, null, element);
+
         // assemble dom
         element.appendChild(this._hiddenInput);
         element.appendChild(this._input);
@@ -68,7 +72,7 @@ webexpress.webui.InputPasswordCtrl = class extends webexpress.webui.Ctrl {
             this._value = this._input.value;
             this._hiddenInput.value = this._value;
 
-            this._dispatch(webexpress.webui.Events.CHANGE_VALUE_EVENT, {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
                 value: this._value
             });
         });

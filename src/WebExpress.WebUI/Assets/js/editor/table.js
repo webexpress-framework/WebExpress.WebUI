@@ -5,45 +5,34 @@
  * Only table cells are editable to prevent structural damage.
  */
 webexpress.webui.EditorPlugins.register("table", 3000, {
-    _tableToolbar: null,
-    _tableToolbarShownOnce: false,
-    _lastCellColor: "#FFFF00",
-    _colors: [
-        "#000000", "#FF0000", "#008000", "#0000FF", "#FFFF00",
-        "#FFA500", "#800080", "#A52A2A", "#00FFFF", "#808080",
-        "#FFC0CB", "#FFD700", "#B22222", "#ADFF2F", "#20B2AA",
-        "#00CED1", "#4682B4", "#DA70D6", "#D2691E", "#C0C0C0",
-        "#FFB6C1", "#FFDAB9", "#E6E6FA", "#98FB98", "#AFEEEE",
-        "#D3D3D3", "#FFE4E1", "#F0E68C", "#F5DEB3", "#F4A460",
-        "#2F4F4F", "#696969", "#708090", "#778899", "#556B2F",
-        "#483D8B", "#8B0000", "#9400D3", "#FF4500", "#DC143C",
-        "#FFFFFF"
+    _selections: new WeakMap(),
+    _selectionIds: new WeakMap(),
+    _colorControls: null,
+    _actions: [
+        ["insertRowAbove", "insert.row.above", "add-row-above"],
+        ["insertRowBelow", "insert.row.below", "add-row-below"],
+        ["insertColumnLeft", "insert.col.left", "add-column-above"],
+        ["insertColumnRight", "insert.col.right", "add-column-below"],
+        ["insertIntermediateHeader", "add.intermediate.header", "add-row-below"],
+        ["toggleLeftHeader", "toggle.left.header", "table-columns"],
+        ["mergeCells", "merge.cells", "table-merge-cells"],
+        ["splitCell", "split.cell", "split-cell"],
+        ["deleteRow", "delete.row", "del-row"],
+        ["deleteColumn", "delete.col", "del-column"]
     ],
 
     /**
-     * Plugin initialization hook.
-     * Registers table navigation and monitors selection changes to toggle context toolbar.
+     * Keeps navigation and selection listeners tied to the owning editor's lifetime.
      * @param {object} editor - Editor instance.
      */
     init: function(editor) {
-        this._enableTabNav(editor);
-        document.addEventListener("selectionchange", () => {
-            const inTable = this._detectTableSelection(editor);
-            if (this._tableToolbar) {
-                if (inTable) {
-                    this._tableToolbar.style.display = "block";
-                    this._tableToolbarShownOnce = true;
-                } else {
-                    if (!this._tableToolbarShownOnce) {
-                        this._tableToolbar.style.display = "none";
-                    }
-                }
-                if (!editor.getEditorElement().querySelector("table")) {
-                    this._tableToolbar.style.display = "none";
-                    this._tableToolbarShownOnce = false;
-                }
-            }
-        });
+        const stopNavigation = this._enableTabNav(editor);
+        const stopSelection = this._enableCellSelection(editor);
+        return () => {
+            stopNavigation();
+            stopSelection();
+            this._colorControls?.forEach(control => control.destroy());
+        };
     },
 
     /**
@@ -52,69 +41,324 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
      * @param {object} editor - Editor instance.
      */
     onContentChange: function(editor) {
+        const ids = this._selectionIds.get(editor) || [];
+        this._colorControls?.forEach(control => control.destroy());
+        this._colorControls = new Map();
+        this._clearCellSelection(editor);
+        const cells = Array.from(editor.getEditorElement().querySelectorAll("td,th")).filter(cell => ids.includes(editor.nodeId(cell)));
+        if (cells.length) this._highlightCells(editor, cells);
         this._upgradeRawTables(editor);
+        this._updateTableToolbars(editor);
     },
 
     /**
-     * Upgrades raw html tables to framed editor tables and binds resize events.
+     * Tracks rectangular cell selections independently of browser text-selection quirks.
+     */
+    _enableCellSelection: function(editor) {
+        const root = editor.getEditorElement();
+        let anchor = null;
+        let dragging = false;
+        const down = e => {
+            if (e.button !== 0 || e.target.closest?.(".wx-col-resizer,.wx-editor-frame-toolbar,.wx-addon-header")) {
+                return;
+            }
+            const cell = e.target.closest?.("td,th");
+            const previous = this._getSelectedCells(editor)[0];
+            this._clearCellSelection(editor);
+            anchor = cell && root.contains(cell) ? cell : null;
+            dragging = false;
+            if (e.shiftKey && anchor && previous?.closest("table") === anchor.closest("table")) {
+                this._selectCellRectangle(editor, previous, anchor);
+                anchor = previous;
+                dragging = true;
+                e.preventDefault();
+            }
+        };
+        const move = e => {
+            if (!anchor || !(e.buttons & 1)) {
+                return;
+            }
+            const cell = e.target.closest?.("td,th");
+            if (!cell || cell.closest("table") !== anchor.closest("table") || (!dragging && cell === anchor)) {
+                return;
+            }
+            dragging = true;
+            e.preventDefault();
+            this._selectCellRectangle(editor, anchor, cell);
+        };
+        const up = () => {
+            anchor = null;
+            dragging = false;
+            this._updateTableToolbars(editor);
+        };
+        const change = () => {
+            if (anchor) {
+                return;
+            }
+            const range = webexpress.webui.EditorSelection.getRange(root);
+            if (range) {
+                const cells = this._nativeSelectedCells(editor);
+                this._highlightCells(editor, cells);
+            }
+            this._updateTableToolbars(editor);
+        };
+        const key = e => {
+            if (e.key === "Escape") {
+                const cell = this._getSelectedCells(editor)[0];
+                this._clearCellSelection(editor);
+                this._focusCell(cell);
+            }
+        };
+        const outside = e => {
+            if (!root.contains(e.target) && !editor._uiContainer?.contains(e.target) &&
+                !e.target.closest?.(".wx-editor-bubble,.wx-editor-bubble-menu")) {
+                this._clearCellSelection(editor);
+            }
+        };
+        root.addEventListener("mousedown", down);
+        root.addEventListener("keydown", key);
+        document.addEventListener("mousemove", move);
+        document.addEventListener("mouseup", up);
+        document.addEventListener("mousedown", outside);
+        document.addEventListener("selectionchange", change);
+        return () => {
+            root.removeEventListener("mousedown", down);
+            root.removeEventListener("keydown", key);
+            document.removeEventListener("mousemove", move);
+            document.removeEventListener("mouseup", up);
+            document.removeEventListener("mousedown", outside);
+            document.removeEventListener("selectionchange", change);
+            this._clearCellSelection(editor);
+        };
+    },
+
+    /**
+     * Maps logical coordinates to cells so row and column spans do not shift the selection.
+     */
+    _tableGrid: function(table) {
+        const rows = Array.from(table.rows);
+        const grid = [];
+        const positions = new Map();
+        rows.forEach((row, r) => {
+            grid[r] ||= [];
+            let c = 0;
+            const groupEnd = rows.findIndex((next, i) => i > r && next.parentElement !== row.parentElement);
+            const remaining = (groupEnd < 0 ? rows.length : groupEnd) - r;
+            Array.from(row.cells).forEach(cell => {
+                while (grid[r][c]) c++;
+                const rowSpan = Math.min(cell.rowSpan || remaining, remaining);
+                const colSpan = cell.colSpan;
+                positions.set(cell, { top: r, left: c, bottom: r + rowSpan - 1, right: c + colSpan - 1 });
+                for (let y = r; y < r + rowSpan; y++) {
+                    grid[y] ||= [];
+                    for (let x = c; x < c + colSpan; x++) grid[y][x] = cell;
+                }
+                c += colSpan;
+            });
+        });
+        return { rows, grid, positions };
+    },
+
+    /**
+     * Expands a rectangle until every intersected spanning cell fits completely inside it.
+     */
+    _cellRectangle: function(first, last) {
+        const table = first?.closest("table");
+        if (!table || table !== last?.closest("table")) return [];
+        const { positions } = this._tableGrid(table);
+        const a = positions.get(first), b = positions.get(last);
+        if (!a || !b) return [];
+        const bounds = { top: Math.min(a.top, b.top), left: Math.min(a.left, b.left),
+            bottom: Math.max(a.bottom, b.bottom), right: Math.max(a.right, b.right) };
+        let changed;
+        do {
+            changed = false;
+            positions.forEach(p => {
+                if (p.top > bounds.bottom || p.bottom < bounds.top || p.left > bounds.right || p.right < bounds.left) return;
+                const expanded = { top: Math.min(bounds.top, p.top), left: Math.min(bounds.left, p.left),
+                    bottom: Math.max(bounds.bottom, p.bottom), right: Math.max(bounds.right, p.right) };
+                if (Object.keys(bounds).some(key => bounds[key] !== expanded[key])) {
+                    Object.assign(bounds, expanded);
+                    changed = true;
+                }
+            });
+        } while (changed);
+        return Array.from(positions).filter(([, p]) => p.top >= bounds.top && p.bottom <= bounds.bottom &&
+            p.left >= bounds.left && p.right <= bounds.right).map(([cell]) => cell);
+    },
+
+    /**
+     * Accepts both text endpoints and native Firefox cell ranges.
+     */
+    _boundaryCell: function(node, offset, end = false) {
+        const element = node?.nodeType === Node.TEXT_NODE ? node.parentElement : node;
+        const cell = element?.closest?.("td,th");
+        if (cell) return cell;
+        const child = node?.childNodes[end ? offset - 1 : offset];
+        if (child?.matches?.("td,th")) return child;
+        const cells = child?.querySelectorAll?.("td,th");
+        return cells?.length ? cells[end ? cells.length - 1 : 0] : null;
+    },
+
+    /**
+     * Converts keyboard and native table selections to the same rectangle as mouse dragging.
+     */
+    _nativeSelectedCells: function(editor) {
+        const sel = window.getSelection();
+        const root = editor.getEditorElement();
+        if (!sel?.rangeCount) return [];
+        const start = sel.getRangeAt(0), end = sel.getRangeAt(sel.rangeCount - 1);
+        const first = this._boundaryCell(start.startContainer, start.startOffset);
+        const last = this._boundaryCell(end.endContainer, end.endOffset, true);
+        if (!first || !last || !root.contains(first) || !root.contains(last)) return [];
+        return this._cellRectangle(first, last);
+    },
+
+    /**
+     * Retains cell identity while toolbar focus temporarily removes the native selection.
+     */
+    _getSelectedCells: function(editor) {
+        const cells = this._selections.get(editor);
+        if (cells?.length && cells.every(cell => editor.getEditorElement().contains(cell))) return cells;
+        const native = this._nativeSelectedCells(editor);
+        if (native.length) return native;
+        const Model = webexpress.webui.EditorModel, selection = editor.selection;
+        const from = Math.min(selection.anchor, selection.focus), to = Math.max(selection.anchor, selection.focus);
+        const cellAt = position => Model.block(editor._state.doc, position)?.ancestors.findLast(node => ["td", "th"].includes(node.type));
+        const first = cellAt(from), last = cellAt(to > from ? to - 1 : to);
+        if (!first || !last) return [];
+        const projected = Array.from(editor.getEditorElement().querySelectorAll("td,th"));
+        return this._cellRectangle(projected.find(cell => editor.nodeId(cell) === first.id), projected.find(cell => editor.nodeId(cell) === last.id));
+    },
+
+    /**
+     * Keeps the visible rectangle and command selection in agreement.
+     */
+    _selectCellRectangle: function(editor, first, last) {
+        const cells = this._cellRectangle(first, last);
+        if (!cells.length) return;
+        this._highlightCells(editor, cells);
+        const range = document.createRange();
+        range.setStart(cells[0], 0);
+        range.setEnd(cells[cells.length - 1], cells[cells.length - 1].childNodes.length);
+        webexpress.webui.EditorSelection.apply(range);
+        editor._saveCurrentSelection();
+    },
+
+    /**
+     * Stores presentation state per editor to prevent selections leaking between instances.
+     */
+    _highlightCells: function(editor, cells) {
+        this._clearCellSelection(editor);
+        if (cells.length > 1) cells.forEach(cell => cell.setAttribute("data-wx-table-selected", ""));
+        this._selections.set(editor, cells);
+        this._selectionIds.set(editor, cells.map(cell => editor.nodeId(cell)));
+        this._updateTableToolbars(editor);
+    },
+
+    /**
+     * Removes selection presentation before content replacement or editor teardown.
+     */
+    _clearCellSelection: function(editor) {
+        editor.getEditorElement().querySelectorAll("[data-wx-table-selected]").forEach(cell => {
+            cell.removeAttribute("data-wx-table-selected");
+        });
+        this._selections.delete(editor);
+        this._selectionIds.delete(editor);
+    },
+
+    /**
+     * Adds resize and menu interactions to the tables projected by the editor view.
      * @param {object} editor - Editor instance.
      */
     _upgradeRawTables: function(editor) {
         const root = editor.getEditorElement();
-        if (!root) {
-            return;
-        }
-
-        const tables = Array.from(root.querySelectorAll("table"));
-        tables.forEach(table => {
-            // allow selection across multiple cells by making the table editable
-            table.setAttribute("contenteditable", "true");
-
-            // remove explicit contenteditable from cells to inherit from table
-            const cells = table.querySelectorAll("td, th");
-            cells.forEach(c => {
-                c.removeAttribute("contenteditable");
-            });
-
-            // check if the table already has a wrapper frame
-            let frame = table.closest(".wx-addon-frame");
-
-            if (!frame) {
-                // it's a raw table, apply classes and wrap it
-                table.classList.add("table", "table-striped", "table-striped-columns", "table-bordered", "wx-native-table");
-
-                const uniqueId = "table-" + Date.now() + "-" + Math.floor(Math.random() * 10000);
-                const dragHandle = '<span class="wx-addon-drag-handle" contenteditable="false"><i class="fas fa-grip-vertical"></i></span>';
-
-                frame = document.createElement("div");
-                frame.className = "wx-addon-frame card my-3 shadow-sm";
-                frame.setAttribute("contenteditable", "false");
-                frame.setAttribute("draggable", "true");
-                frame.setAttribute("data-addon-id", uniqueId);
-                frame.setAttribute("data-type", "table");
-
-                frame.innerHTML = `
-                    <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center" contenteditable="false">
-                        <div class="small text-muted fw-bold d-flex align-items-center">
-                            ${dragHandle}
-                            <i class="fas fa-table me-2"></i>
-                            <span>Table</span>
-                        </div>
-                    </div>
-                    <div class="card-body p-2 wx-addon-body-container" contenteditable="false">
-                    </div>
-                `;
-
-                // insert frame before table, then move table into frame's body
-                if (table.parentNode) {
-                    table.parentNode.insertBefore(frame, table);
-                    frame.querySelector(".wx-addon-body-container").appendChild(table);
-                }
-            }
-
-            // re-attach resizer events (important for loaded content since listeners are lost in html strings)
+        root.querySelectorAll("table").forEach(table => {
+            table._wxEditor = editor;
             this._attachColumnResizersToTable(table);
+            this._attachTableToolbar(editor, table);
         });
+    },
+
+    /**
+     * Places table commands in the frame while preserving the cell selection on pointer input.
+     * @param {object} editor - The editor owning table actions and history.
+     * @param {HTMLTableElement} table - The table receiving a toolbar.
+     */
+    _attachTableToolbar: function(editor, table) {
+        const frame = table.closest(".wx-editor-table-frame");
+        if (!frame) return;
+        const toolbar = document.createElement("div");
+        toolbar.className = "wx-editor-frame-toolbar wx-editor-table-toolbar";
+        toolbar.setAttribute("role", "toolbar");
+        toolbar.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.table"));
+        toolbar.setAttribute("contenteditable", "false");
+        toolbar.addEventListener("mousedown", event => {
+            if (event.target.closest("button")) { editor._saveCurrentSelection(); event.preventDefault(); }
+        });
+        this._actions.forEach(([command, label, icon]) => {
+            const button = document.createElement("button");
+            button.type = "button";
+            button.className = "wx-editor-btn";
+            button.dataset.tableCommand = command;
+            button.title = webexpress.webui.I18N.translate("webexpress.webui:editor.table." + label);
+            button.setAttribute("aria-label", button.title);
+            button.innerHTML = '<i class="' + webexpress.webui.IconSet.resolve(icon) + '"></i>';
+            button.addEventListener("click", () => {
+                if (button.disabled || editor.disabled) return;
+                this._modifyTable(editor, command);
+            });
+            toolbar.appendChild(button);
+        });
+        const color = document.createElement("div");
+        color.dataset.allowEmpty = "true";
+        color.dataset.compact = "true";
+        color.dataset.icon = "fill-drip";
+        color.setAttribute("aria-label", webexpress.webui.I18N.translate("webexpress.webui:editor.table.cell.background"));
+        const control = new webexpress.webui.InputColorCtrl(color);
+        const trigger = color.querySelector(".wx-color-trigger");
+        trigger.classList.add("wx-editor-btn");
+        trigger.title = color.getAttribute("aria-label");
+        color.addEventListener(webexpress.webui.Event.CHANGE_VALUE_EVENT, event => {
+            event.stopPropagation();
+            if (!editor.disabled) this._setCellBackground(editor, event.detail.value);
+        });
+        this._colorControls.set(table, control);
+        toolbar.appendChild(color);
+        frame.insertBefore(toolbar, frame.querySelector(".card-body"));
+    },
+
+    /**
+     * Derives button availability and color feedback from cells in the toolbar's own table.
+     * @param {object} editor - The editor containing the current cell selection.
+     */
+    _updateTableToolbars: function(editor) {
+        const selected = this._getSelectedCells(editor);
+        for (const [table, color] of this._colorControls || []) {
+            const cells = selected.filter(cell => cell.closest("table") === table);
+            const toolbar = table.closest(".wx-editor-table-frame")?.querySelector(".wx-editor-table-toolbar");
+            if (!toolbar) continue;
+            toolbar.querySelectorAll("[data-table-command]").forEach(button => {
+                const command = button.dataset.tableCommand;
+                let enabled = cells.length > 0;
+                if (command === "mergeCells") enabled = this._canMergeCells(cells);
+                if (command === "splitCell") enabled = cells.length === 1 && (cells[0].colSpan > 1 || cells[0].rowSpan > 1);
+                button.dataset.wxSelectionDisabled = String(!enabled);
+                button.disabled = editor.disabled || !enabled;
+                if (command === "toggleLeftHeader") {
+                    const first = Array.from(table.rows).find(row => row.parentElement.tagName !== "THEAD")?.cells[0];
+                    const active = first?.tagName === "TH";
+                    button.setAttribute("aria-pressed", String(active));
+                    button.classList.toggle("active", active);
+                }
+            });
+            color.disabled = editor.disabled || !cells.length;
+            const values = cells.map(cell => webexpress.webui.EditorModel.find(editor._state.doc, editor.nodeId(cell))?.node.attrs.background || "");
+            const value = values.length && values.every(value => value === values[0]) ? values[0] : "";
+            if (!color.setValue(value, false)) color.setValue("", false);
+            color._colorPreview.style.backgroundColor = value || "transparent";
+            color._element.querySelectorAll("button,input").forEach(input => { input.dataset.wxSelectionDisabled = String(!cells.length); });
+        }
     },
 
     /**
@@ -124,92 +368,23 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
      * @param {object} editor - Editor instance.
      */
     _enableTabNav: function(editor) {
-        editor.getEditorElement().addEventListener("keydown", (e) => {
-            if (e.key !== "Tab") {
-                return;
-            }
-
-            const sel = window.getSelection();
-            if (!sel.rangeCount) {
-                return;
-            }
-
-            let node = sel.anchorNode;
-            if (node && node.nodeType !== Node.ELEMENT_NODE) {
-                node = node.parentElement;
-            }
-
-            const cell = node ? node.closest("td, th") : null;
-            if (!cell) {
-                return;
-            }
-
-            const row = cell.parentElement;
-            const table = row ? row.closest("table") : null;
-            if (!table) {
-                return;
-            }
-
+        return editor.listen(editor.getEditorElement(), "keydown", e => {
+            if (e.key !== "Tab" || e.defaultPrevented || e.isComposing || !editor.ownsInput(e)) return;
+            editor._saveCurrentSelection();
+            const Model = webexpress.webui.EditorModel;
+            const block = Model.block(editor._state.doc, editor.selection.focus);
+            const cell = block?.ancestors.findLast(n => n.type === "td" || n.type === "th");
+            const table = block?.ancestors.findLast(n => n.type === "table");
+            if (!cell || !table) return;
             e.preventDefault();
-
-            if (e.shiftKey) {
-                let prev = cell.previousElementSibling;
-                if (prev) {
-                    this._focusCell(prev);
-                    return;
-                }
-
-                let prevRow = row.previousElementSibling;
-                if (!prevRow && row.parentElement && row.parentElement.nodeName === "TBODY") {
-                    const thead = table.tHead;
-                    if (thead && thead.rows.length > 0) {
-                        prevRow = thead.rows[thead.rows.length - 1];
-                    }
-                }
-
-                if (prevRow) {
-                    const lastCell = prevRow.cells[prevRow.cells.length - 1];
-                    this._focusCell(lastCell);
-                }
-                return;
+            const cells = table.children.flatMap(section => section.children.flatMap(row => row.children));
+            let next = cells[cells.indexOf(cell) + (e.shiftKey ? -1 : 1)];
+            if (!next && !e.shiftKey) {
+                editor.dispatch({ type: "table", command: "insertRowBelow", ids: [cell.id] });
+                const updated = Model.find(editor._state.doc, table.id)?.node;
+                next = updated?.children.at(-1)?.children.at(-1)?.children[0];
             }
-
-            let next = cell.nextElementSibling;
-            if (next) {
-                this._focusCell(next);
-                return;
-            }
-
-            let nextRow = row.nextElementSibling;
-            if (!nextRow && row.parentElement && row.parentElement.nodeName === "THEAD") {
-                if (table.tBodies.length > 0 && table.tBodies[0].rows.length > 0) {
-                    nextRow = table.tBodies[0].rows[0];
-                }
-            }
-
-            if (nextRow) {
-                const firstCell = nextRow.cells[0];
-                this._focusCell(firstCell);
-                return;
-            }
-
-            if (row.parentElement && (row.parentElement.nodeName === "TBODY" || !table.tHead)) {
-                // determine if first column is currently a vertical header
-                const firstCellIsHeader = row.cells.length > 0 && row.cells[0].tagName === "TH";
-                const cols = row.cells.length;
-                const targetTbody = table.tBodies.length > 0 ? table.tBodies[0] : table.createTBody();
-                const newRow = targetTbody.insertRow();
-
-                for (let i = 0; i < cols; i++) {
-                    const newCell = document.createElement(i === 0 && firstCellIsHeader ? "th" : "td");
-                    if (i === 0 && firstCellIsHeader) {
-                        newCell.scope = "row";
-                    }
-                    newCell.innerHTML = "<br>";
-                    newRow.appendChild(newCell);
-                }
-                this._focusCell(newRow.cells[0]);
-            }
+            if (next) { const pos = Model.find(editor._state.doc, next.id).start; editor.selection = { anchor: pos, focus: pos }; }
         });
     },
 
@@ -237,18 +412,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
      * @returns {number} Maximum column count.
      */
     _getMaxColumns: function(table) {
-        let max = 0;
-        for (let i = 0; i < table.rows.length; i++) {
-            let cols = 0;
-            const row = table.rows[i];
-            for (let j = 0; j < row.cells.length; j++) {
-                cols += parseInt(row.cells[j].getAttribute("colspan") || 1, 10);
-            }
-            if (cols > max) {
-                max = cols;
-            }
-        }
-        return max;
+        return Math.max(0, ...this._tableGrid(table).grid.map(row => row.length));
     },
 
     /**
@@ -267,7 +431,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         }
 
         const headerRow = thead.rows[0];
-        const cols = headerRow.cells.length;
+        const cols = this._getMaxColumns(table);
         if (cols < 2) {
             return;
         }
@@ -296,11 +460,9 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
             oldResizers[i].remove();
         }
 
-        for (let i = 0; i < cols; i++) {
-            const th = headerRow.cells[i];
-            if (!th) {
-                continue;
-            }
+        const positions = this._tableGrid(table).positions;
+        for (const th of Array.from(headerRow.cells)) {
+            const i = positions.get(th).right;
 
             th.style.position = th.style.position || "relative";
 
@@ -341,45 +503,18 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
      * @param {HTMLElement} th - Header cell.
      */
     _beginNativeColumnResize: function(evt, table, colgroup, index, th) {
-        const pointX = (ev) => {
-            if (ev.touches && ev.touches.length) {
-                return ev.touches[0].clientX;
-            }
-            return ev.clientX;
-        };
-
-        const colEl = colgroup.children[index];
-        if (!colEl) {
-            return;
-        }
-
-        // capture initial widths
-        const startX = pointX(evt);
-        const thRect = th.getBoundingClientRect();
-        const startWidth = Math.max(Math.round(thRect.width), 30);
-        const isRtl = getComputedStyle(table).direction === "rtl";
-        const minWidth = 30;
-
-        const move = (e) => {
-            e.preventDefault();
-            // compute delta
-            const dx = pointX(e) - startX;
-            const signed = isRtl ? -dx : dx;
-            const newWidth = Math.max(startWidth + signed, minWidth);
-            colEl.style.width = `${Math.round(newWidth)}px`;
-        };
-
-        const up = () => {
-            document.removeEventListener("mousemove", move);
-            document.removeEventListener("mouseup", up);
-            document.removeEventListener("touchmove", move);
-            document.removeEventListener("touchend", up);
-        };
-
-        document.addEventListener("mousemove", move);
-        document.addEventListener("mouseup", up);
-        document.addEventListener("touchmove", move, { passive: false });
-        document.addEventListener("touchend", up);
+        const editor = table._wxEditor;
+        if (!editor || editor.disabled) return;
+        const id = editor.nodeId(table);
+        const pointX = e => e.touches?.[0]?.clientX ?? e.clientX;
+        const startX = pointX(evt), startWidth = Math.max(30, Math.round(th.getBoundingClientRect().width));
+        const widths = Array.from(colgroup.children).map(col => parseFloat(col.style.width) || startWidth);
+        const rtl = getComputedStyle(table).direction === "rtl";
+        let width = widths[index];
+        const move = e => { e.preventDefault(); width = Math.max(30, startWidth + (pointX(e) - startX) * (rtl ? -1 : 1)); colgroup.children[index].style.width = width + "px"; };
+        const cleanups = [];
+        const up = () => { cleanups.forEach(cleanup => cleanup()); widths[index] = width; editor.updateNode(id, { widths }); };
+        cleanups.push(editor.listen(document, "mousemove", move), editor.listen(document, "mouseup", up), editor.listen(document, "touchmove", move, { passive: false }), editor.listen(document, "touchend", up));
     },
 
     /**
@@ -397,89 +532,6 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
     },
 
     /**
-     * Returns context menu items for table cell actions.
-     * Includes structural modifications and formatting.
-     * @param {object} editor - Editor instance.
-     * @param {HTMLElement} target - The element that triggered the context menu.
-     * @returns {Array<object>} Context menu descriptor array.
-     */
-    getContextMenuItems: function(editor, target) {
-        const cell = target.closest("td, th");
-        if (!cell || !editor.getEditorElement().contains(cell)) {
-            return [];
-        }
-
-        const range = document.createRange();
-        range.selectNodeContents(cell);
-        range.collapse(true);
-        const sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-
-        const colorItems = this._colors.map(c => ({
-            type: "color",
-            value: c,
-            action: () => {
-                this._lastCellColor = c;
-                this._setCellBackground(editor, c);
-            }
-        }));
-
-        const customLi = document.createElement("li");
-        customLi.style.display = "inline-block";
-        const customLabel = document.createElement("label");
-        customLabel.className = "dropdown-item p-0 d-flex align-items-center justify-content-center";
-        customLabel.style.width = "24px";
-        customLabel.style.height = "24px";
-        customLabel.style.cursor = "pointer";
-        customLabel.style.border = "1px solid #ccc";
-        customLabel.style.borderRadius = "4px";
-        customLabel.innerHTML = '<i class="fas fa-plus" style="font-size: 10px;"></i>';
-
-        const customInput = document.createElement("input");
-        customInput.type = "color";
-        customInput.style.position = "absolute";
-        customInput.style.opacity = "0";
-        customInput.style.width = "0";
-        customInput.style.height = "0";
-        customInput.addEventListener("input", (e) => {
-             this._lastCellColor = e.target.value;
-             this._setCellBackground(editor, e.target.value);
-        });
-        customLabel.appendChild(customInput);
-        customLi.appendChild(customLabel);
-
-        colorItems.push({
-            type: "custom-element",
-            element: customLi
-        });
-
-        return [
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.row.above"), action: () => this._modifyTable(editor, "insertRowAbove"), icon: "wx-icon add-row-above" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.row.below"), action: () => this._modifyTable(editor, "insertRowBelow"), icon: "wx-icon add-row-below" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.col.left"), action: () => this._modifyTable(editor, "insertColumnLeft"), icon: "wx-icon add-col-above" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.insert.col.right"), action: () => this._modifyTable(editor, "insertColumnRight"), icon: "wx-icon add-col-below" },
-            { separator: true },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.add.intermediate.header"), action: () => this._modifyTable(editor, "insertIntermediateHeader"), icon: "wx-icon add-row-below" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.toggle.left.header"), action: () => this._modifyTable(editor, "toggleLeftHeader"), icon: "wx-icon cell-background" },
-            { separator: true },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.merge.cells"), action: () => this._modifyTable(editor, "mergeCells"), icon: "wx-icon merge-cells" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.split.cell"), action: () => this._modifyTable(editor, "splitCell"), icon: "wx-icon split-cell" },
-            { separator: true },
-            {
-                label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.cell.background"),
-                icon: "wx-icon cell-background",
-                submenu: colorItems,
-                submenuClass: "wx-editor-color-picker"
-            },
-            { separator: true },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.delete.row"), action: () => this._modifyTable(editor, "deleteRow"), icon: "wx-icon delete-row" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.delete.col"), action: () => this._modifyTable(editor, "deleteColumn"), icon: "wx-icon delete-col" },
-            { label: webexpress.webui.I18N.translate("webexpress.webui:editor.table.delete.table"), action: () => this._modifyTable(editor, "deleteTable"), icon: "wx-icon delete-table" }
-        ];
-    },
-
-    /**
      * Creates the insert table dropdown with an interactive grid to pick dimensions.
      * @param {object} editor - Editor instance.
      * @returns {HTMLElement} Insert button group.
@@ -490,8 +542,10 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         const button = document.createElement("button");
         button.className = "wx-editor-btn dropdown-toggle";
         button.type = "button";
-        button.setAttribute("data-bs-toggle", "dropdown");
-        button.innerHTML = '<i class="fas fa-table"></i>';
+        button.title = webexpress.webui.I18N.translate("webexpress.webui:editor.table");
+        button.setAttribute("aria-label", button.title);
+
+        button.innerHTML = `<i class="${webexpress.webui.IconSet.resolve("table")}"></i>`;
 
         const menu = document.createElement("div");
         menu.className = "dropdown-menu p-3";
@@ -604,6 +658,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
                 resetGrid();
             }, 0);
         });
+        webexpress.webui.NativeMenu.bind(button, menu);
         return container;
     },
 
@@ -632,48 +687,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
         }
         tableHtml += "</tbody></table>";
 
-        const uniqueId = "table-" + Date.now();
-        const dragHandle = '<span class="wx-addon-drag-handle" contenteditable="false"><i class="fas fa-grip-vertical"></i></span>';
-
-        const frameHtml = `
-            <div class="wx-addon-frame card my-3 shadow-sm"
-                 contenteditable="false"
-                 draggable="true"
-                 data-addon-id="${uniqueId}"
-                 data-type="table">
-
-                <div class="card-header py-1 px-2 d-flex justify-content-between align-items-center" contenteditable="false">
-                    <div class="small text-muted fw-bold d-flex align-items-center">
-                        ${dragHandle}
-                        <i class="fas fa-table me-2"></i>
-                        <span>Table</span>
-                    </div>
-                </div>
-
-                <div class="card-body p-2 wx-addon-body-container"
-                     contenteditable="false">
-                    ${tableHtml}
-                </div>
-            </div>`;
-
-        editor.insertHtmlAtCursor(frameHtml);
-    },
-
-    /**
-     * Detects whether the current selection is inside a table.
-     * @param {object} editor - Editor instance.
-     * @returns {boolean} True if selection is inside a table.
-     */
-    _detectTableSelection: function(editor) {
-        const sel = window.getSelection();
-        if (!sel.rangeCount) {
-            return false;
-        }
-        let node = sel.getRangeAt(0).startContainer;
-        if (node.nodeType === Node.TEXT_NODE) {
-            node = node.parentElement;
-        }
-        return editor.getEditorElement().contains(node) && node.closest("table") !== null;
+        editor.insertHtmlAtCursor(tableHtml);
     },
 
     /**
@@ -683,19 +697,7 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
      * @param {string} color - CSS color string.
      */
     _setCellBackground: function(editor, color) {
-        editor.restoreSavedRange();
-        const sel = window.getSelection();
-        if (!sel.rangeCount) {
-            return;
-        }
-        let cell = sel.getRangeAt(0).startContainer;
-        if (cell.nodeType !== Node.ELEMENT_NODE) {
-            cell = cell.parentElement;
-        }
-        cell = cell.closest("td, th");
-        if (cell) {
-            cell.style.backgroundColor = color;
-        }
+        editor.dispatch({ type: "table", command: "background", ids: this._getSelectedCells(editor).map(cell => editor.nodeId(cell)), color });
     },
 
     /**
@@ -704,181 +706,43 @@ webexpress.webui.EditorPlugins.register("table", 3000, {
      * @param {string} action - Action identifier.
      */
     _modifyTable: function(editor, action) {
-        const sel = window.getSelection();
-        if (!sel.rangeCount) {
-            return;
-        }
-        let cell = sel.getRangeAt(0).startContainer;
-        if (cell.nodeType !== Node.ELEMENT_NODE) {
-            cell = cell.parentElement;
-        }
-        cell = cell.closest("td, th");
-        if (!cell) {
-            return;
-        }
+        const cells = this._getSelectedCells(editor);
+        if (!cells.length) return;
+        editor.dispatch({ type: "table", command: action, ids: cells.map(cell => editor.nodeId(cell)), text: webexpress.webui.I18N.translate("webexpress.webui:editor.table.intermediate.header") });
+        this._updateTableToolbars(editor);
+    },
 
-        const row = cell.parentElement;
-        const table = row.closest("table");
-        const frame = table.closest(".wx-addon-frame");
-        const isHeaderCell = cell.tagName === "TH";
-        const tbody = row.parentElement;
+    /**
+     * Rejects incomplete rectangles and row-group crossings that HTML cannot represent with spans.
+     */
+    _canMergeCells: function(cells) {
+        if (cells.length < 2) return false;
+        const table = cells[0].closest("table");
+        const section = cells[0].parentElement.parentElement;
+        if (cells.some(cell => cell.closest("table") !== table || cell.parentElement.parentElement !== section)) return false;
+        const rectangle = this._cellRectangle(cells[0], cells[cells.length - 1]);
+        if (rectangle.length !== cells.length || rectangle.some(cell => !cells.includes(cell))) return false;
+        const { positions } = this._tableGrid(table);
+        const bounds = this._selectionBounds(cells, positions);
+        const area = cells.reduce((total, cell) => {
+            const p = positions.get(cell);
+            return total + (p.bottom - p.top + 1) * (p.right - p.left + 1);
+        }, 0);
+        return area === (bounds.bottom - bounds.top + 1) * (bounds.right - bounds.left + 1);
+    },
 
-        if (action === "deleteRow") {
-            row.remove();
-            if (table.rows.length === 0) {
-                if (frame) {
-                    frame.remove();
-                } else {
-                    table.remove();
-                }
-            }
-        } else if (action === "deleteColumn") {
-            const colIndex = cell.cellIndex;
+    /**
+     * Finds the logical extent of selected cells including their existing spans.
+     */
+    _selectionBounds: function(cells, positions) {
+        const selected = cells.map(cell => positions.get(cell));
+        return { top: Math.min(...selected.map(p => p.top)), left: Math.min(...selected.map(p => p.left)),
+            bottom: Math.max(...selected.map(p => p.bottom)), right: Math.max(...selected.map(p => p.right)) };
+    },
 
-            for (let r = 0; r < table.rows.length; r++) {
-                const tr = table.rows[r];
-                // ignore rows that are just spanning the whole table (intermediate headers)
-                if (tr.cells.length > 1 && tr.cells.length > colIndex) {
-                    tr.deleteCell(colIndex);
-                }
-            }
 
-            // update colgroup
-            const colgroup = table.querySelector("colgroup");
-            if (colgroup && colgroup.children.length > colIndex) {
-                colgroup.removeChild(colgroup.children[colIndex]);
-            }
 
-            if (table.rows[0] && table.rows[0].cells.length === 0) {
-                if (frame) {
-                    frame.remove();
-                } else {
-                    table.remove();
-                }
-            }
-            this._attachColumnResizersToTable(table);
 
-        } else if (action === "insertRowAbove" || action === "insertRowBelow") {
-            const newRow = table.insertRow(action === "insertRowAbove" ? row.rowIndex : row.rowIndex + 1);
-            const cols = row.cells.length;
 
-            // determine if first column is currently a vertical header
-            const firstCellIsHeader = row.cells.length > 0 && row.cells[0].tagName === "TH";
 
-            for (let i = 0; i < cols; i++) {
-                const newCell = document.createElement(isHeaderCell && tbody.tagName === "THEAD" || (i === 0 && firstCellIsHeader) ? "th" : "td");
-                if (i === 0 && firstCellIsHeader && tbody.tagName !== "THEAD") {
-                    newCell.scope = "row";
-                }
-                newCell.innerHTML = "<br>";
-                newRow.appendChild(newCell);
-            }
-        } else if (action === "insertColumnLeft" || action === "insertColumnRight") {
-            const colIndex = action === "insertColumnLeft" ? cell.cellIndex : cell.cellIndex + 1;
-
-            // update colgroup
-            const colgroup = table.querySelector("colgroup");
-            if (colgroup) {
-                const newCol = document.createElement("col");
-                newCol.style.width = "";
-                if (colgroup.children.length > colIndex) {
-                    colgroup.insertBefore(newCol, colgroup.children[colIndex]);
-                } else {
-                    colgroup.appendChild(newCol);
-                }
-            }
-
-            for (let r = 0; r < table.rows.length; r++) {
-                const tr = table.rows[r];
-                // ignore full row spans
-                if (tr.cells.length === 1 && parseInt(tr.cells[0].getAttribute("colspan") || 1, 10) > 1) {
-                    tr.cells[0].colSpan = parseInt(tr.cells[0].getAttribute("colspan"), 10) + 1;
-                    continue;
-                }
-                const newCell = document.createElement(tr.parentElement.tagName === "THEAD" ? "th" : "td");
-                newCell.innerHTML = "<br>";
-                if (tr.cells.length > colIndex) {
-                    tr.insertBefore(newCell, tr.cells[colIndex]);
-                } else {
-                    tr.appendChild(newCell);
-                }
-            }
-            this._attachColumnResizersToTable(table);
-
-        } else if (action === "insertIntermediateHeader") {
-            const maxCols = this._getMaxColumns(table);
-            const newRow = table.insertRow(row.rowIndex);
-            const newTh = document.createElement("th");
-            newTh.colSpan = maxCols;
-            newTh.className = "table-light text-center"; // simple visual class
-            newTh.innerHTML = webexpress.webui.I18N.translate("webexpress.webui:editor.table.intermediate.header");
-            newRow.appendChild(newTh);
-
-        } else if (action === "toggleLeftHeader") {
-            // checks if body has left header
-            const bodyHasHeaders = table.tBodies.length > 0 && table.tBodies[0].rows.length > 0 && table.tBodies[0].rows[0].cells[0].tagName === "TH";
-
-            for (let r = 0; r < table.rows.length; r++) {
-                const tr = table.rows[r];
-                if (tr.parentElement.tagName === "THEAD") {
-                    continue; // header top row is always TH
-                }
-                // skip intermediate headers
-                if (tr.cells.length === 1 && parseInt(tr.cells[0].getAttribute("colspan") || 1, 10) > 1) {
-                    continue;
-                }
-
-                if (tr.cells.length > 0) {
-                    const firstCell = tr.cells[0];
-                    const targetTag = bodyHasHeaders ? "td" : "th";
-                    const newCell = document.createElement(targetTag);
-                    if (targetTag === "th") {
-                        newCell.scope = "row";
-                    }
-                    newCell.innerHTML = firstCell.innerHTML;
-                    // copy styles and classes
-                    if (firstCell.className) {
-                        newCell.className = firstCell.className;
-                    }
-                    if (firstCell.style.cssText) {
-                        newCell.style.cssText = firstCell.style.cssText;
-                    }
-                    tr.replaceChild(newCell, firstCell);
-                }
-            }
-
-        } else if (action === "deleteTable") {
-            if (frame) {
-                frame.remove();
-            } else {
-                table.remove();
-            }
-        } else if (action === "mergeCells") {
-            const next = cell.nextElementSibling;
-            if (next) {
-                const content = next.innerHTML;
-                const currentSpan = parseInt(cell.getAttribute("colspan") || 1, 10);
-                const nextSpan = parseInt(next.getAttribute("colspan") || 1, 10);
-
-                if (content !== "<br>") {
-                    cell.innerHTML += " " + content;
-                }
-                cell.setAttribute("colspan", currentSpan + nextSpan);
-                next.remove();
-            }
-        } else if (action === "splitCell") {
-            const colspan = parseInt(cell.getAttribute("colspan") || 1, 10);
-            if (colspan > 1) {
-                cell.removeAttribute("colspan");
-                for (let i = 1; i < colspan; i++) {
-                    const newCell = document.createElement(cell.tagName);
-                    if (cell.tagName === "TH" && cell.scope) {
-                        newCell.scope = cell.scope;
-                    }
-                    newCell.innerHTML = "<br>";
-                    row.insertBefore(newCell, cell.nextElementSibling);
-                }
-            }
-        }
-    }
 });

@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a icon item within a split button control that is part of a fragment.
+    /// Base class for a sidebar icon entry that is contributed as a fragment, so the framework can add it into a page's sidebar from a plugin.
     /// </summary>
     public abstract class FragmentControlSidebarItemIcon : ControlSidebarItemIcon, IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IFragmentControlSidebarItem
     {
@@ -33,7 +33,7 @@ namespace WebExpress.WebUI.WebFragment
         /// <returns>An HTML node representing the rendered fragments. Can be null if no nodes are present.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            if (!FragmentContext.Conditions.Check(renderContext?.Request))
+            if (!FragmentContext.Check(renderContext?.Request))
             {
                 return null;
             }

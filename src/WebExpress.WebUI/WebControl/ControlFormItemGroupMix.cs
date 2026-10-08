@@ -41,13 +41,15 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            EnsureInputIds();
+
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-form-group-mix", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-form-group-mix", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
             };
 
             var body = new HtmlElementTextContentDiv() { };

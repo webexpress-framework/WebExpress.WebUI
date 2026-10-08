@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
@@ -8,7 +8,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a link button control.
+    /// Renders a hyperlink that is styled to look and behave like a button.
     /// </summary>
     public class ControlButtonLink : ControlButton
     {
@@ -42,18 +42,27 @@ namespace WebExpress.WebUI.WebControl
         {
             var text = Text?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
+            var active = Active?.Invoke(renderContext);
 
-            text = I18N.Translate(text);
+            text = I18N.Translate(renderContext, text);
 
             var html = new HtmlElementTextSemanticsA()
             {
                 Id = Id,
-                Class = Css.Concatenate("btn", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("btn", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 Href = Uri?.Invoke(renderContext)?.BindParameters(renderContext.Request.Parameters).ToString(),
                 Title = I18N.Translate(renderContext, Tooltip?.Invoke(renderContext))
             };
+
+            // a link has no disabled attribute, so the state is spoken through aria and the
+            // link leaves the tab order, as a disabled button would
+            if (active == TypeActive.Disabled)
+            {
+                html.AddUserAttribute("aria-disabled", "true");
+                html.AddUserAttribute("tabindex", "-1");
+            }
 
             var icon = Icon?.Invoke(renderContext);
             var primaryAction = PrimaryAction?.Invoke(renderContext);
@@ -87,7 +96,6 @@ namespace WebExpress.WebUI.WebControl
 
             if (!string.IsNullOrWhiteSpace(Tooltip?.Invoke(renderContext)))
             {
-                html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
             primaryAction?.ApplyUserAttributes(html, TypeAction.Primary);

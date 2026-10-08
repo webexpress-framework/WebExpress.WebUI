@@ -18,7 +18,29 @@ namespace WebExpress.WebUI.WebNotification
         /// <returns></returns>
         public override TypeNotification Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
         {
-            return Enum.Parse<TypeNotification>(reader.GetString(), true);
+            var value = reader.GetString();
+
+            if (string.IsNullOrWhiteSpace(value))
+            {
+                return TypeNotification.Default;
+            }
+
+            // write emits the css class, so that is what a round trip brings back; the enum
+            // name is still accepted for payloads written by hand
+            foreach (var type in Enum.GetValues<TypeNotification>())
+            {
+                if (string.Equals(type.ToClass(), value, StringComparison.OrdinalIgnoreCase))
+                {
+                    return type;
+                }
+            }
+
+            if (Enum.TryParse<TypeNotification>(value, true, out var named) && Enum.IsDefined(named))
+            {
+                return named;
+            }
+
+            throw new JsonException($"'{value}' is not a known notification type.");
         }
 
         /// <summary>

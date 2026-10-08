@@ -4,7 +4,7 @@ namespace WebExpress.WebUI.WebControl
     /// Defines a contract for a binding that re-opens (calls <c>show()</c> on)
     /// the target control whenever a source element raises a configured event -
     /// typically <c>SELECT_ITEM_EVENT</c> from a list/tile/tree. Use this to
-    /// wire a <see cref="ControlPanelDismissible"/> back into view after the
+    /// wire a <see cref="ControlDismissible"/> back into view after the
     /// user dismissed it.
     /// </summary>
     public interface IBindShow : IBind

@@ -17,7 +17,7 @@ namespace WebExpress.WebUI.WebNotification.Model
         /// </summary>
         /// <param name="applicationContext">The application context.</param>
         /// <param name="notification">The notification.</param>
-        /// <returns>True if the notification item was added successfully, false if an element with the same status code already exists.</returns>
+        /// <returns>True if the notification item was added successfully, false if an element with the same key already exists.</returns>
         public bool AddNotificationItem(IApplicationContext applicationContext, INotification notification)
         {
             if (!_dict.TryGetValue(applicationContext, out var notificationDict))

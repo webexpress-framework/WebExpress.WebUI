@@ -5,6 +5,9 @@ using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
+    /// <summary>
+    /// Contract for a button used as a form item, such as a submit or reset button within a form.
+    /// </summary>
     public interface IControlFormItemButton : IControlFormItem
     {
         /// <summary>

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebUI.WebPage;
 
@@ -14,6 +15,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets the color scheme used for the row.
         /// </summary>
         Func<IRenderControlContext, TypeColorTable> Color { get; }
+
+        /// <summary>
+        /// Gets the icon that identifies the row as a whole.
+        /// </summary>
+        Func<IRenderControlContext, IIcon> Icon { get; }
 
         /// <summary>
         /// Gets the cells.

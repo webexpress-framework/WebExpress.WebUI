@@ -12,9 +12,11 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
 
     // dom nodes
     _navElement = null;
+    _headerElement = null;
+    _toolsElement = null;
     _contentElement = null;
     _toolbarLi = null;
-    
+
     // controllers
     _toolbarCtrl = null;
 
@@ -25,11 +27,13 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
     constructor(element) {
         super(element);
 
+        this._storageKey = element.dataset.persistKey || (element.id ? `wx-tab:${element.id}` : null);
         this._initTabs();
 
         // set initial active tab
         if (this._tabs.length > 0) {
-            this.selectTab(this._tabs[0].id);
+            const stored = webexpress.webui.LocalStorage.getItem(this._storageKey);
+            this.selectTab(this._tabs.some(tab => tab.id === stored) ? stored : this._tabs[0].id);
         }
     }
 
@@ -44,7 +48,7 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
 
         // create navigation wrapper
         this._navElement = document.createElement("ul");
-        
+
         let navClass = "nav wx-tab-nav";
         if (layout === "underline") {
             navClass += " nav-underline";
@@ -53,14 +57,18 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         } else {
             navClass += " nav-tabs";
         }
-        
+
         this._navElement.className = navClass;
         this._navElement.setAttribute("role", "tablist");
+        this._navElement.addEventListener("keydown", (e) => this._onTabListKeyDown(e));
 
         // create content wrapper
         this._contentElement = document.createElement("div");
-        
-        let contentClass = "tab-content wx-tab-content p-3";
+
+        // horizontal padding only: the vertical one belongs to the stylesheet, where it
+        // can be tuned per edge. as a p-3 utility it carried !important and no rule
+        // could reach it
+        let contentClass = "tab-content wx-tab-content px-3";
         if (layout === "default" || layout === "tab") {
             contentClass += " border border-top-0";
         }
@@ -79,6 +87,9 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
                 label: pane.dataset.label || "",
                 icon: pane.dataset.icon || null,
                 color: pane.dataset.color || null,
+                badge: pane.dataset.badge || null,
+                badgeColor: pane.dataset.badgeColor || null,
+                badgeStyle: pane.dataset.badgeStyle || null,
                 primaryAction: pane.dataset.wxPrimaryAction || null,
                 primaryTarget: pane.dataset.wxPrimaryTarget || null,
                 paneElement: pane
@@ -90,27 +101,39 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
             const navItem = this._buildTabHeader(tabData);
             this._navElement.appendChild(navItem);
 
-            // transform pane class list to match bootstrap tabs
+            // transform pane class list to match WebExpress tabs
             pane.classList.remove("wx-tab-view");
             pane.classList.add("tab-pane", "fade");
             pane.setAttribute("role", "tabpanel");
+            pane.setAttribute("aria-labelledby", id + "-tab");
+            // a panel without a focusable child is otherwise skipped by the tab key
+            if (!pane.hasAttribute("tabindex")) { pane.setAttribute("tabindex", "0"); }
 
             // move pane into content wrapper safely
             this._contentElement.appendChild(pane);
         }
+
+        // the header row holds the tab list and, beside it, the tools that are not tabs: a
+        // tab list may hold nothing but tabs, so the toolbar sits next to it rather than in it
+        this._headerElement = document.createElement("div");
+        this._headerElement.className = "wx-tab-header";
+        this._toolsElement = document.createElement("div");
+        this._toolsElement.className = "wx-tab-tools";
+        this._headerElement.appendChild(this._navElement);
+        this._headerElement.appendChild(this._toolsElement);
 
         // find and append toolbar if it exists
         const toolbarElement = el.querySelector(":scope > .wx-tab-toolbar");
         if (toolbarElement) {
             this._toolbarCtrl = new webexpress.webui.ToolbarCtrl(toolbarElement);
 
-            this._toolbarLi = document.createElement("li");
-            this._toolbarLi.className = "nav-item ms-auto d-flex align-items-center";
+            this._toolbarLi = document.createElement("div");
+            this._toolbarLi.className = "wx-tab-tools-item d-flex align-items-center";
             this._toolbarLi.appendChild(toolbarElement);
-            this._navElement.appendChild(this._toolbarLi);
+            this._toolsElement.appendChild(this._toolbarLi);
         }
 
-        el.appendChild(this._navElement);
+        el.appendChild(this._headerElement);
         el.appendChild(this._contentElement);
     }
 
@@ -127,8 +150,12 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         const btn = document.createElement("button");
         btn.className = "nav-link";
         btn.type = "button";
+        btn.id = tab.id + "-tab";
         btn.setAttribute("role", "tab");
         btn.setAttribute("aria-controls", tab.id);
+        btn.setAttribute("aria-selected", "false");
+        // one tab stop for the list; the arrow keys walk the tabs
+        btn.setAttribute("tabindex", "-1");
         btn.dataset.tabId = tab.id;
 
         // map custom action attributes if present
@@ -152,8 +179,23 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
 
         // append label text
         if (tab.label !== "") {
-            const textNode = document.createTextNode(tab.label);
-            btn.appendChild(textNode);
+            tab.labelNode = document.createTextNode(tab.label);
+            btn.appendChild(tab.labelNode);
+        }
+
+        // append the trailing badge if configured; a color class or an inline
+        // style overrides the neutral default
+        if (tab.badge !== null && tab.badge !== "") {
+            const badgeEl = document.createElement("span");
+            badgeEl.className = "wx-tab-badge badge";
+            if (tab.badgeColor !== null) {
+                badgeEl.classList.add(...String(tab.badgeColor).split(/\s+/).filter(Boolean));
+            }
+            if (tab.badgeStyle !== null) {
+                badgeEl.style.cssText = tab.badgeStyle;
+            }
+            badgeEl.textContent = tab.badge;
+            btn.appendChild(badgeEl);
         }
 
         // attach event listener for tab switching
@@ -173,11 +215,12 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
      */
     selectTab(tabId) {
         // prevent redundant updates
-        if (this._activeTabId === tabId) {
+        if (this._activeTabId === tabId || !this._tabs.some(tab => tab.id === tabId)) {
             return;
         }
 
         this._activeTabId = tabId;
+        webexpress.webui.LocalStorage.setItem(this._storageKey, tabId);
 
         // update active state on navigation links
         const navLinks = this._navElement.querySelectorAll(".nav-link");
@@ -188,9 +231,11 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
             if (link.dataset.tabId === tabId) {
                 link.classList.add("active");
                 link.setAttribute("aria-selected", "true");
+                link.setAttribute("tabindex", "0");
             } else {
                 link.classList.remove("active");
                 link.setAttribute("aria-selected", "false");
+                link.setAttribute("tabindex", "-1");
             }
         }
 
@@ -206,6 +251,75 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
         }
 
         this._dispatchTabSelectedEvent(tabId);
+    }
+
+    /**
+     * Changes the label of a tab in the model and in its header. The header knows
+     * where it put the label, so subclasses rename through here instead of
+     * searching the header markup for it.
+     * @param {string} tabId The id of the tab to relabel.
+     * @param {string} label The new label.
+     * @returns {boolean} Whether the tab exists.
+     */
+    setTabLabel(tabId, label) {
+        const tab = this._tabs.find(item => item.id === tabId);
+        if (!tab) {
+            return false;
+        }
+
+        tab.label = label;
+
+        if (tab.labelNode) {
+            tab.labelNode.textContent = label;
+            return true;
+        }
+
+        // a tab created without a label has no text node yet; it belongs ahead of the badge
+        const btn = Array.from(this._navElement.querySelectorAll(".nav-link")).find(link => link.dataset.tabId === tabId);
+        if (btn) {
+            tab.labelNode = document.createTextNode(label);
+            btn.insertBefore(tab.labelNode, btn.querySelector(".wx-tab-badge"));
+        }
+
+        return true;
+    }
+
+    /**
+     * Walks the tabs with the arrow keys and selects the one that receives focus, as a
+     * tab list is expected to; the toolbar sitting in the same list is left to the tab key.
+     * @param {KeyboardEvent} e The key event raised inside the tab list.
+     */
+    _onTabListKeyDown(e) {
+        // only the tabs of the list, not a command a subclass may place among them
+        const tabs = Array.from(this._navElement.querySelectorAll("[role=\"tab\"]")).filter(tab => tab.dataset.tabId);
+        const index = tabs.indexOf(e.target.closest ? e.target.closest("[role=\"tab\"]") : null);
+        if (index < 0 || tabs.length === 0) {
+            return;
+        }
+
+        let next = null;
+        switch (e.key) {
+            case "ArrowRight":
+            case "ArrowDown":
+                next = (index + 1) % tabs.length;
+                break;
+            case "ArrowLeft":
+            case "ArrowUp":
+                next = (index - 1 + tabs.length) % tabs.length;
+                break;
+            case "Home":
+                next = 0;
+                break;
+            case "End":
+                next = tabs.length - 1;
+                break;
+            default:
+                return;
+        }
+
+        e.preventDefault();
+        tabs[next].focus({ preventScroll: true });
+        this.selectTab(tabs[next].dataset.tabId);
     }
 
     /**

@@ -16,7 +16,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertySizeText> Size
         {
             get => (Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -57,8 +57,8 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Text = I18N.Translate(renderContext.Request?.Culture, text),
-                Class = Css.Concatenate("", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             };
         }

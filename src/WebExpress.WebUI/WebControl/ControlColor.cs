@@ -43,8 +43,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-color", GetClasses()),
-                Style = GetStyles()
+                Class = Css.Concatenate("wx-webui-color", GetClasses(renderContext)),
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("data-value", color)
                 .AddUserAttribute("data-tooltip", I18N.Translate(renderContext, tooltip));

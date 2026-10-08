@@ -77,7 +77,7 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("progress", GetClasses()),
+                Class = Css.Concatenate("progress", GetClasses(renderContext)),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = role
             };

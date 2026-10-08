@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a suggestion item for the search control.
+    /// A single suggestion entry offered by a search control as the user types.
     /// </summary>
     public class ControlSearchItemSuggestion
     {

@@ -15,8 +15,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the breadcrumb control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
-        [InlineData("id", @"<ol id=""id"" class=""wx-breadcrumb wx-sm""></ol>")]
+        [InlineData(null, @"<nav class=""wx-breadcrumb-nav wx-sm"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
+        [InlineData("id", @"<nav id=""id"" class=""wx-breadcrumb-nav wx-sm"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -38,8 +38,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the uri property of the breadcrumb control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
-        [InlineData("http://example.com/a/b/c", @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
+        [InlineData(null, @"<nav class=""wx-breadcrumb-nav wx-sm"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
+        [InlineData("http://example.com/a/b/c", @"<nav class=""wx-breadcrumb-nav wx-sm"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
         public void Uri(string uri, string expected)
         {
             // arrange
@@ -62,11 +62,11 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the size property of the breadcrumb control.
         /// </summary>
         [Theory]
-        [InlineData(TypeSizeText.Default, @"<ol class=""wx-breadcrumb""></ol>")]
-        [InlineData(TypeSizeText.ExtraSmall, @"<ol class=""wx-breadcrumb wx-esm""></ol>")]
-        [InlineData(TypeSizeText.Small, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
-        [InlineData(TypeSizeText.Large, @"<ol class=""wx-breadcrumb wx-lg""></ol>")]
-        [InlineData(TypeSizeText.ExtraLarge, @"<ol class=""wx-breadcrumb wx-elg""></ol>")]
+        [InlineData(TypeSizeText.Default, @"<nav class=""wx-breadcrumb-nav"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
+        [InlineData(TypeSizeText.ExtraSmall, @"<nav class=""wx-breadcrumb-nav wx-esm"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
+        [InlineData(TypeSizeText.Small, @"<nav class=""wx-breadcrumb-nav wx-sm"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
+        [InlineData(TypeSizeText.Large, @"<nav class=""wx-breadcrumb-nav wx-lg"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
+        [InlineData(TypeSizeText.ExtraLarge, @"<nav class=""wx-breadcrumb-nav wx-elg"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
         public void Size(TypeSizeText size, string expected)
         {
             // arrange
@@ -90,8 +90,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the prefix property of the breadcrumb control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
-        [InlineData("Prefix", @"<ol class=""wx-breadcrumb wx-sm""><li class=""wx-breadcrumb-prefix""><div>Prefix</div></li></ol>")]
+        [InlineData(null, @"<nav class=""wx-breadcrumb-nav wx-sm"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
+        [InlineData("Prefix", @"<nav class=""wx-breadcrumb-nav wx-sm"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""><li class=""wx-breadcrumb-prefix""><div>Prefix</div></li></ol></nav>")]
         public void Prefix(string prefix, string expected)
         {
             // arrange
@@ -111,8 +111,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the take last property of the breadcrumb control.
         /// </summary>
         [Theory]
-        [InlineData((ushort)5, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
-        [InlineData(3, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
+        [InlineData((ushort)5, @"<nav class=""wx-breadcrumb-nav wx-sm"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
+        [InlineData(3, @"<nav class=""wx-breadcrumb-nav wx-sm"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
         public void TakeLast(ushort takeLast, string expected)
         {
             // arrange
@@ -132,8 +132,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the render function of the breadcrumb control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
-        [InlineData("http://localhost:80/app/page", @"<ol class=""wx-breadcrumb wx-sm""></ol>")]
+        [InlineData(null, @"<nav class=""wx-breadcrumb-nav wx-sm"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
+        [InlineData("http://localhost:80/app/page", @"<nav class=""wx-breadcrumb-nav wx-sm"" aria-label=""Breadcrumb""><ol class=""wx-breadcrumb""></ol></nav>")]
         public void Render(string uri, string expected)
         {
             // arrange

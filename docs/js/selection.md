@@ -74,10 +74,10 @@ The following HTML demonstrates how to display a list of user roles, with "Admin
      data-value="role-admin;role-editor">
 
     <!-- Each option is declared as a child element. -->
-    <div id="role-admin" class="wx-selection-item" data-icon="fas fa-user-shield">Administrator</div>
-    <div id="role-editor" class="wx-selection-item" data-icon="fas fa-user-edit">Editor</div>
-    <div id="role-viewer" class="wx-selection-item" data-icon="fas fa-user">Viewer</div>
-    <div id="role-guest" class="wx-selection-item" data-icon="fas fa-question-circle" disabled>Guest (Disabled)</div>
+    <div id="role-admin" class="wx-selection-item" data-icon="user-shield">Administrator</div>
+    <div id="role-editor" class="wx-selection-item" data-icon="user-pen">Editor</div>
+    <div id="role-viewer" class="wx-selection-item" data-icon="user">Viewer</div>
+    <div id="role-guest" class="wx-selection-item" data-icon="circle-question" disabled>Guest (Disabled)</div>
 </div>
 ```
 
@@ -116,6 +116,7 @@ The component is initialized on a host element and configured using `data-` attr
 | `data-multiselection`  | Set to `"true"` to enable multi-select mode.                           | `data-multiselection="true"`
 |`data-sticky-selection` | Set to `"true"` to prevent deselection of items in single-select mode. | `data-sticky-selection="true"`
 | `placeholder`          | The text displayed when no items are selected.                         | `placeholder="Select an item..."`
+| `data-depends-on`      | The `name` of another field of the same form whose value narrows the offered options. | `data-depends-on="country"`
 
 ### Options and Structural Elements
 
@@ -128,6 +129,7 @@ Options and other list items are defined as child elements of the host container
   - `data-label-color`: A CSS class to apply to the selected item's tag.
   - `disabled`: Marks the item as non-selectable.
   - `data-render`: A JavaScript function string for custom rendering of the item in the dropdown list.
+  - `data-requires`: A semicolon-separated list of values of the `data-depends-on` field for which this option is offered. Without the attribute the option is always offered.
 - **Header (`.wx-selection-header`)**: A non-selectable header to group options.
 - **Divider (`.wx-selection-divider`)**: A visual separator line.
 - **Footer (`.wx-selection-footer`)**: A static footer section at the bottom of the dropdown.
@@ -140,6 +142,29 @@ Options and other list items are defined as child elements of the host container
 - **Custom Rendering**: A `data-render` attribute allows for a completely custom JavaScript-driven rendering for each option in the dropdown.
 - **Form Integration**: The component automatically manages a hidden `<input>` field, storing the selected values as a semicolon-separated string.
 - **Dynamic Updates**: Both the available `options` and the selected `value` can be get and set programmatically.
+- **Dependent Options**: With `data-depends-on` the control follows another field of the same form and offers only the options whose `data-requires` names the value chosen there.
+
+### Dependent Options
+
+Two fields of one form can describe a pairing of which not every combination is valid. Only one side of such a pairing can be settled on the server before the form is submitted — the other is being chosen in the same dialog — so offering an impossible combination and refusing the submission afterwards tells the user too late. `data-depends-on` lets the second field narrow itself while the first one is answered.
+
+```html
+<div class="wx-webui-input-selection" name="state" data-depends-on="country">
+    <div id="bavaria" class="wx-selection-item" data-requires="de">Bavaria</div>
+    <div id="texas"   class="wx-selection-item" data-requires="us">Texas</div>
+    <div id="unknown" class="wx-selection-item">Not listed</div>
+</div>
+```
+
+The rules are:
+
+- **A field that has not been answered narrows nothing.** All options are offered until the depended-on field carries a value, so a form that fills its fields one after another — a REST form loading its row from a service, for example — does not lose the value of the dependent field on the way, whichever order the two arrive in.
+- **An option without `data-requires` is always offered**, whatever is chosen. That is how an entry that does not take part in the pairing (a "none of these" entry, for example) is declared.
+- **Values are compared case-insensitively**, so the two fields need not agree on casing.
+- **A value that is no longer offered is dropped**, because the control must not submit what it does not offer. The selection is then empty and the placeholder is shown; with `data-sticky-selection` the first still-offered option takes its place instead, since a sticky selection may not be emptied.
+- **The dependency is watched on the form**, not on the depended-on element, so it also works when that field is rendered after this one, and when its value is written programmatically rather than by the user.
+
+The depended-on field is addressed by the `name` it submits under. Any form field works — an `<input>`, a `<select>`, or another `InputSelectionCtrl`.
 
 ## Programmatic Control
 
@@ -172,10 +197,12 @@ if (selectionCtrl) {
     // update the available options
     selectionCtrl.options = [
         { id: 'new1', label: 'New Option 1' },
-        { id: 'new2', label: 'New Option 2', icon: 'fas fa-star' }
+        { id: 'new2', label: 'New Option 2', icon: 'star' }
     ];
 }
 ```
+
+An option object may carry `color`, a css class for the chip of the selected item, and `style`, an inline style declaration for a user-defined chip color. The style is assigned through the CSSOM, so it passes a content security policy that blocks style attributes in markup. A chip filled through a `text-bg-*` class or a style gives its remove button the text color of the fill.
 
 ### Accepted Value Formats
 
@@ -209,11 +236,11 @@ The component dispatches several events to allow for external interactions.
      placeholder="Select categories...">
 
     <div class="wx-selection-header">Group 1</div>
-    <div id="cat-1" class="wx-selection-item" data-icon="fas fa-tag">Category 1</div>
-    <div id="cat-2" class="wx-selection-item" data-icon="fas fa-tag" data-label-color="bg-primary">Category 2</div>
+    <div id="cat-1" class="wx-selection-item" data-icon="label">Category 1</div>
+    <div id="cat-2" class="wx-selection-item" data-icon="label" data-label-color="bg-primary">Category 2</div>
     <div class="wx-selection-divider"></div>
     <div class="wx-selection-header">Group 2</div>
-    <div id="cat-3" class="wx-selection-item" data-icon="fas fa-tag" disabled>Category 3 (Disabled)</div>
+    <div id="cat-3" class="wx-selection-item" data-icon="label" disabled>Category 3 (Disabled)</div>
     <div id="cat-4"
          class="wx-selection-item"
          data-render="(item) => `<strong>${item.label}</strong><br><small>Custom Render</small>`"

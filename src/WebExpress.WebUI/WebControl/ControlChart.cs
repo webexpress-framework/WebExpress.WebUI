@@ -212,8 +212,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-chart", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-chart", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             }
                 // set chart type
@@ -281,9 +281,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>JSON string.</returns>
         private static string SerializeJson(object obj)
         {
-            return JsonSerializer
-                .Serialize(obj, _options)
-                .Replace("\"", "&quot;");
+            return JsonSerializer.Serialize(obj, _options);
         }
     }
 }

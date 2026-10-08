@@ -68,6 +68,8 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-icon", (icon as Icon)?.Class)
                 .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
                 .AddUserAttribute("data-color", color?.ToClass())
+                .AddUserAttribute("data-align", Align?.Invoke(renderContext).ToValue())
+                .Add(RenderTitleContent(renderContext))
                 .Add(_template?.Render(renderContext, visualTree));
 
             return html;

@@ -3,7 +3,7 @@
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form input value of type bool.
+    /// Represents the value of a form input field as a strongly typed boolean (true/false).
     /// </summary>
     public class ControlFormInputValueBool : IControlFormInputValue
     {

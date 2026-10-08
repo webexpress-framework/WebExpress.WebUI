@@ -27,7 +27,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeSizeText> Size
         {
             get => (Func<IRenderControlContext, TypeSizeText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -64,12 +64,19 @@ namespace WebExpress.WebUI.WebControl
             var siteManager = WebEx.ComponentHub.SitemapManager;
             var lastEndpointContext = default(WebCore.WebEndpoint.IEndpointContext);
 
+            // the trail is a navigation landmark of its own, named so it is told apart from
+            // the site menu; the list inside keeps the crumbs
             var html = new HtmlElementTextContentOl()
             {
-                Id = Id,
-                Class = Css.Concatenate("wx-breadcrumb", GetClasses()),
-                Style = GetStyles(),
+                Class = "wx-breadcrumb"
             };
+            var nav = new HtmlElementSectionNav(html)
+            {
+                Id = Id,
+                Class = Css.Concatenate("wx-breadcrumb-nav", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
+            }
+                .AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:breadcrumb.label"));
 
             if (!string.IsNullOrWhiteSpace(prefix))
             {
@@ -90,7 +97,7 @@ namespace WebExpress.WebUI.WebControl
 
             if (uri is null)
             {
-                return html;
+                return nav;
             }
 
             takeLast = (ushort)Math.Min(takeLast, uri?.PathSegments.Count() ?? 0);
@@ -109,7 +116,7 @@ namespace WebExpress.WebUI.WebControl
                 }
 
                 var displayText = path.GetDisplayText(renderContext);
-                var pathIcon = path.GetIcon(renderContext)?.ApplyIconTheme(visualTree.IconTheme);
+                var pathIcon = path.GetIcon(renderContext);
 
                 if (last?.IsHidden ?? false)
                 {
@@ -141,7 +148,7 @@ namespace WebExpress.WebUI.WebControl
                 else if (endpointContext is PageContext page)
                 {
                     var display = I18N.Translate(renderContext.Request?.Culture, page.PageTitle);
-                    var icon = page?.PageIcon?.ApplyIconTheme(visualTree.IconTheme);
+                    var icon = page?.PageIcon;
 
                     html.Add
                     (
@@ -166,7 +173,10 @@ namespace WebExpress.WebUI.WebControl
                 lastEndpointContext = endpointContext;
             }
 
-            return html;
+            // the last crumb is the page being read
+            (html.Elements.LastOrDefault() as HtmlElement)?.Elements.OfType<HtmlElementTextSemanticsA>().LastOrDefault()?.AddUserAttribute("aria-current", "page");
+
+            return nav;
         }
     }
 }

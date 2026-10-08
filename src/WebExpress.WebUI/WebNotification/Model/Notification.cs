@@ -14,7 +14,7 @@ namespace WebExpress.WebUI.WebNotification.Model
         /// Gets or sets the notification id.
         /// </summary>
         [JsonPropertyName("id")]
-        public Guid Id { get; } = Guid.NewGuid();
+        public Guid Id { get; internal set; } = Guid.NewGuid();
 
         /// <summary>
         /// Gets or sets the heading.
@@ -41,10 +41,15 @@ namespace WebExpress.WebUI.WebNotification.Model
         public string Icon { get; set; }
 
         /// <summary>
+        /// Gets or sets the address the notification is about. Can be null.
+        /// </summary>
+        public string Link { get; set; }
+
+        /// <summary>
         /// Returns the creation time.
         /// </summary>
         [JsonPropertyName("created")]
-        public DateTime Created { get; } = DateTime.Now;
+        public DateTime Created { get; internal set; } = DateTime.Now;
 
         /// <summary>
         /// Progress as a percentage: 0–100%. Values less than 0 indicate no progress.

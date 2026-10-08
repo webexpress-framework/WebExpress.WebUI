@@ -123,8 +123,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-upload", GetClasses()),
-                Style = GetStyles()
+                Class = Css.Concatenate("wx-webui-upload", GetClasses(renderContext)),
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("data-uri", uri)
                 .AddUserAttribute("placeholder", I18N.Translate(formRenderContext, placeholder))

@@ -1,8 +1,18 @@
-﻿# de_DE  language resource file
+# de_DE  language resource file
 plugin.name=WebExpress.WebUI
 plugin.description=Stellt Basiskomponenten bereit.
 
 notificationmanager.initialization=Der Benachrichtigungsmanager wurde initialisiert.
+
+pdfpluginmanager.initialization=Der PDF-Pluginmanager wurde initialisiert.
+pdfpluginmanager.register=Das PDF-Plugin '{0}' aus '{1}' wurde registriert.
+pdfpluginmanager.duplicate=Das PDF-Plugin '{0}' aus '{1}' wurde nicht registriert, da der Name bereits vergeben ist.
+pdfpluginmanager.noname=Das PDF-Plugin '{0}' wurde nicht registriert, da es kein Name-Attribut besitzt.
+
+markdownpluginmanager.initialization=Der Markdown-Pluginmanager wurde initialisiert.
+markdownpluginmanager.register=Das Markdown-Plugin '{0}' aus '{1}' wurde registriert.
+markdownpluginmanager.duplicate=Das Markdown-Plugin '{0}' aus '{1}' wurde nicht registriert, da der Name bereits vergeben ist.
+markdownpluginmanager.noname=Das Markdown-Plugin '{0}' wurde nicht registriert, da es kein Name-Attribut besitzt.
 
 form.empty.id=Das Formular verfügt über keine Id!
 form.submit.label=Speichern
@@ -13,14 +23,19 @@ form.move.available=Verfügbare Optionen
 form.move.selected=Ausgewählte Optionen
 form.inputfile.validation.required=Das Textfeld darf nicht leer sein!
 form.inputtextbox.validation.required=Das Textfeld darf nicht leer sein!
-form.inputtextbox.validation.min=The text. entspricht nicht der minimalen Länge von {0}!
-form.inputtextbox.validation.max=The text. ist größer als die maximalen Länge von {0}!
+form.inputtextbox.validation.min=Der Text entspricht nicht der minimalen Länge von {0}!
+form.inputtextbox.validation.max=Der Text ist größer als die maximale Länge von {0}!
 
 form.inputpassword.validation.required=Das Passwortfeld darf nicht leer sein!
 form.inputpassword.validation.min=Das Passwort entspricht nicht der minimalen Länge von {0} Zeichen!
 form.inputpassword.validation.max=Das Passwort ist länger als die maximale Länge von {0} Zeichen!
 
 modal.close.label=Schließen
+
+pdfviewer.fallback=Das PDF-Dokument kann hier nicht angezeigt werden.
+pdfviewer.open=PDF öffnen
+
+login.title=Anmelden
 
 confirm.label=Bestätigung
 confirm.header=Bestätigung einholen
@@ -42,3 +57,16 @@ fileupload.file.validation.error.nofile=Es wurde keine Datei angegeben.
 
 darkmode.text.light=Dunkelmodus aktivieren
 darkmode.text.dark=Hellmodus aktivieren
+
+masterdetail.empty.title=Kein Element ausgewählt
+masterdetail.empty.message=Bitte wählen Sie ein Element aus der Liste aus.
+
+carousel.previous=Vorherige Folie
+carousel.next=Nächste Folie
+breadcrumb.label=Brotkrumen-Navigation
+toolbar.label=Werkzeugleiste
+form.actions=Aktionen
+table.actions=Aktionen
+sidebar.label=Seitenleiste
+splitbutton.toggle=Weitere Optionen
+quickfilter.label=Filter

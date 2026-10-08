@@ -5,7 +5,7 @@ webexpress.webui.Syntax.register("property", "ini", (code) => {
         // first, check for lines that are just comments
         const commentMatch = line.match(/^(\s*[#!].*)$/);
         if (commentMatch) {
-            return `<span><span class="comment">${line}</span></span>`;
+            return `<span><span class="comment">${webexpress.webui.Syntax.escape(line)}</span></span>`;
         }
 
         // next, check for key-value pairs, which may have an inline comment
@@ -18,18 +18,19 @@ webexpress.webui.Syntax.register("property", "ini", (code) => {
             const inlineComment = keyValueMatch[5] || '';
 
             // build the highlighted html string part by part
+            const escape = webexpress.webui.Syntax.escape;
             let html = leadingSpace;
-            html += `<span class="key">${key}</span>`;
-            html += `<span class="separator">${separator}</span>`;
-            html += `<span class="value">${value}</span>`;
+            html += `<span class="key">${escape(key)}</span>`;
+            html += `<span class="separator">${escape(separator)}</span>`;
+            html += `<span class="value">${escape(value)}</span>`;
             if (inlineComment) {
-                html += `<span class="comment">${inlineComment}</span>`;
+                html += `<span class="comment">${escape(inlineComment)}</span>`;
             }
             return `<span>${html}</span>`;
         }
 
         // if the line is not a comment and not a key-value pair, return it without formatting
         // this handles empty lines and section headers like [section] in ini files
-        return `<span>${line}</span>`;
+        return `<span>${webexpress.webui.Syntax.escape(line)}</span>`;
     }).join('\n');
 });

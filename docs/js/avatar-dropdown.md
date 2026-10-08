@@ -110,14 +110,14 @@ The component dispatches global events to allow other parts of the application t
      data-name="Max Mustermann"
      data-size="36">
 
-    <a class="wx-dropdown-item" data-icon="fas fa-user">
+    <a class="wx-dropdown-item" data-icon="user">
         Profile
     </a>
-    <a class="wx-dropdown-item" data-icon="fas fa-cog">
+    <a class="wx-dropdown-item" data-icon="cog">
         Settings
     </a>
     <div class="wx-dropdown-divider"></div>
-    <a class="wx-dropdown-item" data-icon="fas fa-sign-out-alt">
+    <a class="wx-dropdown-item" data-icon="arrow-right-from-bracket">
         Logout
     </a>
 </div>
@@ -134,24 +134,24 @@ The component dispatches global events to allow other parts of the application t
      data-shape="circle"
      data-menucss="shadow-lg">
 
-    <div class="wx-dropdown-header" data-icon="fas fa-user">
+    <div class="wx-dropdown-header" data-icon="user">
         Account
     </div>
-    <a class="wx-dropdown-item" data-icon="fas fa-id-card">
+    <a class="wx-dropdown-item" data-icon="id-card">
         Profile
     </a>
-    <a class="wx-dropdown-item" data-icon="fas fa-cog">
+    <a class="wx-dropdown-item" data-icon="cog">
         Settings
     </a>
     <div class="wx-dropdown-divider"></div>
-    <div class="wx-dropdown-header" data-icon="fas fa-shield-alt">
+    <div class="wx-dropdown-header" data-icon="shield">
         Administration
     </div>
-    <a class="wx-dropdown-item" data-icon="fas fa-users">
+    <a class="wx-dropdown-item" data-icon="users">
         User Management
     </a>
     <div class="wx-dropdown-divider"></div>
-    <a class="wx-dropdown-item" data-icon="fas fa-sign-out-alt" data-color="text-danger">
+    <a class="wx-dropdown-item" data-icon="arrow-right-from-bracket" data-color="text-danger">
         Logout
     </a>
 </div>
@@ -167,10 +167,10 @@ The component dispatches global events to allow other parts of the application t
      data-shape="rect"
      data-size="40">
 
-    <a class="wx-dropdown-item" data-icon="fas fa-home">
+    <a class="wx-dropdown-item" data-icon="home">
         Dashboard
     </a>
-    <a class="wx-dropdown-item" data-icon="fas fa-bell" disabled>
+    <a class="wx-dropdown-item" data-icon="bell" disabled>
         Notifications
     </a>
 </div>
