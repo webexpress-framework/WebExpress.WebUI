@@ -319,22 +319,195 @@ test("the column menu starts an inline rename", () => {
     assert.ok(host.querySelector(".wx-board-col-input"), "the rename input appears");
 });
 
-test("the column menu applies a size preset and a color", () => {
+test("the column menu applies a color and leaves the widths to the dividers", () => {
     const runtime = load();
     const { ctrl, host } = buildBoard(runtime, { columns: "todo", editableColumn: "true" });
 
     const menu = host.querySelector(".wx-board-col-menu").querySelector(".dropdown-menu");
+    assert.equal(entry(menu, "Size"), undefined, "no size presets in the menu");
 
-    // drill into Size, then pick a preset
-    clickEntry(entry(menu, "Size"));
-    clickEntry(entry(menu, "50 %"));
-    assert.equal(ctrl._columns[0].size, "50%");
-
-    // the menu was re-rendered by the size change; reacquire it and drill into Color
-    const menu2 = host.querySelector(".wx-board-col-menu").querySelector(".dropdown-menu");
-    clickEntry(entry(menu2, "Color"));
-    clickEntry(menu2.querySelector(".wx-board-col-swatch"));
+    clickEntry(entry(menu, "Color"));
+    clickEntry(menu.querySelector(".wx-board-col-swatch"));
     assert.ok(ctrl._columns[0].color, "a column color is set");
+});
+
+/**
+ * Builds a board of columns with the given sizes, the way the server sends them.
+ * @param {object} runtime - The loaded runtime.
+ * @param {string} sizes - The comma separated column sizes.
+ * @param {object} capabilities - The data-* capability flags of the host.
+ * @returns {{ctrl: object, host: object}} The control and its host.
+ */
+function sized(runtime, sizes, capabilities = {}) {
+    const host = runtime.document.createElement("div");
+    sizes.split(",").forEach((size, i) => {
+        const col = runtime.document.createElement("div");
+        col.className = "wx-column";
+        col.id = "c" + i;
+        Object.assign(col.dataset, { label: "C" + i, size: size });
+        host.appendChild(col);
+    });
+    Object.assign(host.dataset, capabilities);
+    runtime.document.body.appendChild(host);
+    return { ctrl: new runtime.wx.KanbanCtrl(host), host };
+}
+
+/**
+ * Rounds weights for comparison and leaves the vm realm behind.
+ * @param {Array<number>} weights - The weights.
+ * @returns {string} The rounded weights.
+ */
+function shares(weights) {
+    return Array.from(weights, (w) => Math.round(w * 100) / 100).join(" ");
+}
+
+/**
+ * Compares weights within the precision they are stored with.
+ * @param {Array<number>} actual - The weights of the board.
+ * @param {Array<number>} expected - The expected weights.
+ * @param {string} message - The assertion message.
+ */
+function near(actual, expected, message) {
+    const values = Array.from(actual);
+    assert.equal(values.length, expected.length, message);
+    values.forEach((w, i) => assert.ok(Math.abs(w - expected[i]) < 0.002, `${message}: ${values.join(" ")}`));
+}
+
+/**
+ * Gives the columns of every row a width, since the dom stub measures nothing.
+ * @param {object} host - The board host.
+ * @param {number} width - The width of every column in pixels.
+ */
+function measure(host, width) {
+    for (const item of host.querySelectorAll(".wx-kanban-col, .wx-kanban-column-header")) {
+        item.getBoundingClientRect = () => ({ width: width, height: 0, left: 0, top: 0, right: width, bottom: 0 });
+    }
+}
+
+/**
+ * Fires a pointer event carrying the fields the divider reads.
+ * @param {object} el - The divider.
+ * @param {string} type - The event type.
+ * @param {number} clientX - The pointer position.
+ */
+function pointer(el, type, clientX) {
+    el.dispatchEvent({ type: type, button: 0, pointerId: 1, clientX: clientX, preventDefault() { } });
+}
+
+test("column sizes become weights, and percentages that claim more than the row are scaled down", () => {
+    const runtime = load();
+
+    const over = sized(runtime, "75%,75%,75%");
+    assert.equal(shares(over.ctrl._columnWeights()), "1 1 1", "three equal claims become three equal shares");
+    assert.equal(over.host.style.getPropertyValue("--wx-board-template"),
+        "minmax(280px, 1fr) minmax(280px, 1fr) minmax(280px, 1fr)", "every track keeps the floor below which the board scrolls");
+
+    assert.equal(shares(sized(runtime, "25%,*").ctrl._columnWeights()), "0.5 1.5", "a board that fitted keeps its proportions");
+});
+
+test("a divider sits between every two columns of an editable board, none after the last", () => {
+    const runtime = load();
+    assert.equal(sized(runtime, "1fr,1fr,1fr").host.querySelectorAll(".wx-kanban-col-resizer").length, 0, "a read-only board has no dividers");
+
+    const { host } = sized(runtime, "1fr,3fr,1fr", { editableColumn: "true" });
+    const dividers = host.querySelectorAll(".wx-kanban-col-resizer");
+    assert.equal(dividers.length, 2);
+    assert.equal(dividers[0].getAttribute("role"), "separator");
+    assert.equal(dividers[0].getAttribute("aria-orientation"), "vertical");
+    assert.equal(dividers[0].getAttribute("aria-valuenow"), "25", "the left column takes a quarter of the pair");
+    assert.equal(dividers[0].getAttribute("aria-label"), "Width of “C0” and “C1”");
+    assert.equal(dividers[0].tabIndex, 0, "the keyboard reaches the divider");
+});
+
+test("a board with swimlanes announces one divider per pair and repeats it silently in every lane", () => {
+    const runtime = loadFull();
+    const { host } = buildBoard(runtime, { columns: "a,b", swimlanes: "x,y", editableColumn: "true" });
+
+    const dividers = host.querySelectorAll(".wx-kanban-col-resizer");
+    assert.equal(dividers.length, 3, "the header band and both lanes");
+
+    const announced = dividers.filter((d) => d.getAttribute("role") === "separator");
+    assert.equal(announced.length, 1);
+    assert.ok(announced[0].parentElement.classList.contains("wx-kanban-column-header"), "the header band carries it");
+    for (const silent of dividers.filter((d) => d !== announced[0])) {
+        assert.equal(silent.getAttribute("aria-hidden"), "true");
+        assert.notEqual(silent.tabIndex, 0, "the keyboard meets the pair once");
+    }
+});
+
+test("dragging a divider moves width between its two columns only and stores the board as weights", () => {
+    const runtime = load();
+    const { ctrl, host } = sized(runtime, "1fr,1fr,1fr", { editableColumn: "true" });
+    const changes = [];
+    host.addEventListener(runtime.wx.Event.CHANGE_VALUE_EVENT, (e) => changes.push(e.detail));
+    measure(host, 600);
+    const divider = host.querySelectorAll(".wx-kanban-col-resizer")[0];
+
+    pointer(divider, "pointerdown", 100);
+    pointer(divider, "pointermove", 220);
+    assert.equal(host.style.getPropertyValue("--wx-board-template"),
+        "minmax(280px, 1.2fr) minmax(280px, 0.8fr) minmax(280px, 1fr)", "the board follows the pointer while dragging");
+    assert.equal(changes.length, 0, "nothing is stored before the pointer is let go");
+
+    pointer(divider, "pointerup", 220);
+    assert.equal(ctrl._columns.map((c) => c.size).join(","), "1.2fr,0.8fr,1fr", "the third column keeps its width");
+    assert.equal(changes.length, 1);
+    assert.equal(changes[0].action, "columns");
+    assert.equal(divider.getAttribute("aria-valuenow"), "60");
+});
+
+test("a column cannot be dragged narrower than the floor of its track", () => {
+    const runtime = load();
+    const { ctrl, host } = sized(runtime, "1fr,1fr", { editableColumn: "true" });
+    measure(host, 400);
+    const divider = host.querySelector(".wx-kanban-col-resizer");
+
+    pointer(divider, "pointerdown", 400);
+    pointer(divider, "pointermove", -2000);
+    pointer(divider, "pointerup", -2000);
+
+    // 280 of the pair's 800 pixels
+    assert.equal(shares(ctrl._columnWeights()), "0.7 1.3", "the left column stops at the minimum");
+});
+
+test("a cancelled drag leaves the board as it was", () => {
+    const runtime = load();
+    const { ctrl, host } = sized(runtime, "1fr,1fr", { editableColumn: "true" });
+    let changes = 0;
+    host.addEventListener(runtime.wx.Event.CHANGE_VALUE_EVENT, () => changes++);
+    measure(host, 600);
+    const divider = host.querySelector(".wx-kanban-col-resizer");
+
+    pointer(divider, "pointerdown", 100);
+    pointer(divider, "pointermove", 250);
+    pointer(divider, "pointercancel", 250);
+
+    assert.equal(ctrl._columns.map((c) => c.size).join(","), "1fr,1fr");
+    assert.equal(host.style.getPropertyValue("--wx-board-template"), "minmax(280px, 1fr) minmax(280px, 1fr)");
+    assert.equal(changes, 0);
+});
+
+test("the arrow keys move a divider in steps and a double click splits the pair evenly", () => {
+    const runtime = load();
+    const { ctrl, host } = sized(runtime, "1fr,1fr,2fr", { editableColumn: "true" });
+    const dividers = host.querySelectorAll(".wx-kanban-col-resizer");
+
+    // an average column weighs 1, so the board reads 0.75 0.75 1.5 and the pair 1.5
+    dividers[0].dispatchEvent({ type: "keydown", key: "ArrowRight", preventDefault() { } });
+    near(ctrl._columnWeights(), [0.825, 0.675, 1.5], "a step is a twentieth of the pair");
+
+    dividers[1].dispatchEvent({ type: "dblclick" });
+    near(ctrl._columnWeights(), [0.825, 1.0875, 1.0875], "the second divider works on the width the first one left");
+});
+
+test("a new column takes an average width and the others keep their proportions", () => {
+    const runtime = load();
+    const { ctrl } = sized(runtime, "25%,*", { addableColumn: "true" });
+
+    ctrl._addColumn();
+
+    assert.equal(ctrl._columns.map((c) => c.size).join(","), "0.5fr,1.5fr,1fr",
+        "a percentage would have left the new column a sliver of the row");
 });
 
 test("the swimlane menu applies a color", () => {
@@ -534,14 +707,14 @@ test("an open column menu keeps its trigger visible, stays open while drilling d
     assert.ok(container.classList.contains("wx-menu-open"), "the open state is mirrored onto the container");
     assert.equal(menu.style.position, undefined, "the top layer needs no fixed positioning to escape the board clip");
 
-    clickEntry(entry(menu, "Size"));
+    clickEntry(entry(menu, "Color"));
     assert.equal(menu.matches(":popover-open"), true, "drilling down keeps the menu open");
     assert.ok(backEntry(menu), "the sub-level leads back");
 
-    clickEntry(entry(menu, "50 %"));
+    clickEntry(entry(menu, "None"));
     assert.equal(menu.matches(":popover-open"), false, "the pick closes the menu before acting");
     assert.equal(container.classList.contains("wx-menu-open"), false);
-    assert.equal(ctrl._columns[0].size, "50%");
+    assert.equal(ctrl._columns[0].color, null);
 });
 
 test("a reopened column or swimlane menu starts at its top level again", () => {

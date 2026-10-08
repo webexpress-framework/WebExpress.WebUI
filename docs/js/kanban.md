@@ -1,6 +1,6 @@
 # KanbanCtrl
 
-`KanbanCtrl` (`wx-webui-kanban`) renders a column-based board for visual workflow management using a dashboard-style CSS grid. Each column represents a process stage, each card one movable work item. Optional swimlanes group related items as horizontal, expandable lanes across all columns. Cards move via pixel-perfect drag & drop. The board carries a `…` menu (settings with a WQL filter, add column, add swimlane); each column carries a `…` menu (rename, size, color, delete) and can be reordered by its ⠿ grip; each swimlane carries a `…` menu (rename, delete).
+`KanbanCtrl` (`wx-webui-kanban`) renders a column-based board for visual workflow management using a dashboard-style CSS grid. Each column represents a process stage, each card one movable work item. Optional swimlanes group related items as horizontal, expandable lanes across all columns. Cards move via pixel-perfect drag & drop. The board carries a `…` menu (settings with a WQL filter, add column, add swimlane); each column carries a `…` menu (rename, color, delete), can be reordered by its ⠿ grip and resized at the divider to its right; each swimlane carries a `…` menu (rename, delete).
 
 ```
    ┌───────────────┬───────────────┬───────────────┐
@@ -23,7 +23,7 @@ The board is parsed from the static DOM. The host carries the column and board f
 | `data-columns`          | Comma-separated column ids (alternative to `.wx-column` child nodes).                    | `data-columns="todo,done"`
 | `data-column-titles`    | Comma-separated column labels.                                                            | `data-column-titles="To Do,Done"`
 | `data-swimlanes`        | Comma-separated swimlane ids (alternative to `.wx-swimlane` child nodes).                 | `data-swimlanes="team-a,team-b"`
-| `data-editable-column`  | When `"true"`, the column `…` menu offers **Rename**, **Size** and **Color**.             | `data-editable-column="true"`
+| `data-editable-column`  | When `"true"`, the column `…` menu offers **Rename** and **Color**, and the width dividers sit between the columns. | `data-editable-column="true"`
 | `data-movable-column`   | When `"true"`, columns can be reordered by dragging the ⠿ grip.                           | `data-movable-column="true"`
 | `data-deletable-column` | When `"true"`, the column `…` menu offers **Delete** (removes the column and its cards).  | `data-deletable-column="true"`
 | `data-addable-column`   | When `"true"`, the board `…` menu offers **New column**.                                  | `data-addable-column="true"`
@@ -84,10 +84,20 @@ While a column is dragged by its grip, the header under the pointer shows an ins
 Three `…` menus mirror the dashboard control; the per-column and per-swimlane triggers reveal on hover, while the board menu (top right) stays visible.
 
 - **Board `…` menu** — **Settings** (`data-configurable-board`, opens the board settings dialog with the WQL filter), **New column** (`data-addable-column`) and **New swimlane** (`data-addable-swimlane`). Adding the first swimlane moves every card into it so they stay visible; the server does the same for the cards the filter hides.
-- **Column `…` menu** — **Rename** (inline edit), **Size** (drill-down: Auto / 25 % / 33 % / 50 % / 66 % / 75 %), **Color** (drill-down palette + None), **Delete**. Rename, size and color require `data-editable-column`; delete requires `data-deletable-column`. Delete asks first through the framework confirmation dialog (`webexpress.webui.ModalConfirm`, the same one the tabs use), naming the column and its cards; the column is only removed and persisted once confirmed.
+- **Column `…` menu** — **Rename** (inline edit), **Color** (drill-down palette + None), **Delete**. Rename and color require `data-editable-column`; delete requires `data-deletable-column`. Delete asks first through the framework confirmation dialog (`webexpress.webui.ModalConfirm`, the same one the tabs use), naming the column and its cards; the column is only removed and persisted once confirmed.
 - **Swimlane `…` menu** — **Rename** and **Color** (drill-down palette + None, both behind `data-editable-swimlane`), **Settings** (`data-configurable-swimlane`, the per-swimlane WQL filter), **Move up** / **Move down** (`data-movable-swimlane`) and **Delete** (`data-deletable-swimlane`, removes the lane and its cards after the same confirmation as a column). Only the direction with room is offered, so the first and last lanes never carry a dead move entry.
 
 Each change re-renders the board and dispatches a `CHANGE_VALUE_EVENT` (see below) so the REST layer can persist it. The menus are native popovers anchored to their `…` trigger, so they open in the top layer and escape the clip of the board scroller without any positioning code.
+
+## Column widths
+
+A column width is a **weight** (`fr`), the same as on the dashboard: the columns share the row among themselves, so the board always fills it exactly, however many columns there are and whatever widths are set.
+
+- **Divider** (`data-editable-column`) — between every two columns. Dragging it moves width from one of the two to the other only, so the other columns keep their widths. A column cannot be dragged narrower than 280 px, the floor of its grid track: a row too narrow for every column at that width scrolls sideways instead of squeezing the cards. The divider is a focusable `role="separator"`: the arrow keys move it in steps of a twentieth of the pair, and a double click splits the pair evenly. The width is persisted once the pointer is released.
+- **Swimlanes** — the divider runs down every lane, so a pair can be grabbed anywhere on the board; only the one in the header band is focusable and announced.
+- **New column** — gets the width of an average column; the existing columns keep their proportions.
+
+Sizes the server sends as percentages, `*` or `auto` are converted in proportion: a board that fitted keeps its look, an overfull one (e.g. three columns at `75%`) is scaled down until it fits. The first change made through the board stores every column as `fr`.
 
 ## Settings (WQL filter)
 
@@ -102,8 +112,8 @@ A column, a swimlane and a card each render an optional trailing badge in their 
 ```csharp
 var kanban = new ControlKanban("board")
     .Add(
-        new ControlKanbanColumn("todo", "To Do", "33%"),
-        new ControlKanbanColumn("done", "Done", "*"))
+        new ControlKanbanColumn("todo", "To Do", "2fr"),
+        new ControlKanbanColumn("done", "Done", "1fr"))
     .Add(
         new ControlKanbanCard("task1")
         {

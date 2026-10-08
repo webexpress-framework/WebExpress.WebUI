@@ -21,6 +21,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     static NON_SELECTING = "button, a, input, textarea, select, [contenteditable='true'], "
         + ".wx-kanban-card-menu, .wx-kanban-grip";
 
+    // the narrowest a column can be dragged. it is the floor of the grid tracks as
+    // well: below it the board scrolls sideways instead of squeezing the cards, so a
+    // narrower drag would change nothing on screen. the pixel width rules where the
+    // row can be measured, the weight (a part of an average column) where it cannot
+    static MIN_WIDTH = 280;
+    static MIN_WEIGHT = 0.25;
+
     _columns = [];
     _swimlanes = [];
     _cards = [];
@@ -392,17 +399,10 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         // the columns of the swimlanes do not line up. this runs on every render
         // and therefore also covers the REST path, which populates the columns
         // directly (updateData) without going through setData.
+        const weights = this._columnWeights();
         if (this._columns.length > 0) {
             el.style.setProperty("--wx-board-cols", String(this._columns.length));
-
-            const template = this._columns
-                .map((col) => {
-                    const size = (!col.size || col.size === "*") ? "1fr" : col.size;
-                    return "minmax(280px, " + size + ")";
-                })
-                .join(" ");
-
-            el.style.setProperty("--wx-board-template", template);
+            el.style.setProperty("--wx-board-template", this._template(weights));
         } else {
             el.style.removeProperty("--wx-board-cols");
             el.style.removeProperty("--wx-board-template");
@@ -431,7 +431,13 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             headerRow.className = "wx-kanban-row wx-kanban-headers";
 
             for (let c = 0; c < this._columns.length; c++) {
-                headerRow.appendChild(this._createColumnHeader(this._columns[c], c));
+                const header = this._createColumnHeader(this._columns[c], c);
+                // the header row carries the divider the keyboard reaches; the lanes below
+                // repeat it for the pointer only, so it is announced once per pair
+                if (this._hasResizer(c)) {
+                    header.appendChild(this._buildResizer(c, weights, true));
+                }
+                headerRow.appendChild(header);
             }
 
             el.appendChild(headerRow);
@@ -466,6 +472,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             for (let c = 0; c < this._columns.length; c++) {
                 const col = this._columns[c];
                 const colWrapper = document.createElement("div");
+                colWrapper.className = "wx-kanban-col";
 
                 // integrate header directly into the column if no swimlanes are active
                 if (!hasSwimlanes) {
@@ -518,6 +525,14 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 }
 
                 colWrapper.appendChild(cell);
+
+                // the divider sits between a column and its right neighbour, so the last
+                // column has none: the outer edges of the board are not movable. it follows
+                // the cell so the keyboard reaches it after the column's cards
+                if (this._hasResizer(c)) {
+                    colWrapper.appendChild(this._buildResizer(c, weights, !hasSwimlanes));
+                }
+
                 row.appendChild(colWrapper);
             }
             laneWrapper.appendChild(row);
@@ -810,6 +825,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
      */
     _addColumn() {
         const label = this._i18n("webexpress.webui:kanban.column.new", "New column");
+        const weights = this._columnWeights();
         this._columns.push({
             id: "col_" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6),
             label: label,
@@ -817,6 +833,11 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             size: "1fr",
             color: null
         });
+
+        // a percentage would keep its share and leave the new column a sliver, so the
+        // board moves to weights first; the columns keep their proportions and the new
+        // one gets the width of an average column
+        this._applyWeights([...weights, 1]);
 
         this.render();
         this._dispatchColumnChange();
@@ -854,7 +875,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Decorates a column header with the ⠿ reorder grip and the "…" menu
-     * (rename, size, color, delete), depending on the enabled column flags. The
+     * (rename, color, delete), depending on the enabled column flags. The
      * grip and menu trigger reveal on hover; an inline rename is started from the
      * menu rather than a pencil or double-click.
      * @param {HTMLElement} headerEl - The column header element.
@@ -938,9 +959,10 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Builds the column "…" menu offering rename, size, color and delete. The
-     * size and color entries drill down into the same dropdown so no nested
-     * flyout positioning is needed.
+     * Builds the column "…" menu offering rename, color and delete. The widths
+     * are dragged at the dividers between the columns instead. The color entry
+     * drills down into the same dropdown so no nested flyout positioning is
+     * needed.
      * @param {HTMLElement} headerEl - The column header element.
      * @param {number} index - The column index.
      * @returns {HTMLElement} The menu container element.
@@ -983,11 +1005,6 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 this._i18n("webexpress.webui:kanban.column.edit", "Rename column"),
                 null,
                 () => this._startColumnEdit(headerEl, index)
-            ));
-            menu.appendChild(this._buildSubmenuEntry(
-                this._iconClass("expand"),
-                this._i18n("webexpress.webui:kanban.column.size", "Size"),
-                (m) => this._populateColumnMenuSizes(m, headerEl, index)
             ));
             menu.appendChild(this._buildSubmenuEntry(
                 this._iconClass("palette"),
@@ -1075,34 +1092,6 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Populates the column menu with the size presets.
-     * @param {HTMLElement} menu - The dropdown menu element.
-     * @param {HTMLElement} headerEl - The column header element.
-     * @param {number} index - The column index.
-     */
-    _populateColumnMenuSizes(menu, headerEl, index) {
-        menu.replaceChildren();
-        menu.appendChild(this._buildMenuBackEntry(() => this._populateColumnMenuRoot(menu, headerEl, index)));
-
-        const col = this._columns[index];
-        const presets = [
-            { label: this._i18n("webexpress.webui:kanban.column.size.auto", "Auto"), value: "1fr" },
-            { label: "25 %", value: "25%" },
-            { label: "33 %", value: "33%" },
-            { label: "50 %", value: "50%" },
-            { label: "66 %", value: "66%" },
-            { label: "75 %", value: "75%" }
-        ];
-
-        for (let i = 0; i < presets.length; i++) {
-            const preset = presets[i];
-            const active = col && (col.size === preset.value
-                || (preset.value === "1fr" && (!col.size || col.size === "*")));
-            menu.appendChild(this._buildMenuCheckEntry(preset.label, active, () => this._setColumnSize(index, preset.value)));
-        }
-    }
-
-    /**
      * Populates the column menu with the color palette and a "none" option.
      * @param {HTMLElement} menu - The dropdown menu element.
      * @param {HTMLElement} headerEl - The column header element.
@@ -1159,19 +1148,258 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         ];
     }
 
+    // ---- column widths ---------------------------------------------------------
+
     /**
-     * Sets a column size and persists the new column layout.
-     * @param {number} index - The column index.
-     * @param {string} value - The CSS grid size (e.g. "1fr", "33%").
+     * Reads the column widths as relative weights, scaled so that an average
+     * column weighs 1. Weights share the row among themselves, so the board
+     * always fills the row exactly, whatever the user sets; percentages could not
+     * promise that, since each column claimed its share regardless of the others
+     * and three columns at 75 % ran far past the edge. Percentages from the
+     * server or from a board stored before are converted in proportion: a board
+     * that fitted keeps its look, an overfull one is scaled down until it fits.
+     * @returns {Array<number>} One weight per column.
      */
-    _setColumnSize(index, value) {
-        const col = this._columns[index];
-        if (!col) {
-            return;
+    _columnWeights() {
+        const parsed = this._columns.map((c) => {
+            const size = String(c.size ?? "").trim();
+            const percent = /^(\d+(?:\.\d+)?)%$/.exec(size);
+            if (percent) {
+                return { percent: parseFloat(percent[1]) };
+            }
+            const fraction = /^(\d+(?:\.\d+)?)fr$/.exec(size);
+            // "*", "auto" and any size without a share count as one average column
+            return { fraction: fraction ? parseFloat(fraction[1]) : 1 };
+        });
+
+        const percents = parsed.filter((p) => p.percent !== undefined);
+        const percentSum = percents.reduce((sum, p) => sum + p.percent, 0);
+        const fractionSum = parsed.reduce((sum, p) => sum + (p.fraction ?? 0), 0);
+
+        // the fractions share what the percentages leave of the row; when the
+        // percentages already claim all of it, a fraction is worth an average
+        // percentage column instead of nothing
+        let fractionShare = 100 - percentSum;
+        if (fractionShare <= 0 && percents.length > 0) {
+            fractionShare = percentSum / percents.length * fractionSum;
         }
-        col.size = value;
-        this.render();
-        this._dispatchColumnChange();
+
+        const raw = parsed.map((p) => p.percent ?? (fractionSum > 0 ? fractionShare * p.fraction / fractionSum : 0));
+        const total = raw.reduce((sum, w) => sum + w, 0);
+        if (!(total > 0)) {
+            return parsed.map(() => 1);
+        }
+
+        // a column without width would vanish, and with it the divider to pull it back
+        return raw.map((w) => Math.max(w * parsed.length / total, webexpress.webui.KanbanCtrl.MIN_WEIGHT));
+    }
+
+    /**
+     * Builds the grid template from the column weights. The fixed floor keeps a
+     * column from growing with a long word, as a bare fr track would, and lets
+     * the board scroll sideways once the row is too narrow for every column.
+     * @param {Array<number>} weights - One weight per column.
+     * @returns {string} The grid-template-columns value.
+     */
+    _template(weights) {
+        return weights
+            .map((w) => `minmax(${webexpress.webui.KanbanCtrl.MIN_WIDTH}px, ${this._roundWeight(w)}fr)`)
+            .join(" ");
+    }
+
+    /**
+     * Rounds a weight to the precision it is stored and rendered with.
+     * @param {number} weight - The weight.
+     * @returns {number} The rounded weight.
+     */
+    _roundWeight(weight) {
+        return Math.round(weight * 1000) / 1000;
+    }
+
+    /**
+     * Stores the weights as the column sizes. From then on the board is kept as
+     * weights, including any column that still came as a percentage.
+     * @param {Array<number>} weights - One weight per column.
+     */
+    _applyWeights(weights) {
+        for (let i = 0; i < this._columns.length; i++) {
+            this._columns[i].size = this._roundWeight(weights[i]) + "fr";
+        }
+    }
+
+    /**
+     * Moves width between a column and its right neighbour. Only the pair
+     * changes, so every other column keeps its width and the board keeps filling
+     * the row; neither of the two shrinks below the minimum.
+     * @param {Array<number>} weights - The weights to start from.
+     * @param {number} index - The index of the left column of the pair.
+     * @param {number} delta - The part of the pair's width the left column gains (negative: loses).
+     * @param {number} [span] - The width of the pair in pixels, when it could be measured.
+     * @returns {Array<number>} The new weights.
+     */
+    _resizePair(weights, index, delta, span) {
+        const pair = weights[index] + weights[index + 1];
+        const minWidth = span > 0 ? pair * webexpress.webui.KanbanCtrl.MIN_WIDTH / span : 0;
+        const min = Math.min(Math.max(webexpress.webui.KanbanCtrl.MIN_WEIGHT, minWidth), pair / 2);
+        const left = Math.min(Math.max(weights[index] + delta * pair, min), pair - min);
+
+        const next = weights.slice();
+        next[index] = left;
+        next[index + 1] = pair - left;
+        return next;
+    }
+
+    /**
+     * Shows weights on the rendered board without rebuilding it, so a drag stays
+     * smooth and the divider keeps the pointer capture and the focus. The header
+     * row and every lane read the template from the host, so they follow at once.
+     * @param {Array<number>} weights - One weight per column.
+     */
+    _showWeights(weights) {
+        this._element.style.setProperty("--wx-board-template", this._template(weights));
+
+        // a column between two dividers belongs to both pairs, so every divider is updated
+        for (const resizer of this._element.querySelectorAll(".wx-kanban-col-resizer")) {
+            const index = parseInt(resizer.getAttribute("data-col-index"), 10);
+            resizer.setAttribute("aria-valuenow", String(this._pairShare(weights, index)));
+        }
+    }
+
+    /**
+     * The share of a pair's width the left column takes, in percent; the value a
+     * divider announces.
+     * @param {Array<number>} weights - One weight per column.
+     * @param {number} index - The index of the left column of the pair.
+     * @returns {number} The share in whole percent.
+     */
+    _pairShare(weights, index) {
+        return Math.round(100 * weights[index] / (weights[index] + weights[index + 1]));
+    }
+
+    /**
+     * Whether a divider follows the given column: only an editable board offers
+     * one, and only between two columns.
+     * @param {number} index - The column index.
+     * @returns {boolean} True when the column gets a divider on its right edge.
+     */
+    _hasResizer(index) {
+        return this._editableColumn && index < this._columns.length - 1;
+    }
+
+    /**
+     * Builds the divider between a column and its right neighbour. Dragging it
+     * moves width from one of the two to the other, the arrow keys do the same in
+     * steps, and a double click splits the pair evenly again.
+     *
+     * A board with swimlanes repeats the divider in every lane, so the pair can be
+     * grabbed anywhere down the board; only the one in the header row is a
+     * separator the keyboard and a screen reader meet.
+     * @param {number} index - The index of the column left of the divider.
+     * @param {Array<number>} weights - The weights the board is rendered with.
+     * @param {boolean} accessible - Whether this is the focusable, announced divider of the pair.
+     * @returns {HTMLElement} The divider.
+     */
+    _buildResizer(index, weights, accessible) {
+        const name = (col) => col.label ?? col.title ?? "";
+        const resizer = document.createElement("div");
+        resizer.className = "wx-kanban-col-resizer";
+        resizer.setAttribute("data-col-index", String(index));
+        resizer.title = this._i18n("webexpress.webui:kanban.column.resize.hint", "Drag to change the widths, double-click to split them evenly");
+
+        if (accessible) {
+            resizer.tabIndex = 0;
+            resizer.setAttribute("role", "separator");
+            resizer.setAttribute("aria-orientation", "vertical");
+            resizer.setAttribute("aria-valuemin", "0");
+            resizer.setAttribute("aria-valuemax", "100");
+            resizer.setAttribute("aria-label", this._i18n("webexpress.webui:kanban.column.resize", "Width of “{left}” and “{right}”")
+                .replace("{left}", () => name(this._columns[index]))
+                .replace("{right}", () => name(this._columns[index + 1])));
+        } else {
+            resizer.setAttribute("aria-hidden", "true");
+        }
+        resizer.setAttribute("aria-valuenow", String(this._pairShare(weights, index)));
+
+        const commit = (next) => {
+            this._showWeights(next);
+            this._applyWeights(next);
+            this._dispatchColumnChange();
+        };
+
+        // the pixel width of the pair, 0 where nothing is laid out. the divider sits in
+        // a grid item of its row, whose items line up with the columns
+        const measure = () => {
+            const items = resizer.parentElement?.parentElement?.children ?? [];
+            const leftEl = items[index];
+            const rightEl = items[index + 1];
+            return leftEl && rightEl
+                ? leftEl.getBoundingClientRect().width + rightEl.getBoundingClientRect().width
+                : 0;
+        };
+
+        resizer.addEventListener("pointerdown", (e) => {
+            if (e.button > 0) {
+                return;
+            }
+
+            const span = measure();
+            if (!(span > 0)) {
+                return;
+            }
+            e.preventDefault();
+
+            // the weights are read when the drag starts, not when the board was rendered:
+            // the neighbouring divider may have moved the shared column since
+            const start = this._columnWeights();
+            const startX = e.clientX;
+            let current = start;
+
+            resizer.setPointerCapture?.(e.pointerId);
+            this._element.classList.add("wx-kanban-resizing");
+            resizer.classList.add("wx-kanban-col-resizer-active");
+
+            const move = (ev) => {
+                current = this._resizePair(start, index, (ev.clientX - startX) / span, span);
+                this._showWeights(current);
+            };
+            const end = (ev) => {
+                resizer.removeEventListener("pointermove", move);
+                resizer.removeEventListener("pointerup", end);
+                resizer.removeEventListener("pointercancel", end);
+                this._element.classList.remove("wx-kanban-resizing");
+                resizer.classList.remove("wx-kanban-col-resizer-active");
+
+                // a cancelled drag (the system took the pointer) leaves the board as it was
+                if (ev.type === "pointercancel") {
+                    this._showWeights(start);
+                } else if (current !== start) {
+                    commit(current);
+                }
+            };
+
+            resizer.addEventListener("pointermove", move);
+            resizer.addEventListener("pointerup", end);
+            resizer.addEventListener("pointercancel", end);
+        });
+
+        resizer.addEventListener("keydown", (e) => {
+            const step = { ArrowLeft: -0.05, ArrowRight: 0.05 }[e.key];
+            if (step === undefined) {
+                return;
+            }
+            e.preventDefault();
+            commit(this._resizePair(this._columnWeights(), index, step, measure()));
+        });
+
+        resizer.addEventListener("dblclick", () => {
+            const next = this._columnWeights();
+            const half = (next[index] + next[index + 1]) / 2;
+            next[index] = half;
+            next[index + 1] = half;
+            commit(next);
+        });
+
+        return resizer;
     }
 
     /**

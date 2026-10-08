@@ -91,6 +91,62 @@
     margin-bottom: -0.5rem;
 }
 
+/* a column of a row and a header of the header band anchor the width divider on
+   their right edge */
+.wx-kanban-col,
+.wx-kanban-headers > .wx-kanban-column-header {
+    position: relative;
+}
+
+/* the divider between two columns sits in the middle of the gap and reaches down
+   the whole row, however short the column on its left is */
+.wx-kanban-col-resizer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: calc(-0.25rem - 6px);
+    width: 12px;
+    z-index: 1;
+    cursor: col-resize;
+    /* a touch drag moves the divider instead of scrolling the board */
+    touch-action: none;
+}
+
+/* the visible line, drawn only when the divider is in play */
+.wx-kanban-col-resizer::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 5px;
+    width: 2px;
+    border-radius: 1px;
+    background-color: transparent;
+    transition: background-color 0.15s;
+}
+
+.wx-kanban-col-resizer:hover::after,
+.wx-kanban-col-resizer:focus-visible::after,
+.wx-kanban-col-resizer.wx-kanban-col-resizer-active::after {
+    background-color: var(--wx-primary, #0d6efd);
+}
+
+.wx-kanban-col-resizer:focus-visible {
+    outline: none;
+}
+
+/* the drag keeps its cursor and selects no text while the pointer crosses the cards */
+.wx-kanban-resizing {
+    cursor: col-resize;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wx-kanban-col-resizer::after {
+        transition: none;
+    }
+}
+
 /* board "…" menu bar, right aligned above the columns; it stays put while the
    columns scroll horizontally because it is sized to the board, not the rows */
 .wx-kanban-toolbar {

@@ -31,7 +31,9 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="id">The unique identifier for the column.</param>
         /// <param name="title">The title to be displayed for the column.</param>
-        /// <param name="size">The size descriptor for the column (e.g., "33%", "*").</param>
+        /// <param name="size">The column width as a weight relative to the other columns (e.g. "1fr",
+        /// "2fr"); a percentage, "*" or "auto" is converted in proportion, so the columns always
+        /// share the row instead of running past its edge.</param>
         public ControlKanbanColumn(string id, string title, string size)
         {
             Id = id;
