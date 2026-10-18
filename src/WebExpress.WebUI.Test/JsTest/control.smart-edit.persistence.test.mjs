@@ -69,10 +69,18 @@ async function submit(rt, container, value) {
     form.querySelector("input").value = value;
     form.dispatchEvent({ type: "submit", preventDefault() { } });
 
+    await submit.settle();
+}
+
+/**
+ * Lets the promise chains of a submit run out.
+ * @returns {Promise<void>} Resolves after the pending microtasks.
+ */
+submit.settle = async () => {
     for (let i = 0; i < 20; i++) {
         await Promise.resolve();
     }
-}
+};
 
 test("a cell without a form action announces the save without a request", async () => {
     const rt = loadRuntime();
@@ -109,4 +117,76 @@ test("a cell with a form action submits the new value there", async () => {
     assert.equal(requests.length, 1, "the configured action receives the submit");
     assert.equal(requests[0].url, "/api/characters/1");
     assert.equal(requests[0].method, "PATCH");
+});
+
+test("a host that waits on a write keeps the editor until the write is confirmed", async () => {
+    const rt = loadRuntime();
+    const container = buildCell(rt, null);
+    let release = null;
+    container.addEventListener(rt.wx.Event.SAVE_INLINE_EDIT_EVENT, (e) => {
+        e.detail.waitUntil(new Promise((resolve) => { release = resolve; }));
+    });
+
+    await submit(rt, container, "after");
+    assert.ok(container.querySelector("form"), "the editor stays open while the write is on its way");
+    assert.ok(container.querySelector(".spinner-button"), "and shows that it waits");
+
+    release(true);
+    await submit.settle();
+
+    assert.equal(container.querySelector("form"), null);
+    assert.equal(container.textContent, "after", "the confirmed value is taken over");
+});
+
+test("a write the host refuses sets the value back and leaves the cell editable", async () => {
+    const rt = loadRuntime();
+    const container = buildCell(rt, null);
+    container.addEventListener(rt.wx.Event.SAVE_INLINE_EDIT_EVENT, (e) => {
+        e.detail.waitUntil(Promise.resolve(false));
+    });
+
+    await submit(rt, container, "after");
+
+    assert.equal(container.querySelector("form"), null, "the edit has ended");
+    assert.equal(container.textContent, "before", "the value from before the edit is back");
+
+    await submit(rt, container, "again");
+    assert.ok(container.querySelector(".spinner-button") === null, "a second attempt runs through as well");
+    assert.equal(container.textContent, "before", "and is refused the same way");
+});
+
+test("a rejected promise counts as a refusal, and revert and confirm decide at once", async () => {
+    const rt = loadRuntime();
+    const decisions = [
+        (detail) => detail.waitUntil(Promise.reject(new Error("offline"))),
+        (detail) => detail.revert(),
+        (detail) => detail.confirm()
+    ];
+    const container = buildCell(rt, null);
+    container.addEventListener(rt.wx.Event.SAVE_INLINE_EDIT_EVENT, (e) => decisions.shift()(e.detail));
+
+    await submit(rt, container, "first");
+    assert.equal(container.textContent, "before");
+    await submit(rt, container, "second");
+    assert.equal(container.textContent, "before");
+    await submit(rt, container, "third");
+    assert.equal(container.textContent, "third");
+});
+
+test("a form action save can be decided by the host as well", async () => {
+    const rt = loadRuntime();
+    rt.sandbox.fetch = async () => ({ ok: false, status: 409, statusText: "Conflict" });
+    const container = buildCell(rt, "/api/characters/1");
+    const statuses = [];
+    container.addEventListener(rt.wx.Event.SAVE_INLINE_EDIT_EVENT, (e) => {
+        statuses.push(e.detail.status);
+        if (e.detail.status >= 400) {
+            e.detail.revert();
+        }
+    });
+
+    await submit(rt, container, "after");
+
+    assert.deepEqual(statuses, [409]);
+    assert.equal(container.textContent, "before", "the refused value is set back");
 });

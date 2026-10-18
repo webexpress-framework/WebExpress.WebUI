@@ -35,10 +35,11 @@ webexpress.webui.TableTemplates.register("date", (val, table, row, cell, name, o
     // ensure opts is an object to prevent runtime errors
     opts = opts || {};
 
-    if (!val) {
+    const editable = opts.editable === true || opts.editable === "true";
+    // an editable cell keeps its editor when empty, otherwise a date could never be entered
+    if (!val && !editable) {
         return "";
     }
-    const editable = opts.editable === true || opts.editable === "true";
     const format = opts.format || "yyyy-MM-dd";
     const placeholder = opts.placeholder || null;
     const cssColor = opts.colorCss || null;
@@ -75,10 +76,11 @@ webexpress.webui.TableTemplates.register("calendar", (val, table, row, cell, nam
     // ensure opts is an object
     opts = opts || {};
 
-    if (!val) {
+    const editable = opts.editable === true || opts.editable === "true";
+    // an editable cell keeps its editor when empty, otherwise a date could never be entered
+    if (!val && !editable) {
         return "";
     }
-    const editable = opts.editable === true || opts.editable === "true";
     const format = opts.format || "yyyy-MM-dd";
     const placeholder = opts.placeholder || null;
     const cssColor = opts.colorCss || null;

@@ -88,7 +88,7 @@ The following example illustrates a minimal declarative setup, showing how colum
 
 The following events form the central interaction points of the table control system, enabling flexible handling of sort changes and visibility updates in tree structures.
 
-- `TABLE_SORT_EVENT` (sort changes)
+- `TABLE_SORT_EVENT` (sort changes): `columnId` and `sortDirection` (`asc`, `desc` or `null`). The header and the column dialog announce it alike; the detail still carries `dir` with the same value, which is deprecated and will be dropped - read `sortDirection`.
 
 ## Rendering and State
 
@@ -98,7 +98,9 @@ Rows are keyed by their id, so a sort, an expand or a selection moves and patche
 
 The rows and the columns stay records that the control, its subclasses and the cell templates change in place. After such a change `render()` renders the table again on the next microtask and compares the rows with the last refresh: a changed row flashes `wx-change-flash`, a new one `wx-new-flash`, and the marks are taken away once the animation has played. A selection is rendered before `SELECT_ROW_EVENT` fires, so a listener finds the row marked. A column resize follows the pointer through the grid template (`--wx-grid-template`) alone and renders nothing until it ends; a double click on the resizer sizes the column by its own cells.
 
-A subclass extends the view through hooks (`_renderLeadingHeaderCells`, `_headerCellProps`, `_renderActionsHeader`, `_renderLeadingCells`, `_rowClasses`, `_renderRowsList`, `_renderTableExtras`, `_bodyHandlers`) and opens the table at the end of its own constructor with `_open()`, because the hooks read what that constructor sets up; the base opens it only when it is constructed itself. The REST table of WebExpress.WebApp goes one step further and renders the whole host, placing the table element among its progress bar and paging info line.
+The cells of a row are positional: `cells[i]` belongs to `columns[i]`, and so does `footer[i]`. Every reorder of the columns goes through `_applyColumnOrder(orderedIds)`, which moves the columns, the cells of every row and child row and the footer together; a sort and an edit find the cell of a column through the index cache by the column id (`column.index` is only the position the column was declared at). A body cell names its column in `data-column-id`, so a manual edit in it is written back to exactly that model cell - `content` and `text` together, because the text is what the column sorts by. A cell whose template brings an editor of its own (`SmartEditCtrl`) reports through the save event of that editor instead.
+
+A subclass extends the view through hooks (`_renderHeadPrefix`, `_renderHeadSuffix`, `_renderRowPrefix`, `_renderRowSuffix`, `_renderFootPrefix`, `_renderFootSuffix` with `_gridPrefixTracks` and `_gridSuffixTracks` for the cells of no column ahead of and behind the columns, `_headerCellProps`, `_renderActionsHeader`, `_rowClasses`, `_renderRowsList`, `_renderTableExtras`, `_bodyHandlers`, `_afterRenderDom`) and opens the table at the end of its own constructor with `_open()`, because the hooks read what that constructor sets up; the base opens it only when it is constructed itself. The REST table of WebExpress.WebApp goes one step further and renders the whole host, placing the table element among its progress bar and paging info line.
 
 ## Programmatic Control
 

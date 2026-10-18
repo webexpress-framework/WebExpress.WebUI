@@ -108,6 +108,12 @@ webexpress.webui.Controller = new class {
             const actionDef = webexpress.webui.Actions.get(primaryAction);
             if (actionDef) {
                 element.addEventListener("click", (e) => {
+                    // a button or a link inside the element - in a table row, a card - owns
+                    // its click, whether it came from the pointer or from enter on it
+                    const control = e.target && e.target.closest ? e.target.closest("a, button, input, select, textarea, [role='button']") : null;
+                    if (control && control !== element && element.contains(control)) {
+                        return;
+                    }
                     actionDef.execute(element, "primary", this, e);
                 });
                 if (typeof actionDef.init === "function") {

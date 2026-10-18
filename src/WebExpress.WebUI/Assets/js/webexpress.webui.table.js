@@ -102,8 +102,13 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
     // the model is held in the state; the accessors keep the record API the subclasses,
     // the cell templates and the hosts use
 
+    // the cells of a row are positional, and a sort or an edit finds the cell of a column
+    // through the index cache, so the cache follows every replacement of the columns
     get _columns() { return this.state.columns; }
-    set _columns(value) { this.setState({ columns: Array.isArray(value) ? value : [] }); }
+    set _columns(value) {
+        this.setState({ columns: Array.isArray(value) ? value : [] });
+        this._rebuildColumnIndexCache();
+    }
 
     get _rows() { return this.state.rows; }
     set _rows(value) { this.setState({ rows: Array.isArray(value) ? value : [] }); }
@@ -227,36 +232,48 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
     _onBodyInput = (e) => this._syncCellEdit(e);
 
     /**
-     * Synchronises content edits back to the row model.
+     * Writes a manual edit in a cell back to the row model. The cell is resolved by the
+     * column it shows, not by its position in the row, because a row may carry cells of no
+     * column - the grip of a movable row, the actions - and hidden columns render none.
+     * A cell template that brings an editor of its own reports the value through the save
+     * event of that editor instead, so such a cell is left alone.
      * @param {Event} e - The triggering input event.
      */
     _syncCellEdit(e) {
-        const cellEl = e.target.closest(".wx-grid-cell");
-        const rowEl = e.target.closest(".wx-grid-row");
-        if (!cellEl || !rowEl || !rowEl._dataRowRef) {
+        const cellEl = e.target.closest ? e.target.closest(".wx-grid-cell") : null;
+        const columnId = cellEl ? cellEl.dataset.columnId : null;
+        const rowEl = columnId ? cellEl.closest(".wx-grid-row") : null;
+        if (!rowEl || !rowEl._dataRowRef || cellEl.querySelector(".wx-smart-edit")) {
             return;
         }
 
-        const cellsInRow = Array.from(rowEl.children).filter(c => c.classList.contains("wx-grid-cell"));
-        const colIndex = cellsInRow.indexOf(cellEl);
-        if (colIndex < 0) {
-            return;
+        const index = this._colIndexCache.get(columnId);
+        const cell = index === undefined ? null : rowEl._dataRowRef.cells[index];
+        if (cell) {
+            this._writeCellValue(cell, this._editedValue(e.target));
         }
+    }
 
-        // map dom-index (visible columns only) back to model index
-        let visibleCount = 0;
-        for (let i = 0; i < this._columns.length; i++) {
-            if (!this._columns[i].visible) {
-                continue;
-            }
-            if (visibleCount === colIndex) {
-                if (rowEl._dataRowRef.cells[i]) {
-                    rowEl._dataRowRef.cells[i].content = cellEl.innerHTML;
-                }
-                return;
-            }
-            visibleCount++;
-        }
+    /**
+     * Gets the value an edit left in the element it was made in: the value of a form
+     * field, the text of a content editable area.
+     * @param {HTMLElement} target - The element the input event was raised on.
+     * @returns {string} The edited value.
+     */
+    _editedValue(target) {
+        const field = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.tagName === "SELECT";
+        return String((field ? target.value : target.textContent) ?? "");
+    }
+
+    /**
+     * Writes a value into a cell. The content is what the cell shows and the text is what
+     * it sorts by, so both change together or a sort orders the row by its old value.
+     * @param {Object} cell - The model cell.
+     * @param {string} value - The new value.
+     */
+    _writeCellValue(cell, value) {
+        cell.content = value;
+        cell.text = value;
     }
 
     /**
@@ -537,8 +554,14 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
      * @param {KeyboardEvent} e
      */
     _onHostKeyDown(e) {
-        // ignore keys typed into form controls inside cells
+        // a key a control inside the table answered - a grip that moved its row, a header
+        // that sorted - or one aimed at a button or a link belongs to that control alone;
+        // the shortcuts of the table would act on the selected row a second time
         const tgt = e.target;
+        if (e.defaultPrevented || (tgt && tgt.closest && tgt.closest("button, a, [role=\"button\"]"))) {
+            return;
+        }
+        // ignore keys typed into form controls inside cells
         if (tgt && (tgt.tagName === "INPUT" || tgt.tagName === "TEXTAREA" || tgt.tagName === "SELECT" || tgt.isContentEditable)) {
             return;
         }
@@ -740,9 +763,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
         },
             h("div", { key: "row", class: this._headerRowClass(), role: suppressed ? "presentation" : "row" },
                 !suppressed && [
-                    this._renderLeadingHeaderCells(state),
+                    this._renderHeadPrefix(state),
                     visible.map((col) => this._renderHeaderCell(state, col, this._columnResizeEnabled && col.id !== lastVisibleId && col.resizable !== false)),
-                    this._hasActionsColumn() && this._renderActionsHeader(state)
+                    this._renderHeadSuffix(state)
                 ]));
     }
 
@@ -754,14 +777,97 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
         return "wx-grid-row wx-table-header";
     }
 
+    // the cells of no column ahead of and behind the columns. The header, every row and
+    // the footer describe them through matching hooks, and the grid template reserves a
+    // track for each, so a cell of a column stands under its header in every row group
+
     /**
-     * Hook for subclasses to describe non-data header cells ahead of the columns, for
-     * example a drag-handle column.
+     * Hook for subclasses to describe header cells of no column ahead of the columns, for
+     * example the header of a grip column.
      * @param {object} state - The current state.
      * @returns {*} Virtual nodes, or null.
      */
-    _renderLeadingHeaderCells(state) {
+    _renderHeadPrefix(state) {
         return null;
+    }
+
+    /**
+     * Describes the header cells of no column behind the columns: the actions header.
+     * @param {object} state - The current state.
+     * @returns {*} Virtual nodes, or null.
+     */
+    _renderHeadSuffix(state) {
+        return this._hasActionsColumn() ? this._renderActionsHeader(state) : null;
+    }
+
+    /**
+     * Hook for subclasses to describe the cells of no column ahead of the columns of a
+     * row, for example a grip.
+     * @param {object} state - The current state.
+     * @param {Object} row - Row data object.
+     * @returns {*} Virtual nodes, or null.
+     */
+    _renderRowPrefix(state, row) {
+        return null;
+    }
+
+    /**
+     * Describes the cells of no column behind the columns of a row: the actions cell,
+     * which holds the options menu of the row.
+     * @param {object} state - The current state.
+     * @param {Object} row - Row data object.
+     * @returns {*} Virtual nodes, or null.
+     */
+    _renderRowSuffix(state, row) {
+        if (!this._hasActionsColumn()) {
+            return null;
+        }
+        return webexpress.webui.h("div", {
+            key: "__actions",
+            class: "wx-grid-cell wx-table-actions",
+            role: this._cellRole,
+            keep: true,
+            ref: (el) => this._placeOptions(el, row)
+        });
+    }
+
+    /**
+     * Hook for subclasses to describe the footer cells of no column ahead of the columns,
+     * the placeholders under the cells of the row prefix.
+     * @param {object} state - The current state.
+     * @returns {*} Virtual nodes, or null.
+     */
+    _renderFootPrefix(state) {
+        return null;
+    }
+
+    /**
+     * Describes the footer cells of no column behind the columns: the placeholder under
+     * the actions cells.
+     * @param {object} state - The current state.
+     * @returns {*} Virtual nodes, or null.
+     */
+    _renderFootSuffix(state) {
+        if (!this._hasActionsColumn()) {
+            return null;
+        }
+        return webexpress.webui.h("div", { key: "__actions", class: "wx-grid-cell wx-table-actions", role: this._cellRole });
+    }
+
+    /**
+     * Hook for subclasses to name the grid tracks of the cells their row prefix adds.
+     * @returns {Array<string>} The track sizes.
+     */
+    _gridPrefixTracks() {
+        return [];
+    }
+
+    /**
+     * Names the grid tracks of the cells behind the columns: the actions track.
+     * @returns {Array<string>} The track sizes.
+     */
+    _gridSuffixTracks() {
+        return this._hasActionsColumn() ? ["1.5rem"] : [];
     }
 
     /**
@@ -978,15 +1084,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
         }
 
         return h("div", props,
-            this._renderLeadingCells(state, row),
+            this._renderRowPrefix(state, row),
             cells,
-            this._hasActionsColumn() && h("div", {
-                key: "__actions",
-                class: "wx-grid-cell wx-table-actions",
-                role: this._cellRole,
-                keep: true,
-                ref: (el) => this._placeOptions(el, row)
-            }));
+            this._renderRowSuffix(state, row));
     }
 
     /**
@@ -1028,17 +1128,6 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
     }
 
     /**
-     * Hook for subclasses to describe non-data cells ahead of the columns of a row, for
-     * example a drag handle. Leading cells must be mirrored by the grid template.
-     * @param {object} state - The current state.
-     * @param {Object} row - Row data object.
-     * @returns {*} Virtual nodes, or null.
-     */
-    _renderLeadingCells(state, row) {
-        return null;
-    }
-
-    /**
      * Hook for subclasses to describe elements of the table element besides the header,
      * the body and the footer.
      * @param {object} state - The current state.
@@ -1051,6 +1140,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
     /**
      * Describes a single body cell. Its content is built into it and kept until the cell
      * or what the cell shows changes, because a cell template may place a control there.
+     * The cell names its column, which is how an edit in it finds its model cell.
      * @param {Object} row - The row.
      * @param {Object} col - The column.
      * @param {Object} cell - The cell.
@@ -1069,6 +1159,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
             ]),
             role: this._cellRole,
             style: (cell && cell.style) || "",
+            dataset: { columnId: col.id },
             keep: true,
             ref: (el) => this._placeCell(el, row, col, cell, firstVisible && tree && this._treeEnabled !== false, firstVisible)
         });
@@ -1218,7 +1309,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
     }
 
     /**
-     * Describes the footer row group.
+     * Describes the footer row group. The footer cells are positional like the cells of
+     * a row and are reordered with the columns.
      * @param {object} state - The current state.
      * @returns {object} The footer virtual node.
      */
@@ -1227,12 +1319,14 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
 
         return h("div", { key: "foot", class: "wx-table-footer-group", role: "rowgroup", ref: (el) => { this._foot = el; } },
             h("div", { class: "wx-grid-row wx-table-footer", role: "row" },
+                this._renderFootPrefix(state),
                 state.columns.map((col, i) => col.visible && h("div", {
                     key: col.id,
                     class: this._classes(["wx-grid-cell", col.align && `wx-table-align-${col.align}`]),
                     role: this._cellRole,
                     html: state.footer[i] != null ? state.footer[i] : ""
-                }))));
+                })),
+                this._renderFootSuffix(state)));
     }
 
     /**
@@ -1355,13 +1449,33 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
      * @param {Object} col - Column descriptor.
      */
     _handleSortClick(headerCell, col) {
-        const next = col.sort === "asc" ? "desc" : (col.sort === "desc" ? null : "asc");
+        this._applySort(col.id, col.sort === "asc" ? "desc" : (col.sort === "desc" ? null : "asc"));
+    }
+
+    /**
+     * Sorts the table by a column, the one way the header and the column dialog both
+     * sort: the column carries the mark, the rows are ordered locally - or shown in the
+     * order they came in once the sort is lifted - and the sort is announced, so a table
+     * that sorts on its server learns of it from either place alike.
+     * @param {string} columnId - The id of the column.
+     * @param {"asc"|"desc"|null} direction - The direction, or null to lift the sort.
+     * @remarks The event detail names the direction in sortDirection. It carries it in
+     *     dir as well, which is deprecated: the column dialog announced it under that
+     *     name alone, and it remains for listeners written against it until they read
+     *     sortDirection.
+     */
+    _applySort(columnId, direction) {
+        const col = this._columns.find((c) => c.id === columnId);
+        if (!col) {
+            return;
+        }
+        const dir = direction === "asc" || direction === "desc" ? direction : null;
         for (const c of this._columns) {
             c.sort = null;
         }
-        col.sort = next;
+        col.sort = dir;
 
-        if (next) {
+        if (dir) {
             this.orderRows(col);
         } else {
             this.render();
@@ -1370,7 +1484,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
         this._dispatch(webexpress.webui.Event.TABLE_SORT_EVENT, {
             sender: this._element,
             columnId: col.id,
-            sortDirection: col.sort
+            sortDirection: dir,
+            dir: dir
         });
     }
 
@@ -1379,7 +1494,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
      * @param {Object} column - Sorting column descriptor.
      */
     orderRows(column) {
-        const idx = column.index;
+        const idx = this._colIndexCache.get(column.id);
         if (idx === undefined) {
             return;
         }
@@ -1431,6 +1546,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
 
             return {
                 id: el.id || `col_${idx}`,
+                // the position the column was declared at, which names an unlabeled
+                // column; the cells of a column are found through the index cache, since
+                // the columns may have been reordered since
                 index: idx,
                 // a formatted header still needs a plain name for the column chooser and
                 // the accessible name; without a title it is the text of the formatting
@@ -1697,12 +1815,61 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
     }
 
     /**
+     * Puts the columns into a new order and takes along what is positional with them: the
+     * cells of every row and child row, and the footer. Every place that reorders columns
+     * goes through here, so no one of them can move the columns and leave a footer or a
+     * level of rows behind.
+     * @param {Array<string>} orderedIds - The column ids in the wanted order; a column it
+     *     does not name keeps its relative place behind the named ones.
+     * @returns {boolean} True when the order changed.
+     */
+    _applyColumnOrder(orderedIds) {
+        const byId = new Map(this._columns.map((c) => [c.id, c]));
+        const ordered = [];
+        for (const id of orderedIds || []) {
+            const col = byId.get(id);
+            if (col && !ordered.includes(col)) {
+                ordered.push(col);
+            }
+        }
+        for (const col of this._columns) {
+            if (!ordered.includes(col)) {
+                ordered.push(col);
+            }
+        }
+
+        // the old position of the column each new position shows
+        const oldIndexById = new Map(this._columns.map((c, i) => [c.id, i]));
+        const source = ordered.map((c) => oldIndexById.get(c.id));
+        if (source.every((from, to) => from === to)) {
+            return false;
+        }
+
+        const stack = [...this._rows];
+        while (stack.length) {
+            const row = stack.pop();
+            const cells = Array.isArray(row.cells) ? row.cells : [];
+            row.cells = source.map((from) => cells[from] || { content: "" });
+            if (row.children) {
+                stack.push(...row.children);
+            }
+        }
+        if (this._footer.length) {
+            const footer = this._footer;
+            this._footer = source.map((from) => footer[from] ?? "");
+        }
+        // the setter rebuilds the index cache
+        this._columns = ordered;
+        return true;
+    }
+
+    /**
      * Constructs the CSS Grid Template string. It is written to the table element, which
      * is the render root and so outside the rendered tree, and also live while a column
      * is resized.
      */
     _syncColumnWidths() {
-        const parts = [];
+        const parts = [...this._gridPrefixTracks()];
         const visibleCols = this._columns.filter(c => c.visible);
         const lastVisibleId = visibleCols.length > 0 ? visibleCols[visibleCols.length - 1].id : null;
         const minDefault = `${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px`;
@@ -1740,9 +1907,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
             parts.push(val);
         }
 
-        if (this._hasOptions) {
-            parts.push("1.5rem");
-        }
+        parts.push(...this._gridSuffixTracks());
 
         const template = parts.length > 0 ? parts.join(" ") : "auto";
         this._table.style.setProperty("--wx-grid-template", template);

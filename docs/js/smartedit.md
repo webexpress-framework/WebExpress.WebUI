@@ -85,6 +85,21 @@ document.addEventListener(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, (e) => 
 });
 ```
 
+#### Confirming or setting back a save
+
+A host that stores the value itself - an editor without `data-form-action` - may fail to store it. The save event lets it decide the outcome instead of leaving an unsaved value on screen:
+
+- `e.detail.waitUntil(promise)` keeps the editor open, with its spinner, until the promise settles. A promise that resolves to anything but `false` takes the value over; one that resolves to `false` or rejects sets it back to the value from before the edit.
+- `e.detail.confirm()` and `e.detail.revert()` decide at once.
+
+Without any of the three the value is taken over as soon as the event was dispatched, as before. A value that was set back leaves the editor ready for another attempt. The same applies after a `data-form-action` submit, where the host can read `e.detail.status` and revert a refused write.
+
+```javascript
+host.addEventListener(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, (e) => {
+    e.detail.waitUntil(service.update({ name: e.detail.value }).then((result) => result.ok));
+});
+```
+
 ### HTML Usage Example
 
 To use the control, wrap your editor element within a container and assign it the class `wx-webui-smart-edit`.

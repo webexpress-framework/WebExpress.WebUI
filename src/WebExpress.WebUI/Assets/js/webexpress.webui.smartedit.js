@@ -10,11 +10,20 @@
  * Persistence is optional: with data-form-action the new value is submitted as
  * form data, without it the save event is the only outcome and the host decides
  * how to store the value.
+ *
+ * A host that stores the value itself, and may fail to, decides the outcome through the
+ * save event: detail.waitUntil(promise) keeps the editor waiting until the promise
+ * settles - it is taken over when the promise resolves to anything but false and set
+ * back to the previous value when it resolves to false or rejects - and detail.confirm()
+ * or detail.revert() decide it at once. Without any of the three the value is taken
+ * over as soon as it is saved. A value that was set back leaves the cell ready to be
+ * edited again.
  */
 webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     _activeEdit = null;
     _editor = null;
     _previousValue = null;
+    _saving = false;
 
     /**
      * Constructor
@@ -116,7 +125,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLElement} element target element
      */
     _showEditSpinner(element) {
-        if (!this._activeEdit) {
+        if (!this._activeEdit || element.querySelector(":scope > .spinner-button")) {
             return;
         }
         const spinnerButton = document.createElement("button");
@@ -220,6 +229,11 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         form.addEventListener("submit", async (e) => {
             e.preventDefault();
 
+            // a second submit while the first waits for its outcome would save twice
+            if (this._saving) {
+                return;
+            }
+
             // the value the editor holds now, which is the one _finishEditing applies and
             // therefore the one the host is told about and the one submitted. reading the
             // control's own value instead would report the state from before the edit for
@@ -230,15 +244,16 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             // listens for the save event; posting to the current document
             // instead would be a request nobody asked for
             if (!this._formAction) {
-                this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
+                const decision = this._announceSave({
                     value: newValue,
                     status: 200,
                     statusText: ""
                 });
-                this._finishEditing(true, element, newValue);
+                await this._settleSave(element, newValue, decision);
                 return;
             }
 
+            this._saving = true;
             this._prepareValueField(form, valueField, newValue);
             this._showEditSpinner(element);
 
@@ -252,7 +267,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             // application saw for a network failure before the transport
             const answered = !!result.response;
 
-            this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, {
+            const decision = this._announceSave({
                 value: newValue,
                 status: answered ? result.status : 500,
                 statusText: answered
@@ -264,9 +279,9 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                 console.error("failed to edit", result.error.message);
             }
 
-            // the new value is taken over whatever the outcome; the application checks the status
-            this._hideEditSpinner(element);
-            this._finishEditing(true, element, newValue);
+            // unless the application decides, the new value is taken over whatever the
+            // outcome; the application checks the status
+            await this._settleSave(element, newValue, decision);
         });
 
         btnCancel.addEventListener("click", (e) => {
@@ -306,11 +321,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
      * @param {string|any} value new or restored value
      */
     _finishEditing(save, element, value) {
-        if (this._outsideClickHandler) {
-            document.removeEventListener("mousedown", this._outsideClickHandler);
-            document.removeEventListener("touchstart", this._outsideClickHandler);
-            this._outsideClickHandler = null;
-        }
+        this._detachOutsideClick();
 
         element.innerHTML = "";
         this._dispatch(webexpress.webui.Event.END_INLINE_EDIT_EVENT, { value: this.value });
@@ -346,6 +357,76 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         // edit modus beenden und cache löschen
         this._activeEdit = null;
         this._previousValue = null;
+    }
+
+    /**
+     * Stops listening for a click outside the editor, which cancels the edit.
+     */
+    _detachOutsideClick() {
+        if (this._outsideClickHandler) {
+            document.removeEventListener("mousedown", this._outsideClickHandler);
+            document.removeEventListener("touchstart", this._outsideClickHandler);
+            this._outsideClickHandler = null;
+        }
+    }
+
+    /**
+     * Dispatches the save event with the means for the host to decide the outcome.
+     * @param {object} detail - The value and the status of the save.
+     * @returns {Promise<boolean>|null} The decision of the host - true to take the value
+     *     over, false to set it back - or null when the host did not ask to decide.
+     */
+    _announceSave(detail) {
+        let decision = null;
+        let settle = null;
+        const hold = () => decision || (decision = new Promise((resolve) => { settle = resolve; }));
+
+        this._dispatch(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, Object.assign({}, detail, {
+            waitUntil: (promise) => {
+                hold();
+                Promise.resolve(promise).then((outcome) => settle(outcome !== false), () => settle(false));
+            },
+            confirm: () => {
+                hold();
+                settle(true);
+            },
+            revert: () => {
+                hold();
+                settle(false);
+            }
+        }));
+
+        return decision;
+    }
+
+    /**
+     * Ends a save with the outcome the host decided: the value is taken over or set back
+     * to the one before the edit. While the decision is pending the editor shows the
+     * spinner and ignores clicks outside of it, which would cancel an edit that may still
+     * be confirmed.
+     * @param {HTMLElement} element - The target element.
+     * @param {*} value - The saved value.
+     * @param {Promise<boolean>|null} decision - The decision of the host, or null to take
+     *     the value over.
+     */
+    async _settleSave(element, value, decision) {
+        let confirmed = true;
+
+        if (decision) {
+            this._saving = true;
+            this._detachOutsideClick();
+            this._showEditSpinner(element);
+            confirmed = await decision;
+        }
+
+        this._saving = false;
+        this._hideEditSpinner(element);
+
+        if (this._activeEdit !== element) {
+            return;
+        }
+
+        this._finishEditing(confirmed, element, confirmed ? value : this._previousValue);
     }
 
     /**

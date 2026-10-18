@@ -256,3 +256,37 @@ test("the actions and binds registries follow the register, get and unregister s
     wx.Binds.unregister("probe-bind");
     assert.equal(wx.Binds.get("probe-bind"), null);
 });
+
+test("a click on a button or a link inside an action element is theirs, not the element's", () => {
+    const { wx, document } = loadWebUi();
+    const runs = [];
+    wx.Actions.register("probe-row", { execute(element) { runs.push(element.id); } });
+
+    const row = document.createElement("div");
+    row.id = "row";
+    row.setAttribute("data-wx-primary-action", "probe-row");
+    const label = document.createElement("span");
+    const button = document.createElement("button");
+    const icon = document.createElement("i");
+    button.appendChild(icon);
+    row.appendChild(label);
+    row.appendChild(button);
+    document.body.appendChild(row);
+    wx.Controller._registerWxEvents(row);
+
+    row.dispatchEvent({ type: "click", target: icon });
+    assert.deepEqual(runs, [], "the button inside the row owns the click, from the pointer or from enter");
+
+    row.dispatchEvent({ type: "click", target: label });
+    assert.deepEqual(runs, ["row"], "a click on the row itself still runs its action");
+
+    const link = document.createElement("a");
+    link.id = "link";
+    link.setAttribute("data-wx-primary-action", "probe-row");
+    const inner = document.createElement("i");
+    link.appendChild(inner);
+    document.body.appendChild(link);
+    wx.Controller._registerWxEvents(link);
+    link.dispatchEvent({ type: "click", target: inner });
+    assert.deepEqual(runs, ["row", "link"], "an action element that is itself a link keeps its clicks");
+});

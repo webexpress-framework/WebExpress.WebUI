@@ -224,6 +224,75 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Creates the root element of the table with the classes and attributes every
+        /// table variant shares, so a derived table adds only what is its own and cannot
+        /// drop a shared setting - the fill, the selection, the color, the stripes or the
+        /// border - by rendering the root itself.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="controlClass">The class that selects the script controller of the variant.</param>
+        /// <returns>The root element without children.</returns>
+        protected HtmlElementTextContentDiv CreateTableElement(IRenderControlContext renderContext, string controlClass)
+        {
+            var color = Color?.Invoke(renderContext) ?? TypeColorTable.Default;
+            var striped = Striped?.Invoke(renderContext) ?? TypeStripedTable.Default;
+            var tableBorder = TableBorder?.Invoke(renderContext) ?? TypeBorderTable.Default;
+            var selectable = Selectable?.Invoke(renderContext) ?? false;
+
+            var html = new HtmlElementTextContentDiv()
+            {
+                Id = Id,
+                Class = Css.Concatenate(controlClass, [(Fill?.Invoke(renderContext) ?? false) ? "wx-fill" : null, .. Classes]),
+                Style = GetStyles(renderContext),
+                Role = Role?.Invoke(renderContext)
+            };
+
+            html.AddUserAttribute("data-color", color.ToClass());
+            html.AddUserAttribute("data-striped", striped.ToClass());
+            html.AddUserAttribute("data-border", tableBorder.ToClass());
+            html.AddUserAttribute("data-selectable", selectable ? "true" : null);
+
+            return html;
+        }
+
+        /// <summary>
+        /// Renders the children the table script reads its configuration from: the columns,
+        /// the rows and the footer.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <returns>The child elements of the table element.</returns>
+        protected IEnumerable<IHtmlNode> RenderContent(IRenderControlContext renderContext, IVisualTreeControl visualTree)
+        {
+            var headerColor = HeaderColor?.Invoke(renderContext) ?? TypeColorTable.Default;
+            var suppressHeaders = SuppressHeaders?.Invoke(renderContext) ?? false;
+
+            yield return new HtmlElementTextContentDiv()
+            {
+                Class = Css.Concatenate("wx-table-columns", headerColor.ToClass())
+            }
+                .AddUserAttribute("data-color", headerColor.ToClass())
+                .AddUserAttribute("data-suppress-headers", suppressHeaders ? "true" : null)
+                .Add
+                (
+                    _columns.Select
+                    (
+                        column => column.Render(renderContext, visualTree)
+                    )
+                );
+
+            foreach (var row in _rows)
+            {
+                yield return row.Render(renderContext, visualTree);
+            }
+
+            foreach (var footer in RenderFooter(renderContext, visualTree))
+            {
+                yield return footer;
+            }
+        }
+
+        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -231,53 +300,8 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var color = Color?.Invoke(renderContext) ?? TypeColorTable.Default;
-            var striped = Striped?.Invoke(renderContext) ?? TypeStripedTable.Default;
-            var tableBorder = TableBorder?.Invoke(renderContext) ?? TypeBorderTable.Default;
-            var selectable = Selectable?.Invoke(renderContext) ?? false;
-            var headerColor = HeaderColor?.Invoke(renderContext) ?? TypeColorTable.Default;
-            var suppressHeaders = SuppressHeaders?.Invoke(renderContext) ?? false;
-            var role = Role?.Invoke(renderContext);
-
-            var classes = Classes.ToList();
-
-            var html = new HtmlElementTextContentDiv()
-            {
-                Id = Id,
-                Class = Css.Concatenate("wx-webui-table", [(Fill?.Invoke(renderContext) ?? false) ? "wx-fill" : null, .. classes]),
-                Style = GetStyles(renderContext),
-                Role = role
-            }
-                .AddUserAttribute("data-color", color.ToClass())
-                .AddUserAttribute("data-striped", striped.ToClass())
-                .AddUserAttribute("data-border", tableBorder.ToClass())
-                .AddUserAttribute("data-selectable", selectable ? "true" : null)
-                .Add
-                (
-                    new HtmlElementTextContentDiv()
-                    {
-                        Class = Css.Concatenate("wx-table-columns", headerColor.ToClass())
-                    }
-                        .AddUserAttribute("data-color", headerColor.ToClass())
-                        .AddUserAttribute("data-suppress-headers", suppressHeaders ? "true" : null)
-                        .Add
-                        (
-                            _columns.Select
-                            (
-                                column => column.Render(renderContext, visualTree)
-                            )
-                        )
-                )
-                .Add
-                (
-                    _rows.Select
-                    (
-                        row => row.Render(renderContext, visualTree)
-                    )
-                )
-                .Add(RenderFooter(renderContext, visualTree));
-
-            return html;
+            return CreateTableElement(renderContext, "wx-webui-table")
+                .Add(RenderContent(renderContext, visualTree));
         }
     }
 }

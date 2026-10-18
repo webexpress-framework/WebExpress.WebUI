@@ -133,3 +133,17 @@ test("an editable tag cell keeps its editor when the last tag was removed", () =
     assert.ok(node.classList.contains("wx-smart-edit"), "so tags can be added again");
     assert.equal(render(rt, "tag", "", {}), "", "a read-only empty cell stays empty");
 });
+
+for (const type of ["date", "calendar"]) {
+    test(`an editable ${type} cell without a value keeps its editor`, () => {
+        const rt = loadRuntime();
+        rt.wx.SmartEditCtrl = class { constructor(el) { el.classList.add("wx-smart-edit"); } };
+
+        const node = render(rt, type, "", { editable: "true" });
+
+        assert.notEqual(node, "", "the cell is not dropped");
+        assert.ok(node.classList.contains("wx-smart-edit"), "so a date can be entered");
+        assert.equal(render(rt, type, "", {}), "", "a read-only empty cell stays empty");
+        assert.equal(render(rt, type, "", { editable: "false" }), "", "editable false reads as read-only");
+    });
+}

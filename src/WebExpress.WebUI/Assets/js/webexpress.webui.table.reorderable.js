@@ -85,13 +85,33 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
      * @param {object} state - The current state.
      * @returns {object|null} The header cell virtual node.
      */
-    _renderLeadingHeaderCells(state) {
+    _renderHeadPrefix(state) {
         if (!this._movableRow) {
             return null;
         }
         const h = webexpress.webui.h;
         return h("div", { key: "__grip", class: "wx-table-drag-column", role: "columnheader" },
             h("span", { class: "visually-hidden" }, this._i18n("webexpress.webui:table.row.move", "Move row")));
+    }
+
+    /**
+     * Describes the placeholder under the grips in the footer.
+     * @param {object} state - The current state.
+     * @returns {object|null} The placeholder cell virtual node.
+     */
+    _renderFootPrefix(state) {
+        if (!this._movableRow) {
+            return null;
+        }
+        return webexpress.webui.h("div", { key: "__grip", class: "wx-grid-cell wx-table-drag-column", role: this._cellRole });
+    }
+
+    /**
+     * Names the grid track of the grip column.
+     * @returns {Array<string>} The track sizes.
+     */
+    _gridPrefixTracks() {
+        return this._movableRow ? ["1.5rem"] : [];
     }
 
     /**
@@ -149,7 +169,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
      * @param {Object} row - Row data object.
      * @returns {object|null} The grip cell virtual node.
      */
-    _renderLeadingCells(state, row) {
+    _renderRowPrefix(state, row) {
         if (!this._movableRow) {
             return null;
         }
@@ -315,38 +335,8 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
         };
 
         modalCtrl.applyOrder = (orderedIds) => {
-            const map = new Map(this._columns.map(c => [c.id, c]));
-            const newOrder = [];
-
-            orderedIds.forEach(id => {
-                const col = map.get(id);
-                if (col && !newOrder.includes(col)) newOrder.push(col);
-            });
-
-            // append any missing columns (sanity check)
-            this._columns.forEach(c => {
-                if (!newOrder.includes(c)) newOrder.push(c);
-            });
-
-            // remap cell data to match new column order
-            const oldIndexById = new Map(this._columns.map((c, i) => [c.id, i]));
-            this._columns = newOrder;
-
-            const reorderCells = (rows) => {
-                for (const row of rows) {
-                    const newCells = new Array(this._columns.length);
-                    for (let i = 0; i < this._columns.length; i++) {
-                        const cid = this._columns[i].id;
-                        const srcIdx = oldIndexById.get(cid);
-                        newCells[i] = row.cells[srcIdx] || { content: "" };
-                    }
-                    row.cells = newCells;
-                    if (row.children) reorderCells(row.children);
-                }
-            };
-
             this._runWithModalPreservation(() => {
-                reorderCells(this._rows);
+                this._applyColumnOrder(orderedIds);
                 this._schedulePersist();
                 this.render();
             });
@@ -372,17 +362,9 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
         };
 
         modalCtrl.applySort = (columnId, dir) => {
-            this._columns.forEach(c => {
-                c.sort = (c.id === columnId && (dir === "asc" || dir === "desc")) ? dir : null;
-            });
             this._runWithModalPreservation(() => {
+                this._applySort(columnId, dir);
                 this._schedulePersist();
-                this.render();
-            });
-            this._dispatch(webexpress.webui.Event.TABLE_SORT_EVENT, {
-                sender: this._element,
-                columnId,
-                dir
             });
         };
     }
@@ -525,24 +507,12 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
             return;
         }
 
-        const columns = this._columns.slice();
-        const moved = columns.splice(sourceIndex, 1)[0];
-        columns.splice(adjusted, 0, moved);
-
-        // cells are positional, so their order must follow the columns
-        const reorderCells = (rows) => {
-            for (const row of rows) {
-                if (row.cells && row.cells.length > sourceIndex) {
-                    const c = row.cells.splice(sourceIndex, 1)[0];
-                    row.cells.splice(adjusted, 0, c);
-                }
-                if (row.children) reorderCells(row.children);
-            }
-        };
+        const ids = this._columns.map((c) => c.id);
+        ids.splice(sourceIndex, 1);
+        ids.splice(adjusted, 0, sourceId);
 
         this._runWithModalPreservation(() => {
-            this._columns = columns;
-            reorderCells(this._rows);
+            this._applyColumnOrder(ids);
             this._schedulePersist();
             this.render();
         });
@@ -605,7 +575,10 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
         if (!tr || !tr._dataRowRef) {
             return;
         }
+        // the arrow keys are the selection shortcuts of the host as well; on the grip they
+        // move the row and nothing else
         e.preventDefault();
+        e.stopPropagation();
         this._moveRowByStep(tr._dataRowRef, e.key === "ArrowUp" ? -1 : 1);
     }
 
@@ -906,69 +879,6 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
         return this._columns.filter(c => c.visible);
     }
 
-    // ------------------------------------------------------------------ layout
-
-    /**
-     * Apply configured column widths by setting grid-template-columns variable.
-     * Enforces fixed width for drag-handle (first) and actions (last).
-     * Enforces last regular column to not be user-resizable (flexible filler).
-     */
-    _syncColumnWidths() {
-        const parts = [];
-
-        if (this._movableRow) {
-            parts.push("1.5rem"); // Handle width
-        }
-
-        const visibleCols = this._columns.filter(c => c.visible);
-        const lastVisibleId = visibleCols.length > 0 ? visibleCols[visibleCols.length - 1].id : null;
-
-        for (const c of this._columns) {
-            if (!c.visible) {
-                continue;
-            }
-
-            // Last column takes remaining space
-            if (c.id === lastVisibleId) {
-                const min = c.minWidth || `${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px`;
-                parts.push(`minmax(${min}, 1fr)`);
-                continue;
-            }
-
-            let val = "1fr";
-            if (c.width !== null && c.width !== "") {
-                const wStr = String(c.width).trim();
-                if (wStr === "auto") {
-                    val = "auto";
-                } else if (wStr.endsWith("%") || wStr.endsWith("fr") || wStr.endsWith("rem") || wStr.endsWith("px")) {
-                    val = wStr;
-                } else if (!isNaN(Number(wStr))) {
-                    val = `${wStr}px`;
-                } else {
-                    val = wStr;
-                }
-            }
-
-            const min = c.minWidth || `${webexpress.webui.TableCtrl.MIN_COL_WIDTH}px`;
-
-            if (c.width && c.width !== "auto") {
-                 if (c.minWidth) {
-                     val = `minmax(${c.minWidth}, ${val})`;
-                 }
-                 parts.push(val);
-            } else {
-                 parts.push(`minmax(${min}, 1fr)`);
-            }
-        }
-
-        if (this._hasActionsColumn()) {
-            parts.push("1.5rem"); // actions width
-        }
-
-        const template = parts.length > 0 ? parts.join(" ") : "auto";
-        this._table.style.setProperty("--wx-grid-template", template);
-    }
-
     // ------------------------------------------------------------------ persistence
 
     /**
@@ -986,9 +896,12 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
     }
 
     /**
-     * Persists the current table state into localStorage.
+     * Persists the table state into localStorage.
+     * @param {Array<Object>} [layout] - The column layout to store, in display order, as
+     *     records of id, visible and width; the current columns when omitted. A subclass
+     *     that stores only a layout its server confirmed passes that one.
      */
-    _persistState() {
+    _persistState(layout = this._columns) {
         const collapsed = [];
         const stack = [...this._rows];
         while (stack.length) {
@@ -1004,8 +917,8 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
         const sortCol = this._columns.find(c => c.sort);
         const state = {
             v: 1,
-            cols: this._columns.map(c => ({ id: c.id, visible: c.visible, width: c.width })),
-            order: this._columns.map(c => c.id),
+            cols: layout.map(c => ({ id: c.id, visible: c.visible, width: c.width })),
+            order: layout.map(c => c.id),
             sort: sortCol ? { id: sortCol.id, dir: sortCol.sort } : null,
             tree: { collapsed }
         };
@@ -1017,40 +930,15 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
      * Loads a previously persisted table state from localStorage.
      */
     _loadState() {
-        if (!this._persistKey) return;
-
-        const stored = webexpress.webui.LocalStorage.getJson(this._persistKey);
-        if (!stored) return;
+        const obj = this._readStoredState();
+        if (!obj) return;
 
         try {
-            const obj = stored;
-            if (!obj || obj.v !== 1) return;
-
             const colMap = new Map(this._columns.map(c => [c.id, c]));
 
             // Restore Order
             if (Array.isArray(obj.order)) {
-                const newOrder = [];
-                obj.order.forEach(id => {
-                    const col = colMap.get(id);
-                    if (col && !newOrder.includes(col)) newOrder.push(col);
-                });
-                // append unknown new columns
-                this._columns.forEach(c => {
-                    if (!newOrder.includes(c)) newOrder.push(c);
-                });
-                // cells are positional, so their order must follow the restored columns
-                const oldIndexById = new Map(this._columns.map((column, index) => [column.id, index]));
-                const rows = [...this._rows];
-                while (rows.length) {
-                    const row = rows.pop();
-                    row.cells = newOrder.map(column => row.cells[oldIndexById.get(column.id)] || { content: "" });
-                    if (row.children) rows.push(...row.children);
-                }
-                if (this._footer.length) {
-                    this._footer = newOrder.map(column => this._footer[oldIndexById.get(column.id)] ?? "");
-                }
-                this._columns = newOrder;
+                this._applyColumnOrder(obj.order);
             }
 
             // Restore Settings (visibility, width)
@@ -1071,17 +959,33 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
                 if (c && ["asc", "desc"].includes(obj.sort.dir)) c.sort = obj.sort.dir;
             }
 
-            // Restore Tree state
-            if (Array.isArray(obj.tree?.collapsed)) {
-                const set = new Set(obj.tree.collapsed);
-                const stack = [...this._rows];
-                while (stack.length) {
-                    const r = stack.pop();
-                    if (set.has(r.id)) r.expanded = false;
-                    if (r.children) stack.push(...r.children);
-                }
-            }
+            this._restoreCollapsed(obj);
         } catch (e) { /* ignore */ }
+    }
+
+    /**
+     * Collapses the rows a persisted state names as collapsed.
+     * @param {Object|null} obj - The persisted state.
+     */
+    _restoreCollapsed(obj) {
+        if (!Array.isArray(obj?.tree?.collapsed)) return;
+        const set = new Set(obj.tree.collapsed);
+        const stack = [...this._rows];
+        while (stack.length) {
+            const r = stack.pop();
+            if (set.has(r.id)) r.expanded = false;
+            if (r.children) stack.push(...r.children);
+        }
+    }
+
+    /**
+     * Reads the persisted table state.
+     * @returns {Object|null} The state, or null when none of the known version is stored.
+     */
+    _readStoredState() {
+        if (!this._persistKey) return null;
+        const stored = webexpress.webui.LocalStorage.getJson(this._persistKey);
+        return stored && stored.v === 1 ? stored : null;
     }
 
     /**
