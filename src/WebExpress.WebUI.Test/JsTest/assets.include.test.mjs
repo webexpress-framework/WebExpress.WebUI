@@ -49,6 +49,15 @@ test("every declared JavaScript asset exists on disk", () => {
     assert.deepEqual(orphaned, [], `declared assets missing on disk:\n${orphaned.join("\n")}`);
 });
 
+test("the view layer loads right after the core and before every control", () => {
+    // a control may extend StateCtrl at class definition time, and StateCtrl renders
+    // through the renderer, so both have to be there before the first control file
+    const core = order.indexOf("webexpress.webui.js");
+    const renderer = order.indexOf("webexpress.webui.renderer.js");
+    const state = order.indexOf("webexpress.webui.state.js");
+    assert.ok(core >= 0 && renderer === core + 1 && state === renderer + 1, `core ${core}, renderer ${renderer}, state ${state}`);
+});
+
 test("add-ons and panels that translate while registering load after the language bundles", () => {
     // translate answers with the bare key while no bundle is registered, and the
     // definitions keep that key as their label for good

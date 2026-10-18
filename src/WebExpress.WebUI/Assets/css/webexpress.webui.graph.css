@@ -91,8 +91,12 @@
     pointer-events: none;
 }
 
+/* a head without a colour of its own takes the stroke of the edge it ends, so it
+   follows a css colour, the hover and the selection; a browser without
+   context-stroke keeps the text colour */
 .wx-graph-edge-arrow path {
     fill: var(--wx-body-color);
+    fill: context-stroke;
     stroke: none;
 }
 
@@ -393,8 +397,13 @@
 .wx-graph-dash-option:focus-visible { outline: 2px solid var(--wx-primary); outline-offset: 1px; }
 .wx-graph-dash-sample { width: 56px; height: 8px; display: block; }
 
-.wx-graph-node-selected rect, .wx-graph-node-selected circle {
-    stroke: var(--wx-primary); stroke-width: 2px;
+/* the selection has to outweigh the theme stroke of a node, which is scoped and so
+   weighs two classes, and its hover; the halo keeps it visible on any fill */
+.wx-graph-node.wx-graph-node-selected > .wx-graph-node-rect,
+.wx-graph-node.wx-graph-node-selected > .wx-graph-node-circle {
+    stroke: var(--wx-primary);
+    stroke-width: 3px;
+    filter: drop-shadow(0 0 4px color-mix(in oklab, var(--wx-primary) 70%, transparent));
 }
 .wx-workflow-edge { stroke-width: 2px; cursor: pointer; }
 .wx-workflow-edge:hover { stroke-width: 3px; }

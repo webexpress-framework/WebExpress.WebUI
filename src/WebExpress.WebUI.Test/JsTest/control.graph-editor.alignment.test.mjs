@@ -18,6 +18,8 @@ function movePointer(rt, ctrl, type, point) {
         type, clientX: point.x * ctrl._scale + ctrl._pan.x,
         clientY: point.y * ctrl._scale + ctrl._pan.y
     }));
+    // a gesture is painted on the next animation frame, which the test delivers
+    ctrl._store.flush();
 }
 
 for (const [alignment, factor] of [["left", -0.5], ["center", 0], ["right", 0.5]]) {

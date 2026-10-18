@@ -186,6 +186,7 @@ export function createSvgElementClass(ElementClass) {
             // controls branch on that (el.tagName === "path"), so the stub has
             // to preserve the case as well
             this.tagName = String(tag);
+            this.namespaceURI = SVG_NAMESPACE;
         }
 
         /**

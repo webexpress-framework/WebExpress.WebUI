@@ -1,89 +1,84 @@
 /**
- * Controller for interactive tab navigation: parsing markup, rendering tabs,
- * and handling tab selection state without destroying existing dom nodes.
+ * Controller for interactive tab navigation. The tab headers, the tools beside them and
+ * the switching of the panes are rendered from the state (the tabs and the active one);
+ * the panes keep the content and the controls the server rendered into them, the view
+ * only places them and marks the active one. A subclass extends the view through the
+ * hooks _renderTools, _renderHeaderExtras, _renderContentExtras and the tab header hooks
+ * (_tabItemProps, _tabLinkProps, _tabLinkLead, _tabItemTail).
  * Events:
  *  - webexpress.webui.Event.SELECTED_TAB_EVENT
  */
-webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
+webexpress.webui.TabCtrl = class extends webexpress.webui.StateCtrl {
 
-    // model state
-    _tabs = [];
-    _activeTabId = null;
+    // the panes keep their server rendered content and controls; the view places them
+    _panes = new Map();
+    _paneClasses = new Map();
 
-    // dom nodes
+    // the server rendered toolbar and its controller
+    _toolbarElement = null;
+    _toolbarCtrl = null;
+
+    // nodes captured while rendering, for the keyboard and the subclasses
     _navElement = null;
     _headerElement = null;
     _toolsElement = null;
     _contentElement = null;
-    _toolbarLi = null;
 
-    // controllers
-    _toolbarCtrl = null;
+    _onNavKeyDown = (e) => this._onTabListKeyDown(e);
 
     /**
      * Creates a tab controller for the root element.
      * @param {HTMLElement} element Root node containing .wx-tab-view children.
+     * @param {object} [options={}] Options of the StateCtrl base, such as the store a
+     *     WebApp subclass hands in.
      */
-    constructor(element) {
-        super(element);
+    constructor(element, options = {}) {
+        // the authored panes are read before the first render takes the host over
+        const authored = webexpress.webui.TabCtrl._readTabs(element);
 
+        super(element, options);
+
+        this._layout = element.dataset.layout || "default";
         this._storageKey = element.dataset.persistKey || (element.id ? `wx-tab:${element.id}` : null);
-        this._initTabs();
+        element.classList.add("wx-tab-container");
 
-        // set initial active tab
-        if (this._tabs.length > 0) {
-            const stored = webexpress.webui.LocalStorage.getItem(this._storageKey);
-            this.selectTab(this._tabs.some(tab => tab.id === stored) ? stored : this._tabs[0].id);
+        for (const pane of authored.panes) {
+            this._panes.set(pane.id, pane);
+            this._paneClasses.set(pane.id, pane.className);
+        }
+
+        if (authored.toolbar) {
+            this._toolbarElement = authored.toolbar;
+            this._toolbarCtrl = new webexpress.webui.ToolbarCtrl(authored.toolbar);
+        }
+
+        this.setState({ tabs: authored.tabs, activeTabId: null });
+        // the first render reads the state directly, a notification would only repeat it
+        this._store.flush();
+
+        // a subclass renders through hooks that read its own fields, which exist only once
+        // its constructor runs, so it opens the control at the end of that constructor
+        if (new.target === webexpress.webui.TabCtrl) {
+            this._open();
         }
     }
 
     /**
-     * Initializes the tab structure by transforming existing dom nodes.
+     * Reads the authored tabs of a host: one tab per .wx-tab-view child, whose element
+     * stays the pane of the tab, and the optional toolbar beside the tabs.
+     * @param {HTMLElement} element The host element.
+     * @returns {object} The tabs, their pane elements and the toolbar element or null.
      */
-    _initTabs() {
-        const el = this._element;
-        el.classList.add("wx-tab-container");
+    static _readTabs(element) {
+        const children = Array.from(element.childNodes).filter((node) => node.nodeType === 1);
+        const tabs = [];
+        const panes = [];
 
-        const layout = el.dataset.layout || "default";
+        children.filter((node) => node.classList.contains("wx-tab-view")).forEach((pane, i) => {
+            pane.id = pane.id || "wx-tab-" + Date.now() + "-" + i;
 
-        // create navigation wrapper
-        this._navElement = document.createElement("ul");
-
-        let navClass = "nav wx-tab-nav";
-        if (layout === "underline") {
-            navClass += " nav-underline";
-        } else if (layout === "pill") {
-            navClass += " nav-pills";
-        } else {
-            navClass += " nav-tabs";
-        }
-
-        this._navElement.className = navClass;
-        this._navElement.setAttribute("role", "tablist");
-        this._navElement.addEventListener("keydown", (e) => this._onTabListKeyDown(e));
-
-        // create content wrapper
-        this._contentElement = document.createElement("div");
-
-        // horizontal padding only: the vertical one belongs to the stylesheet, where it
-        // can be tuned per edge. as a p-3 utility it carried !important and no rule
-        // could reach it
-        let contentClass = "tab-content wx-tab-content px-3";
-        if (layout === "default" || layout === "tab") {
-            contentClass += " border border-top-0";
-        }
-        this._contentElement.className = contentClass;
-
-        // find all predefined tab views
-        const children = Array.from(el.querySelectorAll(":scope > .wx-tab-view"));
-
-        for (let i = 0; i < children.length; i++) {
-            const pane = children[i];
-            const id = pane.id || "wx-tab-" + Date.now() + "-" + i;
-            pane.id = id;
-
-            const tabData = {
-                id: id,
+            tabs.push({
+                id: pane.id,
                 label: pane.dataset.label || "",
                 icon: pane.dataset.icon || null,
                 color: pane.dataset.color || null,
@@ -91,196 +86,291 @@ webexpress.webui.TabCtrl = class extends webexpress.webui.Ctrl {
                 badgeColor: pane.dataset.badgeColor || null,
                 badgeStyle: pane.dataset.badgeStyle || null,
                 primaryAction: pane.dataset.wxPrimaryAction || null,
-                primaryTarget: pane.dataset.wxPrimaryTarget || null,
-                paneElement: pane
-            };
+                primaryTarget: pane.dataset.wxPrimaryTarget || null
+            });
 
-            this._tabs.push(tabData);
-
-            // build and append header
-            const navItem = this._buildTabHeader(tabData);
-            this._navElement.appendChild(navItem);
-
-            // transform pane class list to match WebExpress tabs
+            // the authored view becomes a WebExpress tab pane
             pane.classList.remove("wx-tab-view");
             pane.classList.add("tab-pane", "fade");
             pane.setAttribute("role", "tabpanel");
-            pane.setAttribute("aria-labelledby", id + "-tab");
+            pane.setAttribute("aria-labelledby", pane.id + "-tab");
             // a panel without a focusable child is otherwise skipped by the tab key
             if (!pane.hasAttribute("tabindex")) { pane.setAttribute("tabindex", "0"); }
 
-            // move pane into content wrapper safely
-            this._contentElement.appendChild(pane);
-        }
+            panes.push(pane);
+        });
 
-        // the header row holds the tab list and, beside it, the tools that are not tabs: a
-        // tab list may hold nothing but tabs, so the toolbar sits next to it rather than in it
-        this._headerElement = document.createElement("div");
-        this._headerElement.className = "wx-tab-header";
-        this._toolsElement = document.createElement("div");
-        this._toolsElement.className = "wx-tab-tools";
-        this._headerElement.appendChild(this._navElement);
-        this._headerElement.appendChild(this._toolsElement);
+        const toolbar = children.find((node) => node.classList.contains("wx-tab-toolbar")) || null;
 
-        // find and append toolbar if it exists
-        const toolbarElement = el.querySelector(":scope > .wx-tab-toolbar");
-        if (toolbarElement) {
-            this._toolbarCtrl = new webexpress.webui.ToolbarCtrl(toolbarElement);
-
-            this._toolbarLi = document.createElement("div");
-            this._toolbarLi.className = "wx-tab-tools-item d-flex align-items-center";
-            this._toolbarLi.appendChild(toolbarElement);
-            this._toolsElement.appendChild(this._toolbarLi);
-        }
-
-        el.appendChild(this._headerElement);
-        el.appendChild(this._contentElement);
+        return { tabs: tabs, panes: panes, toolbar: toolbar };
     }
 
     /**
-     * Builds a tab header element.
-     * @param {Object} tab Tab model.
-     * @returns {HTMLElement} List item element.
+     * Gets the tabs, in their order.
+     * @returns {Array<object>} The tab models.
      */
-    _buildTabHeader(tab) {
-        const li = document.createElement("li");
-        li.className = "nav-item";
-        li.setAttribute("role", "presentation");
+    get _tabs() {
+        return this.state.tabs;
+    }
 
-        const btn = document.createElement("button");
-        btn.className = "nav-link";
-        btn.type = "button";
-        btn.id = tab.id + "-tab";
-        btn.setAttribute("role", "tab");
-        btn.setAttribute("aria-controls", tab.id);
-        btn.setAttribute("aria-selected", "false");
-        // one tab stop for the list; the arrow keys walk the tabs
-        btn.setAttribute("tabindex", "-1");
-        btn.dataset.tabId = tab.id;
+    /**
+     * Gets the id of the selected tab.
+     * @returns {string|null} The id, or null without tabs.
+     */
+    get _activeTabId() {
+        return this.state.activeTabId;
+    }
+
+    /**
+     * Renders the control the first time and selects the remembered tab, or the first.
+     */
+    _open() {
+        this.mount();
+
+        const tabs = this.state.tabs;
+        if (tabs.length > 0) {
+            const stored = webexpress.webui.LocalStorage.getItem(this._storageKey);
+            this.selectTab(tabs.some(tab => tab.id === stored) ? stored : tabs[0].id);
+        }
+    }
+
+    /**
+     * Describes the control: the header row with the tab list and the tools beside it,
+     * and the pane host. A tab list may hold nothing but tabs, so the tools sit next to
+     * it rather than in it.
+     * @param {object} state The current state.
+     * @returns {Array<object>} The virtual node tree of the host.
+     */
+    render(state) {
+        const h = webexpress.webui.h;
+
+        return [
+            h("div", { key: "header", class: this._headerClass(), ref: (el) => { this._headerElement = el; } },
+                h("ul", {
+                    key: "nav",
+                    class: this._navClass(),
+                    role: "tablist",
+                    ref: (el) => { this._navElement = el; },
+                    on: { keydown: this._onNavKeyDown }
+                }, state.tabs.map((tab) => this._renderTabHeader(state, tab))),
+                h("div", { key: "tools", class: "wx-tab-tools", ref: (el) => { this._toolsElement = el; } },
+                    this._renderTools(state)),
+                this._renderHeaderExtras(state)),
+            h("div", { key: "content", class: this._contentClass(), ref: (el) => { this._contentElement = el; } },
+                state.tabs.map((tab) => this._renderPane(state, tab)),
+                this._renderContentExtras(state))
+        ];
+    }
+
+    /**
+     * Gets the classes of the header row.
+     * @returns {string} The css classes.
+     */
+    _headerClass() {
+        return "wx-tab-header";
+    }
+
+    /**
+     * Gets the classes of the tab list, which carry the layout.
+     * @returns {string} The css classes.
+     */
+    _navClass() {
+        if (this._layout === "underline") {
+            return "nav wx-tab-nav nav-underline";
+        }
+        return this._layout === "pill" ? "nav wx-tab-nav nav-pills" : "nav wx-tab-nav nav-tabs";
+    }
+
+    /**
+     * Gets the classes of the pane host.
+     * @returns {string} The css classes.
+     */
+    _contentClass() {
+        // horizontal padding only: the vertical one belongs to the stylesheet, where it
+        // can be tuned per edge. as a p-3 utility it carried !important and no rule
+        // could reach it
+        return this._layout === "default" || this._layout === "tab"
+            ? "tab-content wx-tab-content px-3 border border-top-0"
+            : "tab-content wx-tab-content px-3";
+    }
+
+    /**
+     * Describes the header of one tab.
+     * @param {object} state The current state.
+     * @param {object} tab The tab model.
+     * @returns {object} The list item virtual node.
+     */
+    _renderTabHeader(state, tab) {
+        const h = webexpress.webui.h;
+        const active = tab.id === state.activeTabId;
+        const item = this._tabItemProps(state, tab) || {};
+        const link = this._tabLinkProps(state, tab) || {};
+        const dataset = { tabId: tab.id };
 
         // map custom action attributes if present
         if (tab.primaryAction !== null) {
-            btn.dataset.wxPrimaryAction = tab.primaryAction;
+            dataset.wxPrimaryAction = tab.primaryAction;
         }
-
         if (tab.primaryTarget !== null) {
-            btn.dataset.wxPrimaryTarget = tab.primaryTarget;
+            dataset.wxPrimaryTarget = tab.primaryTarget;
         }
 
-        // append icon if configured
-        if (tab.icon !== null) {
-            const iconEl = document.createElement("i");
-            iconEl.className = tab.icon + " me-2";
-            if (tab.color !== null) {
-                iconEl.classList.add(tab.color);
-            }
-            btn.appendChild(iconEl);
-        }
-
-        // append label text
-        if (tab.label !== "") {
-            tab.labelNode = document.createTextNode(tab.label);
-            btn.appendChild(tab.labelNode);
-        }
-
-        // append the trailing badge if configured; a color class or an inline
-        // style overrides the neutral default
-        if (tab.badge !== null && tab.badge !== "") {
-            const badgeEl = document.createElement("span");
-            badgeEl.className = "wx-tab-badge badge";
-            if (tab.badgeColor !== null) {
-                badgeEl.classList.add(...String(tab.badgeColor).split(/\s+/).filter(Boolean));
-            }
-            if (tab.badgeStyle !== null) {
-                badgeEl.style.cssText = tab.badgeStyle;
-            }
-            badgeEl.textContent = tab.badge;
-            btn.appendChild(badgeEl);
-        }
-
-        // attach event listener for tab switching
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            this.selectTab(tab.id);
-        });
-
-        li.appendChild(btn);
-
-        return li;
+        return h("li", Object.assign({}, item, {
+            key: tab.id,
+            class: ["nav-item"].concat(item.class || []),
+            role: "presentation"
+        }),
+            h("button", Object.assign({}, link, {
+                class: ["nav-link", active && "active"],
+                type: "button",
+                id: tab.id + "-tab",
+                role: "tab",
+                "aria-controls": tab.id,
+                "aria-selected": active ? "true" : "false",
+                // one tab stop for the list; the arrow keys walk the tabs
+                tabindex: active ? "0" : "-1",
+                dataset: dataset,
+                on: Object.assign({}, link.on, {
+                    click: this._handler("select", tab.id, () => (e) => {
+                        e.preventDefault();
+                        this.selectTab(tab.id);
+                    })
+                })
+            }),
+                this._tabLinkLead(state, tab),
+                tab.icon !== null && h("i", { key: "icon", class: [tab.icon, "me-2", tab.color] }),
+                tab.label !== "" ? tab.label : null,
+                // a color class or an inline style overrides the neutral default
+                tab.badge !== null && tab.badge !== "" && h("span", {
+                    key: "badge",
+                    class: ["wx-tab-badge badge"].concat(String(tab.badgeColor || "").split(/\s+/)),
+                    style: tab.badgeStyle || ""
+                }, tab.badge)),
+            this._tabItemTail(state, tab));
     }
 
     /**
-     * Selects a tab by its id and updates the dom.
+     * Gets further props of a tab header list item; the classes are added to its own.
+     * @param {object} state The current state.
+     * @param {object} tab The tab model.
+     * @returns {object|null} The props, or null for none.
+     */
+    _tabItemProps(state, tab) {
+        return null;
+    }
+
+    /**
+     * Gets further props of a tab button; its listeners are added to the selection.
+     * @param {object} state The current state.
+     * @param {object} tab The tab model.
+     * @returns {object|null} The props, or null for none.
+     */
+    _tabLinkProps(state, tab) {
+        return null;
+    }
+
+    /**
+     * Gets the content a tab button shows ahead of its icon and label.
+     * @param {object} state The current state.
+     * @param {object} tab The tab model.
+     * @returns {*} Virtual nodes, or null for none.
+     */
+    _tabLinkLead(state, tab) {
+        return null;
+    }
+
+    /**
+     * Gets the content a tab header list item shows behind its button.
+     * @param {object} state The current state.
+     * @param {object} tab The tab model.
+     * @returns {*} Virtual nodes, or null for none.
+     */
+    _tabItemTail(state, tab) {
+        return null;
+    }
+
+    /**
+     * Describes the tools beside the tab list: the authored toolbar.
+     * @param {object} state The current state.
+     * @returns {Array<object>} The tool items.
+     */
+    _renderTools(state) {
+        if (this._toolbarElement === null) {
+            return [];
+        }
+
+        return [webexpress.webui.h("div", { key: "toolbar", class: "wx-tab-tools-item d-flex align-items-center" },
+            webexpress.webui.Renderer.adopt(this._toolbarElement))];
+    }
+
+    /**
+     * Describes what the header row holds besides the tab list and the tools.
+     * @param {object} state The current state.
+     * @returns {*} Virtual nodes, or null for none.
+     */
+    _renderHeaderExtras(state) {
+        return null;
+    }
+
+    /**
+     * Describes what the pane host holds besides the panes.
+     * @param {object} state The current state.
+     * @returns {*} Virtual nodes, or null for none.
+     */
+    _renderContentExtras(state) {
+        return null;
+    }
+
+    /**
+     * Places the pane of a tab, marked when it is the active one.
+     * @param {object} state The current state.
+     * @param {object} tab The tab model.
+     * @returns {object|null} The adopting virtual node, or null without a pane.
+     */
+    _renderPane(state, tab) {
+        const pane = this._panes.get(tab.id);
+        if (!pane) {
+            return null;
+        }
+
+        const classes = this._paneClasses.get(tab.id) || "tab-pane fade";
+        return webexpress.webui.Renderer.adopt(pane, {
+            class: tab.id === state.activeTabId ? classes + " show active" : classes
+        });
+    }
+
+    /**
+     * Selects a tab by its id. A listener of the selection may measure the pane it was
+     * told about, so the selection is rendered before it is announced.
      * @param {string} tabId The id of the tab to select.
      */
     selectTab(tabId) {
         // prevent redundant updates
-        if (this._activeTabId === tabId || !this._tabs.some(tab => tab.id === tabId)) {
+        if (this.state.activeTabId === tabId || !this.state.tabs.some(tab => tab.id === tabId)) {
             return;
         }
 
-        this._activeTabId = tabId;
         webexpress.webui.LocalStorage.setItem(this._storageKey, tabId);
-
-        // update active state on navigation links
-        const navLinks = this._navElement.querySelectorAll(".nav-link");
-
-        for (let i = 0; i < navLinks.length; i++) {
-            const link = navLinks[i];
-
-            if (link.dataset.tabId === tabId) {
-                link.classList.add("active");
-                link.setAttribute("aria-selected", "true");
-                link.setAttribute("tabindex", "0");
-            } else {
-                link.classList.remove("active");
-                link.setAttribute("aria-selected", "false");
-                link.setAttribute("tabindex", "-1");
-            }
-        }
-
-        // update active state on content panes
-        for (let i = 0; i < this._tabs.length; i++) {
-            const pane = this._tabs[i].paneElement;
-
-            if (pane.id === tabId) {
-                pane.classList.add("show", "active");
-            } else {
-                pane.classList.remove("show", "active");
-            }
+        this.setState({ activeTabId: tabId });
+        if (this._mounted) {
+            this._store.flush();
         }
 
         this._dispatchTabSelectedEvent(tabId);
     }
 
     /**
-     * Changes the label of a tab in the model and in its header. The header knows
-     * where it put the label, so subclasses rename through here instead of
-     * searching the header markup for it.
+     * Changes the label of a tab.
      * @param {string} tabId The id of the tab to relabel.
      * @param {string} label The new label.
      * @returns {boolean} Whether the tab exists.
      */
     setTabLabel(tabId, label) {
-        const tab = this._tabs.find(item => item.id === tabId);
-        if (!tab) {
+        if (!this.state.tabs.some(item => item.id === tabId)) {
             return false;
         }
 
-        tab.label = label;
-
-        if (tab.labelNode) {
-            tab.labelNode.textContent = label;
-            return true;
-        }
-
-        // a tab created without a label has no text node yet; it belongs ahead of the badge
-        const btn = Array.from(this._navElement.querySelectorAll(".nav-link")).find(link => link.dataset.tabId === tabId);
-        if (btn) {
-            tab.labelNode = document.createTextNode(label);
-            btn.insertBefore(tab.labelNode, btn.querySelector(".wx-tab-badge"));
-        }
-
+        this.setState({ tabs: this.state.tabs.map((tab) => tab.id === tabId ? Object.assign({}, tab, { label: label }) : tab) });
         return true;
     }
 

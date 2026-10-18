@@ -2,6 +2,8 @@
   href: index.md
 - name: WebExpress.WebUI
   href: webexpress.webui.md
+- name: StateCtrl and Renderer
+  href: state.md
 - name: Avatar
   href: avatar.md
 - name: Avatar Dropdown

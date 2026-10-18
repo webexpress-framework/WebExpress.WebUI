@@ -5,6 +5,12 @@
  * - Double-click edge: Add Waypoint
  * - Edge Creation: Shows preview arrow from source to mouse
  * - Edge Reconnect: Highlights target nodes on hover
+ *
+ * The editor renders through the hooks of the viewer, from the same state: the toolbar
+ * ahead of the canvas, the selection, hover and source marks of the nodes, the waypoints
+ * and the endpoint handles of the selected edge, the preview of an edge being drawn,
+ * the alignment guides of a drag and the dialogs. A discrete action - a click, a key,
+ * a menu command - renders at once; a gesture renders once per animation frame.
  */
 webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtrl {
     // the distance an Alt+arrow moves the selection; Shift narrows it to one
@@ -16,6 +22,9 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
 
     // a screen-space tolerance keeps alignment equally usable at every zoom
     static ALIGNMENT_TOLERANCE = 6;
+
+    // the colour of the edge being drawn, which marks it as not yet part of the graph
+    static PREVIEW_COLOR = "#ffc107";
 
     static ARROW_DIRECTIONS = {
         ArrowLeft: { x: -1, y: 0 },
@@ -36,192 +45,124 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         // editor no way to give it a height of its own
         element.classList.add("wx-graph-editor");
 
-        // toolbar
-        this._toolbarContainer = document.createElement("div");
-        this._toolbarContainer.className = "wx-graph-simple-toolbar";
+        this.setState({
+            selectedNode: null,
+            selectedEdge: null,
+            selectedWaypoint: null,
+            hoveredNode: null,
+            addEdge: false,
+            edgeSource: null,
+            endpointDrag: null,
+            preview: null,
+            guides: [],
+            dialog: null,
+            history: { undo: 0, redo: 0 }
+        });
 
-        if (this._svg && this._svg.parentNode === element) {
-            element.insertBefore(this._toolbarContainer, this._svg);
-        } else {
-            element.appendChild(this._toolbarContainer);
-        }
-
-        this._buildSimpleToolbar();
-
-        // history (Undo/Redo)
+        // each entry is the model as it was before one change; the model on screen is
+        // never on the stack, so a model a host loads later cannot be undone away
         this._undoStack = [];
         this._redoStack = [];
-        this._saveStateToHistory(true);
 
-        // editor state
         this._drag = null;
         this._dragSnapshot = null;
-        this._selectedEdgeId = null;
-        this._selectedNodeId = null;
-        this._selectedWaypointIndex = null;
-        this._hoveredNodeId = null;
-        this._isAddEdgeMode = false;
-        this._edgeSourceNode = null;
-        this._endpointDrag = null;
+        this._dialogToken = 0;
+        this._confirmAction = null;
 
-        // helper for the preview line
-        this._previewEdgePath = null;
+        this._addWindowListener("pointerup", (e) => this._onPointerUpGlobal(e));
+        this._addWindowListener("keydown", (e) => this._onKeyDown(e));
 
-        if (!this._waypointLayer) {
-            this._waypointLayer = this._createGroup("waypoints");
-            this._viewport.appendChild(this._waypointLayer);
+        if (new.target === webexpress.webui.GraphEditorCtrl) {
+            this._open();
         }
-
-        // preview layer for creating edges
-        this._previewLayer = this._createGroup("preview");
-        this._viewport.appendChild(this._previewLayer);
-
-        if (!this._handleLayer) {
-            this._handleLayer = this._createGroup("handles");
-            this._viewport.appendChild(this._handleLayer);
-        }
-        if (!this._markerLayer) {
-            this._markerLayer = this._createGroup("markers");
-            this._viewport.appendChild(this._markerLayer);
-        }
-
-        this._onPointerMoveBound = (e) => {
-            this._onPointerMove(e);
-        };
-        this._onPointerUpBound = (e) => {
-            this._onPointerUpGlobal(e);
-        };
-        this._onKeyDownBound = (e) => {
-            this._onKeyDown(e);
-        };
-
-        this._addElementListener(this._svg, "pointermove", this._onPointerMoveBound);
-        this._addWindowListener("pointerup", this._onPointerUpBound);
-        this._addWindowListener("keydown", this._onKeyDownBound);
-
-        this._addElementListener(this._svg, "click", (e) => {
-            const isNode = e.target.closest(".wx-graph-node");
-            const isWp = e.target.closest(".wx-workflow-waypoint");
-            const isHandle = e.target.closest(".wx-workflow-handle");
-            const isEdge = e.target.closest(".wx-workflow-edge");
-
-            if (isNode || isWp || isHandle || isEdge) {
-                return;
-            }
-
-            const handled = this._selectEdgeNear(e, 12);
-            if (!handled) {
-                this._deselectAll();
-                if (this._isAddEdgeMode) {
-                    this._resetAddEdgeMode();
-                }
-            }
-        });
-
-        this._addElementListener(this._svg, "dblclick", (e) => {
-            // check for node -> edit modal
-            const isNode = e.target.closest(".wx-graph-node");
-            if (isNode) {
-                const id = isNode.getAttribute("data-id");
-                this._selectedNodeId = id;
-                this._selectedEdgeId = null;
-                this._updateToolbarState();
-                this._openPropertiesModal();
-                return;
-            }
-
-            // check for waypoint -> do nothing (handled by context menu)
-            const isWp = e.target.closest(".wx-workflow-waypoint");
-            if (isWp) {
-                return;
-            }
-
-            // check for edge path element -> skip, handled by edge dblclick
-            const isEdgePath = e.target.closest(".wx-workflow-edge");
-            if (isEdgePath) {
-                return;
-            }
-
-            // check for edge (click near) -> add waypoint
-            const local = this._toLocalSafe(e);
-            const near = this._nearestEdgeAt(local.x, local.y, 12);
-            if (near && near.edge) {
-                this._saveStateToHistory();
-                this._selectedEdgeId = this._edgeId(near.edge, -1);
-                this._selectedNodeId = null;
-
-                const a = near.a;
-                const b = near.b;
-                const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
-
-                near.edge.waypoints = Array.isArray(near.edge.waypoints) ? near.edge.waypoints : [];
-                const insertAt = Math.min(Math.max(near.index, 0), near.edge.waypoints.length);
-                near.edge.waypoints.splice(insertAt, 0, mid);
-
-                this.render();
-                this._updateToolbarState();
-                this._emitChangeSafe();
-            } else {
-                // background -> add node
-                this._addNode();
-            }
-        });
-
-        // re-render now that the editor is fully initialized
-        this.render();
     }
 
+    // the editing state lives in the state; the accessors keep the field api the
+    // subclasses and the hosts use
+
+    get _selectedNodeId() { return this.state.selectedNode ?? null; }
+    set _selectedNodeId(value) { this.setState({ selectedNode: value ?? null }); }
+
+    get _selectedEdgeId() { return this.state.selectedEdge ?? null; }
+    set _selectedEdgeId(value) { this.setState({ selectedEdge: value ?? null }); }
+
+    get _selectedWaypointIndex() { return this.state.selectedWaypoint ?? null; }
+    set _selectedWaypointIndex(value) { this.setState({ selectedWaypoint: value ?? null }); }
+
+    get _hoveredNodeId() { return this.state.hoveredNode ?? null; }
+    set _hoveredNodeId(value) { this.setState({ hoveredNode: value ?? null }); }
+
+    get _isAddEdgeMode() { return !!this.state.addEdge; }
+    set _isAddEdgeMode(value) { this.setState({ addEdge: !!value }); }
+
+    get _edgeSourceNode() { return this.state.edgeSource ?? null; }
+    set _edgeSourceNode(value) { this.setState({ edgeSource: value ?? null }); }
+
+    get _endpointDrag() { return this.state.endpointDrag ?? null; }
+    set _endpointDrag(value) { this.setState({ endpointDrag: value ?? null }); }
+
     /**
-     * Converts a pointer event to local SVG coordinates with fallback.
+     * Converts a pointer event to local SVG coordinates.
      * @param {PointerEvent|MouseEvent} e - the pointer event
      * @returns {{x: number, y: number}} local coordinates
      */
     _toLocalSafe(e) {
-        if (typeof this._toLocal === "function") {
-            return this._toLocal(e);
-        }
-        // fallback: manual calculation from pan and scale
-        const rect = this._svg.getBoundingClientRect();
-        return {
-            x: (e.clientX - rect.left - (this._pan ? this._pan.x : 0)) / (this._scale || 1),
-            y: (e.clientY - rect.top - (this._pan ? this._pan.y : 0)) / (this._scale || 1)
-        };
+        return this._toLocal(e);
     }
 
+    // ------------------------------------------------------------------ history
+
     /**
-     * Saves the current model state to the undo history stack.
-     * @param {boolean} [initial=false] - whether this is the initial snapshot
+     * Records the model as it is before a change, so one undo takes back exactly that
+     * change. Every caller saves ahead of its mutation.
      */
-    _saveStateToHistory(initial = false) {
-        // trim before the push, so the stack never exceeds the limit; testing
-        // with > after the push would keep one entry too many
-        while (this._undoStack.length >= webexpress.webui.GraphEditorCtrl.HISTORY_LIMIT) {
-            this._undoStack.shift();
-        }
-
-        this._syncModelPositions();
-
-        const snapshot = JSON.parse(JSON.stringify(this._model));
-        this._undoStack.push(snapshot);
-        if (!initial) {
-            this._redoStack = [];
-        }
+    _saveStateToHistory() {
+        this._pushHistory(this._undoStack, this._snapshot());
+        this._redoStack = [];
         this._updateToolbarState();
     }
 
     /**
-     * Restores the previous model state from the undo stack.
+     * Copies the model with the positions the simulation and the gestures gave it.
+     * @returns {object} The detached copy.
+     */
+    _snapshot() {
+        this._syncModelPositions();
+        return JSON.parse(JSON.stringify(this._model));
+    }
+
+    /**
+     * Pushes a snapshot onto a history stack within the limit.
+     * @param {Array<object>} stack - The undo or the redo stack.
+     * @param {object} snapshot - The model copy.
+     */
+    _pushHistory(stack, snapshot) {
+        // trim before the push, so the stack never exceeds the limit; testing
+        // with > after the push would keep one entry too many
+        while (stack.length >= webexpress.webui.GraphEditorCtrl.HISTORY_LIMIT) {
+            stack.shift();
+        }
+        stack.push(snapshot);
+    }
+
+    /**
+     * Restores the model as it was before the last change.
      */
     _undo() {
-        if (this._undoStack.length <= 1) {
+        if (this._undoStack.length === 0) {
             return;
         }
 
-        const current = this._undoStack.pop();
-        this._redoStack.push(current);
+        this._pushHistory(this._redoStack, this._snapshot());
+        this._restoreSnapshot(this._undoStack.pop());
+    }
 
-        const prev = this._undoStack[this._undoStack.length - 1];
-        this._model = JSON.parse(JSON.stringify(prev));
+    /**
+     * Puts a snapshot from the history in place of the model and announces the change.
+     * @param {object} snapshot - The model copy.
+     */
+    _restoreSnapshot(snapshot) {
+        this._model = snapshot;
         this._buildPhysics();
         this._pruneSelection();
         this.render();
@@ -261,16 +202,11 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             return;
         }
 
-        const next = this._redoStack.pop();
-        this._undoStack.push(next);
-
-        this._model = JSON.parse(JSON.stringify(next));
-        this._buildPhysics();
-        this._pruneSelection();
-        this.render();
-        this._updateToolbarState();
-        this._emitChangeSafe();
+        this._pushHistory(this._undoStack, this._snapshot());
+        this._restoreSnapshot(this._redoStack.pop());
     }
+
+    // ------------------------------------------------------------------ toolbar
 
     /**
      * The toolbar actions this editor offers, in order; "|" is a separator.
@@ -286,145 +222,646 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
     }
 
     /**
-     * Builds the simple toolbar with all editor action buttons.
+     * Describes the toolbar ahead of the canvas. Fitting and centring are view actions,
+     * not model actions; they live on the canvas itself (lower left), so no key is
+     * offered for them here.
+     * @param {object} state - The state.
+     * @returns {object} The toolbar virtual node.
      */
-    _buildSimpleToolbar() {
-        /**
-         * Creates a toolbar button element.
-         * @param {string} id - button id
-         * @param {string} iconClass - CSS icon class
-         * @param {string} title - tooltip text
-         * @param {Function} action - click handler
-         * @param {boolean} [isToggle=false] - whether the button toggles
-         * @returns {HTMLButtonElement} the created button
-         */
-        const createBtn = (id, iconClass, title, action, isToggle = false) => {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "wx-simple-btn";
-            btn.title = title;
-            btn.id = id;
-            btn.innerHTML = `<i class="${iconClass}"></i>`;
-            btn.onclick = (e) => {
-                e.stopPropagation();
-                if (isToggle) {
-                    btn.classList.toggle("active");
+    _renderBeforeCanvas(state) {
+        const h = webexpress.webui.h;
+        const hasSelection = !!state.selectedNode || !!state.selectedEdge;
+        const canUndo = state.history.undo > 0;
+        const canRedo = state.history.redo > 0;
+
+        const button = (key, id, icon, title, action, options = {}) => h("button", {
+            key: key,
+            type: "button",
+            class: "wx-simple-btn" + (options.active ? " active" : ""),
+            title: title,
+            id: id,
+            disabled: !!options.disabled,
+            style: options.style || null,
+            on: this._handler("toolbar", key, () => ({
+                click: (e) => {
+                    e.stopPropagation();
+                    action();
                 }
-                action(btn);
-            };
-            this._toolbarContainer.appendChild(btn);
-            return btn;
-        };
+            })),
+            ref: options.ref || null
+        }, h("i", { class: icon }));
 
-        /**
-         * Creates a visual separator in the toolbar.
-         */
-        const createSep = () => {
-            const sep = document.createElement("div");
-            sep.className = "wx-simple-sep";
-            this._toolbarContainer.appendChild(sep);
-        };
+        const dim = (enabled, pointer) => pointer
+            ? { opacity: enabled ? "1" : "0.5", cursor: enabled ? "pointer" : "default" }
+            : { opacity: enabled ? "1" : "0.5" };
 
-        // fitting and centring are view actions, not model actions; they live on
-        // the canvas itself (lower left), so no key is offered for them here
         const builders = {
-            "undo": () => {
-                this._btnUndo = createBtn("btn-undo", this._iconClass("undo"),
-                    this._i18n("webexpress.webui:graph.undo", "Undo"), () => this._undo());
-            },
-            "redo": () => {
-                this._btnRedo = createBtn("btn-redo", this._iconClass("redo"),
-                    this._i18n("webexpress.webui:graph.redo", "Redo"), () => this._redo());
-            },
-            "add-node": () => {
-                createBtn("btn-add-node", "circle-plus",
-                    this._i18n("webexpress.webui:graph.add.node", "Add Node"), () => {
-                        this._addNode();
-                        if (this._isAddEdgeMode) {
-                            this._resetAddEdgeMode();
-                        }
-                    });
-            },
-            "add-edge": () => {
-                this._btnEdgeMode = createBtn("btn-add-edge", this._iconClass("share"),
-                    this._i18n("webexpress.webui:graph.add.edge", "Add Edge (Toggle)"), () => {
-                        this._toggleAddEdgeMode(!this._isAddEdgeMode);
-                    }, true);
-            },
-            "edit": () => {
-                this._btnEdit = createBtn("btn-edit", this._iconClass("pen"),
-                    this._i18n("webexpress.webui:graph.edit.properties", "Edit Properties"), () => {
-                        this._openPropertiesModal();
-                    });
-                this._btnEdit.disabled = true;
-            },
-            "delete": () => {
-                this._btnDelete = createBtn("btn-delete", this._iconClass("trash"),
-                    this._i18n("webexpress.webui:graph.delete.selected", "Delete Selected"), () => {
-                        this._requestDelete();
-                    });
-                this._btnDelete.disabled = true;
-            },
-            "export": () => {
-                createBtn("btn-export", "file-export",
-                    this._i18n("webexpress.webui:graph.export.svg", "Export SVG"), () => this.exportSvg());
-            }
+            "undo": () => button("undo", "btn-undo", this._iconClass("undo"),
+                this._i18n("webexpress.webui:graph.undo", "Undo"), () => this._undo(),
+                { disabled: !canUndo, style: dim(canUndo, false), ref: (el) => { this._btnUndo = el; } }),
+            "redo": () => button("redo", "btn-redo", this._iconClass("redo"),
+                this._i18n("webexpress.webui:graph.redo", "Redo"), () => this._redo(),
+                { disabled: !canRedo, style: dim(canRedo, false), ref: (el) => { this._btnRedo = el; } }),
+            "add-node": () => button("add-node", "btn-add-node", this._iconClass("circle-plus"),
+                this._i18n("webexpress.webui:graph.add.node", "Add Node"), () => {
+                    this._addNode();
+                    if (this._isAddEdgeMode) {
+                        this._resetAddEdgeMode();
+                    }
+                }),
+            "add-edge": () => button("add-edge", "btn-add-edge", this._iconClass("share"),
+                this._i18n("webexpress.webui:graph.add.edge", "Add Edge (Toggle)"),
+                () => this._toggleAddEdgeMode(!this._isAddEdgeMode),
+                { active: !!state.addEdge, ref: (el) => { this._btnEdgeMode = el; } }),
+            "edit": () => button("edit", "btn-edit", this._iconClass("pen"),
+                this._i18n("webexpress.webui:graph.edit.properties", "Edit Properties"), () => this._openPropertiesModal(),
+                { disabled: !hasSelection, style: dim(hasSelection, true), ref: (el) => { this._btnEdit = el; } }),
+            "delete": () => button("delete", "btn-delete", this._iconClass("trash"),
+                this._i18n("webexpress.webui:graph.delete.selected", "Delete Selected"), () => this._requestDelete(),
+                { disabled: !hasSelection, style: dim(hasSelection, true), ref: (el) => { this._btnDelete = el; } }),
+            "export": () => button("export", "btn-export", this._iconClass("file-export"),
+                this._i18n("webexpress.webui:graph.export.svg", "Export SVG"), () => this.exportSvg())
         };
 
         const actions = this._toolbarActions();
-        actions.forEach((action, index) => {
+        const items = actions.map((action, index) => {
             if (action === "|") {
                 // a separator only earns its place between two actions that are
                 // actually present
                 const before = actions.slice(0, index).some(a => a !== "|" && builders[a]);
                 const after = actions.slice(index + 1).some(a => a !== "|" && builders[a]);
-                if (before && after) {
-                    createSep();
-                }
-                return;
+                return before && after ? h("div", { key: "sep" + index, class: "wx-simple-sep" }) : null;
             }
-            if (builders[action]) {
-                builders[action]();
-            }
+            return builders[action] ? builders[action]() : null;
         });
+
+        return h("div", {
+            key: "toolbar",
+            class: "wx-graph-simple-toolbar",
+            ref: (el) => { this._toolbarContainer = el; }
+        }, items, this._renderToolbarExtras(state));
     }
 
     /**
-     * Updates the enabled/disabled state and visual appearance of all toolbar buttons.
+     * Hook for subclasses to describe further items at the end of the toolbar.
+     * @param {object} state - The state.
+     * @returns {*} Virtual nodes, or null.
+     */
+    _renderToolbarExtras(state) {
+        return null;
+    }
+
+    /**
+     * Brings the toolbar up to date with the history and renders it at once; the
+     * selection and the mode it reflects are state of their own.
      */
     _updateToolbarState() {
-        const hasSelection = !!this._selectedNodeId || !!this._selectedEdgeId;
+        const history = { undo: this._undoStack.length, redo: this._redoStack.length };
+        const current = this.state.history;
+        if (!current || current.undo !== history.undo || current.redo !== history.redo) {
+            this.setState({ history: history });
+        }
+        this._store.flush();
+    }
 
-        if (this._btnEdit) {
-            this._btnEdit.disabled = !hasSelection;
-            this._btnEdit.style.opacity = hasSelection ? "1" : "0.5";
-            this._btnEdit.style.cursor = hasSelection ? "pointer" : "default";
+    // ------------------------------------------------------------------ canvas view
+
+    /**
+     * Adds the colour of the edge being drawn to the arrow markers.
+     * @param {object} state - The state.
+     * @returns {Array<string>} The colours.
+     */
+    _markerColors(state) {
+        return super._markerColors(state).concat([webexpress.webui.GraphEditorCtrl.PREVIEW_COLOR]);
+    }
+
+    /**
+     * Gets the cursor of the canvas: a crosshair while an edge is drawn.
+     * @param {object} state - The state.
+     * @returns {string} The cursor.
+     */
+    _canvasCursor(state) {
+        return state.addEdge ? "crosshair" : super._canvasCursor(state);
+    }
+
+    /**
+     * Returns the listeners of the canvas: the viewer's, and the background click,
+     * double click and pointer tracking of the editor.
+     * @returns {object} The listener map.
+     */
+    _svgHandlers() {
+        return this._handler("svg", "editor", () => Object.assign({}, super._svgHandlers(), {
+            pointermove: (e) => this._onPointerMove(e),
+            click: (e) => this._onCanvasClick(e),
+            dblclick: (e) => this._onCanvasDoubleClick(e)
+        }));
+    }
+
+    /**
+     * Selects the edge near a background click, or clears the selection.
+     * @param {MouseEvent} e - The click event.
+     */
+    _onCanvasClick(e) {
+        const isNode = e.target.closest(".wx-graph-node");
+        const isWp = e.target.closest(".wx-workflow-waypoint");
+        const isHandle = e.target.closest(".wx-workflow-handle");
+        const isEdge = e.target.closest(".wx-workflow-edge");
+
+        if (isNode || isWp || isHandle || isEdge) {
+            return;
         }
 
-        if (this._btnDelete) {
-            this._btnDelete.disabled = !hasSelection;
-            this._btnDelete.style.opacity = hasSelection ? "1" : "0.5";
-            this._btnDelete.style.cursor = hasSelection ? "pointer" : "default";
-        }
-
-        if (this._btnEdgeMode) {
+        const handled = this._selectEdgeNear(e, 12);
+        if (!handled) {
+            this._deselectAll();
             if (this._isAddEdgeMode) {
-                this._btnEdgeMode.classList.add("active");
+                this._resetAddEdgeMode();
+            }
+        }
+    }
+
+    /**
+     * Adds a waypoint to the edge near a background double click, or a node where no
+     * edge is near.
+     * @param {MouseEvent} e - The double click event.
+     */
+    _onCanvasDoubleClick(e) {
+        // a node and an edge answer their own double click
+        if (e.target.closest(".wx-graph-node") || e.target.closest(".wx-workflow-waypoint") || e.target.closest(".wx-workflow-edge")) {
+            return;
+        }
+
+        const local = this._toLocalSafe(e);
+        const near = this._nearestEdgeAt(local.x, local.y, 12);
+        if (near && near.edge) {
+            this._saveStateToHistory();
+            this._selectedEdgeId = this._edgeId(near.edge, -1);
+            this._selectedNodeId = null;
+
+            const a = near.a;
+            const b = near.b;
+            const mid = { x: (a.x + b.x) / 2, y: (a.y + b.y) / 2 };
+
+            near.edge.waypoints = Array.isArray(near.edge.waypoints) ? near.edge.waypoints : [];
+            const insertAt = Math.min(Math.max(near.index, 0), near.edge.waypoints.length);
+            near.edge.waypoints.splice(insertAt, 0, mid);
+
+            this.render();
+            this._updateToolbarState();
+            this._emitChangeSafe();
+        } else {
+            this._addNode();
+        }
+    }
+
+    /**
+     * Marks the selected node, the source of an edge being drawn and the node an edge
+     * end is about to land on.
+     * @param {object} state - The state.
+     * @param {object} n - The node.
+     * @returns {Array<string>} The classes.
+     */
+    _nodeClasses(state, n) {
+        return [
+            n.id === state.selectedNode && "wx-graph-node-selected",
+            state.addEdge && n.id === state.edgeSource && "wx-graph-node-source",
+            n.id === state.hoveredNode && "wx-graph-node-hover"
+        ].filter(Boolean);
+    }
+
+    /**
+     * Returns the listeners of a node: a press starts a move, a click selects it or
+     * connects it while an edge is drawn, a double click opens its properties.
+     * @param {string} id - The node id.
+     * @returns {object} The listener map.
+     */
+    _nodeHandlers(id) {
+        return this._handler("editorNode", id, () => ({
+            pointerdown: (e) => {
+                if (this._isAddEdgeMode) {
+                    return;
+                }
+                e.stopPropagation();
+                const n = this._nodeById(id);
+                if (!n) {
+                    return;
+                }
+                const p = this._toLocalSafe(e);
+
+                this._dragSnapshot = JSON.stringify(this._model);
+                this._drag = {
+                    type: "node",
+                    id: n.id,
+                    startX: p.x,
+                    startY: p.y,
+                    nodeStartX: n.x || 0,
+                    nodeStartY: n.y || 0,
+                    pointerId: e.pointerId,
+                    hasMoved: false
+                };
+                this._selectedNodeId = n.id;
+                this._selectedEdgeId = null;
+                const target = e.currentTarget || e.target;
+                try {
+                    target.setPointerCapture(e.pointerId);
+                } catch (err) {
+                    // pointer capture may not be supported
+                }
+                this.render();
+                this._updateToolbarState();
+                this._attachDragListeners(target);
+            },
+            click: (e) => {
+                e.stopPropagation();
+                if (this._isAddEdgeMode) {
+                    if (this._edgeSourceNode === null) {
+                        this._edgeSourceNode = id;
+                    } else if (this._edgeSourceNode !== id) {
+                        const source = this._edgeSourceNode;
+                        this._edgeSourceNode = null;
+                        this._createEdgeAndEmit(source, id);
+                    } else {
+                        // clicked same node -> deselect source
+                        this._edgeSourceNode = null;
+                    }
+                    this.setState({ preview: null, hoveredNode: null });
+                    this.render();
+                    return;
+                }
+                this._selectedNodeId = id;
+                this._selectedEdgeId = null;
+                this.render();
+                this._updateToolbarState();
+            },
+            dblclick: (e) => {
+                e.stopPropagation();
+                if (this._isAddEdgeMode) {
+                    return;
+                }
+                this._selectedNodeId = id;
+                this._selectedEdgeId = null;
+                this._updateToolbarState();
+                this._openPropertiesModal();
+            }
+        }));
+    }
+
+    /**
+     * Gets the key of an edge, which is also its id on the canvas.
+     * @param {object} t - The edge.
+     * @param {number} index - The position of the edge in the model.
+     * @returns {string} The key.
+     */
+    _edgeKey(t, index) {
+        return this._edgeId(t, index);
+    }
+
+    /**
+     * Gets the points an edge is drawn through; the edge whose end is being dragged runs
+     * to the pointer.
+     * @param {object} state - The state.
+     * @param {Map<string, object>} placed - The nodes at their rendered positions.
+     * @param {object} t - The edge.
+     * @returns {Array<{x: number, y: number}>|null} The points.
+     */
+    _edgeRenderPoints(state, placed, t) {
+        const drag = state.endpointDrag;
+        const src = placed.get(t.from);
+        const dst = placed.get(t.to);
+
+        if (drag && drag.edgeId === (t.id || "")) {
+            const draggingFrom = drag.which === "from";
+            const startPoint = draggingFrom ? drag.current : (src ? { x: src.x, y: src.y } : { x: 0, y: 0 });
+            const endPoint = draggingFrom ? (dst ? { x: dst.x, y: dst.y } : { x: 0, y: 0 }) : drag.current;
+            const pts = [startPoint].concat(Array.isArray(t.waypoints) ? t.waypoints : [], [endPoint]);
+            if (draggingFrom && dst) {
+                pts[pts.length - 1] = this._nodeEdgePoint(dst, pts[pts.length - 2]);
+            } else if (!draggingFrom && src) {
+                pts[0] = this._nodeEdgePoint(src, pts[1]);
+            }
+            return pts;
+        }
+
+        if (!src || !dst) {
+            return null;
+        }
+        return this._edgePointsWithWaypoints(src, dst, t.waypoints || [], 0);
+    }
+
+    /**
+     * Marks an edge as one the editor works on and gives it its listeners.
+     * @param {object} state - The state.
+     * @param {object} t - The edge.
+     * @param {string} id - The edge key.
+     * @returns {object} The props.
+     */
+    _edgeProps(state, t, id) {
+        return {
+            class: ["wx-graph-viewer-edge wx-workflow-edge", t.colorCss].filter(Boolean).join(" "),
+            "data-selected": id === state.selectedEdge ? "true" : null,
+            on: this._handler("edge", id, () => ({
+                click: (e) => {
+                    e.stopPropagation();
+                    if (this._selectedEdgeId === id) {
+                        this._selectedEdgeId = null;
+                    } else {
+                        this._selectedEdgeId = id;
+                        this._selectedNodeId = null;
+                    }
+                    this.setState({ endpointDrag: null, hoveredNode: null });
+                    this.render();
+                    this._updateToolbarState();
+                },
+                dblclick: (e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    const edge = this._model.edges.find((candidate, index) => this._edgeId(candidate, index) === id);
+                    if (!edge) {
+                        return;
+                    }
+                    this._saveStateToHistory();
+                    this._selectedEdgeId = id;
+                    this._selectedNodeId = null;
+                    this._insertWaypointAtMid(edge, e);
+                }
+            }))
+        };
+    }
+
+    /**
+     * Tells whether edge labels are drawn; the editor shows its edges unlabelled.
+     * @returns {boolean} False.
+     */
+    _showsEdgeLabels() {
+        return false;
+    }
+
+    /**
+     * Describes the layers above the nodes: the waypoints and the endpoint handles of
+     * the selected edge, the preview of an edge being drawn and the alignment guides of
+     * a drag. Handles and waypoints keep their size on screen at every zoom.
+     * @param {object} state - The state.
+     * @param {Map<string, object>} placed - The nodes at their rendered positions.
+     * @returns {Array<object>} The layer virtual nodes.
+     */
+    _renderOverlays(state, placed) {
+        const h = webexpress.webui.h;
+        const inv = 1 / (state.view.scale || 1);
+
+        return [
+            h("g", { key: "waypoints", "data-layer": "waypoints", ref: (el) => { this._waypointLayer = el; } },
+                this._renderWaypoints(state, inv)),
+            h("g", { key: "preview", "data-layer": "preview", ref: (el) => { this._previewLayer = el; } },
+                state.preview && h("path", {
+                    key: "edge",
+                    class: "wx-graph-preview-edge",
+                    d: this._arrowPathData(state.preview),
+                    "marker-end": this._ensureArrowMarker(webexpress.webui.GraphEditorCtrl.PREVIEW_COLOR),
+                    fill: "none"
+                })),
+            h("g", { key: "handles", "data-layer": "handles", ref: (el) => { this._handleLayer = el; } },
+                this._renderHandles(state, placed, inv)),
+            h("g", { key: "markers", "data-layer": "markers", ref: (el) => { this._markerLayer = el; } }),
+            h("g", {
+                key: "alignment",
+                "data-layer": "alignment",
+                "pointer-events": "none",
+                "aria-hidden": "true",
+                ref: (el) => { this._alignmentLayer = el; }
+            }, state.guides.map((guide, index) => h("line", Object.assign({ key: "guide" + index, class: "wx-graph-alignment-guide" }, guide))))
+        ];
+    }
+
+    /**
+     * Describes the waypoint circles of the selected edge.
+     * @param {object} state - The state.
+     * @param {number} inv - The inverse of the zoom.
+     * @returns {Array<object>} The waypoint virtual nodes.
+     */
+    _renderWaypoints(state, inv) {
+        const h = webexpress.webui.h;
+        const edgeId = state.selectedEdge;
+        if (!edgeId) {
+            return [];
+        }
+        const edge = state.model.edges.find((t, index) => this._edgeId(t, index) === edgeId);
+        if (!edge || !Array.isArray(edge.waypoints)) {
+            return [];
+        }
+
+        return edge.waypoints.map((wp, index) => h("circle", {
+            key: edgeId + "/" + index,
+            class: "wx-workflow-waypoint" + (index === state.selectedWaypoint ? " wx-workflow-waypoint-selected" : ""),
+            cx: wp.x,
+            cy: wp.y,
+            r: 5 * inv,
+            style: { strokeWidth: 2 * inv + "px" },
+            "data-edge": edgeId,
+            "data-index": index,
+            on: this._handler("waypoint", edgeId + "/" + index, () => ({
+                pointerdown: (e) => this._beginWaypointDrag(edgeId, index, e),
+                contextmenu: (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const target = this._selectedEdge();
+                    if (!target || !target.waypoints[index]) {
+                        return;
+                    }
+                    this._saveStateToHistory();
+                    target.waypoints.splice(index, 1);
+                    this.render();
+                    this._emitChangeSafe();
+                }
+            }))
+        }));
+    }
+
+    /**
+     * Starts moving a waypoint.
+     * @param {string} edgeId - The id of the edge.
+     * @param {number} index - The index of the waypoint.
+     * @param {PointerEvent} e - The pointer event.
+     */
+    _beginWaypointDrag(edgeId, index, e) {
+        e.stopPropagation();
+        const edge = this._model.edges.find(t => (t.id || "") === edgeId);
+        const wp = edge && edge.waypoints ? edge.waypoints[index] : null;
+        if (!wp) {
+            return;
+        }
+        this._selectedWaypointIndex = index;
+        const p = this._toLocalSafe(e);
+        this._dragSnapshot = JSON.stringify(this._model);
+        this._drag = {
+            type: "waypoint",
+            edgeId: edgeId,
+            index: index,
+            startX: p.x,
+            startY: p.y,
+            wpStartX: wp.x,
+            wpStartY: wp.y,
+            pointerId: e.pointerId,
+            hasMoved: false
+        };
+        const target = e.currentTarget || e.target;
+        try {
+            target.setPointerCapture(e.pointerId);
+        } catch (err) {
+            // pointer capture may not be supported
+        }
+        this._attachDragListeners(target);
+    }
+
+    /**
+     * Describes the draggable endpoint handles of the selected edge.
+     * @param {object} state - The state.
+     * @param {Map<string, object>} placed - The nodes at their rendered positions.
+     * @param {number} inv - The inverse of the zoom.
+     * @returns {Array<object>} The handle virtual nodes.
+     */
+    _renderHandles(state, placed, inv) {
+        const h = webexpress.webui.h;
+        if (!state.selectedEdge) {
+            return [];
+        }
+        const t = state.model.edges.find(tr => (tr.id || "") === state.selectedEdge);
+        if (!t) {
+            return [];
+        }
+
+        let srcPos = null;
+        let dstPos = null;
+        const drag = state.endpointDrag;
+
+        if (drag && drag.edgeId === (t.id || "")) {
+            const src = placed.get(t.from);
+            const dst = placed.get(t.to);
+            if (drag.which === "from") {
+                srcPos = drag.current;
+                const ref = (t.waypoints && t.waypoints.length) ? t.waypoints[t.waypoints.length - 1] : srcPos;
+                dstPos = dst ? this._nodeEdgePoint(dst, ref) : { x: 0, y: 0 };
             } else {
-                this._btnEdgeMode.classList.remove("active");
+                dstPos = drag.current;
+                const ref = (t.waypoints && t.waypoints.length) ? t.waypoints[0] : dstPos;
+                srcPos = src ? this._nodeEdgePoint(src, ref) : { x: 0, y: 0 };
+            }
+        } else {
+            const pts = this._edgeRenderPoints(state, placed, t) || [];
+            if (pts.length > 0) {
+                srcPos = pts[0];
+                dstPos = pts[pts.length - 1];
             }
         }
 
-        if (this._btnUndo) {
-            const canUndo = this._undoStack.length > 1;
-            this._btnUndo.disabled = !canUndo;
-            this._btnUndo.style.opacity = canUndo ? "1" : "0.5";
+        const handle = (pt, which) => pt && h("circle", {
+            key: which,
+            class: "wx-workflow-handle handle-" + which,
+            cx: pt.x,
+            cy: pt.y,
+            r: 6 * inv,
+            style: { strokeWidth: 2 * inv + "px" },
+            on: this._handler("handle", which, () => ({
+                pointerdown: (e) => {
+                    e.stopPropagation();
+                    const edge = this._selectedEdge();
+                    if (!edge) {
+                        return;
+                    }
+                    const p = this._toLocalSafe(e);
+                    this._endpointDrag = { which: which, edgeId: edge.id || "", current: { x: p.x, y: p.y } };
+                    this.render();
+                    try {
+                        this._svg.setPointerCapture(e.pointerId);
+                    } catch (err) {
+                        // pointer capture may not be supported
+                    }
+                }
+            }))
+        });
+
+        return [handle(srcPos, "from"), handle(dstPos, "to")];
+    }
+
+    // ------------------------------------------------------------------ dialogs
+
+    /**
+     * Describes the open dialog, if any: a confirmation or the properties of the
+     * selected node or edge. The fields of the properties dialog are built into its body
+     * when it opens and kept there, because they carry what the user types and the
+     * colour controls of the framework.
+     * @param {object} state - The state.
+     * @returns {object|null} The dialog virtual node.
+     */
+    _renderAfterCanvas(state) {
+        const dialog = state.dialog;
+        if (!dialog) {
+            return null;
         }
-        if (this._btnRedo) {
-            const canRedo = this._redoStack.length > 0;
-            this._btnRedo.disabled = !canRedo;
-            this._btnRedo.style.opacity = canRedo ? "1" : "0.5";
+
+        const h = webexpress.webui.h;
+        const close = this._handler("dialog", "close", () => ({ click: () => this._closeDialog() }));
+
+        let body;
+        let footer;
+
+        if (dialog.kind === "confirm") {
+            body = h("div", { key: "body", class: "wx-graph-modal-body" }, h("p", null, dialog.message));
+            footer = [
+                h("button", { key: "cancel", class: "wx-simple-btn wx-graph-modal-btn", on: close },
+                    this._i18n("webexpress.webui:cancel", "Cancel")),
+                h("button", {
+                    key: "confirm",
+                    class: "wx-simple-btn wx-graph-modal-btn wx-graph-modal-btn--danger",
+                    on: this._handler("dialog", "confirm", () => ({
+                        click: () => {
+                            const action = this._confirmAction;
+                            this._closeDialog();
+                            if (action) {
+                                action();
+                            }
+                        }
+                    }))
+                }, this._i18n("webexpress.webui:delete", "Delete"))
+            ];
+        } else {
+            body = h("div", {
+                key: "fields" + dialog.token,
+                class: "wx-graph-modal-body",
+                keep: true,
+                ref: (el) => this._fillPropertiesDialog(el, dialog)
+            });
+            footer = [
+                h("button", { key: "cancel", class: "wx-simple-btn wx-graph-modal-btn", on: close },
+                    this._i18n("webexpress.webui:cancel", "Cancel")),
+                h("button", {
+                    key: "apply",
+                    class: "wx-simple-btn wx-graph-modal-btn wx-graph-modal-btn--primary",
+                    on: this._handler("dialog", "apply", () => ({ click: () => this._applyPropertiesDialog() }))
+                }, this._i18n("webexpress.webui:graph.apply", "Apply"))
+            ];
         }
+
+        // attached to the host so position: absolute works correctly
+        return h("div", { key: "dialog", class: "wx-graph-modal-backdrop" },
+            h("div", { class: "wx-graph-modal-dialog" },
+                h("div", { key: "header", class: "wx-graph-modal-header" },
+                    h("span", { key: "title" }, dialog.title),
+                    h("span", {
+                        key: "close",
+                        style: dialog.kind === "confirm" ? { cursor: "pointer" } : { cursor: "pointer", fontSize: "20px" },
+                        on: close
+                    }, "×")),
+                body,
+                h("div", { key: "footer", class: "wx-graph-modal-footer" }, footer)));
+    }
+
+    /**
+     * Closes the open dialog.
+     */
+    _closeDialog() {
+        this._confirmAction = null;
+        this.setState({ dialog: null });
+        this._store.flush();
     }
 
     /**
@@ -468,56 +905,9 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
      * @param {Function} onConfirm - callback when user confirms
      */
     _openConfirmationModal(title, message, onConfirm) {
-        const backdrop = document.createElement("div");
-        backdrop.className = "wx-graph-modal-backdrop";
-
-        const dialog = document.createElement("div");
-        dialog.className = "wx-graph-modal-dialog";
-
-        const header = document.createElement("div");
-        header.className = "wx-graph-modal-header";
-        const titleSpan = document.createElement("span");
-        titleSpan.textContent = title;
-        const closeIcon = document.createElement("span");
-        closeIcon.innerHTML = "&times;";
-        closeIcon.style.cursor = "pointer";
-        closeIcon.onclick = () => {
-            this._element.removeChild(backdrop);
-        };
-        header.appendChild(titleSpan);
-        header.appendChild(closeIcon);
-
-        const body = document.createElement("div");
-        body.className = "wx-graph-modal-body";
-        body.innerHTML = `<p>${message}</p>`;
-
-        const footer = document.createElement("div");
-        footer.className = "wx-graph-modal-footer";
-
-        const btnCancel = document.createElement("button");
-        btnCancel.className = "wx-simple-btn wx-graph-modal-btn";
-        btnCancel.textContent = this._i18n("webexpress.webui:cancel", "Cancel");
-        btnCancel.onclick = () => {
-            this._element.removeChild(backdrop);
-        };
-
-        const btnConfirm = document.createElement("button");
-        btnConfirm.className = "wx-simple-btn wx-graph-modal-btn wx-graph-modal-btn--danger";
-        btnConfirm.textContent = this._i18n("webexpress.webui:delete", "Delete");
-        btnConfirm.onclick = () => {
-            onConfirm();
-            this._element.removeChild(backdrop);
-        };
-
-        footer.appendChild(btnCancel);
-        footer.appendChild(btnConfirm);
-        dialog.appendChild(header);
-        dialog.appendChild(body);
-        dialog.appendChild(footer);
-        backdrop.appendChild(dialog);
-
-        // attach to host element so position: absolute works correctly
-        this._element.appendChild(backdrop);
+        this._confirmAction = onConfirm;
+        this.setState({ dialog: { kind: "confirm", token: ++this._dialogToken, title: title, message: message } });
+        this._store.flush();
     }
 
     /**
@@ -527,22 +917,24 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         this._saveStateToHistory();
 
         let changed = false;
-        if (this._selectedEdgeId) {
+        const selectedEdge = this._selectedEdgeId;
+        const selectedNode = this._selectedNodeId;
+        if (selectedEdge) {
             const before = this._model.edges.length;
-            this._model.edges = this._model.edges.filter(t => (t.id || "") !== this._selectedEdgeId);
+            this._model.edges = this._model.edges.filter(t => (t.id || "") !== selectedEdge);
             if (this._model.edges.length !== before) {
                 changed = true;
             }
         }
-        if (this._selectedNodeId) {
+        if (selectedNode) {
             const beforeNodes = this._model.nodes.length;
-            this._model.nodes = this._model.nodes.filter(n => n.id !== this._selectedNodeId);
+            this._model.nodes = this._model.nodes.filter(n => n.id !== selectedNode);
             const beforeEdges = this._model.edges.length;
-            this._model.edges = this._model.edges.filter(e => e.from !== this._selectedNodeId && e.to !== this._selectedNodeId);
+            this._model.edges = this._model.edges.filter(e => e.from !== selectedNode && e.to !== selectedNode);
             if (this._model.nodes.length !== beforeNodes || this._model.edges.length !== beforeEdges) {
                 changed = true;
             }
-            if (this._edgeSourceNode === this._selectedNodeId) {
+            if (this._edgeSourceNode === selectedNode) {
                 this._edgeSourceNode = null;
             }
         }
@@ -562,118 +954,107 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             return;
         }
 
+        const node = this._selectedNodeId ? this._model.nodes.find(n => n.id === this._selectedNodeId) : null;
+        const edge = !node && this._selectedEdgeId ? this._model.edges.find(e => (e.id || "") === this._selectedEdgeId) : null;
+
+        this.setState({
+            dialog: {
+                kind: "properties",
+                token: ++this._dialogToken,
+                nodeId: node ? node.id : null,
+                edgeId: edge ? edge.id || "" : null,
+                title: node
+                    ? this._i18n("webexpress.webui:graph.edit.node", "Edit Node")
+                    : this._i18n("webexpress.webui:graph.edit.edge", "Edit Edge")
+            }
+        });
+        this._store.flush();
+    }
+
+    /**
+     * Builds the fields of the properties dialog into its body once per dialog.
+     * @param {HTMLElement} body - The dialog body.
+     * @param {object} dialog - The dialog state.
+     */
+    _fillPropertiesDialog(body, dialog) {
+        this._dialogBody = body;
+        if (body._wxDialogToken === dialog.token) {
+            return;
+        }
+        body._wxDialogToken = dialog.token;
+        body.replaceChildren();
+
         // the field ids repeat per dialog, so the controls of a previous dialog
         // must not be read back into this one
         this._colorControls = {};
         this._dashValues = {};
 
-        const backdrop = document.createElement("div");
-        backdrop.className = "wx-graph-modal-backdrop";
-
-        const dialog = document.createElement("div");
-        dialog.className = "wx-graph-modal-dialog";
-
-        const header = document.createElement("div");
-        header.className = "wx-graph-modal-header";
-
-        const titleSpan = document.createElement("span");
-
-        const closeIcon = document.createElement("span");
-        closeIcon.innerHTML = "&times;";
-        closeIcon.style.cursor = "pointer";
-        closeIcon.style.fontSize = "20px";
-        closeIcon.onclick = () => {
-            this._element.removeChild(backdrop);
-        };
-
-        const body = document.createElement("div");
-        body.className = "wx-graph-modal-body";
-
-        const footer = document.createElement("div");
-        footer.className = "wx-graph-modal-footer";
-
-        const btnCancel = document.createElement("button");
-        btnCancel.className = "wx-simple-btn wx-graph-modal-btn";
-        btnCancel.textContent = this._i18n("webexpress.webui:cancel", "Cancel");
-        btnCancel.onclick = () => {
-            this._element.removeChild(backdrop);
-        };
-
-        const btnSave = document.createElement("button");
-        btnSave.className = "wx-simple-btn wx-graph-modal-btn wx-graph-modal-btn--primary";
-        btnSave.textContent = this._i18n("webexpress.webui:graph.apply", "Apply");
-
-        let targetObj = null;
-
-        if (this._selectedNodeId) {
-            targetObj = this._model.nodes.find(n => n.id === this._selectedNodeId);
-            titleSpan.textContent = this._i18n("webexpress.webui:graph.edit.node", "Edit Node");
-            if (targetObj) {
-                this._addModalInput(body, this._i18n("webexpress.webui:graph.label", "Label"), "text", targetObj.label || "", "inp-label");
-                this._addModalColor(body, this._i18n("webexpress.webui:graph.background", "Background"), targetObj.backgroundColor || "#ffffff", "inp-bgcolor");
-                this._addModalColor(body, this._i18n("webexpress.webui:graph.textcolor", "Text Color"), targetObj.foregroundColor || "#000000", "inp-fgcolor");
-                this._addModalSelect(body, this._i18n("webexpress.webui:graph.shape", "Shape"), ["rect", "circle"], targetObj.shape, "inp-shape");
-                this._addModalSelect(body, this._i18n("webexpress.webui:graph.layout", "Layout"), ["label-inside", "label-below"], targetObj.layout, "inp-layout");
-                this._addModalInput(body, this._i18n("webexpress.webui:graph.uri", "URI (Link)"), "text", targetObj.uri || "", "inp-uri");
+        if (dialog.nodeId) {
+            const target = this._model.nodes.find(n => n.id === dialog.nodeId);
+            if (target) {
+                this._addModalInput(body, this._i18n("webexpress.webui:graph.label", "Label"), "text", target.label || "", "inp-label");
+                this._addModalColor(body, this._i18n("webexpress.webui:graph.background", "Background"), target.backgroundColor || "#ffffff", "inp-bgcolor");
+                this._addModalColor(body, this._i18n("webexpress.webui:graph.textcolor", "Text Color"), target.foregroundColor || "#000000", "inp-fgcolor");
+                this._addModalSelect(body, this._i18n("webexpress.webui:graph.shape", "Shape"), ["rect", "circle"], target.shape, "inp-shape");
+                this._addModalSelect(body, this._i18n("webexpress.webui:graph.layout", "Layout"), ["label-inside", "label-below"], target.layout, "inp-layout");
+                this._addModalInput(body, this._i18n("webexpress.webui:graph.uri", "URI (Link)"), "text", target.uri || "", "inp-uri");
             }
-            btnSave.onclick = () => {
-                if (!targetObj) {
-                    return;
-                }
-                this._saveStateToHistory();
-
-                // sync visual position to model before applying changes
-                const visualNode = this._nodes.find(n => n.id === this._selectedNodeId);
-                if (visualNode) {
-                    this._syncModelPosition(visualNode);
-                }
-
-                targetObj.label = body.querySelector("#inp-label").value;
-                targetObj.backgroundColor = this._readModalColor(body, "inp-bgcolor", targetObj.backgroundColor);
-                targetObj.foregroundColor = this._readModalColor(body, "inp-fgcolor", targetObj.foregroundColor);
-                targetObj.shape = body.querySelector("#inp-shape").value;
-                targetObj.layout = body.querySelector("#inp-layout").value;
-                targetObj.uri = body.querySelector("#inp-uri").value;
-
-                this._buildPhysics();
-                this.render();
-                this._emitChangeSafe();
-                this._element.removeChild(backdrop);
-            };
-        } else if (this._selectedEdgeId) {
-            targetObj = this._model.edges.find(e => (e.id || "") === this._selectedEdgeId);
-            titleSpan.textContent = this._i18n("webexpress.webui:graph.edit.edge", "Edit Edge");
-            if (targetObj) {
-                this._addModalInput(body, this._i18n("webexpress.webui:graph.label", "Label"), "text", targetObj.label || "", "inp-label");
-                this._addModalColor(body, this._i18n("webexpress.webui:graph.color", "Color"), targetObj.color || "#000000", "inp-color");
+        } else if (dialog.edgeId !== null) {
+            const target = this._model.edges.find(e => (e.id || "") === dialog.edgeId);
+            if (target) {
+                this._addModalInput(body, this._i18n("webexpress.webui:graph.label", "Label"), "text", target.label || "", "inp-label");
+                this._addModalColor(body, this._i18n("webexpress.webui:graph.color", "Color"), target.color || "#000000", "inp-color");
                 this._addModalDash(body, this._i18n("webexpress.webui:graph.dasharray", "Stroke pattern"),
-                    targetObj.dasharray || "", targetObj.color || "#000000", "inp-dash");
+                    target.dasharray || "", target.color || "#000000", "inp-dash");
             }
-            btnSave.onclick = () => {
-                if (!targetObj) {
-                    return;
-                }
-                this._saveStateToHistory();
-                targetObj.label = body.querySelector("#inp-label").value;
-                targetObj.color = this._readModalColor(body, "inp-color", targetObj.color);
-                targetObj.dasharray = this._dashValues ? (this._dashValues["inp-dash"] || "") : targetObj.dasharray;
-                this.render();
-                this._emitChangeSafe();
-                this._element.removeChild(backdrop);
-            };
+        }
+    }
+
+    /**
+     * Writes the fields of the properties dialog back into the model and closes it.
+     */
+    _applyPropertiesDialog() {
+        const dialog = this.state.dialog;
+        const body = this._dialogBody;
+        if (!dialog || !body) {
+            return;
         }
 
-        header.appendChild(titleSpan);
-        header.appendChild(closeIcon);
-        dialog.appendChild(header);
-        dialog.appendChild(body);
-        footer.appendChild(btnCancel);
-        footer.appendChild(btnSave);
-        dialog.appendChild(footer);
-        backdrop.appendChild(dialog);
+        if (dialog.nodeId) {
+            const target = this._model.nodes.find(n => n.id === dialog.nodeId);
+            if (!target) {
+                return;
+            }
+            this._saveStateToHistory();
 
-        // attach to host element so position: absolute works correctly
-        this._element.appendChild(backdrop);
+            // sync visual position to model before applying changes
+            const visualNode = this._nodes.find(n => n.id === dialog.nodeId);
+            if (visualNode) {
+                this._syncModelPosition(visualNode);
+            }
+
+            target.label = body.querySelector("#inp-label").value;
+            target.backgroundColor = this._readModalColor(body, "inp-bgcolor", target.backgroundColor);
+            target.foregroundColor = this._readModalColor(body, "inp-fgcolor", target.foregroundColor);
+            target.shape = body.querySelector("#inp-shape").value;
+            target.layout = body.querySelector("#inp-layout").value;
+            target.uri = body.querySelector("#inp-uri").value;
+
+            this._buildPhysics();
+        } else {
+            const target = this._model.edges.find(e => (e.id || "") === dialog.edgeId);
+            if (!target) {
+                return;
+            }
+            this._saveStateToHistory();
+            target.label = body.querySelector("#inp-label").value;
+            target.color = this._readModalColor(body, "inp-color", target.color);
+            target.dasharray = this._dashValues ? (this._dashValues["inp-dash"] || "") : target.dasharray;
+        }
+
+        this.setState({ dialog: null });
+        this.render();
+        this._emitChangeSafe();
     }
 
     /**
@@ -894,24 +1275,15 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         container.appendChild(div);
     }
 
+    // ------------------------------------------------------------------ modes & actions
+
     /**
      * Toggles the add-edge mode on or off.
      * @param {boolean} active - whether to activate or deactivate
      */
     _toggleAddEdgeMode(active) {
-        this._isAddEdgeMode = active;
-        this._edgeSourceNode = null;
         this._deselectAll();
-
-        if (this._isAddEdgeMode) {
-            this._svg.style.cursor = "crosshair";
-        } else {
-            this._svg.style.cursor = "default";
-        }
-
-        // clear preview line
-        this._previewLayer.innerHTML = "";
-
+        this.setState({ addEdge: !!active, edgeSource: null, preview: null });
         this._updateToolbarState();
         this.render();
     }
@@ -928,14 +1300,12 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
      */
     _addNode() {
         this._saveStateToHistory();
-        const rect = this._svg.getBoundingClientRect();
-        const centerX = (rect.width / 2 - (this._pan ? this._pan.x : 0)) / (this._scale || 1);
-        const centerY = (rect.height / 2 - (this._pan ? this._pan.y : 0)) / (this._scale || 1);
+        const center = this._viewportCenter();
         const newNode = {
             id: "n-" + Date.now(),
             label: this._i18n("webexpress.webui:graph.new.node", "New Node"),
-            x: centerX,
-            y: centerY,
+            x: center.x,
+            y: center.y,
             layout: "label-inside",
             shape: "rect",
             backgroundColor: "#ffffff",
@@ -951,85 +1321,6 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         this.render();
         this._updateToolbarState();
         this._emitChangeSafe();
-    }
-
-    /**
-     * Applies the current pan/zoom transform and scales control elements accordingly.
-     */
-    _applyViewTransform() {
-        super._applyViewTransform();
-        this._updateControlElementsScale();
-    }
-
-    /**
-     * Adjusts the visual size of handles and waypoints to compensate for zoom level.
-     */
-    _updateControlElementsScale() {
-        const s = this._scale || 1;
-        const inv = 1 / s;
-        const rHandle = 6 * inv;
-        const rWaypoint = 5 * inv;
-        const strokeW = 2 * inv;
-
-        Array.from(this._handleLayer.children).forEach(el => {
-            el.setAttribute("r", rHandle);
-            el.style.strokeWidth = strokeW + "px";
-        });
-        Array.from(this._waypointLayer.children).forEach(el => {
-            el.setAttribute("r", rWaypoint);
-            el.style.strokeWidth = strokeW + "px";
-        });
-    }
-
-    /**
-     * Fits all nodes into the current viewport. Falls back to reset if the
-     * parent class does not provide _fitToView.
-     */
-    _fitToView() {
-        if (typeof super._fitToView === "function") {
-            super._fitToView();
-            return;
-        }
-
-        // fallback implementation
-        if (!this._nodes || this._nodes.length === 0) {
-            return;
-        }
-
-        const rect = this._svg.getBoundingClientRect();
-        const padding = 40;
-
-        let minX = Infinity;
-        let minY = Infinity;
-        let maxX = -Infinity;
-        let maxY = -Infinity;
-
-        this._nodes.forEach(n => {
-            const hw = (n.width || 80) / 2;
-            const hh = (n.height || 40) / 2;
-            if (n.x - hw < minX) { minX = n.x - hw; }
-            if (n.y - hh < minY) { minY = n.y - hh; }
-            if (n.x + hw > maxX) { maxX = n.x + hw; }
-            if (n.y + hh > maxY) { maxY = n.y + hh; }
-        });
-
-        const contentW = maxX - minX;
-        const contentH = maxY - minY;
-
-        if (contentW <= 0 || contentH <= 0) {
-            return;
-        }
-
-        const scaleX = (rect.width - padding * 2) / contentW;
-        const scaleY = (rect.height - padding * 2) / contentH;
-        this._scale = Math.min(scaleX, scaleY, 2);
-
-        this._pan = {
-            x: (rect.width - contentW * this._scale) / 2 - minX * this._scale,
-            y: (rect.height - contentH * this._scale) / 2 - minY * this._scale
-        };
-
-        this._applyViewTransform();
     }
 
     /**
@@ -1061,103 +1352,64 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
      * Clears all selection state, preview layers, and hover effects.
      */
     _deselectAll() {
-        this._selectedEdgeId = null;
-        this._selectedNodeId = null;
-        this._selectedWaypointIndex = null;
-        this._hoveredNodeId = null;
-        this._endpointDrag = null;
-
-        // clear stale preview lines
-        if (this._previewLayer) {
-            this._previewLayer.innerHTML = "";
-        }
-
+        this.setState({
+            selectedEdge: null,
+            selectedNode: null,
+            selectedWaypoint: null,
+            hoveredNode: null,
+            endpointDrag: null,
+            preview: null
+        });
         this.render();
         this._updateToolbarState();
     }
 
     /**
-     * Removes all event listeners and cleans up DOM elements created by the editor.
+     * Ends a gesture that is still running and releases what the editor added.
      */
     destroy() {
-        // remove toolbar
-        if (this._toolbarContainer && this._toolbarContainer.parentNode) {
-            this._toolbarContainer.parentNode.removeChild(this._toolbarContainer);
-        }
-
         this._endpointDrag = null;
         this._dragSnapshot = null;
-        this._clearAlignmentGuides();
 
-        // the base teardown releases the recorded listeners (including the ones
-        // registered above) and the frame loop, so it has to run unconditionally
+        // the base teardown releases the recorded listeners and the frame loop and
+        // empties the host, the toolbar with it
         super.destroy();
     }
 
     /**
      * Handles pointer move for endpoint dragging, edge creation preview,
-     * and target node highlighting.
+     * and target node highlighting. The marks it sets are painted on the next frame.
      * @param {PointerEvent} e - the pointer event
      */
     _onPointerMove(e) {
         const local = this._toLocalSafe(e);
 
         if (this._endpointDrag) {
-            this._endpointDrag.current = { x: local.x, y: local.y };
-
             // determine hovered target node and store as state
             const node = this._nearestNodeAt(local.x, local.y, 18);
-            this._hoveredNodeId = node ? node.id : null;
-
-            this.render();
+            this.setState({
+                endpointDrag: Object.assign({}, this._endpointDrag, { current: { x: local.x, y: local.y } }),
+                hoveredNode: node ? node.id : null
+            });
             return;
         }
 
         if (this._isAddEdgeMode && this._edgeSourceNode) {
-            // determine hovered target node and store as state
             const node = this._nearestNodeAt(local.x, local.y, 18);
-            if (node && node.id !== this._edgeSourceNode) {
-                this._hoveredNodeId = node.id;
-            } else {
-                this._hoveredNodeId = null;
-            }
-
-            // draw phantom arrow
+            const target = node && node.id !== this._edgeSourceNode ? node : null;
             const srcNode = this._nodes.find(n => n.id === this._edgeSourceNode);
+            let preview = null;
+
             if (srcNode) {
-                // determine target point (center of hovered node or mouse position)
-                let targetPoint = { x: local.x, y: local.y };
-                if (node && node.id !== this._edgeSourceNode) {
-                    targetPoint = { x: node.x, y: node.y };
-                }
-
-                // calculate edge points with border adjustment
-                let pts = [{ x: srcNode.x, y: srcNode.y }, targetPoint];
-                if (typeof this._nodeEdgePoint === "function") {
-                    pts[0] = this._nodeEdgePoint(srcNode, targetPoint);
-                    if (node && node.id !== this._edgeSourceNode) {
-                        pts[1] = this._nodeEdgePoint(node, srcNode);
-                    }
-                }
-
-                const d = "M " + pts[0].x + "," + pts[0].y + " L " + pts[1].x + "," + pts[1].y;
-
-                // update or create preview path
-                let path = this._previewLayer.querySelector(".wx-graph-preview-edge");
-                if (!path) {
-                    path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    path.setAttribute("class", "wx-graph-preview-edge");
-                    path.setAttribute("marker-end", this._ensureArrowMarker("#ffc107"));
-                    path.setAttribute("fill", "none");
-                    this._previewLayer.appendChild(path);
-                }
-                path.setAttribute("d", d);
+                // the line runs to the centre of the node it would connect, or to the pointer
+                const targetPoint = target ? { x: target.x, y: target.y } : { x: local.x, y: local.y };
+                preview = [
+                    this._nodeEdgePoint(srcNode, targetPoint),
+                    target ? this._nodeEdgePoint(target, srcNode) : targetPoint
+                ];
             }
 
-            // re-render nodes so hover class is applied from state
-            this._nodeLayer.innerHTML = "";
-            this._renderNodes();
-            this._applyViewTransform();
+            this.setState({ hoveredNode: target ? target.id : null, preview: preview });
         }
     }
 
@@ -1166,10 +1418,10 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
      * @param {PointerEvent} e - the pointer event
      */
     _onPointerUpGlobal(e) {
-        if (!this._endpointDrag) {
+        const drag = this._endpointDrag;
+        if (!drag) {
             return;
         }
-        const drag = this._endpointDrag;
         const t = this._model.edges.find(tr => (tr.id || "") === drag.edgeId);
 
         try {
@@ -1179,8 +1431,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         }
 
         if (!t) {
-            this._endpointDrag = null;
-            this._hoveredNodeId = null;
+            this.setState({ endpointDrag: null, hoveredNode: null });
             this.render();
             return;
         }
@@ -1190,23 +1441,15 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         let changed = false;
 
         if (node) {
-            if (drag.which === "from") {
-                if (t.from !== node.id) {
-                    this._saveStateToHistory();
-                    changed = true;
-                }
-                t.from = node.id;
-            } else {
-                if (t.to !== node.id) {
-                    this._saveStateToHistory();
-                    changed = true;
-                }
-                t.to = node.id;
+            const which = drag.which === "from" ? "from" : "to";
+            if (t[which] !== node.id) {
+                this._saveStateToHistory();
+                changed = true;
             }
+            t[which] = node.id;
         }
 
-        this._endpointDrag = null;
-        this._hoveredNodeId = null;
+        this.setState({ endpointDrag: null, hoveredNode: null });
         this.render();
 
         if (changed) {
@@ -1265,6 +1508,17 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
      * @param {KeyboardEvent} e - the keyboard event
      */
     _onKeyDown(e) {
+        // an open dialog sits inside the host but is modal: its buttons and fields keep
+        // their keys, and the canvas shortcuts would act on a graph the user cannot see
+        if (this.state.dialog && !this._destroyed
+            && (this._element.contains(e.target) || this._element.contains(document.activeElement))) {
+            if (e.key === "Escape") {
+                e.preventDefault();
+                this._closeDialog();
+            }
+            return;
+        }
+
         if (!this._ownsKeyEvent(e)) {
             return;
         }
@@ -1361,13 +1615,10 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             return;
         }
 
-        if (this._isAddEdgeMode && this._edgeSourceNode) {
-            // keep the pending source while the target is being picked
-            this._selectedNodeId = next.id;
-            this._selectedEdgeId = null;
-        } else {
-            this._selectedNodeId = next.id;
-            this._selectedEdgeId = null;
+        // a pending edge source stays while the target is being picked
+        this._selectedNodeId = next.id;
+        this._selectedEdgeId = null;
+        if (!(this._isAddEdgeMode && this._edgeSourceNode)) {
             this._selectedWaypointIndex = null;
         }
         this.render();
@@ -1456,7 +1707,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         visual.x += dx;
         visual.y += dy;
         this._syncModelPosition(visual);
-        this._updateGeometry();
+        this.render();
         this._emitChangeSafe();
     }
 
@@ -1483,10 +1734,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             && this._selectedNodeId !== this._edgeSourceNode) {
             const source = this._edgeSourceNode;
             const target = this._selectedNodeId;
-            this._edgeSourceNode = null;
-            this._isAddEdgeMode = false;
-            this._svg.style.cursor = "default";
-            this._previewLayer.innerHTML = "";
+            this.setState({ edgeSource: null, addEdge: false, preview: null });
             this._createEdgeAndEmit(source, target);
             this._announce(this._i18n("webexpress.webui:graph.a11y.edge.created", "Edge created"));
             return;
@@ -1623,379 +1871,11 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         // editor mode does not use physics animation
     }
 
-    /**
-     * Full render pass: clears and redraws edges, nodes, waypoints, and handles.
-     */
-    render() {
-        if (!this._nodes || this._nodes.length === 0) {
-            this._buildPhysics();
-        }
-
-        if (!this._waypointLayer) {
-            this._waypointLayer = this._createGroup("waypoints");
-            this._viewport.appendChild(this._waypointLayer);
-        }
-        if (!this._previewLayer) {
-            this._previewLayer = this._createGroup("preview");
-            this._viewport.appendChild(this._previewLayer);
-        }
-        if (!this._handleLayer) {
-            this._handleLayer = this._createGroup("handles");
-            this._viewport.appendChild(this._handleLayer);
-        }
-
-        this._ensureArrowMarker();
-        this._edgeLayer.innerHTML = "";
-        this._waypointLayer.innerHTML = "";
-        this._nodeLayer.innerHTML = "";
-        this._handleLayer.innerHTML = "";
-        this._clearAlignmentGuides();
-
-        this._renderEdges();
-        this._renderNodes();
-        this._renderWaypoints();
-        this._renderHandles();
-        this._applyViewTransform();
-    }
-
-    /**
-     * Renders all edges including selection state, drag preview, and event handlers.
-     * Each edge receives a per-color arrow marker so the arrowhead matches the edge color.
-     */
-    _renderEdges() {
-        this._model.edges.forEach((t, ti) => {
-            if (!t || typeof t !== "object") {
-                return;
-            }
-            const edgeId = this._edgeId(t, ti);
-            const isSelected = (edgeId === this._selectedEdgeId);
-
-            // determine the effective edge color
-            const edgeColor = t.color || "";
-            // get a color-matched arrow marker
-            const markerUrl = this._ensureArrowMarker(edgeColor);
-
-            let pts;
-
-            if (this._endpointDrag && this._endpointDrag.edgeId === (t.id || "")) {
-                const src = this._nodes.find(s => s.id === t.from);
-                const dst = this._nodes.find(s => s.id === t.to);
-                const draggingFrom = this._endpointDrag.which === "from";
-                const startPoint = draggingFrom
-                    ? this._endpointDrag.current
-                    : (src ? { x: src.x, y: src.y } : { x: 0, y: 0 });
-                const endPoint = draggingFrom
-                    ? (dst ? { x: dst.x, y: dst.y } : { x: 0, y: 0 })
-                    : this._endpointDrag.current;
-                pts = [];
-                pts.push(startPoint);
-                if (Array.isArray(t.waypoints)) {
-                    pts.push.apply(pts, t.waypoints);
-                }
-                pts.push(endPoint);
-                if (draggingFrom && dst && typeof this._nodeEdgePoint === "function") {
-                    pts[pts.length - 1] = this._nodeEdgePoint(dst, pts[pts.length - 2]);
-                } else if (!draggingFrom && src && typeof this._nodeEdgePoint === "function") {
-                    pts[0] = this._nodeEdgePoint(src, pts[1]);
-                }
-            } else {
-                pts = this._edgePoints(t);
-            }
-
-            if (pts.length === 0) {
-                return;
-            }
-
-            const poly = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            // routed through the configured edge style, so the editor draws the
-            // same shape the viewer will
-            poly.setAttribute("d", this._generatePathData(pts));
-            poly.setAttribute("class", "wx-graph-viewer-edge wx-workflow-edge");
-            if (isSelected) {
-                poly.setAttribute("data-selected", "true");
-            }
-            poly.setAttribute("data-id", edgeId);
-            poly.setAttribute("fill", "none");
-            this._applyPaint(poly, "stroke", edgeColor);
-            poly.setAttribute("stroke-linecap", "round");
-            poly.setAttribute("stroke-linejoin", "round");
-            poly.setAttribute("marker-end", markerUrl);
-            if (t.dasharray) {
-                poly.setAttribute("stroke-dasharray", t.dasharray);
-            }
-
-            poly.addEventListener("click", (e) => {
-                e.stopPropagation();
-                if (this._selectedEdgeId === edgeId) {
-                    this._selectedEdgeId = null;
-                } else {
-                    this._selectedEdgeId = edgeId;
-                    this._selectedNodeId = null;
-                }
-                this._endpointDrag = null;
-                this._hoveredNodeId = null;
-                this.render();
-                this._updateToolbarState();
-            });
-
-            poly.addEventListener("dblclick", (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                this._saveStateToHistory();
-                this._selectedEdgeId = edgeId;
-                this._selectedNodeId = null;
-                this._insertWaypointAtMid(t, e);
-            });
-
-            this._edgeLayer.appendChild(poly);
-        });
-    }
-
-    /**
-     * Renders all nodes with editor-specific interaction handlers.
-     * Applies selection, source, and hover classes from editor state
-     * so that visual feedback survives full re-renders.
-     */
-    _renderNodes() {
-        super._renderNodes();
-        Array.from(this._nodeLayer.children).forEach(g => {
-            if (g.dataset.editorAttached === "true") {
-                return;
-            }
-            g.dataset.editorAttached = "true";
-            const id = g.getAttribute("data-id");
-            const n = this._nodes.find(nn => nn.id === id);
-            if (!n) {
-                return;
-            }
-
-            // apply visual state classes from editor state (survives re-render)
-            if (id === this._selectedNodeId) {
-                g.classList.add("wx-graph-node-selected");
-            }
-            if (this._isAddEdgeMode && this._edgeSourceNode === id) {
-                g.classList.add("wx-graph-node-source");
-            }
-            if (this._hoveredNodeId === id) {
-                g.classList.add("wx-graph-node-hover");
-            }
-
-            const newG = g.cloneNode(true);
-            g.parentNode.replaceChild(newG, g);
-
-            newG.addEventListener("pointerdown", (e) => {
-                if (this._isAddEdgeMode) {
-                    return;
-                }
-                e.stopPropagation();
-                const p = this._toLocalSafe(e);
-
-                this._dragSnapshot = JSON.stringify(this._model);
-
-                this._drag = {
-                    type: "node",
-                    id: n.id,
-                    startX: p.x,
-                    startY: p.y,
-                    nodeStartX: n.x || 0,
-                    nodeStartY: n.y || 0,
-                    pointerId: e.pointerId,
-                    hasMoved: false
-                };
-                this._selectedNodeId = n.id;
-                this._selectedEdgeId = null;
-                newG.style.cursor = "grabbing";
-                try {
-                    newG.setPointerCapture(e.pointerId);
-                } catch (err) {
-                    // pointer capture may not be supported
-                }
-                this.render();
-                this._updateToolbarState();
-                this._attachDragListeners(newG);
-            });
-
-            newG.addEventListener("click", (e) => {
-                e.stopPropagation();
-                if (this._isAddEdgeMode) {
-                    if (this._edgeSourceNode === null) {
-                        this._edgeSourceNode = n.id;
-                        this.render();
-                    } else {
-                        if (this._edgeSourceNode !== n.id) {
-                            this._createEdgeAndEmit(this._edgeSourceNode, n.id);
-                            this._edgeSourceNode = null;
-                            // clear preview line
-                            this._previewLayer.innerHTML = "";
-                            this.render();
-                        } else {
-                            // clicked same node -> deselect source
-                            this._edgeSourceNode = null;
-                            this._previewLayer.innerHTML = "";
-                            this.render();
-                        }
-                    }
-                    return;
-                }
-                this._selectedNodeId = n.id;
-                this._selectedEdgeId = null;
-                this.render();
-                this._updateToolbarState();
-            });
-
-            // dblclick: stop propagation so the svg-level handler does not fire again
-            newG.addEventListener("dblclick", (e) => {
-                e.stopPropagation();
-            });
-        });
-    }
-
-    /**
-     * Renders waypoint circles for the currently selected edge.
-     */
-    _renderWaypoints() {
-        const selectedId = this._selectedEdgeId;
-        if (!selectedId) {
-            return;
-        }
-        this._model.edges.forEach((t, ti) => {
-            const tid = this._edgeId(t, ti);
-            if (tid !== selectedId) {
-                return;
-            }
-            t.waypoints = Array.isArray(t.waypoints) ? t.waypoints : [];
-            t.waypoints.forEach((wp, wi) => {
-                const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                c.setAttribute("class", "wx-workflow-waypoint"
-                    + (wi === this._selectedWaypointIndex ? " wx-workflow-waypoint-selected" : ""));
-                c.setAttribute("cx", wp.x);
-                c.setAttribute("cy", wp.y);
-                c.setAttribute("data-edge", tid);
-                c.setAttribute("data-index", wi);
-
-                c.addEventListener("pointerdown", (e) => {
-                    e.stopPropagation();
-                    this._selectedWaypointIndex = wi;
-                    const p = this._toLocalSafe(e);
-                    this._dragSnapshot = JSON.stringify(this._model);
-                    this._drag = {
-                        type: "waypoint",
-                        edgeId: tid,
-                        index: wi,
-                        startX: p.x,
-                        startY: p.y,
-                        wpStartX: wp.x,
-                        wpStartY: wp.y,
-                        pointerId: e.pointerId,
-                        hasMoved: false
-                    };
-                    c.style.cursor = "grabbing";
-                    try {
-                        c.setPointerCapture(e.pointerId);
-                    } catch (err) {
-                        // pointer capture may not be supported
-                    }
-                    this._attachDragListeners(c);
-                });
-
-                c.addEventListener("contextmenu", (e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    this._saveStateToHistory();
-                    t.waypoints.splice(wi, 1);
-                    this.render();
-                    this._emitChangeSafe();
-                });
-
-                this._waypointLayer.appendChild(c);
-            });
-        });
-    }
-
-    /**
-     * Renders draggable endpoint handles for the currently selected edge.
-     */
-    _renderHandles() {
-        if (!this._selectedEdgeId) {
-            return;
-        }
-        const t = this._model.edges.find(tr => (tr.id || "") === this._selectedEdgeId);
-        if (!t) {
-            return;
-        }
-
-        let srcPos = null;
-        let dstPos = null;
-
-        if (this._endpointDrag && this._endpointDrag.edgeId === (t.id || "")) {
-            const src = this._nodes.find(s => s.id === t.from);
-            const dst = this._nodes.find(s => s.id === t.to);
-            if (this._endpointDrag.which === "from") {
-                srcPos = this._endpointDrag.current;
-                if (dst && typeof this._nodeEdgePoint === "function") {
-                    const ref = (t.waypoints && t.waypoints.length)
-                        ? t.waypoints[t.waypoints.length - 1]
-                        : srcPos;
-                    dstPos = this._nodeEdgePoint(dst, ref);
-                } else {
-                    dstPos = dst ? { x: dst.x, y: dst.y } : { x: 0, y: 0 };
-                }
-            } else {
-                dstPos = this._endpointDrag.current;
-                if (src && typeof this._nodeEdgePoint === "function") {
-                    const ref = (t.waypoints && t.waypoints.length)
-                        ? t.waypoints[0]
-                        : dstPos;
-                    srcPos = this._nodeEdgePoint(src, ref);
-                } else {
-                    srcPos = src ? { x: src.x, y: src.y } : { x: 0, y: 0 };
-                }
-            }
-        } else {
-            const pts = this._edgePoints(t);
-            if (pts.length > 0) {
-                srcPos = pts[0];
-                dstPos = pts[pts.length - 1];
-            }
-        }
-
-        /**
-         * Creates a single draggable handle circle.
-         * @param {{x: number, y: number}} pt - position
-         * @param {string} which - "from" or "to"
-         */
-        const createHandle = (pt, which) => {
-            if (!pt) {
-                return;
-            }
-            const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-            c.setAttribute("class", "wx-workflow-handle handle-" + which);
-            c.setAttribute("cx", pt.x);
-            c.setAttribute("cy", pt.y);
-            c.addEventListener("pointerdown", (e) => {
-                e.stopPropagation();
-                const p = this._toLocalSafe(e);
-                this._endpointDrag = {
-                    which: which,
-                    edgeId: t.id || "",
-                    current: { x: p.x, y: p.y }
-                };
-                this.render();
-                try {
-                    this._svg.setPointerCapture(e.pointerId);
-                } catch (err) {
-                    // pointer capture may not be supported
-                }
-            });
-            this._handleLayer.appendChild(c);
-        };
-
-        createHandle(srcPos, "from");
-        createHandle(dstPos, "to");
-    }
+    // ------------------------------------------------------------------ dragging
 
     /**
      * Attaches temporary pointermove and pointerup listeners for drag operations.
+     * A move renders on the next frame; the release takes a single undo step.
      * @param {SVGElement} target - the element being dragged
      */
     _attachDragListeners(target) {
@@ -2038,25 +1918,18 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         };
 
         const up = () => {
-            if (this._drag && typeof target.releasePointerCapture === "function") {
+            if (this._drag && target && typeof target.releasePointerCapture === "function") {
                 try {
                     target.releasePointerCapture(this._drag.pointerId);
                 } catch (err) {
                     // pointer capture may already be released
                 }
             }
-            if (target instanceof SVGGElement || target instanceof SVGCircleElement) {
-                target.style.cursor = "grab";
-            }
 
             // push pre-drag snapshot to undo stack if the element actually moved
             if (this._drag && this._drag.hasMoved && this._dragSnapshot) {
-                while (this._undoStack.length >= webexpress.webui.GraphEditorCtrl.HISTORY_LIMIT) {
-                    this._undoStack.shift();
-                }
-                this._undoStack.push(JSON.parse(this._dragSnapshot));
+                this._pushHistory(this._undoStack, JSON.parse(this._dragSnapshot));
                 this._redoStack = [];
-                this._updateToolbarState();
             }
 
             this._dragSnapshot = null;
@@ -2065,6 +1938,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             this._removeWindowListener("pointermove", move);
             this._removeWindowListener("pointerup", up);
             this._removeWindowListener("pointercancel", up);
+            this._updateToolbarState();
             this._emitChangeSafe();
         };
 
@@ -2112,7 +1986,8 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
     }
 
     /**
-     * Aligns a dragged node or waypoint and draws the references that caused it to snap.
+     * Aligns a dragged node or waypoint and puts the references that caused it to snap
+     * into the state, where they are drawn as guides.
      * @param {{x: number, y: number}} position - The unsnapped center in graph coordinates.
      * @param {number} width - The node width, or zero for a waypoint.
      * @param {number} height - The node height, or zero for a waypoint.
@@ -2124,7 +1999,6 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         const size = { x: width, y: height };
         const result = {};
         const matches = {};
-        this._clearAlignmentGuides();
         for (const axis of ["x", "y"]) {
             let distance = tolerance;
             for (const offset of size[axis] ? [0, -size[axis] / 2, size[axis] / 2] : [0]) {
@@ -2140,12 +2014,8 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             result[axis] = matches[axis] ? matches[axis].value
                 : this._snapToGrid(position[axis] - size[axis] / 2) + size[axis] / 2;
         }
-        if (!this._alignmentLayer) {
-            this._alignmentLayer = this._createGroup("alignment");
-            this._alignmentLayer.setAttribute("pointer-events", "none");
-            this._alignmentLayer.setAttribute("aria-hidden", "true");
-            this._viewport.appendChild(this._alignmentLayer);
-        }
+
+        const guides = [];
         for (const axis of ["x", "y"]) {
             if (!matches[axis]) {
                 continue;
@@ -2153,14 +2023,14 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
             const other = axis === "x" ? "y" : "x";
             const target = matches[axis].target;
             const padding = 12 / (this._scale || 1);
-            const line = document.createElementNS("http://www.w3.org/2000/svg", "line");
-            line.setAttribute("class", "wx-graph-alignment-guide");
-            line.setAttribute(axis + "1", target.value);
-            line.setAttribute(axis + "2", target.value);
-            line.setAttribute(other + "1", Math.min(target.start, result[other] - size[other] / 2) - padding);
-            line.setAttribute(other + "2", Math.max(target.end, result[other] + size[other] / 2) + padding);
-            this._alignmentLayer.appendChild(line);
+            guides.push({
+                [axis + "1"]: target.value,
+                [axis + "2"]: target.value,
+                [other + "1"]: Math.min(target.start, result[other] - size[other] / 2) - padding,
+                [other + "2"]: Math.max(target.end, result[other] + size[other] / 2) + padding
+            });
         }
+        this.setState({ guides: guides });
         return result;
     }
 
@@ -2168,10 +2038,12 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
      * Removes transient references when the pointer leaves alignment or the gesture ends.
      */
     _clearAlignmentGuides() {
-        if (this._alignmentLayer) {
-            this._alignmentLayer.innerHTML = "";
+        if (this.state.guides && this.state.guides.length > 0) {
+            this.setState({ guides: [] });
         }
     }
+
+    // ------------------------------------------------------------------ geometry queries
 
     /**
      * Computes the polyline points for an edge including waypoints and border clipping.
@@ -2209,6 +2081,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         const insertAt = Math.min(Math.max(near.index, 0), edge.waypoints.length);
         edge.waypoints.splice(insertAt, 0, mid);
         this.render();
+        this._updateToolbarState();
         this._emitChangeSafe();
     }
 
@@ -2290,32 +2163,6 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         }
         const t = c1 / c2;
         return { x: a.x + t * vx, y: a.y + t * vy };
-    }
-
-    /**
-     * Updates edge paths, waypoint positions, and handle positions during drag.
-     */
-    _updateGeometry() {
-        super._updateGeometry();
-        if (this._selectedEdgeId) {
-            this._handleLayer.innerHTML = "";
-            this._renderHandles();
-        }
-        Array.from(this._waypointLayer.children).forEach(circle => {
-            const trId = circle.getAttribute("data-edge");
-            const idx = parseInt(circle.getAttribute("data-index"), 10);
-            const t = this._model.edges.find(tr => (tr.id || "") === trId);
-            if (!t || !t.waypoints || !t.waypoints[idx]) {
-                return;
-            }
-            circle.setAttribute("cx", t.waypoints[idx].x);
-            circle.setAttribute("cy", t.waypoints[idx].y);
-            const poly = this._edgeLayer.querySelector('path[data-id="' + trId + '"]');
-            if (poly) {
-                poly.setAttribute("d", this._generatePathData(this._edgePoints(t)));
-            }
-        });
-        this._updateControlElementsScale();
     }
 
     /**

@@ -13,7 +13,7 @@
 import { test } from "node:test";
 import assert from "node:assert";
 import { windowListenerCount, elementListenerCount, keyEvent, pointerEvent } from "./harness.mjs";
-import { createEditor, addEditor, renderedNodes } from "./graph.fixture.mjs";
+import { createEditor, createViewer, addEditor, renderedNodes } from "./graph.fixture.mjs";
 
 const GRAPH = {
     nodes: [
@@ -396,4 +396,81 @@ test("zoom shortcuts scale the view and the fit shortcut resets it", () => {
     ctrl._scale = 2.5;
     pressKey(rt, "0", ctrl._svg);
     assert.notEqual(ctrl._scale, 2.5, "zero fits the content again");
+});
+
+test("one undo takes back exactly one change and redo replays it", () => {
+    const { ctrl } = createEditor(GRAPH);
+    const edgeIds = () => ctrl._model.edges.map((e) => e.id).join(",");
+    assert.equal(ctrl._undoStack.length, 0, "an untouched graph has nothing to undo");
+
+    ctrl._selectedEdgeId = "e1";
+    ctrl._requestDelete();
+    ctrl._selectedEdgeId = "e2";
+    ctrl._requestDelete();
+    assert.equal(edgeIds(), "");
+
+    ctrl._undo();
+    assert.equal(edgeIds(), "e2", "only the second deletion is taken back");
+    ctrl._undo();
+    assert.equal(edgeIds(), "e1,e2");
+    ctrl._redo();
+    assert.equal(edgeIds(), "e2", "redo replays the first deletion");
+});
+
+test("a model loaded after construction cannot be undone away", () => {
+    const { ctrl } = createEditor({ nodes: [], edges: [] });
+    ctrl.model = GRAPH;
+
+    ctrl._selectedEdgeId = "e1";
+    ctrl._requestDelete();
+    ctrl._undo();
+
+    assert.equal(ctrl._model.nodes.length, 3, "the loaded nodes stay");
+    assert.equal(ctrl._model.edges.length, 2, "the deleted edge is back");
+    assert.equal(ctrl._undoStack.length, 0, "the load itself is no step");
+});
+
+test("an open dialog keeps its keys from the canvas shortcuts", () => {
+    const { rt, ctrl } = createEditor(GRAPH);
+    ctrl._selectedNodeId = "draft";
+    ctrl._openPropertiesModal();
+    const apply = ctrl._element.querySelector(".wx-graph-modal-btn--primary");
+
+    const enter = pressKey(rt, "Enter", apply);
+    assert.equal(enter.defaultPrevented, false, "Enter activates the focused button");
+    pressKey(rt, "Delete", apply);
+    assert.equal(ctrl._model.nodes.length, 3, "Delete does not reach the graph");
+    assert.equal(ctrl.state.dialog.kind, "properties", "nor replaces the dialog with a confirmation");
+
+    pressKey(rt, "Escape", apply);
+    assert.equal(ctrl.state.dialog, null, "Escape closes the dialog");
+    assert.equal(ctrl._element.querySelector(".wx-graph-modal-backdrop"), null);
+    assert.equal(ctrl._selectedNodeId, "draft", "and leaves the selection alone");
+});
+
+test("a cancelled pan and a cancelled node drag end their gesture", () => {
+    const { rt, ctrl } = createViewer(GRAPH);
+    ctrl._svg.dispatchEvent(pointerEvent({ type: "pointerdown", target: ctrl._svg }));
+    assert.equal(ctrl.state.panning, true);
+    rt.sandbox.window.dispatchEvent(pointerEvent({ type: "pointercancel" }));
+    assert.equal(ctrl.state.panning, false, "the canvas no longer pans");
+    assert.equal(windowListenerCount(rt, "pointermove"), 0, "and no longer follows the pointer");
+
+    const node = ctrl._nodes[0];
+    const group = renderedNodes(ctrl)[0];
+    group.dispatchEvent(pointerEvent({ type: "pointerdown", target: group }));
+    assert.equal(node.fixed, true, "the node follows the pointer");
+    rt.sandbox.window.dispatchEvent(pointerEvent({ type: "pointercancel" }));
+    assert.equal(ctrl._drag, null, "the drag ended");
+    assert.equal(node.fixed, false, "the node is handed back to the layout");
+    ctrl.destroy();
+});
+
+test("a replaced model is shown fitted at once", () => {
+    const { ctrl } = createEditor({ nodes: [], edges: [] });
+    ctrl.model = GRAPH;
+
+    const view = ctrl.state.view;
+    assert.equal(ctrl._viewport.getAttribute("transform"), `translate(${view.x} ${view.y}) scale(${view.scale})`,
+        "the fit waits for no frame");
 });

@@ -105,7 +105,8 @@ test("tabs remember selection by identity and fall back when that tab disappears
     const next = runtime(files, first.sandbox.localStorage);
     const ctrl = new next.wx.TabCtrl(host(next, "tabs", ["two", "one"], "wx-tab-view"));
     assert.equal(ctrl._activeTabId, "two");
-    assert.equal(ctrl._tabs[0].paneElement.classList.contains("active"), true);
+    // the tab models are state; the panes are references of the control
+    assert.equal(ctrl._panes.get(ctrl._tabs[0].id).classList.contains("active"), true);
     ctrl.selectTab("missing");
     assert.equal(ctrl._activeTabId, "two");
     assert.equal(new next.wx.TabCtrl(host(next, "tabs", ["one"], "wx-tab-view"))._activeTabId, "one");

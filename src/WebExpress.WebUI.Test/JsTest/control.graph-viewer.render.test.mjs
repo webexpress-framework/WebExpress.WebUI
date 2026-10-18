@@ -103,6 +103,8 @@ test("recolouring through the model reaches the rendered element", () => {
     ctrl._model.nodes[0].foregroundColor = "#146c43";
     ctrl._model.edges[0].color = "#b26a00";
     ctrl._updateGeometry();
+    // a geometry update is painted on the next animation frame
+    ctrl._store.flush();
 
     assert.equal(renderedNodes(ctrl)[0].querySelector("text").style.fill, "#146c43",
         "the geometry update repaints the label");
@@ -347,8 +349,23 @@ test("the arrowhead is coloured like the edge it terminates", () => {
     assert.equal(head.style.fill, "#ff6600", "the arrowhead colour outranks the theme stylesheet");
     const definition = head.parentNode;
     assert.equal(definition.getAttribute("markerUnits"), "userSpaceOnUse", "selection weight cannot resize the tip");
-    assert.equal(definition.getAttribute("refX"), "10", "the triangle tip meets the edge endpoint");
-    assert.equal(definition.getAttribute("refY"), "5", "the triangle is centered on the edge");
+    assert.equal(definition.getAttribute("refX"), "0", "the head is anchored at its base");
+    assert.equal(Number(definition.getAttribute("refY")), ctrl.constructor.ARROW_WIDTH / 2, "the triangle is centered on the edge");
+});
+
+test("the line stops where the arrowhead begins and the tip reaches the target", () => {
+    const { ctrl } = createViewer({
+        nodes: [{ id: "a", x: 0, y: 0 }, { id: "b", x: 300, y: 0 }],
+        edges: [{ id: "e1", from: "a", to: "b" }]
+    });
+
+    const target = ctrl._nodes.find((n) => n.id === "b");
+    const border = target.x - (target.rectWidth || target.width) / 2;
+    const numbers = renderedEdges(ctrl)[0].getAttribute("d").match(/-?\d+(\.\d+)?/g).map(Number);
+    const lineEnd = numbers[numbers.length - 2];
+
+    // the head spans ARROW_LENGTH from the line end, so its tip sits one unit off the border
+    assert.equal(Math.round(lineEnd + ctrl.constructor.ARROW_LENGTH), Math.round(border - 1));
 });
 
 test("arrow markers remain local to each graph on a shared page", () => {
@@ -498,4 +515,29 @@ test("the text of a detailed node stays inside its rectangle", () => {
     assert.ok(Number(badge.getAttribute("x")) + Number(badge.getAttribute("width")) <= right,
         "the badge ends inside the box");
     assert.ok(Number(description.getAttribute("x")) > left, "the description starts inside the box");
+});
+
+test("the graph keeps fitting a resizing canvas until the user takes the view", () => {
+    const { ctrl } = createViewer(TWO_NODES);
+    const resize = (width) => {
+        ctrl._svg._rect = { left: 0, top: 0, width: width, height: CANVAS_HEIGHT };
+        // the ResizeObserver of the stub never fires on its own
+        ctrl._measureCanvas();
+    };
+    const view = () => JSON.stringify(ctrl.state.view);
+
+    resize(CANVAS_WIDTH);
+    const wide = ctrl.state.view.scale;
+    resize(CANVAS_WIDTH / 2);
+    assert.ok(ctrl.state.view.scale < wide, "a canvas the layout narrows fits the graph again");
+
+    ctrl._zoomAt(1.2);
+    const chosen = view();
+    resize(CANVAS_WIDTH);
+    assert.equal(view(), chosen, "a zoom of the user survives a resize");
+
+    ctrl._fitToView();
+    const fitted = view();
+    resize(CANVAS_WIDTH / 2);
+    assert.notEqual(view(), fitted, "fitting again hands the view back to the canvas");
 });

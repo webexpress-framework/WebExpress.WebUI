@@ -1,24 +1,26 @@
 /**
  * Table controller providing declarative parsing, sorting, rendering, and optional column resizing.
+ *
+ * The header, the rows and the footer are rendered from the state: the columns, the rows,
+ * the footer, the selected row and the rows a refresh found changed. Rows are keyed, so a
+ * sort, an expand or a selection moves and patches them instead of rebuilding them. The
+ * content of a cell - the output of a cell template, which may be a control of its own -
+ * is built into the cell and kept until the cell or what it shows changes.
+ *
+ * The rows and the columns are records the control, its subclasses and the cell templates
+ * change in place; render() renders them again and flashes the rows whose content changed.
+ *
  * The following events are triggered:
  * - webexpress.webui.Event.TABLE_SORT_EVENT
  * - webexpress.webui.Event.SELECT_ROW_EVENT
  */
-webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
+webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
 
     static MIN_COL_WIDTH = 30;
     static AUTOSIZE_BUFFER = 8;
+    // the length of the wx-change-flash animation in webexpress.webui.table.css
+    static FLASH_DURATION = 1000;
     static IGNORED_DATA_ATTRS = ["data-color", "data-border", "data-striped", "data-selectable"];
-
-    _table = document.createElement("div");
-    _head = document.createElement("div");
-    _body = document.createElement("div");
-    _foot = null;
-
-    _columns = [];
-    _rows = [];
-    _footer = [];
-    _options = [];
 
     // feature flags
     _isTree = false;
@@ -28,10 +30,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _columnResizeEnabled = true;
     _hasOptions = false;
     _selectable = false;
+    _headColor = null;
 
-    // state
-    _selectedRow = null;
-    _renderScheduled = false;
+    // interaction state
     _isResizing = false;
     _initialized = false;
     _autoSelected = false;
@@ -40,23 +41,84 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     _prevRowState = new Map();
     _colIndexCache = new Map();
 
+    // the change marks of refreshes that were not rendered yet, and the marks rendered last
+    _pendingFlash = null;
+    _shownFlash = null;
+
+    // nodes captured while rendering
+    _head = null;
+    _body = null;
+    _foot = null;
+    _headerCells = new Map();
+    _rowElements = new Map();
+
     /**
      * Initialize controller and render initial state.
      * @param {HTMLElement} element - Host element that contains declarative configuration.
      */
     constructor(element) {
-        super(element);
+        // the table element is the render root; a subclass places elements of its own
+        // beside it in the host, such as a pager or a progress bar
+        const table = document.createElement("div");
+
+        super(element, {
+            renderRoot: table,
+            state: {
+                columns: [],
+                rows: [],
+                footer: [],
+                options: [],
+                selected: null,
+                // the rows the last refresh found changed or new, by row key
+                flash: null,
+                revision: 0
+            }
+        });
+
+        this._table = table;
         this._suppressFlashOnce = true;
         this._setupDom(element);
         this._parseConfig(element);
         this._initEventListeners();
-        this.render();
-        this._initialized = true;
+
+        // a subclass renders through hooks that read what its own constructor sets up,
+        // so it opens the table at the end of that constructor
+        if (new.target === webexpress.webui.TableCtrl) {
+            this._open();
+        }
     }
 
     /**
-     * Build base DOM structure and apply initial classes from dataset.
-     * Sets ARIA roles for accessibility.
+     * Renders the table the first time. The rows it shows are the ones the first refresh
+     * compares against, so nothing flashes for what the table was built with.
+     */
+    _open() {
+        // the first render reads the state directly, a notification would only repeat it
+        this._store.flush();
+        this.mount();
+        this._initialized = true;
+    }
+
+    // the model is held in the state; the accessors keep the record API the subclasses,
+    // the cell templates and the hosts use
+
+    get _columns() { return this.state.columns; }
+    set _columns(value) { this.setState({ columns: Array.isArray(value) ? value : [] }); }
+
+    get _rows() { return this.state.rows; }
+    set _rows(value) { this.setState({ rows: Array.isArray(value) ? value : [] }); }
+
+    get _footer() { return this.state.footer; }
+    set _footer(value) { this.setState({ footer: Array.isArray(value) ? value : [] }); }
+
+    get _options() { return this.state.options; }
+    set _options(value) { this.setState({ options: Array.isArray(value) ? value : [] }); }
+
+    get _selectedRow() { return this.state.selected; }
+    set _selectedRow(value) { this.setState({ selected: value || null }); }
+
+    /**
+     * Applies the classes and the role of the table element from the dataset.
      * @param {HTMLElement} element - Host element.
      */
     _setupDom(element) {
@@ -84,16 +146,6 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
                 element.tabIndex = 0;
             }
         }
-
-        this._head.className = "wx-table-header-group";
-        this._head.setAttribute("role", "rowgroup");
-
-        this._body.className = "wx-table-body-group";
-        this._body.setAttribute("role", "rowgroup");
-
-        const frag = document.createDocumentFragment();
-        frag.append(this._head, this._body);
-        this._table.appendChild(frag);
     }
 
     /**
@@ -119,67 +171,60 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Register event listeners for header interactions (sorting), body interactions (selection and inputs),
-     * and host-level keyboard shortcuts.
+     * Registers the host-level keyboard shortcuts of a selectable table. The header and
+     * the body listen through the view.
      */
     _initEventListeners() {
-        // header keys (sorting): the keys a button answers to sort like a click does
-        this._head.addEventListener("keydown", (e) => {
-            if (e.key !== "Enter" && e.key !== " ") {
-                return;
-            }
-            const headerCell = e.target.closest ? e.target.closest(".wx-col-header") : null;
-            if (!headerCell || e.target !== headerCell) {
-                return;
-            }
-            const col = this._columns[this._colIndexCache.get(headerCell.dataset.columnId)];
-            if (col) {
-                e.preventDefault();
-                this._handleSortClick(headerCell, col);
-            }
-        });
-
-        // header click (sorting)
-        this._head.addEventListener("click", (e) => {
-            const headerCell = e.target.closest(".wx-col-header");
-            if (!headerCell || this._isResizing) {
-                return;
-            }
-            const colId = headerCell.dataset.columnId;
-            const idx = this._colIndexCache.get(colId);
-            if (idx === undefined) {
-                return;
-            }
-            const col = this._columns[idx];
-            if (col) {
-                this._handleSortClick(headerCell, col);
-            }
-        }, { passive: true });
-
-        // body click (selection)
-        this._body.addEventListener("click", (e) => {
-            if (e.target.closest(".wx-dropdown-toggle, .wx-dropdown-menu, .dropdown-toggle, .dropdown-menu, .wx-table-actions")) {
-                return;
-            }
-            // ignore interactive elements and content editable areas
-            if (e.target.closest("a, button, input, select, textarea, [contenteditable='true'], .wx-prevent-row-select")) {
-                return;
-            }
-
-            const rowEl = e.target.closest(".wx-grid-row");
-            if (rowEl && rowEl._dataRowRef && this._selectable) {
-                this._selectRowInternal(rowEl._dataRowRef, e);
-            }
-        });
-
-        // body input (sync manual edits back to the internal data model)
-        this._body.addEventListener("input", (e) => this._syncCellEdit(e));
-
-        // host-level keyboard shortcuts (only when selectable)
         if (this._selectable) {
             this._element.addEventListener("keydown", (e) => this._onHostKeyDown(e));
         }
     }
+
+    // header keys (sorting): the keys a button answers to sort like a click does
+    _onHeadKeyDown = (e) => {
+        if (e.key !== "Enter" && e.key !== " ") {
+            return;
+        }
+        const headerCell = e.target.closest ? e.target.closest(".wx-col-header") : null;
+        if (!headerCell || e.target !== headerCell) {
+            return;
+        }
+        const col = this._columns[this._colIndexCache.get(headerCell.dataset.columnId)];
+        if (col) {
+            e.preventDefault();
+            this._handleSortClick(headerCell, col);
+        }
+    };
+
+    _onHeadClick = (e) => {
+        const headerCell = e.target.closest(".wx-col-header");
+        if (!headerCell || this._isResizing) {
+            return;
+        }
+        const idx = this._colIndexCache.get(headerCell.dataset.columnId);
+        const col = idx === undefined ? null : this._columns[idx];
+        if (col) {
+            this._handleSortClick(headerCell, col);
+        }
+    };
+
+    _onBodyClick = (e) => {
+        if (e.target.closest(".wx-dropdown-toggle, .wx-dropdown-menu, .dropdown-toggle, .dropdown-menu, .wx-table-actions")) {
+            return;
+        }
+        // ignore interactive elements and content editable areas
+        if (e.target.closest("a, button, input, select, textarea, [contenteditable='true'], .wx-prevent-row-select")) {
+            return;
+        }
+
+        const rowEl = e.target.closest(".wx-grid-row");
+        if (rowEl && rowEl._dataRowRef && this._selectable) {
+            this._selectRowInternal(rowEl._dataRowRef, e);
+        }
+    };
+
+    // body input (sync manual edits back to the internal data model)
+    _onBodyInput = (e) => this._syncCellEdit(e);
 
     /**
      * Synchronises content edits back to the row model.
@@ -241,6 +286,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      */
     enableColumnResize() {
         this._columnResizeEnabled = true;
+        this.render();
     }
 
     /**
@@ -248,6 +294,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
      */
     disableColumnResize() {
         this._columnResizeEnabled = false;
+        this.render();
     }
 
     /**
@@ -277,8 +324,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         if (!Array.isArray(rows)) {
             return;
         }
-        this._rows = rows;
-        this._selectedRow = null;
+        this.setState({ rows: rows, selected: null });
         this._autoSelected = false;
         this._recalculateHasOptions();
         this.render();
@@ -450,26 +496,18 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     // ------------------------------------------------------------------ selection
 
     /**
-     * Internal logic to handle row selection and event dispatching.
+     * Selects a row and announces it. A listener may look at the row it was told about,
+     * so the selection is rendered before it is announced.
      * @param {Object} row - Data row object.
      * @param {Event|null} originalEvent - Triggering event.
+     * @param {boolean} [renderNow=true] - False when called while the table renders.
      */
-    _selectRowInternal(row, originalEvent) {
-        // deselect previous
-        if (this._selectedRow && this._selectedRow._anchorTr) {
-            this._selectedRow._anchorTr.classList.remove("active");
-            this._selectedRow._anchorTr.removeAttribute("aria-selected");
-        }
-
+    _selectRowInternal(row, originalEvent, renderNow = true) {
         this._selectedRow = row;
-
-        // select new
-        if (this._selectedRow && this._selectedRow._anchorTr) {
-            this._selectedRow._anchorTr.classList.add("active");
-            this._selectedRow._anchorTr.setAttribute("aria-selected", "true");
+        if (renderNow && this._mounted) {
+            this._store.flush();
         }
 
-        // dispatch event
         this._dispatch(webexpress?.webui?.Event?.SELECT_ROW_EVENT, {
             sender: this._element,
             row: this._selectedRow,
@@ -488,11 +526,8 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         if (!this._selectedRow) {
             return;
         }
-        if (this._selectedRow._anchorTr) {
-            this._selectedRow._anchorTr.classList.remove("active");
-            this._selectedRow._anchorTr.removeAttribute("aria-selected");
-        }
         this._selectedRow = null;
+        this._store.flush();
     }
 
     // ------------------------------------------------------------------ keyboard
@@ -635,30 +670,13 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     // ------------------------------------------------------------------ render
 
     /**
-     * Render the table using microtask batching.
+     * Renders the table again, on the next microtask together with every other change of
+     * the same turn. The rows are compared with the last refresh, so a row whose content
+     * changed flashes - which is why a caller that changed the records in place calls this.
      */
     render() {
-        if (this._renderScheduled) {
-            return;
-        }
-        this._renderScheduled = true;
-
-        queueMicrotask(() => {
-            this._renderScheduled = false;
-            this._renderNow();
-        });
-    }
-
-    /**
-     * Performs a full render pass. Subclasses extend the pass through the
-     * hooks (_buildLeadingHeaderCells, _buildLeadingCells, _renderActionsHeader,
-     * _afterRenderDom) instead of overriding the pipeline, so batching and the
-     * change-flash diff stay in one place.
-     */
-    _renderNow() {
-        const currentStates = this._collectCurrentRowStates();
-        const changedIds = new Set();
-        const newIds = new Set();
+        const states = this._collectCurrentRowStates();
+        const flash = {};
 
         const shouldHighlight = this._initialized
             && this._highlightChanges
@@ -666,136 +684,107 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             && this._prevRowState.size > 0;
 
         if (shouldHighlight) {
-            for (const entry of currentStates) {
+            for (const entry of states) {
                 const oldSig = this._prevRowState.get(entry.key);
                 if (oldSig === undefined) {
-                    newIds.add(entry.key);
+                    flash[entry.key] = "new";
                 } else if (oldSig !== entry.signature) {
-                    changedIds.add(entry.key);
+                    flash[entry.key] = "change";
                 }
             }
         }
-
-        this._isTree = this._detectTree(this._rows);
-
-        this._rebuildColumnIndexCache();
-        this._syncColumnWidths();
-
-        this._renderColumns();
-        this._renderRows(changedIds, newIds);
-        this._renderFooter();
-        this._attachColumnResizers();
-        this._afterRenderDom();
 
         this._suppressFlashOnce = false;
-        this._updateSnapshot(currentStates);
-        this._initialized = true;
+        this._updateSnapshot(states);
 
-        this._autoSelectFirstRow();
+        // the marks of several refreshes before one render add up rather than replace
+        this._pendingFlash = Object.assign(this._pendingFlash || {}, flash);
+        this.setState({ revision: this.state.revision + 1, flash: this._pendingFlash });
     }
 
     /**
-     * Hook for subclasses to bind row-level interactions after the DOM was
-     * rebuilt, for example drag handles.
+     * Produces the view of a state; the public render() is the refresh the hosts call.
+     * @param {object} state - The state.
+     * @returns {Array<object>} The virtual node tree of the table element.
      */
-    _afterRenderDom() { }
+    _viewTree(state) {
+        const tree = this._detectTree(state.rows);
 
-    /**
-     * Auto-selects the first row on the very first render when the table is
-     * selectable. The primary action of the row is triggered afterwards so a
-     * paired panel (e.g. preview / detail view) can populate itself without
-     * requiring an explicit user click. Skipped while a data load is pending
-     * (_isLoading is owned by REST-backed subclasses), so placeholder rows
-     * are never auto-selected.
-     */
-    _autoSelectFirstRow() {
-        if (!this._selectable || this._autoSelected || this._isLoading || this._selectedRow !== null || this._rows.length === 0) {
-            return;
-        }
-        this._autoSelected = true;
-        const firstRow = this._rows[0];
-        this._selectRowInternal(firstRow, null);
-        this._triggerPrimaryAction(firstRow);
+        return [
+            this._renderHead(state),
+            this._renderBody(state, tree),
+            state.footer.length > 0 && this._renderFoot(state),
+            this._renderTableExtras(state)
+        ];
     }
 
     /**
-     * Triggers the row's `data-wx-primary-action` via the central Actions
-     * registry so callers don't have to dispatch synthetic clicks.
-     * @param {Object} row - Data row whose anchor element carries the action.
+     * Describes the header row group.
+     * @param {object} state - The current state.
+     * @returns {object} The header virtual node.
      */
-    _triggerPrimaryAction(row) {
-        const el = row?._anchorTr;
-        if (!el) {
-            return;
-        }
-        const actionName = el.getAttribute("data-wx-primary-action");
-        if (!actionName) {
-            return;
-        }
-        const actionDef = webexpress?.webui?.Actions?.get?.(actionName);
-        if (!actionDef || typeof actionDef.execute !== "function") {
-            return;
-        }
-        try {
-            actionDef.execute(el, "primary", this, null);
-        } catch (e) {
-            console.error("table: primary action execute failed", e);
-        }
-    }
+    _renderHead(state) {
+        const h = webexpress.webui.h;
+        const suppressed = this._suppressHeaders;
+        const visible = state.columns.filter((c) => c.visible);
+        const lastVisibleId = visible.length > 0 ? visible[visible.length - 1].id : null;
 
-    /**
-     * Render header row structure.
-     */
-    _renderColumns() {
-        const headFragment = document.createDocumentFragment();
-        const headRow = document.createElement("div");
-        headRow.className = "wx-grid-row wx-table-header";
         // a header the table does without is layout only: a row without cells, and a row
         // group without rows, would be announced as broken structure
-        headRow.setAttribute("role", this._suppressHeaders ? "presentation" : "row");
-        this._head.setAttribute("role", this._suppressHeaders ? "presentation" : "rowgroup");
-        headFragment.appendChild(headRow);
-
-        if (!this._suppressHeaders) {
-            this._buildLeadingHeaderCells(headRow);
-
-            for (const col of this._columns) {
-                if (!col.visible) {
-                    continue;
-                }
-                headRow.appendChild(this._buildHeaderCell(col));
-            }
-
-            if (this._hasActionsColumn()) {
-                this._renderActionsHeader(headRow);
-            }
-        }
-
-        this._head.replaceChildren(headFragment);
+        return h("div", {
+            key: "head",
+            class: this._classes(["wx-table-header-group", this._headColor]),
+            role: suppressed ? "presentation" : "rowgroup",
+            ref: (el) => { this._head = el; },
+            on: { click: this._onHeadClick, keydown: this._onHeadKeyDown }
+        },
+            h("div", { key: "row", class: this._headerRowClass(), role: suppressed ? "presentation" : "row" },
+                !suppressed && [
+                    this._renderLeadingHeaderCells(state),
+                    visible.map((col) => this._renderHeaderCell(state, col, this._columnResizeEnabled && col.id !== lastVisibleId && col.resizable !== false)),
+                    this._hasActionsColumn() && this._renderActionsHeader(state)
+                ]));
     }
 
     /**
-     * Hook for subclasses to prepend non-data header cells, for example a
-     * drag-handle column.
-     * @param {HTMLElement} headRow - Header row element.
+     * Gets the classes of the header row.
+     * @returns {string} The css classes.
      */
-    _buildLeadingHeaderCells(headRow) { }
+    _headerRowClass() {
+        return "wx-grid-row wx-table-header";
+    }
 
     /**
-     * Renders the trailing actions header cell. The base control renders an
-     * empty cell; subclasses may add controls such as a column manager.
-     * @param {HTMLElement} headRow - Header row element.
+     * Hook for subclasses to describe non-data header cells ahead of the columns, for
+     * example a drag-handle column.
+     * @param {object} state - The current state.
+     * @returns {*} Virtual nodes, or null.
      */
-    _renderActionsHeader(headRow) {
-        const th = document.createElement("div");
-        th.className = "wx-grid-header-cell wx-table-actions";
-        th.setAttribute("role", "columnheader");
+    _renderLeadingHeaderCells(state) {
+        return null;
+    }
+
+    /**
+     * Hook for subclasses to add props to a column header cell, such as listeners; the
+     * props of the cell itself win.
+     * @param {Object} col - The column.
+     * @returns {object|null} The props, or null.
+     */
+    _headerCellProps(col) {
+        return null;
+    }
+
+    /**
+     * Describes the trailing actions header cell. The base control renders an empty
+     * cell; subclasses may add controls such as a column manager.
+     * @param {object} state - The current state.
+     * @returns {object} The header cell virtual node.
+     */
+    _renderActionsHeader(state) {
+        const h = webexpress.webui.h;
         // the column is named, but the name need not be seen
-        const caption = document.createElement("span");
-        caption.className = "visually-hidden";
-        caption.textContent = this._i18n("webexpress.webui:table.options.label", "Options");
-        th.appendChild(caption);
-        headRow.appendChild(th);
+        return h("div", { key: "__actions", class: "wx-grid-header-cell wx-table-actions", role: "columnheader" },
+            h("span", { class: "visually-hidden" }, this._i18n("webexpress.webui:table.options.label", "Options")));
     }
 
     /**
@@ -817,231 +806,329 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Builds a single column header cell.
-     * @param {Object} col
-     * @returns {HTMLElement}
-     */
-    _buildHeaderCell(col) {
-        const th = document.createElement("div");
-        th.className = "wx-grid-header-cell wx-col-header";
-        th.setAttribute("role", "columnheader");
-        th.dataset.columnId = col.id;
-        // a click on the header sorts, so the keyboard reaches it and reads the order
-        th.setAttribute("tabindex", "0");
-        th.setAttribute("aria-sort", col.sort === "asc" ? "ascending" : col.sort === "desc" ? "descending" : "none");
-
-        if (col.color) {
-            th.classList.add(col.color);
-        }
-        if (col.align) {
-            th.classList.add(`wx-table-align-${col.align}`);
-        }
-        if (col.sort) {
-            th.classList.add(col.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc");
-        }
-
-        const inner = document.createElement("div");
-        inner.className = "wx-col-inner";
-        if (col.icon) {
-            const i = document.createElement("i");
-            i.className = col.icon;
-            inner.appendChild(i);
-        }
-        if (col.image) {
-            const img = document.createElement("img");
-            img.className = "wx-icon";
-            img.src = col.image;
-            img.alt = "";
-            img.loading = "lazy";
-            inner.appendChild(img);
-        }
-        this._appendHeaderLabel(inner, col);
-        // a column that shows an icon or nothing at all still needs a name a reader can sort
-        // by; it is text, hidden from the eye, because a header is read by its content
-        if (!col.label) {
-            const name = document.createElement("span");
-            name.className = "visually-hidden";
-            name.textContent = col.name || this._columnFallbackName(col.index);
-            inner.appendChild(name);
-        }
-        th.appendChild(inner);
-        return th;
-    }
-
-    /**
-     * Appends the label of a column header: the formatted header the server rendered, or
-     * the plain label. The formatting is kept in one span, because the header lays out its
-     * children as flex items and would drop the blanks between formatted words.
-     * @param {HTMLElement} inner - The header content wrapper.
+     * Describes a single column header cell.
+     * @param {object} state - The current state.
      * @param {Object} col - The column.
+     * @param {boolean} resizable - Whether the column carries a resize handle.
+     * @returns {object} The header cell virtual node.
      */
-    _appendHeaderLabel(inner, col) {
-        if (col.labelHtml) {
-            const label = document.createElement("span");
-            label.className = "wx-table-cell-text";
-            label.innerHTML = col.labelHtml;
-            inner.appendChild(label);
-        } else {
-            inner.appendChild(document.createTextNode(col.label));
-        }
+    _renderHeaderCell(state, col, resizable) {
+        const h = webexpress.webui.h;
+        const extra = this._headerCellProps(col) || {};
+
+        return h("div", Object.assign({}, extra, {
+            key: col.id,
+            class: this._classes([
+                "wx-grid-header-cell wx-col-header",
+                col.color,
+                col.align && `wx-table-align-${col.align}`,
+                col.sort && (col.sort === "asc" ? "wx-sort-asc" : "wx-sort-desc")
+            ]),
+            role: "columnheader",
+            dataset: { columnId: col.id },
+            // a click on the header sorts, so the keyboard reaches it and reads the order
+            tabindex: "0",
+            "aria-sort": col.sort === "asc" ? "ascending" : col.sort === "desc" ? "descending" : "none",
+            ref: (el) => { this._headerCells.set(col.id, el); }
+        }),
+            h("div", { key: "inner", class: "wx-col-inner" },
+                col.icon && h("i", { key: "icon", class: col.icon }),
+                col.image && h("img", { key: "image", class: "wx-icon", src: col.image, alt: "", loading: "lazy" }),
+                this._renderHeaderLabel(col),
+                // a column that shows an icon or nothing at all still needs a name a reader
+                // can sort by; it is text, hidden from the eye, because a header is read by
+                // its content
+                !col.label && h("span", { key: "name", class: "visually-hidden" }, col.name || this._columnFallbackName(col.index))),
+            resizable && h("span", { key: "resizer", class: "wx-col-resizer", on: this._resizerHandlers(col.id) }));
     }
 
     /**
-     * Render body rows.
-     * @param {Set<string>} changedIds - Keys of modified rows.
-     * @param {Set<string>} newIds - Keys of new rows.
+     * Describes the label of a column header: the formatted header the server rendered,
+     * or the plain label. The formatting is kept in one span, because the header lays
+     * out its children as flex items and would drop the blanks between formatted words.
+     * @param {Object} col - The column.
+     * @returns {*} The label virtual node or text.
      */
-    _renderRows(changedIds, newIds) {
-        const fragment = document.createDocumentFragment();
-        const renderList = (rows, depth) => {
-            for (const r of rows) {
-                this._addRow(r, depth, fragment, changedIds, newIds);
+    _renderHeaderLabel(col) {
+        return col.labelHtml
+            ? webexpress.webui.h("span", { key: "label", class: "wx-table-cell-text", html: col.labelHtml })
+            : (col.label || null);
+    }
+
+    /**
+     * Returns the listeners of the resize handle of a column.
+     * @param {string} columnId - The column id.
+     * @returns {object} The listener map.
+     */
+    _resizerHandlers(columnId) {
+        return this._handler("resizer", columnId, () => ({
+            mousedown: (e) => {
+                e.stopPropagation();
+                this._beginColumnResize(e, this._headerCells.get(columnId));
+            },
+            touchstart: (e) => {
+                e.stopPropagation();
+                this._beginColumnResize(e, this._headerCells.get(columnId));
+            },
+            click: (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+            },
+            dblclick: (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                this._autoSizeColumn(this._colIndexCache.get(columnId));
+            }
+        }));
+    }
+
+    /**
+     * Describes the body row group: the visible rows in display order.
+     * @param {object} state - The current state.
+     * @param {boolean} tree - Whether a row has children.
+     * @returns {object} The body virtual node.
+     */
+    _renderBody(state, tree) {
+        return webexpress.webui.h("div", {
+            key: "body",
+            class: "wx-table-body-group",
+            role: "rowgroup",
+            ref: (el) => { this._body = el; },
+            on: this._bodyHandlers()
+        }, this._renderRowsList(state, tree));
+    }
+
+    /**
+     * Returns the listeners of the body, which serve every row through delegation.
+     * Subclasses add theirs, for example the start of a row move.
+     * @returns {object} The listener map.
+     */
+    _bodyHandlers() {
+        return this._handler("body", "rows", () => ({ click: this._onBodyClick, input: this._onBodyInput }));
+    }
+
+    /**
+     * Describes the visible rows in display order, expanding only opened tree nodes.
+     * @param {object} state - The current state.
+     * @param {boolean} tree - Whether a row has children.
+     * @returns {Array<object>} The row virtual nodes.
+     */
+    _renderRowsList(state, tree) {
+        const nodes = [];
+        const walk = (rows, depth) => {
+            for (const row of rows) {
+                nodes.push(this._renderRow(state, row, depth, tree));
                 // _treeEnabled is owned by the reorderable subclass; undefined means enabled
-                if (this._treeEnabled !== false && r.children?.length && r.expanded) {
-                    renderList(r.children, depth + 1);
+                if (this._treeEnabled !== false && row.children?.length && row.expanded) {
+                    walk(row.children, depth + 1);
                 }
             }
         };
-        if (this._rows.length) {
-            renderList(this._rows, 0);
-        }
-        this._body.replaceChildren(fragment);
+        walk(state.rows, 0);
+        return nodes;
     }
 
     /**
-     * Create and append a single row div.
+     * Describes one row: its leading cells, a cell per visible column and the actions
+     * cell.
+     * @param {object} state - The current state.
      * @param {Object} row - Row data object.
      * @param {number} depth - Hierarchy depth.
-     * @param {DocumentFragment} fragment - Target fragment.
-     * @param {Set<string>} changedIds - Keys with changed signatures.
-     * @param {Set<string>} newIds - Keys for new rows.
+     * @param {boolean} tree - Whether a row has children.
+     * @returns {object} The row virtual node.
      */
-    _addRow(row, depth, fragment, changedIds, newIds) {
-        const tr = document.createElement("div");
-        tr.className = "wx-grid-row";
-        tr.setAttribute("role", "row");
-
-        if (row.color) {
-            tr.classList.add(row.color);
-        }
-        if (row.class) {
-            tr.classList.add(...row.class.split(/\s+/).filter(Boolean));
-        }
-        if (row.style) {
-            tr.style.cssText = row.style;
-        }
+    _renderRow(state, row, depth, tree) {
+        const h = webexpress.webui.h;
+        const key = this._getRowKey(row);
+        const flash = state.flash ? state.flash[key] : null;
+        const selected = state.selected === row;
+        const props = {
+            key: key,
+            class: this._classes([
+                "wx-grid-row",
+                row.color,
+                ...String(row.class || "").split(/\s+/),
+                selected && "active",
+                flash === "change" && "wx-change-flash",
+                flash === "new" && "wx-new-flash"
+            ].concat(this._rowClasses(state, row) || [])),
+            role: "row",
+            style: row.style || "",
+            "aria-selected": selected ? "true" : null,
+            ref: (el) => {
+                el._dataRowRef = row;
+                row._anchorTr = el;
+                row._depth = depth;
+                this._rowElements.set(key, el);
+            }
+        };
 
         // apply action attributes (primary + secondary)
-        this._applyActionAttrs(tr, "primary", row.primaryAction);
-        this._applyActionAttrs(tr, "secondary", row.secondaryAction);
+        Object.assign(props, this._actionProps("primary", row.primaryAction), this._actionProps("secondary", row.secondaryAction));
 
-        // apply selection state
-        if (this._selectedRow === row) {
-            tr.classList.add("active");
-            tr.setAttribute("aria-selected", "true");
-        }
-
-        const key = this._getRowKey(row);
-        if (key) {
-            if (changedIds.has(key)) {
-                tr.classList.add("wx-change-flash");
-            } else if (newIds.has(key)) {
-                tr.classList.add("wx-new-flash");
-            }
-        }
-
-        tr._dataRowRef = row;
-        row._anchorTr = tr;
-        row._depth = depth;
-
-        this._buildLeadingCells(tr, row);
-
+        const cells = [];
         let firstVisible = true;
-
-        for (let i = 0; i < this._columns.length; i++) {
-            const colDef = this._columns[i];
-            if (!colDef.visible) {
+        for (let i = 0; i < state.columns.length; i++) {
+            const col = state.columns[i];
+            if (!col.visible) {
                 continue;
             }
-            tr.appendChild(this._buildBodyCell(row, colDef, row.cells[i], firstVisible));
+            cells.push(this._renderBodyCell(row, col, row.cells[i], firstVisible, tree));
             firstVisible = false;
         }
 
-        if (this._hasActionsColumn()) {
-            tr.appendChild(this._buildOptionsCell(row));
-        }
-
-        if (this._isTree && this._treeEnabled !== false) {
-            this._injectTreeToggle(tr, row, depth);
-        }
-        fragment.appendChild(tr);
+        return h("div", props,
+            this._renderLeadingCells(state, row),
+            cells,
+            this._hasActionsColumn() && h("div", {
+                key: "__actions",
+                class: "wx-grid-cell wx-table-actions",
+                role: this._cellRole,
+                keep: true,
+                ref: (el) => this._placeOptions(el, row)
+            }));
     }
 
     /**
-     * Hook for subclasses to prepend non-data cells to a row, for example a
-     * drag handle. Leading cells must be mirrored by _gridLeadingParts so the
-     * grid template stays aligned.
-     * @param {HTMLElement} tr - Row element.
-     * @param {Object} row - Row data object.
+     * Joins class names into one string. The renderer leaves a prop alone that equals the
+     * one it rendered last, so a row keeps a class another hand gave it (a drag mark)
+     * until its own classes change.
+     * @param {Array<string>} parts - The class names, falsy entries skipped.
+     * @returns {string} The class attribute.
      */
-    _buildLeadingCells(tr, row) { }
+    _classes(parts) {
+        return parts.filter(Boolean).join(" ");
+    }
 
     /**
-     * Builds a single body cell.
-     * @param {Object} row
-     * @param {Object} colDef
-     * @param {Object} cell
-     * @param {boolean} firstVisible
-     * @returns {HTMLElement}
+     * Gets the action attributes of a row as props, in the form _applyActionAttrs writes.
+     * @param {"primary"|"secondary"} prefix - Attribute prefix.
+     * @param {Object|null} actionMap - The action map (key→value).
+     * @returns {object} The attribute props.
      */
-    _buildBodyCell(row, colDef, cell, firstVisible) {
-        const td = document.createElement("div");
-        td.className = "wx-grid-cell";
-        td.setAttribute("role", this._cellRole);
+    _actionProps(prefix, actionMap) {
+        const props = {};
+        for (const [key, value] of Object.entries(actionMap || {})) {
+            if (value === null || value === undefined || value === false || value === "") {
+                continue;
+            }
+            props[`data-wx-${prefix}-${key.replace(/[A-Z]/g, (c) => "-" + c.toLowerCase())}`] = String(value);
+        }
+        return props;
+    }
 
-        if (colDef?.align) {
-            td.classList.add(`wx-table-align-${colDef.align}`);
+    /**
+     * Hook for subclasses to add classes to a row, for example the marks of a drag.
+     * @param {object} state - The current state.
+     * @param {Object} row - Row data object.
+     * @returns {Array<string>|null} The classes.
+     */
+    _rowClasses(state, row) {
+        return null;
+    }
+
+    /**
+     * Hook for subclasses to describe non-data cells ahead of the columns of a row, for
+     * example a drag handle. Leading cells must be mirrored by the grid template.
+     * @param {object} state - The current state.
+     * @param {Object} row - Row data object.
+     * @returns {*} Virtual nodes, or null.
+     */
+    _renderLeadingCells(state, row) {
+        return null;
+    }
+
+    /**
+     * Hook for subclasses to describe elements of the table element besides the header,
+     * the body and the footer.
+     * @param {object} state - The current state.
+     * @returns {*} Virtual nodes, or null.
+     */
+    _renderTableExtras(state) {
+        return null;
+    }
+
+    /**
+     * Describes a single body cell. Its content is built into it and kept until the cell
+     * or what the cell shows changes, because a cell template may place a control there.
+     * @param {Object} row - The row.
+     * @param {Object} col - The column.
+     * @param {Object} cell - The cell.
+     * @param {boolean} firstVisible - Whether it is the first visible column.
+     * @param {boolean} tree - Whether a row has children.
+     * @returns {object} The cell virtual node.
+     */
+    _renderBodyCell(row, col, cell, firstVisible, tree) {
+        return webexpress.webui.h("div", {
+            key: col.id,
+            class: this._classes([
+                "wx-grid-cell",
+                col.align && `wx-table-align-${col.align}`,
+                cell && cell.color,
+                ...String((cell && cell.class) || "").split(/\s+/)
+            ]),
+            role: this._cellRole,
+            style: (cell && cell.style) || "",
+            keep: true,
+            ref: (el) => this._placeCell(el, row, col, cell, firstVisible && tree && this._treeEnabled !== false, firstVisible)
+        });
+    }
+
+    /**
+     * Builds the content of a cell into it, anew only when the cell, its column or what
+     * it shows changed, so a control a cell template placed there survives a sort, an
+     * expand or a selection.
+     * @param {HTMLElement} el - The cell element.
+     * @param {Object} row - The row.
+     * @param {Object} col - The column.
+     * @param {Object} cell - The cell.
+     * @param {boolean} treeCell - Whether the cell carries the tree toggle.
+     * @param {boolean} firstVisible - Whether it is the first visible column.
+     */
+    _placeCell(el, row, col, cell, treeCell, firstVisible) {
+        const signature = JSON.stringify([
+            cell ? [cell.content, cell.html, cell.type, cell.uri, cell.icon, cell.image, cell.target] : null,
+            firstVisible ? [row.uri, row.icon, row.image, row.target] : null,
+            treeCell ? [row.expanded, !!row.children?.length, webexpress.webui.treeGuides(row)] : null
+        ]);
+        if (el._wxCell === cell && el._wxColumn === col && el._wxRow === row && el._wxSignature === signature) {
+            return;
+        }
+        el._wxCell = cell;
+        el._wxColumn = col;
+        el._wxRow = row;
+        el._wxSignature = signature;
+
+        el.replaceChildren();
+        if (cell) {
+            let content = this._renderCell(row, col, cell, firstVisible);
+
+            // markup has to become nodes before the row anchor wraps it, otherwise the anchor
+            // would take it as a text node and the tags would show up verbatim
+            if (cell.html === true && !(content instanceof Node)) {
+                const parser = document.createElement("template");
+                parser.innerHTML = String(content ?? "");
+                content = parser.content;
+            }
+
+            // the row decorates its first visible cell; every other cell may carry a link or an
+            // icon of its own. Only one of the two wraps a given cell, so the anchors never nest
+            if (firstVisible && (row.uri || row.icon || row.image)) {
+                content = this._wrapWithAnchor(row, content);
+            } else if (cell.uri || cell.icon || cell.image) {
+                content = this._wrapWithAnchor(cell, content);
+            }
+
+            if (content instanceof Node) {
+                el.appendChild(content);
+            } else {
+                el.textContent = String(content ?? "");
+            }
         }
 
-        if (!cell) {
-            td.textContent = "";
-            return td;
+        if (treeCell) {
+            this._injectTreeToggle(el, row);
         }
-
-        if (cell.color) {
-            td.classList.add(cell.color);
-        }
-        if (cell.class) {
-            td.classList.add(...cell.class.split(/\s+/).filter(Boolean));
-        }
-        if (cell.style) {
-            td.style.cssText += (td.style.cssText ? "; " : "") + cell.style;
-        }
-
-        let content = this._renderCell(row, colDef, cell, firstVisible);
-
-        // markup has to become nodes before the row anchor wraps it, otherwise the anchor
-        // would take it as a text node and the tags would show up verbatim
-        if (cell.html === true && !(content instanceof Node)) {
-            const parser = document.createElement("template");
-            parser.innerHTML = String(content ?? "");
-            content = parser.content;
-        }
-
-        // the row decorates its first visible cell; every other cell may carry a link or an
-        // icon of its own. Only one of the two wraps a given cell, so the anchors never nest
-        if (firstVisible && (row.uri || row.icon || row.image)) {
-            content = this._wrapWithAnchor(row, content);
-        } else if (cell.uri || cell.icon || cell.image) {
-            content = this._wrapWithAnchor(cell, content);
-        }
-
-        if (content instanceof Node) {
-            td.appendChild(content);
-        } else {
-            td.textContent = String(content ?? "");
-        }
-        return td;
     }
 
     /**
@@ -1082,26 +1169,28 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Builds the options dropdown cell for a row.
-     * @param {Object} row
-     * @returns {HTMLElement}
+     * Builds the options dropdown of a row into its cell, anew only when the options
+     * changed.
+     * @param {HTMLElement} el - The actions cell.
+     * @param {Object} row - The row.
      */
-    _buildOptionsCell(row) {
-        const tdOpt = document.createElement("div");
-        tdOpt.className = "wx-grid-cell wx-table-actions";
-        tdOpt.setAttribute("role", this._cellRole);
-
+    _placeOptions(el, row) {
         const effectiveOptions = (row.options && row.options.length) ? row.options : this._options;
+        if (el._wxOptions === effectiveOptions) {
+            return;
+        }
+        el._wxOptions = effectiveOptions;
+        el.replaceChildren();
+
         if (effectiveOptions && effectiveOptions.length > 0) {
             const div = document.createElement("div");
             div.dataset.icon = this._iconClass("more");
             div.dataset.size = "btn-sm";
             div.dataset.border = "false";
             div.title = this._i18n("webexpress.webui:table.options.label", "Options");
-            tdOpt.appendChild(div);
+            el.appendChild(div);
             new webexpress.webui.DropdownCtrl(div).items = effectiveOptions;
         }
-        return tdOpt;
     }
 
     /**
@@ -1129,45 +1218,133 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Render footer row.
+     * Describes the footer row group.
+     * @param {object} state - The current state.
+     * @returns {object} The footer virtual node.
      */
-    _renderFooter() {
-        if (!this._footer.length) {
-            this._foot?.remove();
+    _renderFoot(state) {
+        const h = webexpress.webui.h;
+
+        return h("div", { key: "foot", class: "wx-table-footer-group", role: "rowgroup", ref: (el) => { this._foot = el; } },
+            h("div", { class: "wx-grid-row wx-table-footer", role: "row" },
+                state.columns.map((col, i) => col.visible && h("div", {
+                    key: col.id,
+                    class: this._classes(["wx-grid-cell", col.align && `wx-table-align-${col.align}`]),
+                    role: this._cellRole,
+                    html: state.footer[i] != null ? state.footer[i] : ""
+                }))));
+    }
+
+    /**
+     * Follows the first render: the rows it shows are the ones the next refresh compares
+     * against, and a selectable table selects its first row.
+     * @param {object} state - The rendered state.
+     */
+    onMount(state) {
+        this._updateSnapshot(this._collectCurrentRowStates());
+        this._suppressFlashOnce = false;
+        this.onUpdate(state);
+    }
+
+    /**
+     * Follows a render with what the DOM has to do itself: the grid template of the
+     * columns, the restart of a change flash on a row that kept its node, and the hooks.
+     * @param {object} state - The rendered state.
+     */
+    onUpdate(state) {
+        this._isTree = this._detectTree(state.rows);
+        this._rebuildColumnIndexCache();
+        this._syncColumnWidths();
+
+        if (!state.footer.length) {
             this._foot = null;
+        }
+
+        if (state.flash !== this._shownFlash) {
+            this._shownFlash = state.flash;
+            this._pendingFlash = null;
+            // a row keeps its node, so a mark it already carries has to be set anew for
+            // the animation to play again
+            for (const [key, kind] of Object.entries(state.flash || {})) {
+                const el = this._rowElements.get(key);
+                const cls = kind === "new" ? "wx-new-flash" : "wx-change-flash";
+                if (el && el.isConnected !== false) {
+                    el.classList.remove(cls);
+                    void el.offsetWidth;
+                    el.classList.add(cls);
+                }
+            }
+
+            // once played, the marks go, so a row that is shown again later (an expand,
+            // a column brought back) does not flash a change it never had
+            const shown = state.flash;
+            if (shown && Object.keys(shown).length > 0) {
+                clearTimeout(this._flashTimer);
+                this._flashTimer = setTimeout(() => {
+                    if (this.state.flash === shown) {
+                        this.setState({ flash: null });
+                    }
+                }, webexpress.webui.TableCtrl.FLASH_DURATION);
+            }
+        }
+
+        this._afterRenderDom();
+        this._autoSelectFirstRow();
+    }
+
+    /**
+     * Stops the timer that takes the change marks away.
+     */
+    onUnmount() {
+        clearTimeout(this._flashTimer);
+    }
+
+    /**
+     * Hook for subclasses to bind row-level interactions after a render.
+     */
+    _afterRenderDom() { }
+
+    /**
+     * Auto-selects the first row on the very first render when the table is
+     * selectable. The primary action of the row is triggered afterwards so a
+     * paired panel (e.g. preview / detail view) can populate itself without
+     * requiring an explicit user click. Skipped while a data load is pending
+     * (_isLoading is owned by REST-backed subclasses), so placeholder rows
+     * are never auto-selected.
+     */
+    _autoSelectFirstRow() {
+        if (!this._selectable || this._autoSelected || this._isLoading || this._selectedRow !== null || this._rows.length === 0) {
             return;
         }
+        this._autoSelected = true;
+        const firstRow = this._rows[0];
+        this._selectRowInternal(firstRow, null, false);
+        this._triggerPrimaryAction(firstRow);
+    }
 
-        if (!this._foot) {
-            this._foot = document.createElement("div");
-            this._foot.className = "wx-table-footer-group";
-            this._foot.setAttribute("role", "rowgroup");
-            this._table.appendChild(this._foot);
+    /**
+     * Triggers the row's `data-wx-primary-action` via the central Actions
+     * registry so callers don't have to dispatch synthetic clicks.
+     * @param {Object} row - Data row whose anchor element carries the action.
+     */
+    _triggerPrimaryAction(row) {
+        const el = row?._anchorTr;
+        if (!el) {
+            return;
         }
-
-        this._foot.textContent = "";
-        const tr = document.createElement("div");
-        tr.className = "wx-grid-row wx-table-footer";
-        tr.setAttribute("role", "row");
-
-        for (let i = 0; i < this._columns.length; i++) {
-            const col = this._columns[i];
-            if (!col.visible) {
-                continue;
-            }
-
-            const td = document.createElement("div");
-            td.className = "wx-grid-cell";
-            td.setAttribute("role", this._cellRole);
-            if (col.align) {
-                td.classList.add(`wx-table-align-${col.align}`);
-            }
-            if (this._footer[i] != null) {
-                td.innerHTML = this._footer[i];
-            }
-            tr.appendChild(td);
+        const actionName = el.getAttribute("data-wx-primary-action");
+        if (!actionName) {
+            return;
         }
-        this._foot.appendChild(tr);
+        const actionDef = webexpress?.webui?.Actions?.get?.(actionName);
+        if (!actionDef || typeof actionDef.execute !== "function") {
+            return;
+        }
+        try {
+            actionDef.execute(el, "primary", this, null);
+        } catch (e) {
+            console.error("table: primary action execute failed", e);
+        }
     }
 
     // ------------------------------------------------------------------ sorting
@@ -1236,9 +1413,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
         if (!div) {
             return [];
         }
-        if (div.dataset.color) {
-            this._head.classList.add(div.dataset.color);
-        }
+        this._headColor = div.dataset.color || null;
         this._suppressHeaders = div.dataset.suppressHeaders === "true";
 
         return Array.from(div.children).map((el, idx) => {
@@ -1449,24 +1624,17 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Inject tree toggle control into the first data column.
+     * Wraps the content of the first data cell of a row into the tree indentation and
+     * its toggle.
      * @remarks
      * The indentation is drawn as one guide column per level rather than as a single
      * blank spacer: an ancestor whose branch continues carries a through line, and the
      * column of the row itself carries the elbow that joins it to its parent. At depth
      * two and beyond, indentation alone no longer says which parent a row belongs to.
-     * @param {HTMLElement} tr - Row element.
+     * @param {HTMLElement} firstCell - The first data cell of the row.
      * @param {Object} row - Row data.
-     * @param {number} depth - Hierarchy depth.
      */
-    _injectTreeToggle(tr, row, depth) {
-        const firstCell = Array.from(tr.children).find(cell =>
-            cell.classList.contains("wx-grid-cell") && !cell.classList.contains("wx-table-drag-handle")
-        );
-        if (!firstCell) {
-            return;
-        }
-
+    _injectTreeToggle(firstCell, row) {
         const wrapper = document.createElement("span");
         wrapper.className = "wx-tree";
 
@@ -1529,7 +1697,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Constructs the CSS Grid Template string.
+     * Constructs the CSS Grid Template string. It is written to the table element, which
+     * is the render root and so outside the rendered tree, and also live while a column
+     * is resized.
      */
     _syncColumnWidths() {
         const parts = [];
@@ -1679,56 +1849,6 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     // ------------------------------------------------------------------ resizing
 
     /**
-     * Attach column resizer handles.
-     */
-    _attachColumnResizers() {
-        if (!this._columnResizeEnabled) {
-            return;
-        }
-        const headers = this._head.querySelectorAll(".wx-col-header");
-
-        const visibleCols = this._columns.filter(c => c.visible);
-        const lastVisibleId = visibleCols.length > 0 ? visibleCols[visibleCols.length - 1].id : null;
-
-        headers.forEach((th) => {
-            const colId = th.dataset.columnId;
-            if (!colId || !this._colIndexCache.has(colId) || colId === lastVisibleId) {
-                return;
-            }
-
-            const index = this._colIndexCache.get(colId);
-            const column = this._columns[index];
-            if (column && column.resizable === false) {
-                return;
-            }
-
-            let handle = th.querySelector(":scope > .wx-col-resizer");
-            if (handle) {
-                return;
-            }
-
-            handle = document.createElement("span");
-            handle.className = "wx-col-resizer";
-            th.appendChild(handle);
-
-            handle.addEventListener("mousedown", (e) => {
-                e.stopPropagation();
-                this._beginColumnResize(e, th);
-            });
-            handle.addEventListener("touchstart", (e) => {
-                e.stopPropagation();
-                this._beginColumnResize(e, th);
-            }, { passive: true });
-            handle.addEventListener("click", (e) => { e.stopPropagation(); e.preventDefault(); });
-            handle.addEventListener("dblclick", (e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                this._autoSizeColumn(index);
-            });
-        });
-    }
-
-    /**
      * Autosize a specific column.
      * @param {number} index - Column index.
      */
@@ -1738,42 +1858,35 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        const headers = this._head.querySelectorAll(".wx-col-header");
-        let headerTh = null;
-        let domIndex = -1;
-
-        for (let i = 0; i < headers.length; i++) {
-            if (headers[i].dataset.columnId === column.id) {
-                domIndex = i;
-                headerTh = headers[i];
-                break;
-            }
-        }
-        if (!headerTh) {
+        const headerTh = this._headerCells.get(column.id);
+        if (!headerTh || !headerTh.isConnected) {
             return;
         }
 
+        // a style the browser leaves empty counts as no width rather than poisoning the sum
+        const px = (value) => parseFloat(value) || 0;
         let maxWidth = 0;
         const inner = headerTh.querySelector(".wx-col-inner") || headerTh;
 
         // measure header
         const thStyle = getComputedStyle(headerTh);
         const headerWidth = Math.ceil(inner.getBoundingClientRect().width)
-            + parseFloat(thStyle.paddingLeft) + parseFloat(thStyle.paddingRight)
-            + parseFloat(thStyle.borderLeftWidth) + parseFloat(thStyle.borderRightWidth);
+            + px(thStyle.paddingLeft) + px(thStyle.paddingRight)
+            + px(thStyle.borderLeftWidth) + px(thStyle.borderRightWidth);
 
         maxWidth = Math.max(maxWidth, headerWidth);
 
-        // measure cells
+        // measure cells; a cell is found by the column it shows, because a row may lead
+        // with cells of no column (the grip of a movable row)
         const rows = this._body.querySelectorAll(".wx-grid-row");
         for (let r = 0; r < rows.length; r++) {
-            const td = rows[r].children[domIndex];
+            const td = Array.from(rows[r].children).find((cell) => cell._wxColumn === column);
             if (!td) {
                 continue;
             }
             const tdStyle = getComputedStyle(td);
             const contentW = Math.max(td.scrollWidth, Math.ceil(td.getBoundingClientRect().width));
-            const totalW = contentW + parseFloat(tdStyle.borderLeftWidth) + parseFloat(tdStyle.borderRightWidth);
+            const totalW = contentW + px(tdStyle.borderLeftWidth) + px(tdStyle.borderRightWidth);
             if (totalW > maxWidth) {
                 maxWidth = totalW;
             }
@@ -1786,11 +1899,15 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Start column resize interaction.
+     * Start column resize interaction. The width follows the pointer through the grid
+     * template alone, so the gesture renders nothing.
      * @param {Event} evt - Triggering event.
      * @param {HTMLElement} th - Column header element.
      */
     _beginColumnResize(evt, th) {
+        if (!th) {
+            return;
+        }
         this._isResizing = true;
         const colId = th.dataset.columnId;
         const index = this._colIndexCache.get(colId);

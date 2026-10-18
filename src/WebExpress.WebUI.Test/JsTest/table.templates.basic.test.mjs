@@ -122,3 +122,14 @@ test("combo renders a select with the embedded options in edit mode", () => {
     assert.equal(select.childNodes[1].value, "ghost");
     assert.equal(select.childNodes[1].selected, true, "the current value is preselected");
 });
+
+test("an editable tag cell keeps its editor when the last tag was removed", () => {
+    const rt = loadRuntime();
+    rt.wx.SmartEditCtrl = class { constructor(el) { el.classList.add("wx-smart-edit"); } };
+
+    const node = render(rt, "tag", "", { editable: "true" });
+
+    assert.notEqual(node, "", "the cell is not dropped");
+    assert.ok(node.classList.contains("wx-smart-edit"), "so tags can be added again");
+    assert.equal(render(rt, "tag", "", {}), "", "a read-only empty cell stays empty");
+});

@@ -384,6 +384,12 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--wx-link-hover
     border-radius: 0.5em;
 }
 
+/* the decoration keeps its size; a long text beside it would shrink it otherwise */
+.wx-cell-content > .wx-icon,
+.wx-cell-content > .wx-icon-large {
+    flex-shrink: 0;
+}
+
 /* --- Row Drag & Drop --- */
 .wx-table-drag-handle {
     cursor: grab;
@@ -396,6 +402,16 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--wx-link-hover
 
 .wx-table .wx-drag-over {
     border-top: 2px solid var(--wx-primary);
+}
+
+/* --- Column Drag & Drop --- */
+/* the insertion line is placed in viewport coordinates of the header it stands at */
+.wx-table-drag-indicator {
+    position: fixed;
+    width: 2px;
+    background-color: var(--wx-primary);
+    pointer-events: none;
+    z-index: 1040;
 }
 
 /* --- Column Resizing --- */

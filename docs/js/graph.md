@@ -100,8 +100,20 @@ keeps a waypoint readable as the deliberate routing decision it is: a bezier ben
 whole run and no longer passes through the point the user placed. `data-edge-style` selects
 `straight` (sharp corners) or `smooth` when a curve is wanted anyway.
 
-The arrowhead is drawn in the edge's own colour. Since an SVG marker cannot inherit the
-stroke of the path referencing it, one marker is created per colour in use.
+The arrowhead is drawn in the edge's own colour. An edge with an explicit `color` gets a
+marker of that colour; an edge without one uses a marker filled with `context-stroke`, so
+its head follows a css colour, the hover and the selection like the line does. The head is
+anchored at its base: the line stops `ARROW_LENGTH` short of the end point and the head
+reaches on to it, so neither the round line cap nor a stroke pattern runs into the tip, and
+the tip ends just off the border of the target node.
+
+## Rendering and State
+
+The canvas is a function of the state: the model, the measured nodes, their positions, the viewport (`scale`, pan) and the canvas size. The state is a `webexpress.webui.FrameState`, so a simulation step, a drag, a pan or a wheel zoom renders once per animation frame however many changes the frame saw, while a discrete change - `render()`, a replaced `model`, a click or a key in the editor - renders at once. Node groups and edges are keyed by their id, so a frame patches their geometry instead of rebuilding them.
+
+The node records of the simulation are its working memory: an integration step or a gesture moves them and then publishes their positions into the state, from which the canvas renders. The pointer math reads the viewport from the state, so it is right before the frame that paints a new viewport. The canvas size, which only the layout knows, is measured by a `ResizeObserver` and enters the state like any other change; the grid covers the visible area from it. Until the user pans or zooms, a change of the canvas size also fits the graph again, because the first fit often sees a canvas the page has not finished laying out (a scrollbar, a sidebar, a hidden tab, a folded pane). Fitting by hand - the fit button or `0` - hands the view back to the canvas.
+
+Measured in Chrome with the simulation running, a frame - integration, render and layout - costs about the same as with the viewer that updated its DOM by hand on a graph of 100 nodes (2.5 to 3.8 against 2.6 to 2.8 ms), and less on larger ones: 7.8 against 9.2 to 9.8 ms for 300 nodes and 15.9 against 21.0 to 21.4 ms for 600. The integration step looks up the ends of an edge by id rather than by search, which pays for most of the reconciliation.
 
 ## Simulation Lifecycle
 
@@ -123,7 +135,8 @@ settle and the loop ends once more.
 - the pan and drag handlers on `window`, **including the transient ones of a gesture that
   was still in progress**,
 - the pointer, wheel and context-menu handlers on the SVG root,
-- the SVG canvas, the fit button and the live region.
+- the SVG canvas, the fit button and the live region, together with the listeners the view
+  attached to them.
 
 The controller calls `destroy()` when the host leaves the document. A control that is torn
 down mid-drag leaves nothing behind.
@@ -267,6 +280,12 @@ narrows the list instead of removing buttons afterwards — the workflow editor 
 creation and editing into its properties panel that way. Separators collapse automatically
 when the actions around them are absent.
 
+The editor renders through the hooks of the viewer, from the same state: the toolbar, the
+selection, source and hover marks of the nodes, the waypoints and endpoint handles of the
+selected edge, the preview of an edge being drawn, the alignment guides of a drag and the
+dialogs. The fields of the properties dialog are built into its body when it opens and
+kept there, so what the user types survives every render until the dialog is applied.
+
 ## Editing with the Pointer
 
 - **Click** a node or an edge to select it; clicking the background clears the selection.
@@ -293,7 +312,7 @@ than a bare native swatch.
 |`Ctrl` + `Enter`       |Starts an edge at the selected node; pick the target with the arrows and confirm with `Enter`.
 |`Insert`               |Adds a waypoint to the selected edge, on its longest segment, and selects it.
 |`Delete`               |Removes the selection. With a waypoint selected only the waypoint is removed, not the edge. Removing a node asks for confirmation and takes its edges with it.
-|`Escape`               |Cancels a pending edge and clears the selection.
+|`Escape`               |Cancels a pending edge and clears the selection; with a dialog open it closes the dialog.
 |`Ctrl` + `Z` / `Ctrl` + `Y` |Undo / redo.
 |`+` / `-` / `0`        |Zoom in, zoom out, fit to view.
 
@@ -310,6 +329,8 @@ pointing at it. It therefore checks whether the event belongs to this editor bef
   so `Delete` while renaming a state edits the text instead of deleting the state;
 - an event originating outside this editor's host is ignored, so a page can carry several
   graphs and arbitrary other forms without a shortcut crossing over;
+- while a dialog is open, its buttons and fields keep their keys; only `Escape` is taken,
+  to close it;
 - a torn-down editor ignores keys entirely.
 
 ## Alignment
@@ -323,8 +344,11 @@ outside that tolerance the configured grid behavior remains active.
 
 ## Undo History
 
-Every structural change pushes a deep snapshot of the model. A drag pushes its pre-drag
-snapshot once, on release, and only if the element actually moved. The stack is capped at
+Every structural change pushes a deep snapshot of the model as it was before the change,
+so one undo takes back exactly one change and redo replays it. The model on screen is never
+on the stack, and setting `model` adds no entry: a model a host loads after construction -
+the workflow editor loads its model that way - cannot be undone away. A drag pushes its
+pre-drag snapshot once, on release, and only if the element actually moved. The stack is capped at
 `HISTORY_LIMIT` (50 entries). Undo and redo prune a selection the restored model no longer
 contains, so the properties panel never edits an object that has been undone away.
 

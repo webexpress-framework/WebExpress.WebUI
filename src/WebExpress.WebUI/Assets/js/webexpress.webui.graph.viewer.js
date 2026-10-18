@@ -1,12 +1,24 @@
 /**
  * Graph viewer controller with pan, zoom, drag, and simple spring-mass physics.
  * Supports nodes with optional icons or images, edges with waypoint and labels.
+ *
+ * The canvas is a function of the state: the model, the measured nodes, their
+ * positions, the viewport and the canvas size. The state is a FrameState, so a
+ * simulation step, a drag or a pan renders once per animation frame however many
+ * changes the frame saw; a discrete change - render(), a replaced model - renders at
+ * once. The node records of the simulation are its working memory: an integration
+ * step or a gesture moves them and then publishes their positions into the state the
+ * canvas renders from.
+ *
  * The following events are triggered:
  * - webexpress.webui.Event.CLICK_EVENT
  * - webexpress.webui.Event.DOUBLE_CLICK_EVENT
  */
-webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
+webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.StateCtrl {
     static ICON_SIZE = 28;
+
+    // an image icon is drawn a little smaller than a glyph, whose box carries padding
+    static IMAGE_SIZE = 22;
 
     // a node that carries a description or a state is measured from its text,
     // so the text is cut first and the rectangle then fits it exactly; without
@@ -35,6 +47,10 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     // how far a rounded corner reaches into the two segments meeting at a waypoint
     static CORNER_RADIUS = 12;
 
+    // the arrow head in graph units, slimmer than wide so it reads as a direction
+    static ARROW_LENGTH = 10;
+    static ARROW_WIDTH = 7;
+
     // svg fragment references share the document even across separate canvases
     static _nextMarkerId = 0;
 
@@ -43,7 +59,19 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
      * @param {HTMLElement} element - The host element.
      */
     constructor(element) {
-        super(element);
+        super(element, {
+            store: new webexpress.webui.FrameState({
+                model: { nodes: [], edges: [] },
+                nodes: [],
+                positions: {},
+                view: { scale: 1, x: 0, y: 0 },
+                size: { width: 0, height: 0 },
+                dissolve: 0,
+                panning: false,
+                announcement: "",
+                revision: 0
+            })
+        });
 
         // every listener the control installs outside its own subtree is
         // recorded here, so the teardown can release them all - including the
@@ -68,14 +96,10 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         this._gridSize = this._readGridSize(element.dataset.grid);
         this._gridSnap = element.dataset.gridSnap === "true";
 
-        this._scale = 1;
-        this._pan = { x: 0, y: 0 };
         this._viewDrag = null;
-
-        this._model = this._normalizeModel(this._readFromDom(element));
-        this._nodes = [];
-        this._edges = [];
         this._drag = null;
+        this._autoFit = true;
+        this._edges = [];
         this._anim = null;
         this._animFrames = 0;
         this._destroyed = false;
@@ -83,6 +107,9 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         this._dissolving = false;
         this._dissolveProgress = 0;
         this._dissolveDuration = 0.6; // seconds
+        this._markerPrefix = `wx-graph-arrow-${++webexpress.webui.GraphViewerCtrl._nextMarkerId}`;
+
+        this._model = this._normalizeModel(this._readFromDom(element));
 
         if (!element.style.position) {
             element.style.position = "relative";
@@ -95,56 +122,52 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             e.preventDefault();
         });
 
-        this._svg = this._createSvg();
-        this._viewport = this._createGroup("viewport");
-        this._svg.appendChild(this._viewport);
-        element.appendChild(this._svg);
+        this._autoPhysics = this._buildPhysics();
 
-        // the grid is the bottom layer of the viewport, so it pans and zooms
-        // with the content and the cells stay aligned to model coordinates
-        this._gridLayer = this._createGroup("grid");
-        this._viewport.appendChild(this._gridLayer);
-
-        this._nodeLayer = this._createGroup("nodes");
-        this._edgeLayer = this._createGroup("edges");
-        this._viewport.appendChild(this._edgeLayer);
-        this._viewport.appendChild(this._nodeLayer);
-
-        const autoPhysics = this._buildPhysics();
-        this.render();
-        this._createViewControls();
-        this._createLiveRegion();
-        this._fitToView();
-
-        if (autoPhysics) {
-            this._startAnimation();
+        // a subclass renders through hooks that read what its own constructor sets up,
+        // so it opens the canvas at the end of that constructor
+        if (new.target === webexpress.webui.GraphViewerCtrl) {
+            this._open();
         }
     }
 
     /**
-     * Applies an author-chosen paint value, or clears it again.
-     *
-     * The value goes on the inline style rather than on the fill/stroke
-     * presentation attribute. A presentation attribute loses against every
-     * stylesheet rule, and the theme defaults for labels and edges are exactly
-     * such rules - so a colour chosen for a node or an edge was silently
-     * overruled by the default. An inline style outranks both, which restores
-     * the intended precedence: explicit colour beats css class beats theme.
-     * @param {Element} element - The element to paint.
-     * @param {string} property - "fill" or "stroke".
-     * @param {string} value - The colour, or an empty value to clear it.
+     * Renders the canvas the first time, fits the graph into it and starts the
+     * simulation when nodes are still to be placed.
      */
-    _applyPaint(element, property, value) {
-        if (!element) {
-            return;
+    _open() {
+        this._store.flush();
+        this.mount();
+        this._fitToView();
+        this._store.flush();
+
+        if (this._autoPhysics) {
+            this._startAnimation();
         }
-        if (value) {
-            element.style[property] = value;
-        } else {
-            element.style[property] = "";
-            // an earlier render may have left the attribute behind
-            element.removeAttribute(property);
-        }
+    }
+
+    // the model, the measured nodes and the viewport are state; the accessors keep the
+    // record api the subclasses and the hosts use
+
+    get _model() { return this.state.model; }
+    set _model(value) { this.setState({ model: value || { nodes: [], edges: [] } }); }
+
+    get _nodes() { return this.state.nodes; }
+    set _nodes(value) { this.setState({ nodes: Array.isArray(value) ? value : [] }); }
+
+    get _scale() { return this.state.view.scale; }
+    set _scale(value) { this._setView({ scale: value }); }
+
+    // a copy: the pan is changed through _setView, never in place
+    get _pan() { return Object.freeze({ x: this.state.view.x, y: this.state.view.y }); }
+    set _pan(value) { this._setView({ x: value.x, y: value.y }); }
+
+    /**
+     * Changes the viewport.
+     * @param {{scale?: number, x?: number, y?: number}} patch - The changed parts.
+     */
+    _setView(patch) {
+        this.setState({ view: Object.assign({}, this.state.view, patch) });
     }
 
     /**
@@ -188,9 +211,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Releases every recorded listener. Only the listeners on long-lived
-     * targets are recorded; the per-node and per-edge handlers live on elements
-     * that every render replaces wholesale and that cannot outlive the SVG.
+     * Releases every recorded listener and the listeners the view attached.
      */
     _releaseListeners() {
         for (const entry of this._windowListeners) {
@@ -202,45 +223,8 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             entry.target.removeEventListener(entry.type, entry.handler, entry.options);
         }
         this._elementListeners = [];
-    }
 
-    /**
-     * Creates the SVG root element with pan/zoom support.
-     * @returns {SVGSVGElement} The SVG element.
-     */
-    _createSvg() {
-        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-        svg.setAttribute("class", "wx-graph-svg");
-
-        // the canvas is a single tab stop that owns its arrow keys, which is
-        // what role=application expresses; without a tabindex the graph could
-        // not be reached by keyboard at all, and a global key handler could not
-        // tell whether a key press was meant for it
-        svg.setAttribute("tabindex", "0");
-        svg.setAttribute("role", "application");
-        svg.setAttribute("aria-roledescription", this._i18n("webexpress.webui:graph.a11y.roledescription", "graph"));
-        svg.setAttribute("aria-label", this._element.dataset.label
-            || this._i18n("webexpress.webui:graph.a11y.canvas", "Graph canvas"));
-
-        this._addElementListener(svg, "pointerdown", (e) => {
-            e.preventDefault();
-            // a pointer interaction moves the keyboard focus onto the canvas so
-            // the two input paths stay on the same element
-            this._focusCanvas();
-        });
-        this._addElementListener(svg, "contextmenu", (e) => {
-            e.preventDefault();
-        });
-        this._addElementListener(svg, "wheel", (e) => {
-            e.preventDefault();
-            this._onWheel(e);
-        }, { passive: false });
-        this._addElementListener(svg, "pointerdown", (e) => {
-            if (e.button === 0 && !this._viewDrag && e.target === svg) {
-                this._beginPan(svg, e);
-            }
-        });
-        return svg;
+        webexpress.webui.Renderer.release(this._renderRoot);
     }
 
     /**
@@ -258,73 +242,6 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         }
         const size = parseFloat(value);
         return Number.isFinite(size) && size > 0 ? size : 0;
-    }
-
-    /**
-     * Draws the background grid across the area the content occupies, padded so
-     * it keeps covering the canvas while the view is panned.
-     */
-    _renderGrid() {
-        if (!this._gridLayer) {
-            return;
-        }
-        this._gridLayer.innerHTML = "";
-
-        if (this._gridSize <= 0) {
-            return;
-        }
-
-        const rect = this._svg.getBoundingClientRect();
-        const scale = this._scale || 1;
-        const size = this._gridSize;
-
-        // the visible area in local coordinates, generously padded so a pan does
-        // not immediately run past the drawn cells
-        const padding = Math.max(rect.width, rect.height) / scale;
-        const left = Math.floor(((-this._pan.x / scale) - padding) / size) * size;
-        const top = Math.floor(((-this._pan.y / scale) - padding) / size) * size;
-        const right = left + (rect.width / scale) + padding * 2 + size;
-        const bottom = top + (rect.height / scale) + padding * 2 + size;
-
-        // a single path per direction keeps the node count low even on a wide
-        // canvas, which matters because this redraws on every pan and zoom
-        let minor = "";
-        let major = "";
-
-        for (let x = left; x <= right; x += size) {
-            const line = `M ${x},${top} L ${x},${bottom} `;
-            if (Math.round(x / size) % webexpress.webui.GraphViewerCtrl.GRID_MAJOR_EVERY === 0) {
-                major += line;
-            } else {
-                minor += line;
-            }
-        }
-        for (let y = top; y <= bottom; y += size) {
-            const line = `M ${left},${y} L ${right},${y} `;
-            if (Math.round(y / size) % webexpress.webui.GraphViewerCtrl.GRID_MAJOR_EVERY === 0) {
-                major += line;
-            } else {
-                minor += line;
-            }
-        }
-
-        const append = (d, className, width) => {
-            if (!d) {
-                return;
-            }
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("class", className);
-            path.setAttribute("d", d.trim());
-            path.setAttribute("fill", "none");
-            // the stroke is specified in screen pixels, so the grid stays a hair
-            // line rather than thickening as the user zooms in
-            path.setAttribute("stroke-width", width / scale);
-            path.setAttribute("pointer-events", "none");
-            this._gridLayer.appendChild(path);
-        };
-
-        append(minor, "wx-graph-grid-line", 0.5);
-        append(major, "wx-graph-grid-line-major", 1);
     }
 
     /**
@@ -356,89 +273,719 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
      * @param {string} message - The message to announce.
      */
     _announce(message) {
-        if (!this._liveRegion) {
-            return;
-        }
-        this._liveRegion.textContent = message || "";
+        this.setState({ announcement: message || "" });
+    }
+
+    // ------------------------------------------------------------------ view
+
+    /**
+     * Describes the host: the canvas, the view controls in its lower left corner and the
+     * live region, with room for a subclass to place a toolbar ahead of the canvas and
+     * dialogs after it.
+     * @param {object} state - The state.
+     * @returns {Array<object>} The virtual nodes of the host.
+     */
+    _viewTree(state) {
+        const h = webexpress.webui.h;
+        const placed = this._placedNodes(state);
+        const view = state.view;
+
+        return [
+            this._renderBeforeCanvas(state),
+            h("svg", {
+                key: "svg",
+                class: "wx-graph-svg",
+                // the canvas is a single tab stop that owns its arrow keys, which is
+                // what role=application expresses; without a tabindex the graph could
+                // not be reached by keyboard at all, and a global key handler could not
+                // tell whether a key press was meant for it
+                tabindex: "0",
+                role: "application",
+                "aria-roledescription": this._i18n("webexpress.webui:graph.a11y.roledescription", "graph"),
+                "aria-label": this._element.dataset.label || this._i18n("webexpress.webui:graph.a11y.canvas", "Graph canvas"),
+                style: { cursor: this._canvasCursor(state) },
+                on: this._svgHandlers(),
+                ref: (el) => { this._svg = el; }
+            },
+                h("defs", { key: "defs" }, this._markerColors(state).map((color) => this._renderMarker(color))),
+                h("g", {
+                    key: "viewport",
+                    "data-layer": "viewport",
+                    transform: `translate(${view.x} ${view.y}) scale(${view.scale})`,
+                    ref: (el) => { this._viewport = el; }
+                },
+                    h("g", { key: "grid", "data-layer": "grid", ref: (el) => { this._gridLayer = el; } }, this._renderGrid(state)),
+                    h("g", { key: "edges", "data-layer": "edges", ref: (el) => { this._edgeLayer = el; } }, this._renderEdges(state, placed)),
+                    h("g", { key: "nodes", "data-layer": "nodes", ref: (el) => { this._nodeLayer = el; } },
+                        state.nodes.map((n) => this._renderNode(state, placed.get(n.id)))),
+                    this._renderOverlays(state, placed))),
+            this._renderViewControls(state),
+            h("div", {
+                key: "live",
+                class: "wx-graph-live-region",
+                role: "status",
+                "aria-live": "polite",
+                ref: (el) => { this._liveRegion = el; }
+            }, state.announcement),
+            this._renderAfterCanvas(state)
+        ];
     }
 
     /**
-     * Creates the off-screen live region used for the spoken selection state.
+     * Hook for subclasses to describe what goes ahead of the canvas, such as a toolbar.
+     * @param {object} state - The state.
+     * @returns {*} Virtual nodes, or null.
      */
-    _createLiveRegion() {
-        if (this._liveRegion) {
-            return;
-        }
-        const region = document.createElement("div");
-        region.className = "wx-graph-live-region";
-        region.setAttribute("role", "status");
-        region.setAttribute("aria-live", "polite");
-        this._liveRegion = region;
-        this._element.appendChild(region);
+    _renderBeforeCanvas(state) {
+        return null;
     }
 
     /**
-     * Creates the view controls that sit in the lower left corner of the canvas.
-     *
-     * They live on the canvas rather than in the editor toolbar because they act
-     * on the view, not on the model: they change nothing that could be saved or
-     * undone, and they are equally useful to the read-only viewer, which has no
-     * toolbar at all.
+     * Hook for subclasses to describe what goes after the canvas, such as a dialog.
+     * @param {object} state - The state.
+     * @returns {*} Virtual nodes, or null.
      */
-    _createViewControls() {
-        if (this._viewControls) {
-            return;
-        }
+    _renderAfterCanvas(state) {
+        return null;
+    }
 
-        const controls = document.createElement("div");
-        controls.className = "wx-graph-view-controls";
+    /**
+     * Hook for subclasses to describe layers above the nodes, such as handles.
+     * @param {object} state - The state.
+     * @param {Map<string, object>} placed - The nodes at their rendered positions.
+     * @returns {*} Virtual nodes, or null.
+     */
+    _renderOverlays(state, placed) {
+        return null;
+    }
 
-        /**
-         * Adds one control button.
-         * @param {string} icon - The symbolic icon name.
-         * @param {string} title - The tooltip and accessible name.
-         * @param {Function} action - The click handler.
-         * @returns {HTMLButtonElement} The button.
-         */
-        const add = (icon, title, action) => {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "wx-graph-fit-button";
-            btn.title = title;
-            btn.setAttribute("aria-label", title);
+    /**
+     * Gets the cursor of the canvas.
+     * @param {object} state - The state.
+     * @returns {string} The cursor, or an empty value for the default.
+     */
+    _canvasCursor(state) {
+        return state.panning ? "grabbing" : "";
+    }
 
-            const iconElement = document.createElement("i");
-            iconElement.className = this._iconClass(icon);
-            iconElement.setAttribute("aria-hidden", "true");
-            btn.appendChild(iconElement);
+    /**
+     * Returns the listeners of the canvas.
+     * @returns {object} The listener map.
+     */
+    _svgHandlers() {
+        return this._handler("svg", "viewer", () => ({
+            pointerdown: (e) => {
+                e.preventDefault();
+                // a pointer interaction moves the keyboard focus onto the canvas so
+                // the two input paths stay on the same element
+                this._focusCanvas();
+                if (e.button === 0 && !this._viewDrag && e.target === this._svg) {
+                    this._beginPan(this._svg, e);
+                }
+            },
+            contextmenu: (e) => {
+                e.preventDefault();
+            },
+            wheel: (e) => {
+                e.preventDefault();
+                this._onWheel(e);
+            }
+        }));
+    }
 
-            this._addElementListener(btn, "click", (e) => {
-                e.stopPropagation();
-                action();
+    /**
+     * Gets the node records at the positions the state publishes, by id. Rendering reads
+     * these, because the records go on moving between a publication and the paint.
+     * @param {object} state - The state.
+     * @returns {Map<string, object>} The placed nodes.
+     */
+    _placedNodes(state) {
+        const placed = new Map();
+        for (const n of state.nodes) {
+            const p = state.positions[n.id] || n;
+            // flat objects of one shape keep the property access of every render fast
+            placed.set(n.id, {
+                id: n.id,
+                data: n.data,
+                x: p.x,
+                y: p.y,
+                width: n.width,
+                height: n.height,
+                rectWidth: n.rectWidth,
+                rectHeight: n.rectHeight,
+                shape: n.shape
             });
-            controls.appendChild(btn);
-            return btn;
-        };
-
-        this._fitBtn = add("expand",
-            this._i18n("webexpress.webui:graph.fit.view", "Fit to view"),
-            () => this._fitToView());
-
-        add("crosshairs",
-            this._i18n("webexpress.webui:graph.center.view", "Centre the view"),
-            () => this._centerView());
-
-        add("magnifying-glass-plus",
-            this._i18n("webexpress.webui:graph.zoom.in", "Zoom in"),
-            () => this._zoomAt(1.2));
-
-        add("magnifying-glass-minus",
-            this._i18n("webexpress.webui:graph.zoom.out", "Zoom out"),
-            () => this._zoomAt(1 / 1.2));
-
-        this._viewControls = controls;
-        this._element.appendChild(controls);
+        }
+        return placed;
     }
+
+    /**
+     * Gets the colours an arrow marker is needed for: the theme default and every
+     * explicit edge colour.
+     * @param {object} state - The state.
+     * @returns {Array<string>} The colours.
+     */
+    _markerColors(state) {
+        const colors = new Set([""]);
+        for (const edge of state.model.edges) {
+            if (edge && edge.color) {
+                colors.add(edge.color);
+            }
+        }
+        return Array.from(colors);
+    }
+
+    /**
+     * Gets the id of the arrow marker of a colour. A marker cannot inherit the stroke of
+     * the path that references it, so an arrowhead that is to match its edge needs its
+     * own marker per colour.
+     * @param {string} [color] - The explicit edge color, or the theme default.
+     * @returns {string} The marker id.
+     */
+    _markerId(color) {
+        const safeColor = String(color || "").replace(/[^a-zA-Z0-9]/g, "");
+        return `${this._markerPrefix}-${safeColor || "default"}`;
+    }
+
+    /**
+     * Returns the URL reference of the arrow marker of a colour.
+     * @param {string} [color] - The explicit edge color, or the theme default.
+     * @returns {string} The marker URL reference.
+     */
+    _ensureArrowMarker(color) {
+        return `url(#${this._markerId(color)})`;
+    }
+
+    /**
+     * Describes the arrow marker of a colour.
+     * @param {string} color - The colour, or an empty value for the theme default.
+     * @returns {object} The marker virtual node.
+     */
+    _renderMarker(color) {
+        const h = webexpress.webui.h;
+        const id = this._markerId(color);
+
+        const length = webexpress.webui.GraphViewerCtrl.ARROW_LENGTH;
+        const width = webexpress.webui.GraphViewerCtrl.ARROW_WIDTH;
+
+        // the head is anchored at its base: the line stops where the head begins, so
+        // neither its round cap nor its dash pattern runs into the tip
+        return h("marker", {
+            key: id,
+            id: id,
+            class: "wx-graph-edge-arrow",
+            viewBox: `0 0 ${length} ${width}`,
+            refX: "0",
+            refY: String(width / 2),
+            markerWidth: String(length),
+            markerHeight: String(width),
+            markerUnits: "userSpaceOnUse",
+            orient: "auto-start-reverse"
+        }, h("path", { d: `M 0 0 L ${length} ${width / 2} L 0 ${width} Z`, style: this._paint("fill", color) }));
+    }
+
+    /**
+     * Gets the style that applies an author-chosen paint value, or clears it again.
+     *
+     * The value goes on the inline style rather than on the fill/stroke presentation
+     * attribute. A presentation attribute loses against every stylesheet rule, and the
+     * theme defaults for labels and edges are exactly such rules - so a colour chosen for
+     * a node or an edge was silently overruled by the default. An inline style outranks
+     * both, which restores the intended precedence: explicit colour beats css class beats
+     * theme.
+     * @param {string} property - "fill" or "stroke".
+     * @param {string} value - The colour, or an empty value to clear it.
+     * @returns {object} The style object.
+     */
+    _paint(property, value) {
+        return { [property]: value || "" };
+    }
+
+    /**
+     * Describes the background grid across the area the content occupies, padded so it
+     * keeps covering the canvas while the view is panned.
+     * @param {object} state - The state.
+     * @returns {Array<object>} The grid paths.
+     */
+    _renderGrid(state) {
+        if (this._gridSize <= 0) {
+            return [];
+        }
+
+        const h = webexpress.webui.h;
+        const view = state.view;
+        const scale = view.scale || 1;
+        const size = this._gridSize;
+        const width = state.size.width;
+        const height = state.size.height;
+
+        // the visible area in local coordinates, generously padded so a pan does
+        // not immediately run past the drawn cells
+        const padding = Math.max(width, height) / scale;
+        const left = Math.floor(((-view.x / scale) - padding) / size) * size;
+        const top = Math.floor(((-view.y / scale) - padding) / size) * size;
+        const right = left + (width / scale) + padding * 2 + size;
+        const bottom = top + (height / scale) + padding * 2 + size;
+
+        // a single path per direction keeps the node count low even on a wide
+        // canvas, which matters because this redraws on every pan and zoom
+        let minor = "";
+        let major = "";
+
+        for (let x = left; x <= right; x += size) {
+            const line = `M ${x},${top} L ${x},${bottom} `;
+            if (Math.round(x / size) % webexpress.webui.GraphViewerCtrl.GRID_MAJOR_EVERY === 0) {
+                major += line;
+            } else {
+                minor += line;
+            }
+        }
+        for (let y = top; y <= bottom; y += size) {
+            const line = `M ${left},${y} L ${right},${y} `;
+            if (Math.round(y / size) % webexpress.webui.GraphViewerCtrl.GRID_MAJOR_EVERY === 0) {
+                major += line;
+            } else {
+                minor += line;
+            }
+        }
+
+        // the stroke is specified in screen pixels, so the grid stays a hair
+        // line rather than thickening as the user zooms in
+        const path = (key, d, className, width) => d && h("path", {
+            key: key,
+            class: className,
+            d: d.trim(),
+            fill: "none",
+            "stroke-width": width / scale,
+            "pointer-events": "none"
+        });
+
+        return [
+            path("minor", minor, "wx-graph-grid-line", 0.5),
+            path("major", major, "wx-graph-grid-line-major", 1)
+        ];
+    }
+
+    /**
+     * Describes the edges and their labels.
+     * @param {object} state - The state.
+     * @param {Map<string, object>} placed - The nodes at their rendered positions.
+     * @returns {Array<object>} The edge virtual nodes.
+     */
+    _renderEdges(state, placed) {
+        const h = webexpress.webui.h;
+        const out = [];
+
+        state.model.edges.forEach((t, index) => {
+            if (!t || typeof t !== "object") {
+                return;
+            }
+            const pts = this._edgeRenderPoints(state, placed, t);
+            if (!pts || pts.length === 0) {
+                return;
+            }
+            const id = this._edgeKey(t, index);
+
+            out.push(h("path", Object.assign({
+                key: id,
+                class: ["wx-graph-viewer-edge", t.colorCss].filter(Boolean).join(" "),
+                "data-id": id,
+                "data-label": t.label || "",
+                d: this._arrowPathData(pts),
+                fill: "none",
+                "stroke-linecap": "round",
+                "stroke-linejoin": "round",
+                "marker-end": this._ensureArrowMarker(t.color),
+                "stroke-dasharray": t.dasharray || null,
+                style: this._paint("stroke", t.color)
+            }, this._edgeProps(state, t, id))));
+
+            if (t.label && this._showsEdgeLabels()) {
+                const pos = this._edgeLabelPoint(pts);
+                out.push(h("text", {
+                    key: id + "/label",
+                    class: ["wx-graph-edge-label", t.colorCss].filter(Boolean).join(" "),
+                    "data-id": id,
+                    x: pos.x,
+                    y: pos.y,
+                    "text-anchor": "middle",
+                    "dominant-baseline": "middle"
+                }, t.label));
+            }
+        });
+
+        return out;
+    }
+
+    /**
+     * Gets the key and the data-id of an edge.
+     * @param {object} t - The edge.
+     * @param {number} index - The position of the edge in the model.
+     * @returns {string} The key.
+     */
+    _edgeKey(t, index) {
+        return t.id || "";
+    }
+
+    /**
+     * Gets the points an edge is drawn through, or nothing for an edge between unknown
+     * nodes, which is skipped rather than rendered broken.
+     * @param {object} state - The state.
+     * @param {Map<string, object>} placed - The nodes at their rendered positions.
+     * @param {object} t - The edge.
+     * @returns {Array<{x: number, y: number}>|null} The points.
+     */
+    _edgeRenderPoints(state, placed, t) {
+        const a = placed.get(t.from);
+        const b = placed.get(t.to);
+        if (!a || !b) {
+            return null;
+        }
+        return this._edgePointsWithWaypoints(a, b, t.waypoints || [], state.dissolve);
+    }
+
+    /**
+     * Hook for subclasses to add props to an edge path, such as listeners.
+     * @param {object} state - The state.
+     * @param {object} t - The edge.
+     * @param {string} id - The edge key.
+     * @returns {object|null} The props.
+     */
+    _edgeProps(state, t, id) {
+        return null;
+    }
+
+    /**
+     * Tells whether edge labels are drawn on the canvas.
+     * @returns {boolean} True for the viewer.
+     */
+    _showsEdgeLabels() {
+        return true;
+    }
+
+    /**
+     * Describes one node: its shape, its icon, its label and, for a node that says more
+     * than its name, the description and the state badge.
+     * @param {object} state - The state.
+     * @param {object} n - The node at its rendered position.
+     * @returns {object} The node virtual node.
+     */
+    _renderNode(state, n) {
+        const h = webexpress.webui.h;
+        const ctor = webexpress.webui.GraphViewerCtrl;
+        const layout = (n.data.layout || "").toLowerCase();
+        const iconBox = ctor.ICON_SIZE;
+        const imgSize = ctor.IMAGE_SIZE;
+        const rectW = n.rectWidth || n.width;
+        const rectH = n.rectHeight || n.height;
+        const hasIcon = Boolean(n.data.image) || Boolean(n.data.icon);
+        const detailed = layout !== "label-below" && (Boolean(n.data.description) || Boolean(n.data.state));
+
+        const shape = n.shape === "circle"
+            ? h("circle", {
+                key: "circle",
+                class: ["wx-graph-node-circle", n.data.backgroundCss].filter(Boolean).join(" "),
+                cx: n.x,
+                cy: n.y,
+                r: Math.max(rectW, rectH) / 2,
+                style: this._paint("fill", n.data.backgroundColor)
+            })
+            : h("rect", {
+                key: "rect",
+                class: ["wx-graph-node-rect", n.data.backgroundCss].filter(Boolean).join(" "),
+                x: n.x - rectW / 2,
+                y: n.y - rectH / 2,
+                rx: 6,
+                ry: 6,
+                width: rectW,
+                height: rectH,
+                style: this._paint("fill", n.data.backgroundColor)
+            });
+
+        // the icon box, by layout: centred in the shape below a label, at the left edge
+        // of the box otherwise
+        let iconX;
+        let iconY;
+        if (layout === "label-below") {
+            const size = n.data.image ? imgSize : iconBox;
+            iconX = n.x - size / 2;
+            iconY = n.y - rectH / 2 + (rectH - size) / 2;
+        } else {
+            iconX = n.x - n.width / 2 + 12;
+            iconY = n.y - (n.data.image ? imgSize : iconBox) / 2;
+        }
+
+        let icon = null;
+        if (n.data.image) {
+            icon = h("image", {
+                key: "image",
+                class: "wx-graph-node-icon",
+                "data-role": "icon-image",
+                href: n.data.image,
+                x: iconX,
+                y: iconY,
+                width: imgSize,
+                height: imgSize,
+                "pointer-events": "none"
+            });
+        } else if (n.data.icon) {
+            icon = h("foreignObject", {
+                key: "icon",
+                class: "wx-graph-node-icon",
+                "data-role": "icon-fo",
+                x: iconX,
+                y: iconY,
+                width: iconBox,
+                height: iconBox,
+                "pointer-events": "none"
+            }, h("i", {
+                class: [n.data.icon, n.data.foregroundCss].filter(Boolean).join(" "),
+                style: {
+                    width: `${iconBox}px`,
+                    height: `${iconBox}px`,
+                    lineHeight: `${iconBox}px`,
+                    textAlign: "center",
+                    color: n.data.foregroundColor || ""
+                }
+            }));
+        }
+
+        const labelClass = ["wx-graph-node-label", n.data.foregroundCss, n.data.uri && "wx-graph-node-link"].filter(Boolean).join(" ");
+        const labelProps = {
+            key: "label",
+            class: labelClass,
+            style: this._paint("fill", n.data.foregroundColor)
+        };
+        let detail = null;
+
+        if (layout === "label-below") {
+            Object.assign(labelProps, {
+                x: n.x,
+                y: n.y + rectH / 2 + (n.data.shape === "circle" ? 16 : 6),
+                "text-anchor": "middle",
+                "dominant-baseline": "hanging"
+            });
+        } else if (detailed) {
+            // the two lines of text sit left aligned beside the icon and the state at the
+            // right edge of the first line; the geometry lives here alone, because every
+            // frame has to agree with the first one on it
+            const left = n.x - rectW / 2 + 14 + (hasIcon ? iconBox + 6 : 0);
+            const right = n.x + rectW / 2 - 12;
+            const line = n.data.description ? n.y - 3 : n.y + 4;
+            Object.assign(labelProps, { x: left, y: line, "text-anchor": "start" });
+
+            detail = [
+                n.data.description && h("text", {
+                    key: "description",
+                    class: "wx-graph-node-description",
+                    "pointer-events": "none",
+                    x: left,
+                    y: n.y + 14,
+                    "text-anchor": "start"
+                }, n.data.description),
+                n.data.state && this._renderNodeState(n, right, line)
+            ];
+        } else {
+            Object.assign(labelProps, {
+                x: hasIcon ? n.x + iconBox * 0.4 : n.x,
+                y: n.y + 5,
+                "text-anchor": "middle"
+            });
+        }
+
+        return h("g", {
+            key: n.id,
+            class: ["wx-graph-node"].concat(this._nodeClasses(state, n) || []).join(" "),
+            "data-id": n.id,
+            // the shape carries no accessible name of its own, so the group supplies
+            // one; keyboard reachability stays with the canvas, which owns the roving
+            // selection
+            role: "img",
+            "aria-label": n.data.label || n.id,
+            on: this._nodeHandlers(n.id)
+        }, shape, icon, h("text", labelProps, n.data.label || n.id), detail);
+    }
+
+    /**
+     * Describes the state of a node: a coloured badge laid under its caption.
+     * @param {object} n - The node.
+     * @param {number} right - The right edge of the text area.
+     * @param {number} line - The baseline of the first line.
+     * @returns {Array<object>} The badge and the caption.
+     */
+    _renderNodeState(n, right, line) {
+        const h = webexpress.webui.h;
+        // the caption is right aligned and the plate is laid under it, so the badge
+        // grows to the left and never leaves the box
+        const captionW = n.data.state.length * 6;
+        const padding = 6;
+
+        return [
+            h("rect", {
+                key: "state-badge",
+                class: ["wx-graph-node-state-badge", n.data.stateCss].filter(Boolean).join(" "),
+                rx: 8,
+                ry: 8,
+                height: 16,
+                x: right - captionW - padding * 2,
+                y: line - 12,
+                width: captionW + padding * 2,
+                "pointer-events": "none",
+                style: this._paint("fill", n.data.stateColor)
+            }),
+            h("text", {
+                key: "state",
+                class: ["wx-graph-node-state", n.data.stateCss].filter(Boolean).join(" "),
+                "pointer-events": "none",
+                x: right - padding,
+                y: line,
+                "text-anchor": "end",
+                style: this._paint("fill", n.data.stateColor)
+            }, n.data.state)
+        ];
+    }
+
+    /**
+     * Hook for subclasses to add classes to a node group, such as a selection mark.
+     * @param {object} state - The state.
+     * @param {object} n - The node.
+     * @returns {Array<string>|null} The classes.
+     */
+    _nodeClasses(state, n) {
+        return null;
+    }
+
+    /**
+     * Returns the listeners of a node. They name only the node id and look the node up
+     * when they run, so a listener never acts on a replaced record.
+     * @param {string} id - The node id.
+     * @returns {object} The listener map.
+     */
+    _nodeHandlers(id) {
+        return this._handler("node", id, () => ({
+            click: (e) => {
+                e.stopPropagation();
+                const n = this._nodeById(id);
+                if (!n) {
+                    return;
+                }
+
+                // if ctrl + click and uri is present, open url
+                if (e.ctrlKey && n.data.uri) {
+                    window.open(n.data.uri, "_self");
+                    return;
+                }
+
+                this._dispatch(webexpress.webui.Event.CLICK_EVENT, { detail: { id: n.id, data: n.data }, bubbles: true });
+            },
+            dblclick: (e) => {
+                e.stopPropagation();
+                const n = this._nodeById(id);
+                if (!n) {
+                    return;
+                }
+
+                // if uri is present, navigate to it on double click
+                if (n.data.uri) {
+                    window.open(n.data.uri, "_self");
+                }
+
+                this._dispatch(webexpress.webui.Event.DOUBLE_CLICK_EVENT, { detail: { id: n.id, data: n.data }, bubbles: true });
+            },
+            pointerdown: (e) => {
+                e.stopPropagation();
+                const n = this._nodeById(id);
+                if (n) {
+                    this._beginNodeDrag(n, e);
+                }
+            }
+        }));
+    }
+
+    /**
+     * Finds a node record by its id.
+     * @param {string} id - The node id.
+     * @returns {object|null} The record.
+     */
+    _nodeById(id) {
+        return this._nodes.find((n) => n.id === id) || null;
+    }
+
+    /**
+     * Describes the view controls in the lower left corner of the canvas.
+     *
+     * They live on the canvas rather than in the editor toolbar because they act on the
+     * view, not on the model: they change nothing that could be saved or undone, and they
+     * are equally useful to the read-only viewer, which has no toolbar at all.
+     * @param {object} state - The state.
+     * @returns {object} The controls virtual node.
+     */
+    _renderViewControls(state) {
+        const h = webexpress.webui.h;
+        const button = (key, icon, title, action) => h("button", {
+            key: key,
+            type: "button",
+            class: "wx-graph-fit-button",
+            title: title,
+            "aria-label": title,
+            on: this._handler("view", key, () => ({
+                click: (e) => {
+                    e.stopPropagation();
+                    action();
+                }
+            })),
+            ref: key === "fit" ? (el) => { this._fitBtn = el; } : null
+        }, h("i", { class: this._iconClass(icon), "aria-hidden": "true" }));
+
+        return h("div", { key: "controls", class: "wx-graph-view-controls", ref: (el) => { this._viewControls = el; } },
+            button("fit", "expand", this._i18n("webexpress.webui:graph.fit.view", "Fit to view"), () => this._fitToView()),
+            button("center", "crosshairs", this._i18n("webexpress.webui:graph.center.view", "Centre the view"), () => this._centerView()),
+            button("in", "magnifying-glass-plus", this._i18n("webexpress.webui:graph.zoom.in", "Zoom in"), () => this._zoomAt(1.2)),
+            button("out", "magnifying-glass-minus", this._i18n("webexpress.webui:graph.zoom.out", "Zoom out"), () => this._zoomAt(1 / 1.2)));
+    }
+
+    /**
+     * Measures the canvas once it is shown and whenever its box changes; the grid covers
+     * the visible area, which only the layout knows.
+     * @param {object} state - The rendered state.
+     */
+    onMount(state) {
+        this._measureCanvas();
+        if (typeof ResizeObserver === "function" && this._svg) {
+            this._resizeObserver = new ResizeObserver(() => this._measureCanvas());
+            this._resizeObserver.observe(this._svg);
+        }
+        this.onUpdate(state);
+    }
+
+    /**
+     * Follows a render with what the DOM has to do itself.
+     * @param {object} state - The rendered state.
+     */
+    onUpdate(state) { }
+
+    /**
+     * Takes the box of the canvas into the state.
+     */
+    _measureCanvas() {
+        if (!this._svg || this._destroyed) {
+            return;
+        }
+        const rect = this._svg.getBoundingClientRect();
+        const size = this.state.size;
+        if (rect.width !== size.width || rect.height !== size.height) {
+            this.setState({ size: { width: rect.width, height: rect.height } });
+
+            // the first fit often sees a canvas the page layout has not settled yet (a
+            // scrollbar, a sidebar, a hidden tab), so the graph keeps fitting the canvas
+            // until the user takes the view into their own hands
+            if (this._autoFit) {
+                this._fitToView();
+            }
+        }
+    }
+
+    // ------------------------------------------------------------------ view actions
 
     /**
      * Pans the view so the graph content sits in the middle of the canvas,
@@ -448,7 +995,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
      */
     _centerView() {
         const bbox = this._computeContentBBox();
-        if (!bbox) {
+        if (!bbox || !this._svg) {
             return;
         }
         const rect = this._svg.getBoundingClientRect();
@@ -458,52 +1005,10 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
 
         const cx = (bbox.minX + bbox.maxX) / 2;
         const cy = (bbox.minY + bbox.maxY) / 2;
+        const scale = this._scale;
 
-        this._pan.x = rect.width / 2 - cx * this._scale;
-        this._pan.y = rect.height / 2 - cy * this._scale;
-        this._applyViewTransform();
-    }
-
-    /**
-     * Ensures the arrow marker exists and returns its URL reference.
-     * @param {string} [color] - The explicit edge color, or the theme default.
-     * @returns {string} The marker URL reference.
-     */
-    _ensureArrowMarker(color) {
-        let defs = this._svg.querySelector("defs");
-        if (!defs) {
-            defs = document.createElementNS("http://www.w3.org/2000/svg", "defs");
-            this._svg.insertBefore(defs, this._svg.firstChild);
-        }
-
-        // a marker cannot inherit the stroke of the path that references it, so
-        // an arrowhead that is to match its edge needs its own marker per colour
-        const safeColor = String(color || "").replace(/[^a-zA-Z0-9]/g, "");
-        if (!this._arrowMarkerPrefix) {
-            this._arrowMarkerPrefix = `wx-graph-arrow-${++webexpress.webui.GraphViewerCtrl._nextMarkerId}`;
-        }
-        const markerId = `${this._arrowMarkerPrefix}-${safeColor || "default"}`;
-
-        let marker = defs.querySelector("#" + markerId);
-        if (!marker) {
-            marker = document.createElementNS("http://www.w3.org/2000/svg", "marker");
-            marker.classList.add("wx-graph-edge-arrow");
-            marker.setAttribute("id", markerId);
-            marker.setAttribute("viewBox", "0 0 10 10");
-            marker.setAttribute("refX", "10");
-            marker.setAttribute("refY", "5");
-            marker.setAttribute("markerWidth", "10");
-            marker.setAttribute("markerHeight", "10");
-            marker.setAttribute("markerUnits", "userSpaceOnUse");
-            marker.setAttribute("orient", "auto-start-reverse");
-
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("d", "M 0 0 L 10 5 L 0 10 Z");
-            this._applyPaint(path, "fill", color);
-            marker.appendChild(path);
-            defs.appendChild(marker);
-        }
-        return `url(#${markerId})`;
+        this._autoFit = false;
+        this._setView({ x: rect.width / 2 - cx * scale, y: rect.height / 2 - cy * scale });
     }
 
     /**
@@ -512,14 +1017,15 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
      * @param {PointerEvent} e - The pointer event.
      */
     _beginPan(svg, e) {
+        const view = this.state.view;
         this._viewDrag = {
             startClientX: e.clientX,
             startClientY: e.clientY,
-            panStartX: this._pan.x,
-            panStartY: this._pan.y,
+            panStartX: view.x,
+            panStartY: view.y,
             pointerId: e.pointerId
         };
-        svg.style.cursor = "grabbing";
+        this.setState({ panning: true });
         svg.setPointerCapture(e.pointerId);
         this._attachPanListeners(svg);
     }
@@ -533,11 +1039,11 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             if (!this._viewDrag) {
                 return;
             }
-            const dx = e.clientX - this._viewDrag.startClientX;
-            const dy = e.clientY - this._viewDrag.startClientY;
-            this._pan.x = this._viewDrag.panStartX + dx;
-            this._pan.y = this._viewDrag.panStartY + dy;
-            this._applyViewTransform();
+            this._autoFit = false;
+            this._setView({
+                x: this._viewDrag.panStartX + e.clientX - this._viewDrag.startClientX,
+                y: this._viewDrag.panStartY + e.clientY - this._viewDrag.startClientY
+            });
         };
 
         const up = () => {
@@ -548,47 +1054,38 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                     // ignore
                 }
             }
-            svg.style.cursor = "default";
             this._viewDrag = null;
+            this.setState({ panning: false });
             this._removeWindowListener("pointermove", move);
             this._removeWindowListener("pointerup", up);
+            this._removeWindowListener("pointercancel", up);
         };
         this._addWindowListener("pointermove", move);
         this._addWindowListener("pointerup", up);
+        // a gesture the browser takes over (a touch scroll) ends without a pointerup
+        this._addWindowListener("pointercancel", up);
     }
 
     /**
-     * Transforms pointer coordinates into SVG local coordinates.
+     * Transforms pointer coordinates into local graph coordinates: the screen point is
+     * taken into the canvas through its own transformation, then through the inverse of
+     * the viewport the state holds. The viewport is read from the state rather than from
+     * the rendered transform, which may still wait for its frame.
      * @param {PointerEvent|MouseEvent} e - The pointer event.
      * @returns {{x: number, y: number}} Local coordinates.
      */
     _toLocal(e) {
-        const pt = this._svg.createSVGPoint();
-        pt.x = e.clientX;
-        pt.y = e.clientY;
-        const ctm = (this._viewport && typeof this._viewport.getScreenCTM === "function" ? this._viewport.getScreenCTM() : null)
-            || this._svg.getScreenCTM();
-        return ctm ? pt.matrixTransform(ctm.inverse()) : { x: e.clientX, y: e.clientY };
-    }
-
-    /**
-     * Creates an SVG group element.
-     * @param {string} name - The layer name.
-     * @returns {SVGGElement} The group element.
-     */
-    _createGroup(name) {
-        const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-        g.setAttribute("data-layer", name);
-        return g;
-    }
-
-    /**
-     * Applies the current pan/zoom transform to the viewport.
-     */
-    _applyViewTransform() {
-        this._viewport.setAttribute("transform", `translate(${this._pan.x} ${this._pan.y}) scale(${this._scale})`);
-        // the grid is drawn for the visible area, so it has to follow the view
-        this._renderGrid();
+        let point = { x: e.clientX, y: e.clientY };
+        const ctm = this._svg && typeof this._svg.getScreenCTM === "function" ? this._svg.getScreenCTM() : null;
+        if (ctm) {
+            const pt = this._svg.createSVGPoint();
+            pt.x = e.clientX;
+            pt.y = e.clientY;
+            point = pt.matrixTransform(ctm.inverse());
+        }
+        const view = this.state.view;
+        const scale = view.scale || 1;
+        return { x: (point.x - view.x) / scale, y: (point.y - view.y) / scale };
     }
 
     /**
@@ -607,18 +1104,21 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
      * @param {{x: number, y: number}} [anchor] - The local point to keep fixed.
      */
     _zoomAt(factor, anchor) {
-        const oldScale = this._scale;
+        const view = this.state.view;
+        const oldScale = view.scale;
         const newScale = Math.min(3, Math.max(0.3, oldScale * factor));
 
         if (newScale === oldScale) {
             return;
         }
 
+        this._autoFit = false;
         const point = anchor || this._viewportCenter();
-        this._scale = newScale;
-        this._pan.x += point.x * (oldScale - newScale);
-        this._pan.y += point.y * (oldScale - newScale);
-        this._applyViewTransform();
+        this._setView({
+            scale: newScale,
+            x: view.x + point.x * (oldScale - newScale),
+            y: view.y + point.y * (oldScale - newScale)
+        });
     }
 
     /**
@@ -626,13 +1126,80 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
      * @returns {{x: number, y: number}} The centre point.
      */
     _viewportCenter() {
-        const rect = this._svg.getBoundingClientRect();
-        const scale = this._scale || 1;
+        const rect = this._svg ? this._svg.getBoundingClientRect() : { width: 0, height: 0 };
+        const view = this.state.view;
+        const scale = view.scale || 1;
         return {
-            x: (rect.width / 2 - this._pan.x) / scale,
-            y: (rect.height / 2 - this._pan.y) / scale
+            x: (rect.width / 2 - view.x) / scale,
+            y: (rect.height / 2 - view.y) / scale
         };
     }
+
+    /**
+     * Fits the graph content to the view.
+     * @param {number} [padding=24] - Padding.
+     */
+    _fitToView(padding = 24) {
+        // a fit asks for the whole graph, which a later resize of the canvas keeps
+        this._autoFit = true;
+        const bbox = this._computeContentBBox();
+        if (!bbox || !this._svg) {
+            return;
+        }
+        const rect = this._svg.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+
+        if (w <= 0 || h <= 0) {
+            return;
+        }
+
+        const contentW = bbox.maxX - bbox.minX;
+        const contentH = bbox.maxY - bbox.minY;
+        const scale = Math.max(0.3, Math.min(3, Math.min((w - padding * 2) / contentW, (h - padding * 2) / contentH)));
+        const cx = (bbox.minX + bbox.maxX) / 2;
+        const cy = (bbox.minY + bbox.maxY) / 2;
+
+        this._setView({ scale: scale, x: w / 2 - cx * scale, y: h / 2 - cy * scale });
+    }
+
+    /**
+     * Computes the bounding box of the graph content.
+     * @returns {{minX:number, minY:number, maxX:number, maxY:number}|null} The bbox.
+     */
+    _computeContentBBox() {
+        if (!this._nodes.length) {
+            return null;
+        }
+        const pts = [];
+        this._nodes.forEach(n => {
+            pts.push({ x: n.x - n.width / 2, y: n.y - n.height / 2 });
+            pts.push({ x: n.x + n.width / 2, y: n.y + n.height / 2 });
+        });
+        this._model.edges.forEach(t => {
+            if (Array.isArray(t.waypoints)) {
+                t.waypoints.forEach(wp => {
+                    pts.push({ x: wp.x, y: wp.y });
+                });
+            }
+        });
+
+        let minX = Infinity;
+        let minY = Infinity;
+        let maxX = -Infinity;
+        let maxY = -Infinity;
+
+        pts.forEach(p => {
+            minX = Math.min(minX, p.x);
+            minY = Math.min(minY, p.y);
+            maxX = Math.max(maxX, p.x);
+            maxY = Math.max(maxY, p.y);
+        });
+        const expand = 20;
+        return { minX: minX - expand, minY: minY - expand, maxX: maxX + expand, maxY: maxY + expand };
+    }
+
+    // ------------------------------------------------------------------ model
 
     /**
      * Normalizes the raw model data.
@@ -792,109 +1359,6 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Builds the two optional parts of a node that says more than its name: the
-     * description line below the label and the state, drawn as a coloured dot
-     * with its caption. A node that carries neither renders exactly as before.
-     * @param {object} data - The node data.
-     * @returns {{description: SVGElement|null, state: {dot: SVGElement, text: SVGElement}|null}} The parts.
-     */
-    _createNodeDetail(data) {
-        let description = null;
-        let state = null;
-
-        if (data.description) {
-            description = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            description.setAttribute("class", "wx-graph-node-description");
-            description.setAttribute("pointer-events", "none");
-            description.textContent = data.description;
-        }
-
-        if (data.state) {
-            const badge = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-            badge.setAttribute("class", ["wx-graph-node-state-badge", data.stateCss].filter(Boolean).join(" "));
-            badge.setAttribute("rx", 8);
-            badge.setAttribute("ry", 8);
-            badge.setAttribute("height", 16);
-            badge.setAttribute("pointer-events", "none");
-            this._applyPaint(badge, "fill", data.stateColor);
-
-            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttribute("class", ["wx-graph-node-state", data.stateCss].filter(Boolean).join(" "));
-            text.setAttribute("pointer-events", "none");
-            text.textContent = data.state;
-            this._applyPaint(text, "fill", data.stateColor);
-
-            state = { badge: badge, text: text };
-        }
-
-        return { description: description, state: state };
-    }
-
-    /**
-     * Returns the parts of an already rendered node, so the geometry update
-     * moves the same elements the first render created.
-     * @param {SVGElement} g - The node group.
-     * @returns {object} The parts.
-     */
-    _readNodeDetail(g) {
-        const badge = g.querySelector("rect.wx-graph-node-state-badge");
-        const text = g.querySelector("text.wx-graph-node-state");
-
-        return {
-            description: g.querySelector("text.wx-graph-node-description"),
-            state: badge && text ? { badge: badge, text: text } : null
-        };
-    }
-
-    /**
-     * Places the label, the optional description and the optional state of a
-     * node inside its rectangle: the icon on the left, the two lines of text
-     * left aligned beside it and the state at the right edge of the first line.
-     * The geometry lives in one place because the first render and every
-     * simulation frame have to agree on it.
-     * @param {object} n - The node.
-     * @param {object} parts - The icon, the label, the description and the state.
-     */
-    _placeNodeDetail(n, parts) {
-        const iconBoxSize = webexpress.webui.GraphViewerCtrl.ICON_SIZE;
-        const hasIcon = Boolean(n.data.image) || Boolean(n.data.icon);
-        const rectW = n.rectWidth || n.width;
-        const left = n.x - rectW / 2 + 14 + (hasIcon ? iconBoxSize + 6 : 0);
-        const right = n.x + rectW / 2 - 12;
-        const line = n.data.description ? n.y - 3 : n.y + 4;
-
-        if (parts.icon) {
-            parts.icon.setAttribute("x", n.x - rectW / 2 + 12);
-            parts.icon.setAttribute("y", n.y - iconBoxSize / 2);
-        }
-
-        parts.label.setAttribute("x", left);
-        parts.label.setAttribute("y", line);
-        parts.label.setAttribute("text-anchor", "start");
-        parts.label.removeAttribute("dominant-baseline");
-
-        if (parts.description) {
-            parts.description.setAttribute("x", left);
-            parts.description.setAttribute("y", n.y + 14);
-            parts.description.setAttribute("text-anchor", "start");
-        }
-
-        if (parts.state) {
-            // the caption is right aligned and the plate is laid under it,
-            // so the badge grows to the left and never leaves the box
-            const captionW = n.data.state.length * 6;
-            const padding = 6;
-
-            parts.state.text.setAttribute("x", right - padding);
-            parts.state.text.setAttribute("y", line);
-            parts.state.text.setAttribute("text-anchor", "end");
-            parts.state.badge.setAttribute("x", right - captionW - padding * 2);
-            parts.state.badge.setAttribute("y", line - 12);
-            parts.state.badge.setAttribute("width", captionW + padding * 2);
-        }
-    }
-
-    /**
      * Measures the node size based on content, shape, and layout.
      * @param {object} data - The node data.
      * @returns {{width: number, height: number, shape: string, rectWidth: number, rectHeight: number}} Size info.
@@ -992,6 +1456,8 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             });
 
         const hadMissing = this._assignMissingPositions();
+        this._updateGeometry();
+
         // start animation if missing positions were found AND physics is allowed by config
         const shouldRun = hadMissing && this._configPhysics;
 
@@ -1084,68 +1550,28 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Renders the graph.
+     * Renders the graph again at once: a discrete change - a model edited in place, a
+     * replaced selection - is shown before the call returns.
      */
     render() {
-        this._ensureArrowMarker();
-        this._edgeLayer.innerHTML = "";
-        this._nodeLayer.innerHTML = "";
-        this._renderEdges();
-        this._renderNodes();
         this._updateGeometry();
-        this._applyViewTransform();
+        this.setState({ revision: this.state.revision + 1 });
+        this._store.flush();
     }
 
     /**
-     * Renders all edges.
+     * Publishes the positions of the node records into the state, which renders them on
+     * the next animation frame. A simulation step and every move of a gesture end here.
      */
-    _renderEdges() {
-        this._model.edges.forEach((t) => {
-            const marker = this._ensureArrowMarker(t.color);
-            const a = this._nodes.find(n => {
-                return n.id === t.from;
-            });
-            const b = this._nodes.find(n => {
-                return n.id === t.to;
-            });
-            if (!a || !b) {
-                return;
-            }
-
-            const pts = this._edgePointsWithWaypoints(a, b, t.waypoints || [], this._dissolveProgress);
-            // change from polyline to path for smooth curves
-            const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-            path.setAttribute("class", "wx-graph-viewer-edge");
-            if (t.colorCss) {
-                path.classList.add(t.colorCss);
-            }
-            path.setAttribute("data-id", t.id || "");
-            path.setAttribute("data-label", t.label || "");
-
-            // use helper to generate path data based on configuration
-            path.setAttribute("d", this._generatePathData(pts));
-
-            path.setAttribute("fill", "none");
-            path.setAttribute("stroke-linecap", "round");
-            path.setAttribute("stroke-linejoin", "round");
-            path.setAttribute("marker-end", marker);
-            this._applyPaint(path, "stroke", t.color);
-            if (t.dasharray) {
-                path.setAttribute("stroke-dasharray", t.dasharray);
-            }
-            this._edgeLayer.appendChild(path);
-
-            if (t.label) {
-                const lbl = document.createElementNS("http://www.w3.org/2000/svg", "text");
-                lbl.setAttribute("class", "wx-graph-edge-label");
-                lbl.setAttribute("data-id", t.id || "");
-                lbl.setAttribute("text-anchor", "middle");
-                lbl.setAttribute("dominant-baseline", "middle");
-                lbl.textContent = t.label;
-                this._edgeLayer.appendChild(lbl);
-            }
-        });
+    _updateGeometry() {
+        const positions = {};
+        for (const n of this._nodes) {
+            positions[n.id] = { x: n.x, y: n.y };
+        }
+        this.setState({ positions: positions, dissolve: this._dissolveProgress });
     }
+
+    // ------------------------------------------------------------------ geometry
 
     /**
      * Generates the SVG path data string based on the current edge style configuration.
@@ -1247,7 +1673,6 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
                 x: n.x - p.x,
                 y: n.y - p.y
             };
-            const len = Math.hypot(o.x, o.y);
             const angle = Math.atan2(o.y, o.x) + (reverse ? Math.PI : 0);
             const length = Math.hypot(curr.x - (reverse ? n.x : p.x), curr.y - (reverse ? n.y : p.y)) * smoothing;
             return {
@@ -1291,11 +1716,11 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             const isLabelBelow = (from.data.layout === "label-below");
             const loopOffset = isLabelBelow ? 28 : 20;
 
-            const p1 = { x: srcC.x + w/4, y: srcC.y - h/2 };
-            const p2 = { x: srcC.x + w/4, y: srcC.y - h/2 - loopOffset };
-            const p3 = { x: srcC.x + w/2 + loopOffset, y: srcC.y - h/2 - loopOffset};
-            const p4 = { x: srcC.x + w/2 + loopOffset, y: srcC.y - h/4 };
-            const p5 = { x: srcC.x + w/2 + 5, y: srcC.y - h/8 };
+            const p1 = { x: srcC.x + w / 4, y: srcC.y - h / 2 };
+            const p2 = { x: srcC.x + w / 4, y: srcC.y - h / 2 - loopOffset };
+            const p3 = { x: srcC.x + w / 2 + loopOffset, y: srcC.y - h / 2 - loopOffset };
+            const p4 = { x: srcC.x + w / 2 + loopOffset, y: srcC.y - h / 4 };
+            const p5 = { x: srcC.x + w / 2 + 5, y: srcC.y - h / 8 };
 
             return [p1, p2, p3, p4, p5];
         }
@@ -1320,8 +1745,10 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         }
         pts.push({ ...dstC });
 
-        const marginSrc = 4;
-        const pullBack = 8;
+        // the line starts just off the source and the tip just clears the stroke of
+        // the target, so an arrow visibly arrives at the node it points to
+        const marginSrc = 2;
+        const pullBack = 1;
 
         if (pts.length > 1) {
             const next = pts[1];
@@ -1394,6 +1821,24 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Generates the path data of an edge that ends in an arrow head: the line stops
+     * where the head begins, and the head reaches on to the last point.
+     * @param {Array<{x:number, y:number}>} points - The points from source to tip.
+     * @returns {string} The path d attribute string.
+     */
+    _arrowPathData(points) {
+        if (!points || points.length < 2) {
+            return this._generatePathData(points);
+        }
+        const tip = points[points.length - 1];
+        const before = points[points.length - 2];
+        const length = Math.hypot(tip.x - before.x, tip.y - before.y);
+        // a segment shorter than the head keeps a stub, so the head still has a direction
+        const trim = Math.min(webexpress.webui.GraphViewerCtrl.ARROW_LENGTH, Math.max(0, length - 0.5));
+        return this._generatePathData(points.slice(0, -1).concat([this._shiftAlong(tip, before, trim)]));
+    }
+
+    /**
      * Shifts a point along a segment.
      * @param {{x:number, y:number}} from - Start point.
      * @param {{x:number, y:number}} to - End point.
@@ -1410,206 +1855,83 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Renders nodes and attaches listeners.
+     * Calculates the midpoint for edge labels.
+     * @param {Array<{x:number, y:number}>} pts - Points.
+     * @returns {{x:number, y:number}} The midpoint.
      */
-    _renderNodes() {
-        this._nodes.forEach(n => {
-            const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
-            g.setAttribute("class", "wx-graph-node");
-            g.setAttribute("data-id", n.id);
-            // the shape carries no accessible name of its own, so the group
-            // supplies one; keyboard reachability stays with the canvas, which
-            // owns the roving selection
-            g.setAttribute("role", "img");
-            g.setAttribute("aria-label", n.data.label || n.id);
+    _edgeLabelPoint(pts) {
+        if (!Array.isArray(pts) || pts.length === 0) {
+            return { x: 0, y: 0 };
+        }
+        if (pts.length === 1) {
+            return pts[0];
+        }
 
-            const layout = (n.data.layout || "").toLowerCase();
-            const iconBoxSize = webexpress.webui.GraphViewerCtrl.ICON_SIZE;
-            const rectW = n.rectWidth || n.width;
-            const rectH = n.rectHeight || n.height;
-            let shapeEl = null;
+        let total = 0;
+        const segs = [];
+        for (let i = 0; i < pts.length - 1; i++) {
+            const dx = pts[i + 1].x - pts[i].x;
+            const dy = pts[i + 1].y - pts[i].y;
+            const len = Math.hypot(dx, dy);
+            segs.push({ len, from: pts[i], to: pts[i + 1] });
+            total += len;
+        }
 
-            if (n.shape === "circle") {
-                shapeEl = document.createElementNS("http://www.w3.org/2000/svg", "circle");
-                shapeEl.setAttribute("cx", n.x);
-                shapeEl.setAttribute("cy", n.y);
-                shapeEl.setAttribute("r", Math.max(rectW, rectH) / 2);
-                shapeEl.setAttribute("class", "wx-graph-node-circle");
-            } else {
-                shapeEl = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-                shapeEl.setAttribute("x", n.x - rectW / 2);
-                shapeEl.setAttribute("y", n.y - rectH / 2);
-                shapeEl.setAttribute("rx", 6);
-                shapeEl.setAttribute("ry", 6);
-                shapeEl.setAttribute("width", rectW);
-                shapeEl.setAttribute("height", rectH);
-                shapeEl.setAttribute("class", "wx-graph-node-rect");
-            }
-
-            if (n.data.backgroundCss) {
-                shapeEl.classList.add(n.data.backgroundCss);
-            }
-            this._applyPaint(shapeEl, "fill", n.data.backgroundColor);
-
-            const hasIcon = Boolean(n.data.image) || Boolean(n.data.icon);
-            let iconEl = null;
-
-            if (n.data.image) {
-                const img = document.createElementNS("http://www.w3.org/2000/svg", "image");
-                img.setAttribute("class", "wx-graph-node-icon");
-                img.setAttribute("data-role", "icon-image");
-                img.setAttribute("href", n.data.image);
-                img.setAttribute("width", iconBoxSize);
-                img.setAttribute("height", iconBoxSize);
-                img.setAttribute("pointer-events", "none");
-                iconEl = img;
-            } else if (n.data.icon) {
-                const fo = document.createElementNS("http://www.w3.org/2000/svg", "foreignObject");
-                fo.setAttribute("class", "wx-graph-node-icon");
-                fo.setAttribute("data-role", "icon-fo");
-                fo.setAttribute("width", iconBoxSize);
-                fo.setAttribute("height", iconBoxSize);
-                fo.setAttribute("pointer-events", "none");
-
-                const iEl = document.createElementNS("http://www.w3.org/1999/xhtml", "i");
-                iEl.setAttribute("class", [n.data.icon, n.data.foregroundCss || ""]
-                    .filter(Boolean).join(" "));
-                iEl.style.width = `${iconBoxSize}px`;
-                iEl.style.height = `${iconBoxSize}px`;
-                iEl.style.lineHeight = `${iconBoxSize}px`;
-                iEl.style.textAlign = "center";
-                if (n.data.foregroundColor) {
-                    iEl.style.color = n.data.foregroundColor;
-                }
-                fo.appendChild(iEl);
-                iconEl = fo;
-            }
-
-            const text = document.createElementNS("http://www.w3.org/2000/svg", "text");
-            text.setAttribute("text-anchor", "middle");
-            text.setAttribute("class", "wx-graph-node-label");
-            if (n.data.foregroundCss) {
-                text.classList.add(n.data.foregroundCss);
-            }
-            text.textContent = n.data.label || n.id;
-            this._applyPaint(text, "fill", n.data.foregroundColor);
-
-            // if uri is present, add underline style class
-            if (n.data.uri) {
-                text.classList.add("wx-graph-node-link");
-            }
-
-            const detail = this._createNodeDetail(n.data);
-            const hasDetail = Boolean(detail.description) || Boolean(detail.state);
-
-            if (layout === "label-below") {
-                const centerX = n.x;
-                let iconY = n.y - rectH / 2 + (rectH - iconBoxSize) / 2;
-                if (iconEl) {
-                    iconEl.setAttribute("x", centerX - iconBoxSize / 2);
-                    iconEl.setAttribute("y", iconY);
-                }
-                g.appendChild(shapeEl);
-                if (iconEl) {
-                    g.appendChild(iconEl);
-                }
-                const textY = n.y + rectH / 2 + 6;
-                text.setAttribute("x", centerX);
-                text.setAttribute("y", textY);
-                text.setAttribute("dominant-baseline", "hanging");
-                g.appendChild(text);
-            } else {
-                g.appendChild(shapeEl);
-                if (iconEl) {
-                    g.appendChild(iconEl);
-                }
-                text.removeAttribute("dominant-baseline");
-                g.appendChild(text);
-
-                if (hasDetail) {
-                    if (detail.description) {
-                        g.appendChild(detail.description);
-                    }
-                    if (detail.state) {
-                        g.appendChild(detail.state.badge);
-                        g.appendChild(detail.state.text);
-                    }
-
-                    this._placeNodeDetail(n, {
-                        icon: iconEl,
-                        label: text,
-                        description: detail.description,
-                        state: detail.state
-                    });
-                } else {
-                    if (iconEl) {
-                        iconEl.setAttribute("x", n.x - n.width / 2 + 12);
-                        iconEl.setAttribute("y", n.y - iconBoxSize / 2);
-                    }
-                    const textX = hasIcon ? n.x + iconBoxSize * 0.4 : n.x;
-                    text.setAttribute("x", textX);
-                    text.setAttribute("y", n.y + 5);
-                }
-            }
-
-            this._nodeLayer.appendChild(g);
-
-            g.addEventListener("click", (e) => {
-                e.stopPropagation();
-
-                // if ctrl + click and uri is present, open url
-                if (e.ctrlKey && n.data.uri) {
-                    window.open(n.data.uri, "_self");
-                    return;
-                }
-
-                const detail = { id: n.id, data: n.data };
-                this._dispatch(webexpress.webui.Event.CLICK_EVENT, { detail, bubbles: true });
-            });
-
-            g.addEventListener("dblclick", (e) => {
-                e.stopPropagation();
-                const detail = { id: n.id, data: n.data };
-
-                // if uri is present, navigate to it on double click
-                if (n.data.uri) {
-                    window.open(n.data.uri, "_self");
-                }
-
-                this._dispatch(webexpress.webui.Event.DOUBLE_CLICK_EVENT, { detail, bubbles: true });
-            });
-
-            g.addEventListener("pointerdown", (e) => {
-                e.stopPropagation();
-                const p = this._toLocal(e);
-                // check config before enabling physics
-                if (this._configPhysics) {
-                    if (!this._physicsEnabled) {
-                        this._physicsEnabled = true;
-                        this._dissolving = true;
-                        this._dissolveProgress = 0;
-                    }
-                    // the loop stops itself once the layout settles, so a drag
-                    // has to be able to wake it again rather than assume it runs
-                    this._startAnimation();
-                }
-                n.fixed = true;
-                n.vx = 0;
-                n.vy = 0;
-                n._wasDragged = false;
-                this._drag = {
-                    node: n,
-                    offsetX: n.x - p.x,
-                    offsetY: n.y - p.y,
-                    startX: p.x,
-                    startY: p.y,
-                    pointerId: e.pointerId
+        const half = total / 2;
+        let acc = 0;
+        for (let i = 0; i < segs.length; i++) {
+            const seg = segs[i];
+            if (acc + seg.len >= half) {
+                const t = (half - acc) / (seg.len || 1);
+                return {
+                    x: seg.from.x + (seg.to.x - seg.from.x) * t,
+                    y: seg.from.y + (seg.to.y - seg.from.y) * t
                 };
-                g.style.cursor = "grabbing";
-                g.setPointerCapture(e.pointerId);
-                this._attachDragListeners(g);
-            });
-        });
+            }
+            acc += seg.len;
+        }
+        const last = pts[pts.length - 1];
+        return { x: last.x, y: last.y };
+    }
+
+    // ------------------------------------------------------------------ drag & physics
+
+    /**
+     * Starts dragging a node: the simulation wakes up, and the node follows the pointer
+     * until it is released.
+     * @param {object} n - The node record.
+     * @param {PointerEvent} e - The pointer event.
+     */
+    _beginNodeDrag(n, e) {
+        const p = this._toLocal(e);
+        // check config before enabling physics
+        if (this._configPhysics) {
+            if (!this._physicsEnabled) {
+                this._physicsEnabled = true;
+                this._dissolving = true;
+                this._dissolveProgress = 0;
+            }
+            // the loop stops itself once the layout settles, so a drag
+            // has to be able to wake it again rather than assume it runs
+            this._startAnimation();
+        }
+        n.fixed = true;
+        n.vx = 0;
+        n.vy = 0;
+        n._wasDragged = false;
+        this._drag = {
+            node: n,
+            offsetX: n.x - p.x,
+            offsetY: n.y - p.y,
+            startX: p.x,
+            startY: p.y,
+            pointerId: e.pointerId
+        };
+        const target = e.currentTarget || e.target;
+        if (target && typeof target.setPointerCapture === "function") {
+            target.setPointerCapture(e.pointerId);
+        }
+        this._attachDragListeners(target);
     }
 
     /**
@@ -1679,20 +2001,20 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         };
 
         const up = () => {
-            if (this._drag && typeof target.releasePointerCapture === "function") {
+            if (this._drag && target && typeof target.releasePointerCapture === "function") {
                 try {
                     target.releasePointerCapture(this._drag.pointerId);
                 } catch (e) {
                     // ignore
                 }
             }
-            target.style.cursor = "grab";
             if (this._drag) {
                 this._drag.node.fixed = false;
             }
             this._drag = null;
             this._removeWindowListener("pointermove", move);
             this._removeWindowListener("pointerup", up);
+            this._removeWindowListener("pointercancel", up);
 
             // releasing a node hands it back to the simulation, which has to
             // run again to let it and its neighbours settle
@@ -1700,6 +2022,8 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         };
         this._addWindowListener("pointermove", move);
         this._addWindowListener("pointerup", up);
+        // a gesture the browser takes over (a touch scroll) ends without a pointerup
+        this._addWindowListener("pointercancel", up);
     }
 
     /**
@@ -1721,26 +2045,21 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             // a dissolve still moves the waypoints, so geometry has to follow;
             // once it is done nothing changes on its own any more and the frame
             // loop has no reason to continue
-            if (this._dissolving) {
-                this._updateGeometry();
-                return true;
-            }
             this._updateGeometry();
-            return false;
+            return this._dissolving;
         }
 
         const k = 0.05;
         const rest = 200;
         const damping = 0.9;
         const repulse = 9000;
+        // the records are read once: the accessor would be asked once per pair otherwise
+        const nodes = this._nodes;
+        const byId = new Map(nodes.map(n => [n.id, n]));
 
         this._edges.forEach(e => {
-            const a = this._nodes.find(n => {
-                return n.id === e.from;
-            });
-            const b = this._nodes.find(n => {
-                return n.id === e.to;
-            });
+            const a = byId.get(e.from);
+            const b = byId.get(e.to);
             if (!a || !b) {
                 return;
             }
@@ -1761,10 +2080,10 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             }
         });
 
-        for (let i = 0; i < this._nodes.length; i++) {
-            for (let j = i + 1; j < this._nodes.length; j++) {
-                const a = this._nodes[i];
-                const b = this._nodes[j];
+        for (let i = 0; i < nodes.length; i++) {
+            for (let j = i + 1; j < nodes.length; j++) {
+                const a = nodes[i];
+                const b = nodes[j];
                 const dx = b.x - a.x;
                 const dy = b.y - a.y;
                 const dist2 = dx * dx + dy * dy || 0.0001;
@@ -1786,7 +2105,7 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
 
         let peakVelocity = 0;
 
-        this._nodes.forEach(n => {
+        nodes.forEach(n => {
             if (n.fixed) {
                 return;
             }
@@ -1807,250 +2126,10 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Calculates the midpoint for edge labels.
-     * @param {Array<{x:number, y:number}>} pts - Points.
-     * @returns {{x:number, y:number}} The midpoint.
-     */
-    _edgeLabelPoint(pts) {
-        if (!Array.isArray(pts) || pts.length === 0) {
-            return { x: 0, y: 0 };
-        }
-        if (pts.length === 1) {
-            return pts[0];
-        }
-
-        let total = 0;
-        const segs = [];
-        for (let i = 0; i < pts.length - 1; i++) {
-            const dx = pts[i + 1].x - pts[i].x;
-            const dy = pts[i + 1].y - pts[i].y;
-            const len = Math.hypot(dx, dy);
-            segs.push({ len, from: pts[i], to: pts[i + 1] });
-            total += len;
-        }
-
-        const half = total / 2;
-        let acc = 0;
-        for (let i = 0; i < segs.length; i++) {
-            const seg = segs[i];
-            if (acc + seg.len >= half) {
-                const t = (half - acc) / (seg.len || 1);
-                return {
-                    x: seg.from.x + (seg.to.x - seg.from.x) * t,
-                    y: seg.from.y + (seg.to.y - seg.from.y) * t
-                };
-            }
-            acc += seg.len;
-        }
-        const last = pts[pts.length - 1];
-        return { x: last.x, y: last.y };
-    }
-
-    /**
-     * Updates the SVG geometry based on the current model state.
-     */
-    _updateGeometry() {
-        Array.from(this._nodeLayer.children).forEach(g => {
-            const id = g.getAttribute("data-id");
-            const n = this._nodes.find(nn => {
-                return nn.id === id;
-            });
-            if (!n) {
-                return;
-            }
-            const shapeEl = g.querySelector("rect, circle");
-            const text = g.querySelector("text.wx-graph-node-label");
-            const imgIcon = g.querySelector("[data-role='icon-image']");
-            const foIcon = g.querySelector("[data-role='icon-fo']");
-            const hasIcon = Boolean(n.data.image) || Boolean(n.data.icon);
-            const layout = (n.data.layout || "").toLowerCase();
-            const iconBoxSize = webexpress.webui.GraphViewerCtrl.ICON_SIZE;
-            const rectW = n.rectWidth || n.width;
-            const rectH = n.rectHeight || n.height;
-            const imgSize = 22;
-
-            // determine the size actually used for centering logic
-            const currentIconSize = n.data.image ? imgSize : iconBoxSize;
-
-            // update shape position and size
-            if (n.shape === "circle") {
-                shapeEl.setAttribute("cx", n.x);
-                shapeEl.setAttribute("cy", n.y);
-                shapeEl.setAttribute("r", Math.max(rectW, rectH) / 2);
-            } else {
-                shapeEl.setAttribute("x", n.x - rectW / 2);
-                shapeEl.setAttribute("y", n.y - rectH / 2);
-                shapeEl.setAttribute("width", rectW);
-                shapeEl.setAttribute("height", rectH);
-            }
-
-            // handle visual hover highlights (for Editor/Interactive use)
-            if (g.classList.contains("wx-graph-node-hover")) {
-                shapeEl.classList.add("hover-highlight");
-            } else {
-                shapeEl.classList.remove("hover-highlight");
-            }
-
-            const rectClasses = ["wx-graph-node-rect"];
-            if (n.data.backgroundCss) {
-                rectClasses.push(n.data.backgroundCss);
-            }
-            // preserve existing classes on the shape (like hover-highlight added above or via classList manipulation elsewhere)
-            const existingClasses = shapeEl.getAttribute("class") || "";
-            if (existingClasses.includes("hover-highlight")) {
-                rectClasses.push("hover-highlight");
-            }
-
-            // reset base class but keep dynamic ones
-            shapeEl.setAttribute("class", rectClasses.join(" "));
-
-            this._applyPaint(shapeEl, "fill", n.data.backgroundColor);
-
-            if (imgIcon) {
-                imgIcon.setAttribute("width", imgSize);
-                imgIcon.setAttribute("height", imgSize);
-            }
-            if (foIcon) {
-                foIcon.setAttribute("width", iconBoxSize);
-                foIcon.setAttribute("height", iconBoxSize);
-                const iEl = foIcon.firstChild;
-                const desiredClass = [n.data.icon, n.data.foregroundCss || ""].filter(Boolean).join(" ");
-                if (iEl && iEl.className !== desiredClass) {
-                    iEl.className = desiredClass;
-                }
-                if (iEl) {
-                    if (n.data.foregroundColor) {
-                        iEl.style.color = n.data.foregroundColor;
-                    } else {
-                        iEl.style.color = "";
-                    }
-                    iEl.style.width = `${iconBoxSize}px`;
-                    iEl.style.height = `${iconBoxSize}px`;
-                    iEl.style.lineHeight = `${iconBoxSize}px`;
-                }
-            }
-
-            if (layout === "label-below") {
-                const centerX = n.x;
-                const rectHalfH = rectH / 2;
-                // use currentIconSize for correct vertical centering within the shape
-                let iconY = n.y - rectHalfH + (rectH - currentIconSize) / 2;
-
-                if (imgIcon) {
-                    imgIcon.setAttribute("x", centerX - imgSize / 2);
-                    imgIcon.setAttribute("y", iconY);
-                }
-                if (foIcon) {
-                    foIcon.setAttribute("x", centerX - iconBoxSize / 2);
-                    foIcon.setAttribute("y", iconY);
-                }
-                const textY = n.y + rectH / 2 + (n.data.shape == "circle" ? 16 : 6);
-                text.setAttribute("x", centerX);
-                text.setAttribute("y", textY);
-                text.setAttribute("dominant-baseline", "hanging");
-            } else {
-                const detail = this._readNodeDetail(g);
-
-                if (detail.description || detail.state) {
-                    // the icon is placed by the block below, which knows the
-                    // sizes of the two icon kinds
-                    this._placeNodeDetail(n, {
-                        icon: null,
-                        label: text,
-                        description: detail.description,
-                        state: detail.state
-                    });
-                } else {
-                    const textX = hasIcon ? n.x + iconBoxSize * 0.4 : n.x;
-                    text.setAttribute("x", textX);
-                    text.setAttribute("y", n.y + 5);
-                    text.removeAttribute("dominant-baseline");
-                }
-
-                if (imgIcon) {
-                    // center image icon vertically based on its own size
-                    imgIcon.setAttribute("x", n.x - n.width / 2 + 12);
-                    imgIcon.setAttribute("y", n.y - imgSize / 2);
-                }
-                if (foIcon) {
-                    foIcon.setAttribute("x", n.x - n.width / 2 + 12);
-                    foIcon.setAttribute("y", n.y - iconBoxSize / 2);
-                }
-            }
-
-            text.className.baseVal = ["wx-graph-node-label", n.data.foregroundCss || ""].filter(Boolean).join(" ");
-
-            // if uri is present, add link style
-            if (n.data.uri) {
-                text.classList.add("wx-graph-node-link");
-            } else {
-                text.classList.remove("wx-graph-node-link");
-            }
-
-            this._applyPaint(text, "fill", n.data.foregroundColor);
-        });
-
-        Array.from(this._edgeLayer.children).forEach(el => {
-            const id = el.getAttribute("data-id");
-            const t = this._model.edges.find(tt => {
-                return tt.id === id;
-            });
-            if (!t) {
-                return;
-            }
-            const a = this._nodes.find(n => {
-                return n.id === t.from;
-            });
-            const b = this._nodes.find(n => {
-                return n.id === t.to;
-            });
-            if (!a || !b) {
-                return;
-            }
-
-            // check for path tag now
-            if (el.tagName === "path") {
-                const pts = this._edgePointsWithWaypoints(a, b, t.waypoints || [], this._dissolveProgress);
-                // update d-attribute instead of points using the config-aware helper
-                el.setAttribute("d", this._generatePathData(pts));
-
-                el.setAttribute("data-label", t.label || "");
-                el.className.baseVal = ["wx-graph-viewer-edge",
-                    el.classList.contains("wx-workflow-edge") ? "wx-workflow-edge" : "",
-                    t.colorCss || ""].filter(Boolean).join(" ");
-                this._applyPaint(el, "stroke", t.color);
-                // the arrowhead is a separate element, so a recoloured edge needs
-                // to be pointed at the marker matching its new colour
-                el.setAttribute("marker-end", this._ensureArrowMarker(t.color));
-                if (t.dasharray) {
-                    el.setAttribute("stroke-dasharray", t.dasharray);
-                } else {
-                    el.removeAttribute("stroke-dasharray");
-                }
-                // cache points for label positioning
-                el._cachedPoints = pts;
-            } else if (el.tagName === "text" && el.classList.contains("wx-graph-edge-label")) {
-                const pathEl = Array.from(this._edgeLayer.children).find(p => {
-                    return p.tagName === "path" && p.getAttribute("data-id") === id;
-                });
-                const pts = pathEl && pathEl._cachedPoints ? pathEl._cachedPoints : this._edgePointsWithWaypoints(a, b, t.waypoints || [], this._dissolveProgress);
-                const pos = this._edgeLabelPoint(pts);
-                el.setAttribute("x", pos.x);
-                el.setAttribute("y", pos.y);
-                el.textContent = t.label || "";
-                if (t.colorCss) {
-                    el.className.baseVal = ["wx-graph-edge-label", t.colorCss].join(" ");
-                } else {
-                    el.className.baseVal = "wx-graph-edge-label";
-                }
-            }
-        });
-    }
-
-    /**
      * Starts the animation loop, or restarts it when a settled simulation has
      * been disturbed again. The loop ends itself as soon as the simulation
-     * comes to rest, so an idle graph costs nothing.
+     * comes to rest, so an idle graph costs nothing. The frame that integrates the
+     * positions also paints them, rather than leaving them to the next one.
      */
     _startAnimation() {
         if (this._destroyed || (!this._physicsEnabled && !this._dissolving)) {
@@ -2063,7 +2142,13 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
             this._animFrames += 1;
             const running = this._tick();
 
-            if (this._destroyed || !running || this._animFrames >= webexpress.webui.GraphViewerCtrl.MAX_SIMULATION_FRAMES) {
+            if (this._destroyed) {
+                this._anim = null;
+                return;
+            }
+            this._store.flush();
+
+            if (!running || this._animFrames >= webexpress.webui.GraphViewerCtrl.MAX_SIMULATION_FRAMES) {
                 this._anim = null;
                 return;
             }
@@ -2087,100 +2172,31 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Releases the frame loop, every listener the control installed outside its
-     * own subtree and the DOM it added to the host. Without this the frame loop
-     * keeps the whole control graph reachable and running long after the host
-     * has left the document.
+     * Releases the frame loop, every listener the control installed and the DOM it
+     * added to the host. Without this the frame loop keeps the whole control graph
+     * reachable and running long after the host has left the document.
      */
     destroy() {
         this._destroyed = true;
         this._stopAnimation();
+        if (this._resizeObserver) {
+            this._resizeObserver.disconnect();
+            this._resizeObserver = null;
+        }
         this._releaseListeners();
 
         this._drag = null;
         this._viewDrag = null;
 
-        if (this._viewControls && this._viewControls.parentNode) {
-            this._viewControls.parentNode.removeChild(this._viewControls);
+        if (this._renderRoot) {
+            this._renderRoot.replaceChildren();
         }
         this._viewControls = null;
         this._fitBtn = null;
-
-        if (this._liveRegion && this._liveRegion.parentNode) {
-            this._liveRegion.parentNode.removeChild(this._liveRegion);
-        }
         this._liveRegion = null;
 
-        if (this._svg && this._svg.parentNode) {
-            this._svg.parentNode.removeChild(this._svg);
-        }
-
         super.destroy();
-    }
-
-    /**
-     * Fits the graph content to the view.
-     * @param {number} [padding=24] - Padding.
-     */
-    _fitToView(padding = 24) {
-        const bbox = this._computeContentBBox();
-        if (!bbox) {
-            return;
-        }
-        const rect = this._svg.getBoundingClientRect();
-        const w = rect.width;
-        const h = rect.height;
-
-        if (w <= 0 || h <= 0) {
-            return;
-        }
-
-        const contentW = bbox.maxX - bbox.minX;
-        const contentH = bbox.maxY - bbox.minY;
-        const scale = Math.max(0.3, Math.min(3, Math.min((w - padding * 2) / contentW, (h - padding * 2) / contentH)));
-        const cx = (bbox.minX + bbox.maxX) / 2;
-        const cy = (bbox.minY + bbox.maxY) / 2;
-
-        this._scale = scale;
-        this._pan.x = w / 2 - cx * scale;
-        this._pan.y = h / 2 - cy * scale;
-        this._applyViewTransform();
-    }
-
-    /**
-     * Computes the bounding box of the graph content.
-     * @returns {{minX:number, minY:number, maxX:number, maxY:number}|null} The bbox.
-     */
-    _computeContentBBox() {
-        if (!this._nodes.length) {
-            return null;
-        }
-        const pts = [];
-        this._nodes.forEach(n => {
-            pts.push({ x: n.x - n.width / 2, y: n.y - n.height / 2 });
-            pts.push({ x: n.x + n.width / 2, y: n.y + n.height / 2 });
-        });
-        this._model.edges.forEach(t => {
-            if (Array.isArray(t.waypoints)) {
-                t.waypoints.forEach(wp => {
-                    pts.push({ x: wp.x, y: wp.y });
-                });
-            }
-        });
-
-        let minX = Infinity;
-        let minY = Infinity;
-        let maxX = -Infinity;
-        let maxY = -Infinity;
-
-        pts.forEach(p => {
-            minX = Math.min(minX, p.x);
-            minY = Math.min(minY, p.y);
-            maxX = Math.max(maxX, p.x);
-            maxY = Math.max(maxY, p.y);
-        });
-        const expand = 20;
-        return { minX: minX - expand, minY: minY - expand, maxX: maxX + expand, maxY: maxY + expand };
+        this._store.destroy();
     }
 
     /**
@@ -2200,6 +2216,9 @@ webexpress.webui.GraphViewerCtrl = class extends webexpress.webui.Ctrl {
         const autoPhysics = this._buildPhysics();
         this.render();
         this._fitToView();
+        // the fit belongs to the replaced model; a frame later the graph would first
+        // show at the zoom of the previous one
+        this._store.flush();
 
         // a replaced model may bring nodes without a position, which only the
         // simulation can place

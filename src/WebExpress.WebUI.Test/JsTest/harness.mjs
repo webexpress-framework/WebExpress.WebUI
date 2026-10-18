@@ -228,7 +228,8 @@ export function loadWebUi(options = {}) {
 
     vm.createContext(sandbox);
 
-    const files = ["webexpress.webui.js", ...(options.extraFiles || [])];
+    // the view layer loads right after the core, as IncludeJavaScript declares it
+    const files = ["webexpress.webui.js", "webexpress.webui.renderer.js", "webexpress.webui.state.js", ...(options.extraFiles || [])];
 
     for (const file of files) {
         const full = path.isAbsolute(file) ? file : path.join(assetsJs, file);

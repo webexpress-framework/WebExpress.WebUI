@@ -101,7 +101,13 @@ if (tabCtrl) {
 
 The component dispatches events to notify the application of user interactions, specifically when a different tab is selected.
 
-- **`webexpress.webui.Event.SELECTED_TAB_EVENT`**: This event is fired when the user selects a tab. The event `detail` object contains the `tabId` of the newly active tab.
+- **`webexpress.webui.Event.SELECTED_TAB_EVENT`**: This event is fired when the user selects a tab. The event `detail` object contains the `tabId` of the newly active tab. The selection is rendered before the event fires, so a listener finds the pane of that tab already shown and may measure it.
+
+## Rendering
+
+`TabCtrl` extends `webexpress.webui.StateCtrl` (see [StateCtrl and Renderer](state.md)): the tab headers, the tools beside them and the marking of the active pane are rendered from the state, which holds the tabs and the id of the active one. The authored panes keep their content, their classes and the controls the server rendered into them; the view only places them. `selectTab(id)` renders at once, `setTabLabel(id, label)` on the next microtask.
+
+A subclass extends the view through hooks instead of building headers itself: `_tabItemProps`, `_tabLinkProps`, `_tabLinkLead` and `_tabItemTail` decorate a tab header, `_renderTools` the tools beside the list, `_renderHeaderExtras` and `_renderContentExtras` the header row and the pane host. A subclass opens the control at the end of its own constructor through `_open()`, because its hooks read fields that exist only by then.
 
 ## Use Case Examples
 

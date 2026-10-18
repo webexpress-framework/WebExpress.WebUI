@@ -90,6 +90,16 @@ The following events form the central interaction points of the table control sy
 
 - `TABLE_SORT_EVENT` (sort changes)
 
+## Rendering and State
+
+The control renders on `webexpress.webui.StateCtrl`: the header, the rows and the footer are a function of its state - the columns, the rows, the footer, the selected row and the rows the last refresh found changed. The table element is the render root; the host keeps room for what a subclass places beside it (the pager and the progress bar of the REST table).
+
+Rows are keyed by their id, so a sort, an expand or a selection moves and patches the row nodes instead of rebuilding them. The content of a cell - the output of a cell template, which may be a control of its own such as an inline editor - is built into the cell and kept until the cell, its column or what it shows (content, type, link, tree state) changes; a refresh does not rebuild an editor under the hands of the user.
+
+The rows and the columns stay records that the control, its subclasses and the cell templates change in place. After such a change `render()` renders the table again on the next microtask and compares the rows with the last refresh: a changed row flashes `wx-change-flash`, a new one `wx-new-flash`, and the marks are taken away once the animation has played. A selection is rendered before `SELECT_ROW_EVENT` fires, so a listener finds the row marked. A column resize follows the pointer through the grid template (`--wx-grid-template`) alone and renders nothing until it ends; a double click on the resizer sizes the column by its own cells.
+
+A subclass extends the view through hooks (`_renderLeadingHeaderCells`, `_headerCellProps`, `_renderActionsHeader`, `_renderLeadingCells`, `_rowClasses`, `_renderRowsList`, `_renderTableExtras`, `_bodyHandlers`) and opens the table at the end of its own constructor with `_open()`, because the hooks read what that constructor sets up; the base opens it only when it is constructed itself. The REST table of WebExpress.WebApp goes one step further and renders the whole host, placing the table element among its progress bar and paging info line.
+
 ## Programmatic Control
 
 Programmatic control allows you to interact with the table and customize its structure, data, and behavior directly via JavaScript APIs. This is especially useful for building dynamic applications, updating data on the fly, or integrating with other JavaScript modules.
@@ -147,7 +157,7 @@ Beyond its core functionality, the table control component offers a range of adv
 - **Column Visibility Management:** With `data-allow-column-remove`, hide or show columns via modal; modal can search/filter columns.
 - **Persistence:** View state (columns, widths, tree collapsed/expanded, sort) is saved in localStorage using `data-persist-key` and restored on initialization.
 - **Row Reordering:** Drag handle (`≡`) in leftmost column when `data-movable-row="true"`; support for hierarchical drag and drop including reparenting.
-- **Auto-Expand on Row Hover:** When dragging a row, hovering for >2 seconds over a collapsed parent with children auto-expands the parent to enable dropping as a child.
+- **Auto-Expand on Row Hover:** When dragging a row, hovering for a second over a collapsed parent with children auto-expands the parent to enable dropping as a child.
 - **Action/Options Column:** Automatically handled; supports per-row or global action dropdowns for contextual table actions.
 - **All base features:** Hierarchy, cell templates, flexible, responsive rendering.
 
@@ -182,6 +192,10 @@ In addition to the core event set, the table control component emits several ext
 - `COLUMN_REORDER_EVENT`: details about column move
 - `COLUMN_VISIBILITY_EVENT`: toggling columns on/off
 - `ROW_REORDER_EVENT`: details about row move/reparenting (includes parentId, toIndex)
+
+## Rendering
+
+The reorderable table renders through the hooks of the base table: the grip cell ahead of every row, the column manager in the actions header and the drag listeners of the column headers. A row move is state - the moved row (`wx-dragging`), the row under the pointer (`wx-drag-over`) and the place the drop line stands at - so the rows render their marks and the line from it, and a drop moves the row nodes rather than rebuilding them. Only the ghost and the insertion line of a column drag follow the pointer directly, because they change at pointer rate. A row moved with the arrow keys keeps the focus on its grip.
 
 ## Example Markup
 

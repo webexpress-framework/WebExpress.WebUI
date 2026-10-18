@@ -125,6 +125,8 @@ class Element {
     constructor(tag) {
         this.nodeType = 1;
         this.tagName = String(tag).toUpperCase();
+        // the renderer decides by the namespace of a parent whether its children are SVG
+        this.namespaceURI = "http://www.w3.org/1999/xhtml";
         this.childNodes = [];
         this.parentNode = null;
         this._attrs = new Map();
@@ -169,6 +171,11 @@ class Element {
     set className(value) { this._classes = new Set(String(value || "").split(/\s+/).filter(Boolean)); }
 
     get classList() { return new ClassList(this); }
+
+    // a boolean property reflects its content attribute, so a view that states it as an
+    // attribute and a test that reads the property agree
+    get disabled() { return this.hasAttribute("disabled"); }
+    set disabled(value) { if (value) { this.setAttribute("disabled", ""); } else { this.removeAttribute("disabled"); } }
 
     get children() { return this.childNodes.filter((n) => n.nodeType === 1); }
 

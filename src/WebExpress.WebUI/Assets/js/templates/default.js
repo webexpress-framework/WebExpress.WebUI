@@ -114,10 +114,12 @@ webexpress.webui.TableTemplates.register("calendar", (val, table, row, cell, nam
 webexpress.webui.TableTemplates.register("tag", (val, table, row, cell, name, opts) => {
     opts = opts || {};
 
-    if (!val) {
+    const editable = opts.editable === true || opts.editable === "true";
+    // an editable cell keeps its editor when empty, otherwise removing the last tag
+    // would leave no way to add one again
+    if (!val && !editable) {
         return "";
     }
-    const editable = opts.editable === true || opts.editable === "true";
     const container = document.createElement("div");
     const cssColor = opts.colorCss || null;
     const styleColor = opts.colorStyle || null;
