@@ -149,6 +149,11 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
      * Restores the model as it was before the last change.
      */
     _undo() {
+        if (this._collab) {
+            this._collabStep(false);
+            return;
+        }
+
         if (this._undoStack.length === 0) {
             return;
         }
@@ -198,12 +203,193 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
      * Re-applies a previously undone model state from the redo stack.
      */
     _redo() {
+        if (this._collab) {
+            this._collabStep(true);
+            return;
+        }
+
         if (this._redoStack.length === 0) {
             return;
         }
 
         this._pushHistory(this._undoStack, this._snapshot());
         this._restoreSnapshot(this._redoStack.pop());
+    }
+
+    // ------------------------------------------------------------------ collaboration
+
+    /**
+     * Names the document kind this control shares: a graph of node and edge leaves (see
+     * webexpress.webui.OtSchema.checkGraph).
+     * @returns {string} The kind.
+     */
+    get collaborationKind() { return "graph"; }
+
+    /**
+     * Starts sharing the graph. Every committed change is announced as steps; moving a node
+     * becomes attribute steps on its coordinates, so two users moving different nodes never
+     * conflict. Undo then inverts only the user's own changes.
+     * @param {object} [options] - The options.
+     * @param {string} [options.tag] - The client tag that keeps new ids unique across clients.
+     */
+    beginCollaboration(options = {}) {
+        this._collabTag = /^[a-z\d]{1,12}$/.test(options.tag ?? "") ? options.tag : "";
+        // edges without ids cannot be addressed by steps
+        this._model.edges.forEach(edge => { if (!edge.id) edge.id = this._newEdgeId(); });
+        this._collab = { history: new webexpress.webui.OtHistory(), tokens: this._graphTokens() };
+        this._updateToolbarState();
+    }
+
+    /**
+     * Stops sharing the graph; the snapshot history starts afresh.
+     */
+    endCollaboration() {
+        this._collab = null;
+        this._undoStack = [];
+        this._redoStack = [];
+        this._updateToolbarState();
+    }
+
+    /**
+     * Returns the graph as packed tokens, as it was last announced.
+     * @returns {Array<object>} The packed tokens.
+     */
+    getCollaborationTokens() {
+        return webexpress.webui.Ot.compact(this._collab?.tokens ?? this._graphTokens());
+    }
+
+    /**
+     * Replaces the graph with the shared state.
+     * @param {Array<object>} tokens - The packed tokens.
+     * @returns {boolean} True if they form a valid graph.
+     */
+    loadCollaborationTokens(tokens) {
+        let expanded;
+        try { expanded = webexpress.webui.Ot.expand(tokens); } catch { return false; }
+        if (!webexpress.webui.OtSchema.checkGraph(expanded)) return false;
+        this._showGraph(expanded);
+        this._collab?.history.reset();
+        this._updateToolbarState();
+        return true;
+    }
+
+    /**
+     * Checks packed tokens against the graph schema.
+     * @param {Array<object>} tokens - The tokens.
+     * @returns {boolean} True if valid.
+     */
+    checkCollaborationTokens(tokens) {
+        try { return webexpress.webui.OtSchema.checkGraph(webexpress.webui.Ot.expand(tokens)); } catch { return false; }
+    }
+
+    /**
+     * Repairs a graph after concurrent changes; edges whose node was removed are dropped.
+     * @param {Array<object>} tokens - The broken tokens.
+     * @returns {Array<object>|null} The repaired packed tokens.
+     */
+    repairCollaborationTokens(tokens) {
+        try { return webexpress.webui.Ot.compact(webexpress.webui.OtSchema.repairGraph(webexpress.webui.Ot.expand(tokens))); } catch { return null; }
+    }
+
+    /**
+     * Applies steps another user made, without announcing them or making them undoable here.
+     * @param {Array<object>} steps - The steps.
+     * @returns {boolean} True if they applied to a valid graph.
+     */
+    applyRemoteSteps(steps) {
+        if (!this._collab) return false;
+        let result;
+        try { result = webexpress.webui.Ot.apply(this._collab.tokens, steps); } catch { return false; }
+        if (!webexpress.webui.OtSchema.checkGraph(result.tokens)) return false;
+        this._showGraph(result.tokens);
+        this._collab.history.remote(result.steps);
+        this._updateToolbarState();
+        return true;
+    }
+
+    /**
+     * A graph has no text caret; the pointers of the others are shown by the host.
+     * @returns {null} Always null.
+     */
+    getModelSelection() { return null; }
+
+    /**
+     * A graph has no text positions to measure.
+     * @returns {null} Always null.
+     */
+    getModelPositionRect() { return null; }
+
+    /**
+     * Returns the suffix that keeps new ids unique across the clients sharing the graph.
+     * @returns {string} The suffix, empty while the graph is not shared.
+     */
+    _idSuffix() { return this._collab && this._collabTag ? "-" + this._collabTag : ""; }
+
+    /**
+     * Linearizes the model: one leaf per node, then one per edge, with all properties but the
+     * id as attributes.
+     * @returns {Array<object>} The tokens.
+     */
+    _graphTokens() {
+        this._syncModelPositions();
+        const leaf = (type, item) => {
+            const { id, ...attrs } = JSON.parse(JSON.stringify(item));
+            return { t: "l", n: type, id: String(id ?? ""), a: attrs };
+        };
+        return [...this._model.nodes.map(node => leaf("node", node)), ...this._model.edges.map(edge => leaf("edge", edge))];
+    }
+
+    /**
+     * Shows a graph from tokens and publishes it as the value, without announcing it as a
+     * local change.
+     * @param {Array<object>} tokens - The tokens.
+     */
+    _showGraph(tokens) {
+        const model = { nodes: [], edges: [] };
+        for (const token of tokens) (token.n === "node" ? model.nodes : model.edges).push({ id: token.id, ...JSON.parse(JSON.stringify(token.a)) });
+        if (this._collab) this._collab.tokens = tokens;
+        this._model = this._normalizeModel(model);
+        this._buildPhysics();
+        this._pruneSelection();
+        this.render();
+        this._remote = true;
+        try { this._emitChangeSafe(); } finally { this._remote = false; }
+    }
+
+    /**
+     * Announces what changed since the last announcement as steps and records it for
+     * selective undo.
+     */
+    _announceGraph() {
+        if (!this._collab || this._remote) return;
+        const before = this._collab.tokens, after = this._graphTokens();
+        const steps = webexpress.webui.Ot.diff(before, after);
+        if (!steps.length) return;
+        const applied = webexpress.webui.Ot.apply(before, steps).steps;
+        this._collab.tokens = after;
+        this._collab.history.record(applied);
+        this._dispatch(webexpress.webui.Event.COLLABORATION_STEPS_EVENT, { steps: applied });
+        this._updateToolbarState();
+    }
+
+    /**
+     * Undoes or redoes an own change while the graph is shared.
+     * @param {boolean} redo - True to redo.
+     */
+    _collabStep(redo) {
+        let applied = null;
+        const apply = steps => {
+            let result;
+            try { result = webexpress.webui.Ot.apply(this._collab.tokens, steps); } catch { return null; }
+            if (!webexpress.webui.OtSchema.checkGraph(result.tokens) || webexpress.webui.Ot.equal(result.tokens, this._collab.tokens)) return null;
+            this._showGraph(result.tokens);
+            return (applied = result.steps);
+        };
+        const history = this._collab.history;
+        if (redo ? history.redo(apply) : history.undo(apply)) {
+            this._dispatch(webexpress.webui.Event.COLLABORATION_STEPS_EVENT, { steps: applied });
+        }
+        this._updateToolbarState();
     }
 
     // ------------------------------------------------------------------ toolbar
@@ -316,7 +502,9 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
      * selection and the mode it reflects are state of their own.
      */
     _updateToolbarState() {
-        const history = { undo: this._undoStack.length, redo: this._redoStack.length };
+        const history = this._collab
+            ? { undo: this._collab.history.canUndo() ? 1 : 0, redo: this._collab.history.canRedo() ? 1 : 0 }
+            : { undo: this._undoStack.length, redo: this._redoStack.length };
         const current = this.state.history;
         if (!current || current.undo !== history.undo || current.redo !== history.redo) {
             this.setState({ history: history });
@@ -1302,7 +1490,7 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
         this._saveStateToHistory();
         const center = this._viewportCenter();
         const newNode = {
-            id: "n-" + Date.now(),
+            id: "n-" + Date.now() + this._idSuffix(),
             label: this._i18n("webexpress.webui:graph.new.node", "New Node"),
             x: center.x,
             y: center.y,
@@ -2220,13 +2408,13 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
     _newEdgeId() {
         const base = "e";
         let n = this._model.edges.length + 1;
-        let candidate = base + "-" + Date.now() + "-" + n;
+        let candidate = base + "-" + Date.now() + "-" + n + this._idSuffix();
         const exists = (id) => {
             return this._model.edges.some(t => (t.id || "") === id);
         };
         while (exists(candidate)) {
             n += 1;
-            candidate = base + "-" + Date.now() + "-" + n;
+            candidate = base + "-" + Date.now() + "-" + n + this._idSuffix();
         }
         return candidate;
     }
@@ -2235,6 +2423,8 @@ webexpress.webui.GraphEditorCtrl = class extends webexpress.webui.GraphViewerCtr
      * Safely emits a change event, supporting both _emitChange and _dispatch patterns.
      */
     _emitChangeSafe() {
+        this._announceGraph();
+
         if (typeof this._emitChange === "function") {
             this._emitChange();
         } else if (typeof this._dispatch === "function") {

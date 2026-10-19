@@ -161,6 +161,8 @@ test("invalid comment marks are discarded at the document boundary", () => {
         assert.equal(M.marks({ comment }).comment, undefined);
     }
     assert.equal(M.marks({ comment: { id: 'valid', text: 'x'.repeat(11000) } }).comment.text.length, 10000);
+    // a comment store keeps the text outside the document; the mark then only anchors it by id
+    assert.equal(JSON.stringify(M.marks({ comment: { id: 'valid' } }).comment), '{"id":"valid"}');
 });
 
 
@@ -282,3 +284,50 @@ for (const mode of ["editor", "content"]) {
         assert.equal(host.querySelector(".wx-editor-comment"), null);
     });
 }
+
+/**
+ * A comment store that records what the editor asks of it.
+ * @returns {object} The store.
+ */
+function recordingStore() {
+    const texts = new Map(), calls = [];
+    return {
+        calls, texts,
+        load: async id => { calls.push(["load", id]); return texts.get(id) ?? null; },
+        save: async (id, text) => { calls.push(["save", id, text]); texts.set(id, text); },
+        remove: async id => { calls.push(["remove", id]); texts.delete(id); }
+    };
+}
+
+test("with a comment store the document keeps only the anchor and the store keeps the text", async () => {
+    const r = loadEditor({ files, html: "<p>alpha beta</p>" });
+    const store = recordingStore();
+    r.editor.commentStore = store;
+    const plugin = open(r, 0, 5);
+    plugin._input.value = "Check this";
+    plugin._commit(false);
+    await Promise.resolve();
+    const marks = comments(r).map(entry => entry.node.marks.comment);
+    assert.equal(marks.length, 1);
+    assert.equal(marks[0].text, undefined, "no comment text in the document");
+    assert.deepEqual(store.calls, [["save", marks[0].id, "Check this"]]);
+    assert.equal(r.editor.value.includes("Check this"), false);
+});
+
+test("an anchored comment loads its text from the store and is removed from both", async () => {
+    const r = loadEditor({ files, html: "<p>alpha beta</p>" });
+    const store = recordingStore();
+    r.editor.commentStore = store;
+    let plugin = open(r, 0, 5);
+    plugin._input.value = "First";
+    plugin._commit(false);
+    await Promise.resolve();
+    const id = comments(r)[0].node.marks.comment.id;
+    plugin = open(r, 1, 1);
+    await new Promise(resolve => setImmediate(resolve));
+    assert.equal(plugin._input.value, "First", "the dialog shows the stored text");
+    plugin._commit(true);
+    await Promise.resolve();
+    assert.equal(comments(r).length, 0);
+    assert.deepEqual(store.calls.at(-1), ["remove", id]);
+});

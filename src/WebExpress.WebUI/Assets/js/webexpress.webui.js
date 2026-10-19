@@ -2782,6 +2782,9 @@ webexpress.webui.Event = class {
     static TABLE_SORT_EVENT = "webexpress.webui.table.sorted";
     // Event triggered when the value of an input or control changes.
     static CHANGE_VALUE_EVENT = "webexpress.webui.change.value";
+    // Event triggered when a control taking part in a shared document made a local change; the
+    // detail carries the transformation steps (see webexpress.webui.ot.js).
+    static COLLABORATION_STEPS_EVENT = "webexpress.webui.collaboration.steps";
     // Event triggered when a item is moved.
     static MOVE_EVENT = "webexpress.webui.move";
     // Event triggered when the page changes in a pagination control.

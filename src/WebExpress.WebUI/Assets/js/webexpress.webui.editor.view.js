@@ -71,7 +71,7 @@ webexpress.webui.EditorHtml = class {
                     if (!commentIds.has(id)) commentIds.set(id, Model.commentId());
                     id = commentIds.get(id);
                 }
-                inherited.comment = { id, text: node.getAttribute("data-comment-text") };
+                inherited.comment = { id, text: node.getAttribute("data-comment-text") ?? undefined };
             }
             const mark = { b: "bold", strong: "bold", i: "italic", em: "italic", u: "underline", ins: "underline", s: "strikethrough", strike: "strikethrough", del: "strikethrough", sup: "superscript", sub: "subscript", code: "code", kbd: "code", samp: "code" }[tag];
             if (mark) inherited[mark] = true;
@@ -183,8 +183,11 @@ webexpress.webui.EditorView = class {
                 const span = document.createElement("span");
                 span.className = "wx-editor-comment";
                 span.setAttribute("data-comment-id", marks.comment.id);
-                span.setAttribute("data-comment-text", marks.comment.text);
-                span.setAttribute("title", marks.comment.text);
+                // an anchor without text belongs to a comment store, which shows the text itself
+                if (marks.comment.text) {
+                    span.setAttribute("data-comment-text", marks.comment.text);
+                    span.setAttribute("title", marks.comment.text);
+                }
                 span.appendChild(element);
                 element = span;
             }

@@ -122,6 +122,8 @@ The comment dialog edits the annotation when the caret is inside its text or the
 
 The document model stores annotations in a `comment` text mark containing `id` and `text`. Typing inside annotated text extends the annotation, while typing at either edge does not. Deleting all referenced text removes its annotation. Clearing formatting retains comments, and the format painter does not copy them. JSON persistence and HTML interchange retain comment metadata. Clipboard imports assign new identities so pasted comments can be edited independently.
 
+With a comment store (`editor.commentStore`, an object with `load(id)`, `save(id, text)` and `remove(id)` returning promises) the mark holds the `id` only and the text lives in the store, typically a WebApp `CommentCtrl` (`anchorStore`). This is how shared documents carry comment anchors without carrying anybody's comment text.
+
 ## Reading view
 
 The editor value contains the validated JSON document model. Frame titles, drag handles, column resizers and selection indicators belong to the editing view and are excluded from that value. The [content control](content.md) renders the document for reading. HTML interchange is available through `exportHtml()`, which also omits the editing controls.
@@ -410,6 +412,34 @@ that page in Chromium and Firefox.
 It includes controller integration checks and a playground for native keyboard
 input, cell selection and image popover interaction; the Node DOM stub alone does not verify
 browser layout, focus or composition behavior.
+
+## Shared Editing
+
+The editor takes part in real-time collaboration through a defined interface; it has no
+dependency on the collaboration host, which in WebApp is `ControlCollaborative` (see the WebApp
+documentation, *Real-time collaboration*). Without a host nothing of this is active and the editor
+behaves exactly as before.
+
+| Member | Purpose |
+|--------|---------|
+| `collaborationKind` | `"richtext"` |
+| `beginCollaboration({ tag })` | starts sharing; undo becomes selective, new node ids carry the client tag |
+| `endCollaboration()` | stops sharing; the snapshot history takes over |
+| `getCollaborationTokens()` / `loadCollaborationTokens(tokens)` | the document as packed tokens |
+| `checkCollaborationTokens(tokens)` / `repairCollaborationTokens(tokens)` | the schema check and its repair rules |
+| `applyRemoteSteps(steps)` | applies another user's steps through the model, moves the selection along, keeps them out of the undo history |
+| `getModelSelection()` | the selection as linear model positions |
+| `getModelPositionRect(pos)` / `getModelRangeRects(from, to)` | where a position or range is shown, for remote carets |
+
+While shared, every local transaction is announced as primitive steps through
+`webexpress.webui.Event.COLLABORATION_STEPS_EVENT` (`detail.steps`). The steps are derived from the
+model before and after the transaction, so plugins and add-ons need no collaboration code of their
+own. Remote steps that arrive during an IME composition wait until it ends, because the browser
+owns the DOM meanwhile; the composed text is then committed where the composition started.
+
+Undo and redo invert only the user's own steps, transformed against everything other users did
+since. Typing merges into one undo step per word or until a pause of a second. The core is
+documented in [Operational Transformation](ot.md).
 
 ## Extending the Editor
 

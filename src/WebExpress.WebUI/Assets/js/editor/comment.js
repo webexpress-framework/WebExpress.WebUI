@@ -58,6 +58,15 @@ webexpress.webui.EditorComment = {
         this._ensureDialog();
         this._context = { id: comment?.id, selection: editor.selection, doc: state.doc };
         this._input.value = comment?.text || "";
+        this._context.text = comment?.text || "";
+        // an anchor without text belongs to a comment store, which is asked for it
+        if (comment && !comment.text && editor.commentStore?.load) {
+            Promise.resolve(editor.commentStore.load(comment.id)).then(text => {
+                if (this._context?.id !== comment.id || this._input.value) return;
+                this._input.value = text || "";
+                this._save.disabled = this._input.disabled || !this._input.value.trim();
+            }).catch(() => {});
+        }
         this._input.disabled = !comment && (from === to || !selected.length || overlap);
         this._hint.textContent = this._input.disabled ? this._label(overlap ? "editor.comment.overlap" : "editor.comment.select") : "";
         this._remove.hidden = !comment || !editor.deleteComments;
@@ -118,9 +127,23 @@ webexpress.webui.EditorComment = {
         if (editor.disabled || editor._destroyed || editor._state.doc !== this._context.doc) { this._modal.hide(); return; }
         if (remove && (!this._context.id || !editor.deleteComments)) return;
         if (!remove && (this._input.disabled || !this._input.value.trim())) return;
-        const action = { type: "comment", id: this._context.id, text: this._input.value, remove, selection: this._context.selection };
+        const store = editor.commentStore;
         this._modal.hide();
-        editor.dispatch(action);
+        if (!store) {
+            editor.dispatch({ type: "comment", id: this._context.id, text: this._input.value, remove, selection: this._context.selection });
+            return;
+        }
+        // with a store the document holds only the anchor; the anchor is set first and the text
+        // follows asynchronously, so the dialog never waits for the network
+        const id = this._context.id || webexpress.webui.EditorModel.commentId();
+        if (remove) {
+            editor.dispatch({ type: "comment", id, remove: true, selection: this._context.selection });
+            Promise.resolve(store.remove?.(id)).catch(() => {});
+            return;
+        }
+        if (!this._context.id) editor.dispatch({ type: "comment", anchor: id, selection: this._context.selection });
+        else if (this._context.text) editor.dispatch({ type: "comment", id, selection: this._context.selection });
+        Promise.resolve(store.save?.(id, this._input.value.trim())).catch(() => {});
     },
 
     /**

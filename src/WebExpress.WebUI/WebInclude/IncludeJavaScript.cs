@@ -31,6 +31,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.date.js")]
     [Asset("/assets/js/webexpress.webui.dnf.js")]
     [Asset("/assets/js/webexpress.webui.dropdown.js")]
+    [Asset("/assets/js/webexpress.webui.ot.js")]
     [Asset("/assets/js/webexpress.webui.editor.model.js")]
     [Asset("/assets/js/webexpress.webui.editor.view.js")]
     [Asset("/assets/js/webexpress.webui.editor.js")]

@@ -352,6 +352,15 @@ pre-drag snapshot once, on release, and only if the element actually moved. The 
 `HISTORY_LIMIT` (50 entries). Undo and redo prune a selection the restored model no longer
 contains, so the properties panel never edits an object that has been undone away.
 
+## Shared Editing
+
+The graph editor implements the collaboration interface (`collaborationKind` `"graph"`, see
+[Operational Transformation](ot.md)) and can be edited by several users at once inside a WebApp
+`ControlCollaborative`. Nodes and edges are atomic items of the shared document with their
+properties as attributes, so moving a node changes only its coordinates and two users moving
+different nodes never conflict. An edge whose node another user deleted is dropped. New node and
+edge ids carry the client tag. While shared, undo and redo invert only the own changes.
+
 ## Events
 
 In addition to the viewer events the editor emits

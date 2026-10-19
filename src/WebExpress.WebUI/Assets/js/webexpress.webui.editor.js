@@ -119,24 +119,34 @@ webexpress.webui.EditorHistory = class {
      * Determines whether an earlier state is available.
      * @returns {boolean} True if undo would change the document.
      */
-    canUndo() { return this._index > 0; }
+    canUndo() { return this._editor._collab ? this._editor._collab.history.canUndo() : this._index > 0; }
 
     /**
      * Determines whether an undone state is available.
      * @returns {boolean} True if redo would change the document.
      */
-    canRedo() { return this._index < this._entries.length; }
+    canRedo() { return this._editor._collab ? this._editor._collab.history.canRedo() : this._index < this._entries.length; }
 
     /**
      * Restores the state before the most recent transaction. A disabled or destroyed editor is
-     * left untouched, because its form value must not change behind the user's back.
+     * left untouched, because its form value must not change behind the user's back. While the
+     * document is shared, restoring a snapshot would also revert what others wrote, so undo
+     * then inverts only the user's own steps.
      */
-    undo() { if (!this._editor.disabled && !this._editor._destroyed && this.canUndo()) this._restore(this._entries[--this._index].before); }
+    undo() {
+        if (this._editor.disabled || this._editor._destroyed) return;
+        if (this._editor._collab) this._editor._collabStep(false);
+        else if (this.canUndo()) this._restore(this._entries[--this._index].before);
+    }
 
     /**
      * Reapplies the most recently undone transaction under the same conditions as undo.
      */
-    redo() { if (!this._editor.disabled && !this._editor._destroyed && this.canRedo()) this._restore(this._entries[this._index++].after); }
+    redo() {
+        if (this._editor.disabled || this._editor._destroyed) return;
+        if (this._editor._collab) this._editor._collabStep(true);
+        else if (this.canRedo()) this._restore(this._entries[this._index++].after);
+    }
 
     /**
      * Replaces the editor state with a copy of a recorded one, so later transactions cannot
@@ -264,6 +274,15 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (this._destroyed) return;
         const next = webexpress.webui.EditorModel.validate(value);
         if (JSON.stringify(next.doc) === JSON.stringify(this._state.doc)) return;
+        if (this._collab) {
+            // a program loading a value into a shared document changes it for everyone, so the load
+            // travels as steps like any edit; it is no undo step of the user's own
+            const applied = this._stepsBetween(this._state.doc, next.doc);
+            this._state = next; this._savedRange = null; this.render(false); this._syncValue(options.emit !== false);
+            this._collab.history.remote(applied);
+            this._emitSteps(applied);
+            return;
+        }
         this._state = next; this._savedRange = null; this._history.reset(); this.render(false); this._syncValue(options.emit !== false);
     }
 
@@ -305,6 +324,288 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     get deleteComments() { return true; }
 
     /**
+     * Gets the store that keeps comment texts outside the document. With a store, a comment in
+     * the document is only an anchor mark holding the comment id, so the text belongs to the
+     * comment backend (for example a WebApp CommentCtrl) and a shared document never carries
+     * it. The store offers load(id), save(id, text) and remove(id), each returning a promise.
+     * @returns {object|null} The store, or null when comment texts live in the marks.
+     */
+    get commentStore() { return this._commentStore ?? null; }
+
+    /**
+     * Sets the comment store.
+     * @param {object|null} value - The store, or null.
+     */
+    set commentStore(value) { this._commentStore = value ?? null; }
+
+    /**
+     * Names the document kind this control shares: a rich text document whose tokens follow the
+     * schema of EditorModel. A collaboration host uses it to choose the validation on both ends.
+     * @returns {string} The kind.
+     */
+    get collaborationKind() { return "richtext"; }
+
+    /**
+     * Gets whether the document is currently shared.
+     * @returns {boolean} True between beginCollaboration and endCollaboration.
+     */
+    get collaborating() { return !!this._collab; }
+
+    /**
+     * Starts sharing the document. From now on every local change is announced as steps through
+     * COLLABORATION_STEPS_EVENT, undo inverts only the user's own steps, and new node ids carry
+     * the client's tag so they cannot collide with ids other clients create.
+     * @param {object} [options] - The options.
+     * @param {string} [options.tag] - The client tag for node ids, lowercase letters and digits.
+     */
+    beginCollaboration(options = {}) {
+        if (this._destroyed) return;
+        if (/^[a-z\d]{1,12}$/.test(options.tag ?? "")) webexpress.webui.EditorModel.idTag = options.tag;
+        this._collab = { history: new webexpress.webui.OtHistory(), queue: [] };
+        this._history.reset();
+        this._updateUndoRedoStates();
+    }
+
+    /**
+     * Stops sharing the document; the snapshot history takes over from the current state.
+     */
+    endCollaboration() {
+        if (!this._collab) return;
+        this._collab = null;
+        this._history.reset();
+        this._updateUndoRedoStates();
+    }
+
+    /**
+     * Returns the document as packed tokens, the form shared documents are exchanged in.
+     * @returns {Array<object>} The packed tokens.
+     */
+    getCollaborationTokens() {
+        return webexpress.webui.Ot.compact(webexpress.webui.EditorModel.tokens(this._state.doc));
+    }
+
+    /**
+     * Replaces the document with the shared state, for example on joining or after a forced
+     * resynchronization. The own undo steps refer to the replaced document and are dropped.
+     * @param {Array<object>} tokens - The packed tokens.
+     * @returns {boolean} True if the tokens formed a valid document.
+     */
+    loadCollaborationTokens(tokens) {
+        const Model = webexpress.webui.EditorModel;
+        let doc;
+        try { doc = Model.check(Model.fromTokens(webexpress.webui.Ot.expand(tokens), { id: this._state.doc.id })); } catch { return false; }
+        const max = Math.max(0, Model.size(doc) - 1), clamp = n => Math.max(0, Math.min(max, n));
+        this._state = { version: Model.VERSION, doc, selection: { anchor: clamp(this._state.selection.anchor), focus: clamp(this._state.selection.focus) }, storedMarks: null };
+        this._collab?.history.reset();
+        this.render(this._hasFocus());
+        this._syncValue();
+        return true;
+    }
+
+    /**
+     * Checks packed tokens against the document schema, the same check the server applies.
+     * @param {Array<object>} tokens - The tokens.
+     * @returns {boolean} True if they form a valid document.
+     */
+    checkCollaborationTokens(tokens) {
+        const Model = webexpress.webui.EditorModel;
+        try { Model.check(Model.fromTokens(webexpress.webui.Ot.expand(tokens))); return true; } catch { return false; }
+    }
+
+    /**
+     * Repairs tokens that concurrent structural changes left invalid, following the documented
+     * rules of EditorModel.repairTokens.
+     * @param {Array<object>} tokens - The broken tokens.
+     * @returns {Array<object>|null} The repaired packed tokens, or null if nothing valid remains.
+     */
+    repairCollaborationTokens(tokens) {
+        const Model = webexpress.webui.EditorModel;
+        try { return webexpress.webui.Ot.compact(Model.repairTokens(webexpress.webui.Ot.expand(tokens))); } catch { return null; }
+    }
+
+    /**
+     * Applies steps another user made. They pass through the model like every change, move the
+     * local selection along and are transformed into the own undo steps, but they are neither
+     * announced again nor undoable here. During an IME composition the browser owns the DOM, so
+     * the steps wait until the composition ends.
+     * @param {Array<object>} steps - The steps, based on the current document.
+     * @returns {boolean} True if the steps were applied or queued; false if they did not fit.
+     */
+    applyRemoteSteps(steps) {
+        if (!this._collab || this._destroyed) return false;
+        if (this._composing) { this._collab.queue.push(...steps); return true; }
+        const applied = this._applySteps(steps, 1);
+        if (!applied) return false;
+        if (!applied.length) return true;
+        this._collab.history.remote(applied);
+        this.render(this._hasFocus());
+        this._syncValue();
+        return true;
+    }
+
+    /**
+     * Gets the selection as linear positions, the addressing all steps use.
+     * @returns {{anchor: number, focus: number}} The selection.
+     */
+    getModelSelection() {
+        const Model = webexpress.webui.EditorModel, doc = this._state.doc, map = Model.linearMap(doc);
+        return { anchor: Model.toLinear(doc, this._state.selection.anchor, map), focus: Model.toLinear(doc, this._state.selection.focus, map) };
+    }
+
+    /**
+     * Measures where a linear position is shown, so a host can draw another user's caret there.
+     * @param {number} pos - The linear position.
+     * @returns {{left: number, top: number, height: number}|null} The viewport rectangle, or null.
+     */
+    getModelPositionRect(pos) {
+        if (this._destroyed) return null;
+        const Model = webexpress.webui.EditorModel;
+        const point = this._view.point(Model.fromLinear(this._state.doc, pos));
+        if (!point?.node || !this._editorElement.contains(point.node)) return null;
+        const range = document.createRange();
+        try { range.setStart(point.node, point.offset); range.collapse(true); } catch { return null; }
+        let rect = range.getClientRects?.()[0] ?? range.getBoundingClientRect?.();
+        if (!rect || !rect.height) {
+            const element = point.node.nodeType === 3 ? point.node.parentElement : point.node;
+            const box = element.getBoundingClientRect();
+            rect = { left: box.left, top: box.top, height: box.height || 16 };
+        }
+        return { left: rect.left, top: rect.top, height: rect.height };
+    }
+
+    /**
+     * Measures the lines a linear range covers, so a host can highlight another user's selection.
+     * @param {number} from - One end of the range.
+     * @param {number} to - The other end.
+     * @returns {Array<{left: number, top: number, width: number, height: number}>} The viewport rectangles.
+     */
+    getModelRangeRects(from, to) {
+        if (this._destroyed || from === to) return [];
+        const Model = webexpress.webui.EditorModel, map = Model.linearMap(this._state.doc);
+        const a = this._view.point(Model.fromLinear(this._state.doc, Math.min(from, to), map));
+        const b = this._view.point(Model.fromLinear(this._state.doc, Math.max(from, to), map));
+        if (!a?.node || !b?.node || !this._editorElement.contains(a.node) || !this._editorElement.contains(b.node)) return [];
+        const range = document.createRange();
+        try { range.setStart(a.node, a.offset); range.setEnd(b.node, b.offset); } catch { return []; }
+        return Array.from(range.getClientRects?.() ?? []).filter(r => r.width > 0).map(r => ({ left: r.left, top: r.top, width: r.width, height: r.height }));
+    }
+
+    /**
+     * Determines whether the surface has the focus, which decides whether a re-render puts the
+     * caret back or leaves the page's focus where it is.
+     * @returns {boolean} True if the focus is inside the surface.
+     */
+    _hasFocus() { return !!document.activeElement && this._editorElement.contains(document.activeElement); }
+
+    /**
+     * Turns a reduced transaction into steps, records them for selective undo and announces them.
+     * Consecutive typing and deleting merge into word-sized undo steps.
+     * @param {object} action - The reduced action.
+     * @param {object} before - The state before.
+     * @param {object} after - The state after.
+     * @returns {boolean} True if the document changed.
+     */
+    _recordSteps(action, before, after) {
+        if (before.doc === after.doc) return false;
+        const selection = action.selection ?? before.selection;
+        const hint = webexpress.webui.EditorModel.toLinear(before.doc, Math.min(selection.anchor, selection.focus));
+        const applied = this._stepsBetween(before.doc, after.doc, hint);
+        if (!applied.length) return false;
+        const plain = !action.source && action.type !== "batch";
+        const kind = plain && action.type === "insertText" ? "typing" : plain && action.type === "delete" ? "delete" : null;
+        this._collab.history.record(applied, { kind, text: typeof action.text === "string" ? action.text : "" });
+        this._emitSteps(applied);
+        return true;
+    }
+
+    /**
+     * Derives the applied steps between two documents.
+     * @param {object} from - The previous document.
+     * @param {object} to - The new document.
+     * @param {number} [hint] - The linear position where the change begins, if known.
+     * @returns {Array<object>} The steps with their recorded inverses.
+     */
+    _stepsBetween(from, to, hint) {
+        const Ot = webexpress.webui.Ot, Model = webexpress.webui.EditorModel;
+        const tokens = Model.tokens(from);
+        const steps = Ot.diff(tokens, Model.tokens(to), hint);
+        return steps.length ? Ot.apply(tokens, steps).steps : [];
+    }
+
+    /**
+     * Announces local steps to the collaboration host.
+     * @param {Array<object>} steps - The applied steps.
+     */
+    _emitSteps(steps) {
+        if (steps.length) this._dispatch(webexpress.webui.Event.COLLABORATION_STEPS_EVENT, { steps: webexpress.webui.EditorModel.clone(steps) });
+    }
+
+    /**
+     * Applies steps to the state, keeping the selection on the same content. The result is
+     * checked against the schema before it replaces the state, so a step that would break the
+     * document leaves it untouched.
+     * @param {Array<object>} steps - The steps.
+     * @param {number} assoc - Which side of text inserted at the caret the caret stays on.
+     * @returns {Array<object>|null} The applied steps, empty if they changed nothing, or null if
+     * they were invalid.
+     */
+    _applySteps(steps, assoc) {
+        const Ot = webexpress.webui.Ot, Model = webexpress.webui.EditorModel, before = this._state;
+        const tokens = Model.tokens(before.doc);
+        let result, doc;
+        try {
+            result = Ot.apply(tokens, steps);
+            if (Ot.equal(result.tokens, tokens)) return [];
+            doc = Model.check(Model.fromTokens(result.tokens, { id: before.doc.id }));
+        } catch { return null; }
+        const from = Model.linearMap(before.doc), to = Model.linearMap(doc);
+        const move = selection => {
+            if (!selection) return selection;
+            const mapped = Ot.mapSelection({ anchor: Model.toLinear(before.doc, selection.anchor, from), focus: Model.toLinear(before.doc, selection.focus, from) }, result.steps, assoc);
+            return { anchor: Model.fromLinear(doc, mapped.anchor, to), focus: Model.fromLinear(doc, mapped.focus, to) };
+        };
+        this._compositionSelection = move(this._compositionSelection);
+        this._state = { version: Model.VERSION, doc, selection: move(before.selection), storedMarks: before.storedMarks };
+        return result.steps;
+    }
+
+    /**
+     * Applies the remote steps queued during a composition.
+     */
+    _flushRemoteSteps() {
+        if (!this._collab?.queue.length) return;
+        const steps = this._collab.queue.splice(0);
+        const applied = this._applySteps(steps, 1);
+        if (applied) { this._collab.history.remote(applied); this._syncValue(); }
+        else this._dispatch(webexpress.webui.Event.COLLABORATION_STEPS_EVENT, { steps: [], resync: true });
+    }
+
+    /**
+     * Undoes or redoes an own step while the document is shared. The inverse already accounts
+     * for everything other users changed since, and it travels to them like any local change.
+     * @param {boolean} redo - True to redo.
+     */
+    _collabStep(redo) {
+        const Ot = webexpress.webui.Ot;
+        let applied = null;
+        const apply = steps => (applied = this._applySteps(steps, 1));
+        const history = this._collab.history;
+        if (!(redo ? history.redo(apply) : history.undo(apply))) { this._updateUndoRedoStates(); return; }
+        // the caret goes to the end of what the step changed, where the user expects to continue
+        const last = applied.map((step, index) => ({ step, index })).filter(e => e.step.type === "replace").pop();
+        if (last) {
+            const Model = webexpress.webui.EditorModel;
+            const pos = Ot.map(last.step.from + Ot.size(last.step.slice), applied.slice(last.index + 1));
+            const caret = Model.fromLinear(this._state.doc, pos);
+            this._state.selection = { anchor: caret, focus: caret };
+        }
+        this._state.storedMarks = null;
+        this.render(true);
+        this._syncValue();
+        this._emitSteps(applied);
+    }
+
+    /**
      * Commits one validated action before any DOM or form value changes, so history, rendering
      * and form value always agree.
      * @param {object} action - The action to reduce.
@@ -313,7 +614,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     dispatch(action) {
         if (this.disabled || this._destroyed || this._composing) return false;
         const next = webexpress.webui.EditorModel.reduce(this._state, action);
-        const changed = this._history.record(action, this._state, next);
+        const changed = this._collab ? this._recordSteps(action, this._state, next) : this._history.record(action, this._state, next);
         this._state = next;
         this.render(true);
         if (changed) {
@@ -438,6 +739,9 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         this.listen(root, "compositionend", e => {
             if (!this._composing) return;
             this._composing = false;
+            // remote steps that arrived while the browser owned the DOM go first, so the committed
+            // text lands where the composition started in the document as it is now
+            this._flushRemoteSteps();
             // composition DOM is temporary; the committed text is reduced against its original model range
             this.dispatch({ type: "insertText", text: e.data || "", selection: this._compositionSelection, source: "composition" });
             this._compositionSelection = null;
@@ -675,7 +979,11 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
         if (this._composing || this._destroyed) return;
         const selection = this._view.selection(this._editorElement);
         if (selection) {
-            if (selection.anchor !== this._state.selection.anchor || selection.focus !== this._state.selection.focus) this._state.storedMarks = null;
+            if (selection.anchor !== this._state.selection.anchor || selection.focus !== this._state.selection.focus) {
+                this._state.storedMarks = null;
+                // typing elsewhere is a new intention and must not merge into the previous undo step
+                this._collab?.history.seal();
+            }
             this._state.selection = selection;
             this._savedRange = webexpress.webui.EditorSelection.getRange(this._editorElement);
         }

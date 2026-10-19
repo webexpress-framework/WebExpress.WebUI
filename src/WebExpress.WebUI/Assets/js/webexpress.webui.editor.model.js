@@ -8,9 +8,17 @@ webexpress.webui.EditorModel = class {
     static MAX_NODES = 50000;
     static MAX_TEXT = 2000000;
     static _nextId = 0;
+
+    /**
+     * Distinguishes the ids this client creates from those of other clients. While documents are
+     * shared, two clients counting from the same start would otherwise mint the same node id.
+     */
+    static idTag = "";
     static TEXT_BLOCKS = new Set(["p", "h1", "h2", "h3", "h4", "h5", "h6", "pre"]);
     static CONTAINERS = new Set(["doc", "row", "region", "blockquote", "ul", "ol", "li", "table", "thead", "tbody", "tfoot", "tr", "td", "th", "addon"]);
+    static MISPLACED = new Set(["doc", "row", "region", "li", "thead", "tbody", "tfoot", "tr", "td", "th"]);
     static MARKS = new Set(["bold", "italic", "underline", "strikethrough", "superscript", "subscript", "code", "color", "background", "font", "size", "link", "comment"]);
+    static ID = /^n\d{1,15}(?:-[a-z\d]{1,12})?$/;
     static FILE_TYPES = /\.(?:html?|php|aspx?|jsp|md|txt|json|xml|pdf|png|jpe?g|gif|svg|webp|avif|bmp|ico|css|js)$/i;
 
     /** Keeps caller-owned objects out of transactions and published values. */
@@ -18,7 +26,15 @@ webexpress.webui.EditorModel = class {
 
     /** Produces keys for node-targeted actions that survive a complete render. */
     static node(type, children = [], attrs = {}) {
-        return { type, id: "n" + (++this._nextId), attrs, children };
+        return { type, id: this._id(), attrs, children };
+    }
+
+    /**
+     * Mints a node id unique within this client and, with an id tag, across clients.
+     * @returns {string} The id.
+     */
+    static _id() {
+        return "n" + (++this._nextId) + (this.idTag ? "-" + this.idTag : "");
     }
 
     /** Rejects executable and obfuscated URL schemes at every input boundary. */
@@ -67,8 +83,10 @@ webexpress.webui.EditorModel = class {
         for (const name of [...this.MARKS].sort()) {
             const raw = value?.[name];
             if (name === "comment") {
-                if (typeof raw?.id === "string" && /^[\w-]{1,100}$/.test(raw.id) && typeof raw.text === "string" && raw.text.trim()) {
-                    result.comment = { id: raw.id, text: raw.text.trim().slice(0, 10000) };
+                // the text is optional: a comment store keeps it outside the document and the mark only anchors it
+                if (typeof raw?.id === "string" && /^[\w-]{1,100}$/.test(raw.id)) {
+                    if (raw.text === undefined) result.comment = { id: raw.id };
+                    else if (typeof raw.text === "string" && raw.text.trim()) result.comment = { id: raw.id, text: raw.text.trim().slice(0, 10000) };
                 }
             } else if (name === "link") {
                 const href = this.url(raw?.href ?? raw);
@@ -112,7 +130,8 @@ webexpress.webui.EditorModel = class {
             for (const key of ["text", "value", "format"]) a[key] = String(raw[key] ?? "").slice(0, 10000);
         }
         if (type === "addon") {
-            a.name = /^[\w.-]{1,100}$/.test(raw.name) ? raw.name : "";
+            // test() would coerce a number or null into a matching string and keep the non-string value
+            a.name = typeof raw.name === "string" && /^[\w.-]{1,100}$/.test(raw.name) ? raw.name : "";
             a.inline = raw.inline === true;
             a.container = raw.container === true && !a.inline;
             a.data = {};
@@ -138,9 +157,9 @@ webexpress.webui.EditorModel = class {
                 return { type: "text", text: raw.text, marks: this.marks(raw.marks) };
             }
             if (!this.TEXT_BLOCKS.has(raw.type) && !this.CONTAINERS.has(raw.type) && !["image", "atom", "br", "hr"].includes(raw.type)) return null;
-            let id = typeof raw.id === "string" && /^n\d+$/.test(raw.id) && !ids.has(raw.id) ? raw.id : "n" + (++this._nextId);
-            while (ids.has(id)) id = "n" + (++this._nextId);
-            this._nextId = Math.max(this._nextId, Number(id.slice(1)));
+            let id = typeof raw.id === "string" && this.ID.test(raw.id) && !ids.has(raw.id) ? raw.id : this._id();
+            while (ids.has(id)) id = this._id();
+            this._nextId = Math.max(this._nextId, parseInt(id.slice(1), 10));
             ids.add(id);
             const attrs = this.attributes(raw.type, raw.attrs);
             if (raw.type === "image" && !attrs.src) return null;
@@ -183,8 +202,11 @@ webexpress.webui.EditorModel = class {
             node.children.forEach(child => this.normalize(child));
             return;
         }
-        if (this.TEXT_BLOCKS.has(node.type)) children = children.flatMap(n => this.inline(n) ? [n] : this.leaves(n));
+        if (this.TEXT_BLOCKS.has(node.type)) children = children.flatMap(n => this.inline(n) ? [n] : this.leaves(n).filter(leaf => this.inline(leaf)));
         if (["region", "li", "blockquote", "td", "th"].includes(node.type) || node.type === "addon" && node.attrs.container) {
+            // structure that only lives inside its own parent, such as a cell outside a row, gives up its wrapper but not its content
+            const unwrap = n => this.MISPLACED.has(n.type) ? n.children.flatMap(unwrap) : [n];
+            children = children.flatMap(unwrap);
             const blocks = [];
             let run = [];
             const flush = () => { if (run.length) { blocks.push(this.node("p", run)); run = []; } };
@@ -437,7 +459,9 @@ webexpress.webui.EditorModel = class {
         const [from, to] = this.bounds(state);
         const selected = entries.filter(e => e.end > from && e.start < to);
         if (action.remove || from === to || !selected.length || selected.some(e => e.node.marks.comment)) return;
-        const comment = this.marks({ comment: { id: this.commentId(), text: action.text } }).comment;
+        // a comment store chooses the anchor id and keeps the text, so the mark then holds the id only
+        const id = typeof action.anchor === "string" && /^[\w-]{1,100}$/.test(action.anchor) ? action.anchor : this.commentId();
+        const comment = this.marks({ comment: action.anchor ? { id } : { id, text: action.text } }).comment;
         if (comment) this.format(state, "comment", comment);
     }
 
@@ -757,5 +781,248 @@ webexpress.webui.EditorModel = class {
         const survivor = this.find(state.doc, first.cell.id) ?? this.entries(state.doc).find(e => e.ancestors.includes(table) && this.TEXT_BLOCKS.has(e.node.type));
         const pos = survivor?.start ?? Math.min(state.selection.focus, this.size(state.doc) - 1);
         state.selection = { anchor: pos, focus: pos };
+    }
+
+    /**
+     * The schema: which children each structured node type may hold, and how many at least.
+     * normalize() produces exactly this shape and check() rejects everything else, so a document
+     * that passes the check never changes when it is normalized. Content groups: "block" for
+     * flow content, "inline" for text-level content, "section" for table sections, "cell" for
+     * table cells; any other group names the one accepted node type. Atomic nodes and add-ons
+     * that are no containers have no entry, because they hold no children.
+     */
+    static SCHEMA = {
+        doc: { content: "row", min: 1 },
+        row: { content: "region", min: 1 },
+        region: { content: "block", min: 1 },
+        blockquote: { content: "block", min: 1 },
+        li: { content: "block", min: 1 },
+        td: { content: "block", min: 1 },
+        th: { content: "block", min: 1 },
+        addon: { content: "block", min: 1 },
+        ul: { content: "li", min: 1 },
+        ol: { content: "li", min: 1 },
+        table: { content: "section", min: 0 },
+        thead: { content: "tr", min: 0 },
+        tbody: { content: "tr", min: 0 },
+        tfoot: { content: "tr", min: 0 },
+        tr: { content: "cell", min: 0 },
+        p: { content: "inline", min: 0 },
+        h1: { content: "inline", min: 0 },
+        h2: { content: "inline", min: 0 },
+        h3: { content: "inline", min: 0 },
+        h4: { content: "inline", min: 0 },
+        h5: { content: "inline", min: 0 },
+        h6: { content: "inline", min: 0 },
+        pre: { content: "inline", min: 0 }
+    };
+
+    /**
+     * Determines whether a content group accepts a node.
+     * @param {string} group - The content group of the parent.
+     * @param {object} node - The child.
+     * @returns {boolean} True if the child is allowed.
+     */
+    static accepts(group, node) {
+        if (group === "inline") return this.inline(node);
+        if (group === "block") return !this.inline(node) && (this.TEXT_BLOCKS.has(node.type) || ["ul", "ol", "blockquote", "table", "hr", "addon"].includes(node.type));
+        if (group === "section") return ["thead", "tbody", "tfoot"].includes(node.type);
+        if (group === "cell") return node.type === "td" || node.type === "th";
+        return node.type === group;
+    }
+
+    /**
+     * Serializes a value with sorted keys, so sanitized and stored data compare independently
+     * of the order their keys were written in.
+     * @param {*} value - The JSON-compatible value.
+     * @returns {string} The canonical JSON text.
+     */
+    static canonical(value) {
+        if (value === undefined || value === null || typeof value !== "object") return JSON.stringify(value ?? null);
+        if (Array.isArray(value)) return "[" + value.map(v => this.canonical(v)).join(",") + "]";
+        return "{" + Object.keys(value).filter(k => value[k] !== undefined).sort().map(k => JSON.stringify(k) + ":" + this.canonical(value[k])).join(",") + "}";
+    }
+
+    /**
+     * Verifies a document against the schema without changing it. Unlike validate(), nothing is
+     * repaired: shared documents must be identical on every client and on the server, so a
+     * document that would need repair is rejected instead of silently becoming another one.
+     * Attributes and marks must already be in their sanitized form, which keeps unsafe URLs and
+     * styles out of a document that arrives as transformation steps.
+     * @param {object} doc - The document tree.
+     * @returns {object} The document.
+     * @throws {TypeError} If the document violates the schema; the message names the reason.
+     */
+    static check(doc) {
+        const fail = reason => { throw new TypeError("Editor document violates its schema: " + reason + "."); };
+        if (doc?.type !== "doc" || !Array.isArray(doc.children)) fail("no document root");
+        const ids = new Set(), known = new Set([...this.TEXT_BLOCKS, ...this.CONTAINERS, "image", "atom", "br", "hr"]);
+        let count = 0, text = 0;
+        const walk = (node, depth) => {
+            if (++count > this.MAX_NODES || depth > this.MAX_DEPTH) fail("structural limit exceeded");
+            if (node.type === "text") {
+                if (typeof node.text !== "string" || !node.text) fail("empty text");
+                text += node.text.length;
+                if (text > this.MAX_TEXT) fail("text limit exceeded");
+                if (this.canonical(this.marks(node.marks)) !== this.canonical(node.marks ?? {})) fail("unsupported marks");
+                return;
+            }
+            if (!known.has(node.type) || node.type === "doc" && depth) fail("unknown node " + node.type);
+            if (depth) {
+                if (typeof node.id !== "string" || !this.ID.test(node.id) || ids.has(node.id)) fail("invalid or duplicate id " + node.id);
+                ids.add(node.id);
+                if (this.canonical(this.attributes(node.type, node.attrs ?? {})) !== this.canonical(node.attrs ?? {})) fail("unsupported attributes on " + node.type);
+                if (node.type === "image" && !node.attrs.src) fail("image without source");
+            }
+            if (!Array.isArray(node.children)) fail("children missing");
+            if (this.atomic(node)) {
+                if (node.children.length) fail(node.type + " holds children");
+                return;
+            }
+            const rule = this.SCHEMA[node.type];
+            if (node.children.length < rule.min) fail(node.type + " needs content");
+            for (const child of node.children) {
+                if (!child || typeof child !== "object") fail("malformed node");
+                if (!this.accepts(rule.content, child)) fail(child.type + " inside " + node.type);
+                walk(child, depth + 1);
+            }
+        };
+        walk(doc, 0);
+        return doc;
+    }
+
+    /**
+     * Linearizes the document for operational transformation: every character, the opening and
+     * the closing of every structured node and every atomic node occupy one position. The root
+     * itself is not part of the sequence. Tokens share attribute and mark objects with the tree,
+     * which is safe because neither side mutates them.
+     * @param {object} doc - The document tree.
+     * @returns {Array<object>} The tokens.
+     */
+    static tokens(doc) {
+        const out = [];
+        const walk = node => {
+            if (node.type === "text") {
+                // indexing walks UTF-16 code units, the unit model positions count in
+                for (let i = 0; i < node.text.length; i++) out.push({ t: "c", v: node.text[i], m: node.marks });
+                return;
+            }
+            if (this.atomic(node)) { out.push({ t: "l", n: node.type, id: node.id, a: node.attrs }); return; }
+            out.push({ t: "o", n: node.type, id: node.id, a: node.attrs });
+            node.children.forEach(walk);
+            out.push({ t: "e", n: node.type, id: node.id });
+        };
+        doc.children.forEach(walk);
+        return out;
+    }
+
+    /**
+     * Rebuilds a document tree from tokens.
+     * @param {Array<object>} tokens - The tokens.
+     * @param {object} [options] - The options.
+     * @param {string} [options.id] - The id of the root, which is not part of the tokens.
+     * @param {boolean} [options.lenient=false] - Closes unbalanced nodes and ignores stray
+     * closings instead of failing, which is how a document broken by concurrent structural
+     * changes is turned back into a tree that normalize() can repair.
+     * @returns {object} The document tree; attributes and marks are copies.
+     * @throws {TypeError} If the tokens are unbalanced and lenient is not set.
+     */
+    static fromTokens(tokens, options = {}) {
+        const doc = { type: "doc", id: options.id ?? "n0", attrs: {}, children: [] };
+        const stack = [doc], memo = new Map();
+        const key = m => { let k = memo.get(m); if (k === undefined) { k = this.canonical(m ?? {}); memo.set(m, k); } return k; };
+        let run = null, runKey = null;
+        const fail = () => { throw new TypeError("Editor tokens are unbalanced."); };
+        for (const token of tokens) {
+            const parent = stack[stack.length - 1];
+            if (token.t === "c") {
+                const k = key(token.m);
+                if (run && runKey === k && parent.children[parent.children.length - 1] === run) run.text += token.v;
+                else { run = { type: "text", text: token.v, marks: JSON.parse(k) }; runKey = k; parent.children.push(run); }
+                continue;
+            }
+            run = null;
+            if (token.t === "e") {
+                const index = stack.findLastIndex(n => n !== doc && n.id === token.id && n.type === token.n);
+                if (index === stack.length - 1) stack.pop();
+                else if (!options.lenient) fail();
+                else if (index > 0) stack.length = index;
+                continue;
+            }
+            const node = { type: token.n, id: token.id, attrs: JSON.parse(JSON.stringify(token.a ?? {})), children: [] };
+            const atomic = this.atomic(node);
+            if (atomic !== (token.t === "l") && !options.lenient) fail();
+            parent.children.push(node);
+            if (!atomic && token.t === "o") stack.push(node);
+        }
+        if (stack.length !== 1 && !options.lenient) fail();
+        return doc;
+    }
+
+    /**
+     * Turns tokens that violate the schema into the nearest valid document, following the rules
+     * of normalize(): inline content outside a text block is wrapped into a paragraph, misplaced
+     * table and list structure gives up its wrapper, emptied containers receive an empty
+     * paragraph and unbalanced nodes are closed where their parent ends.
+     * @param {Array<object>} tokens - The broken tokens.
+     * @returns {Array<object>} Valid tokens.
+     */
+    static repairTokens(tokens) {
+        const doc = this.fromTokens(tokens, { lenient: true });
+        return this.tokens(this.validate({ version: this.VERSION, doc }).doc);
+    }
+
+    /**
+     * Maps every caret position to its linear token position. Caret positions count a text
+     * block's end as one unit; linear positions count the opening and closing of every node, so
+     * the caret at a block's end is the position right before its closing token.
+     * @param {object} doc - The document tree.
+     * @returns {Array<number>} The linear position per caret position, ascending.
+     */
+    static linearMap(doc) {
+        const map = [];
+        let linear = 0;
+        const walk = node => {
+            if (node.type === "text") { for (let i = 0; i < node.text.length; i++) map.push(linear++); return; }
+            if (this.atomic(node)) { map.push(linear++); return; }
+            linear++;
+            node.children.forEach(walk);
+            if (this.TEXT_BLOCKS.has(node.type)) map.push(linear);
+            linear++;
+        };
+        doc.children.forEach(walk);
+        map.push(linear);
+        return map;
+    }
+
+    /**
+     * Converts a caret position to a linear position.
+     * @param {object} doc - The document tree.
+     * @param {number} caret - The caret position.
+     * @param {Array<number>} [map] - A precomputed linearMap().
+     * @returns {number} The linear position.
+     */
+    static toLinear(doc, caret, map = this.linearMap(doc)) {
+        return map[Math.max(0, Math.min(map.length - 1, Math.floor(caret) || 0))];
+    }
+
+    /**
+     * Converts a linear position to the nearest caret position at or after it. Linear positions
+     * between blocks have no caret of their own; they resolve into the following text block, or
+     * to the document end when nothing follows.
+     * @param {object} doc - The document tree.
+     * @param {number} linear - The linear position.
+     * @param {Array<number>} [map] - A precomputed linearMap().
+     * @returns {number} The caret position.
+     */
+    static fromLinear(doc, linear, map = this.linearMap(doc)) {
+        let low = 0, high = map.length - 2;
+        if (high < 0) return 0;
+        if (linear > map[high]) return high;
+        while (low < high) {
+            const mid = (low + high) >> 1;
+            if (map[mid] < linear) low = mid + 1; else high = mid;
+        }
+        return low;
     }
 };

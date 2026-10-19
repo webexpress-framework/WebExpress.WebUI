@@ -69,7 +69,7 @@ export function loadEditor(options = {}) {
     vm.runInContext(core.slice(fieldMenuStart, core.indexOf("\n};", fieldMenuStart) + 3), sandbox, { filename: "MenuCtrl" });
     const contrastStart = core.indexOf("webexpress.webui.ContrastColor = class");
     vm.runInContext(core.slice(contrastStart, core.indexOf("\n};", contrastStart) + 3), sandbox, { filename: "ContrastColor" });
-    ["webexpress.webui.input.color.js", "webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js", "webexpress.webui.editor.js", ...(options.files || [])].forEach(load);
+    ["webexpress.webui.input.color.js", "webexpress.webui.ot.js", "webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js", "webexpress.webui.editor.js", ...(options.files || [])].forEach(load);
     if (options.addons) Object.entries(options.addons).forEach(([id, def]) => wx.EditorAddOns.register(id, def));
     const form = document.createElement("form"), host = document.createElement("div");
     host.setAttribute("name", "document");
