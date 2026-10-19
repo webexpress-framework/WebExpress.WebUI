@@ -299,6 +299,10 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         };
 
         setTimeout(() => {
+            // torn down within the tick the edit opened in
+            if (this._destroyed || !this._outsideClickHandler) {
+                return;
+            }
             document.addEventListener("mousedown", this._outsideClickHandler);
             document.addEventListener("touchstart", this._outsideClickHandler);
         }, 0);
@@ -368,6 +372,20 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             document.removeEventListener("touchstart", this._outsideClickHandler);
             this._outsideClickHandler = null;
         }
+    }
+
+    /**
+     * Releases the document listeners of an open edit. A host that builds the inline
+     * editor itself, rather than through the controller, throws it away on its next
+     * render; without this the listener of an edit that was open at that moment would
+     * keep cancelling edits on a detached element.
+     */
+    destroy() {
+        this._destroyed = true;
+        this._detachOutsideClick();
+        this.onSave = null;
+        this.onCancel = null;
+        super.destroy();
     }
 
     /**

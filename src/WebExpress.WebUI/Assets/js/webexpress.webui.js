@@ -632,6 +632,20 @@ webexpress.webui.LocalStorage = class {
     }
 
     /**
+     * Forgets a value once it no longer applies, without interrupting an interaction
+     * when storage is unavailable.
+     * @param {string|null} key - A stable preference key.
+     */
+    static removeItem(key) {
+        if (!key) return;
+        try {
+            localStorage.removeItem(key);
+        } catch {
+            // storage is optional; a value that cannot be removed is ignored when read
+        }
+    }
+
+    /**
      * Treats damaged JSON as a missing preference so controls can use their defaults.
      * @param {string|null} key - A stable preference key.
      * @returns {*} The stored JSON value, or null.
