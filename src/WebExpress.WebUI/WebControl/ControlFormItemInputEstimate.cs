@@ -101,6 +101,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
                 .AddUserAttribute("data-scale", scale != null && scale.Any() ? string.Join(",", scale) : null)
                 .AddUserAttribute("data-allow-clear", allowClear ? "true" : null)
                 .AddUserAttribute("data-colors-css", hasColorClass ? string.Join("|", colors.Select(c => c?.ToClass())) : null)
@@ -114,6 +115,23 @@ namespace WebExpress.WebUI.WebControl
             }
 
             return html;
+        }
+
+        /// <summary>
+        /// Determines whether no estimate was given. Zero may be a point of the scale, so the
+        /// number cannot tell; the control sends an empty field when no point is chosen, and the
+        /// submitted text decides.
+        /// </summary>
+        /// <param name="value">The submitted value.</param>
+        /// <param name="renderContext">The context in which the inputs are validated.</param>
+        /// <returns>True when no point is chosen.</returns>
+        protected override bool IsEmpty(ControlFormInputValueUInt value, IRenderControlFormContext renderContext)
+        {
+            var name = Name?.Invoke(renderContext);
+            var submitted = name is not null ? renderContext?.Request?.GetParameter(name)?.Value : null;
+
+            // without a submitted field the value came from the initializer, which set what it meant
+            return value is null || (submitted is not null && string.IsNullOrWhiteSpace(submitted));
         }
 
         /// <summary>

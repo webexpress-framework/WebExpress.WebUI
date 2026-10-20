@@ -3,7 +3,8 @@
  * Provides a read-only rendering wrapper that extracts a value from an inner editor element
  * (or plain markup) and renders a formatted display representation. No inline editing,
  * no event dispatch for edit lifecycle. The value can still be updated programmatically
- * via the public getter/setter.
+ * via the public getter/setter, which announces a change with
+ * webexpress.webui.Event.CHANGE_VALUE_EVENT.
  */
 webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
     /**
@@ -113,10 +114,13 @@ webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Sets the value programmatically and refreshes the display.
+     * Sets the value programmatically and refreshes the display. A value that differs from the
+     * current one is announced; the embedded view lives outside the document, so its own
+     * announcement would reach nobody.
      * @param {string|string[]} value The new raw value.
      */
     set value(value) {
+        const changed = JSON.stringify(value ?? null) !== JSON.stringify(this._value ?? null);
         this._value = value;
 
         // update underlying embedded control if available
@@ -139,6 +143,10 @@ webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
         this._element.innerHTML = "";
         if (this._view) {
             this._element.appendChild(this._view.cloneNode(true));
+        }
+
+        if (changed) {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
         }
     }
 };

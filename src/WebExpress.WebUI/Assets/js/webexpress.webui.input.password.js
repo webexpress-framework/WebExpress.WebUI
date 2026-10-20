@@ -91,9 +91,13 @@ webexpress.webui.InputPasswordCtrl = class extends webexpress.webui.Ctrl {
      * @param {string} val - The new password value.
      */
     set value(val) {
+        const changed = (val || "") !== this._value;
         this._value = val || "";
         this._input.value = this._value;
         this._hiddenInput.value = this._value;
+        if (changed) {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this._value });
+        }
     }
 };
 

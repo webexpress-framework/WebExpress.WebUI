@@ -94,35 +94,9 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
-        /// Validates the input elements within a form for correctness of the data.
+        /// Gets the i18n key of the message the required rule reports.
         /// </summary>
-        /// <param name="renderContext">The context in which the control is rendered.</param>
-        /// <returns>A collection of validation results indicating any issues found.</returns>
-        public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
-        {
-            var validationResults = new List<ValidationResult>();
-            var value = renderContext.GetValue<ControlFormInputValueFile>(this)?.Name;
-            var disabled = Disabled?.Invoke(renderContext) ?? false;
-            var required = Required?.Invoke(renderContext) ?? false;
-
-            if (disabled)
-            {
-                return [];
-            }
-
-            if (required && string.IsNullOrWhiteSpace(value))
-            {
-                validationResults.Add(new ValidationResult
-                (
-                    TypeInputValidity.Error,
-                    "webexpress.webui:form.inputfile.validation.required"
-                ));
-            }
-
-            validationResults.AddRange(base.Validate(renderContext));
-
-            return validationResults;
-        }
+        protected override string RequiredMessage => "webexpress.webui:form.inputfile.validation.required";
 
         /// <summary>
         /// Creates an value from the specified string representation.

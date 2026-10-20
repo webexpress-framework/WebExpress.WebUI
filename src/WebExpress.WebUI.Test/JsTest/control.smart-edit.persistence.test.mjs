@@ -190,3 +190,71 @@ test("a form action save can be decided by the host as well", async () => {
     assert.deepEqual(statuses, [409]);
     assert.equal(container.textContent, "before", "the refused value is set back");
 });
+
+test("a form action save the server refuses is set back and reported when the host does not decide", async () => {
+    const rt = loadRuntime();
+    rt.sandbox.fetch = async () => ({ ok: false, status: 500, statusText: "Server Error", text: async () => "" });
+    const container = buildCell(rt, "/api/characters/1");
+    const events = [];
+    for (const name of ["DATA_ERROR_EVENT", "SAVED_EVENT", "CHANGE_VALUE_EVENT"]) {
+        container.addEventListener(rt.wx.Event[name], (e) => events.push({ name: name, detail: e.detail }));
+    }
+
+    await submit(rt, container, "after");
+
+    assert.equal(container.textContent, "before", "a value the server did not take is not shown as saved");
+    assert.deepEqual(events.map((event) => event.name), ["DATA_ERROR_EVENT"]);
+    assert.equal(events[0].detail.action, "save");
+    assert.equal(events[0].detail.error.status, 500);
+    assert.equal(events[0].detail.value, "after");
+});
+
+test("an invalid value is not saved; the edit stays open with the field marked", async () => {
+    const rt = loadRuntime();
+    const container = buildCell(rt, null);
+    const saved = [];
+    container.addEventListener(rt.wx.Event.SAVE_INLINE_EDIT_EVENT, (e) => saved.push(e.detail));
+
+    container.dispatchEvent({ type: "dblclick", stopPropagation() { } });
+    const editor = container.querySelector("form input");
+    editor.setAttribute("required", "");
+    editor.value = "";
+    container.querySelector("form").dispatchEvent({ type: "submit", preventDefault() { } });
+    await submit.settle();
+
+    assert.equal(saved.length, 0);
+    assert.ok(container.querySelector("form"), "the editor is still open");
+    assert.equal(editor.getAttribute("aria-invalid"), "true");
+});
+
+test("a save a listener holds back keeps the edit open and sends nothing", async () => {
+    const rt = loadRuntime();
+    const requests = [];
+    rt.sandbox.fetch = async (url) => {
+        requests.push(url);
+        return { ok: true, status: 200, text: async () => "" };
+    };
+    const container = buildCell(rt, "/api/characters/1");
+    container.addEventListener(rt.wx.Event.BEFORE_SAVE_EVENT, (e) => e.preventDefault());
+
+    await submit(rt, container, "after");
+
+    assert.deepEqual(requests, []);
+    assert.ok(container.querySelector("form"), "the editor is still open");
+});
+
+test("a taken over value is announced as a change and as saved, once each", async () => {
+    const rt = loadRuntime();
+    const container = buildCell(rt, null);
+    const events = [];
+    for (const name of ["SAVED_EVENT", "CHANGE_VALUE_EVENT"]) {
+        container.addEventListener(rt.wx.Event[name], (e) => events.push({ name: name, value: e.detail.value }));
+    }
+
+    await submit(rt, container, "after");
+
+    assert.deepEqual(JSON.parse(JSON.stringify(events)), [
+        { name: "CHANGE_VALUE_EVENT", value: "after" },
+        { name: "SAVED_EVENT", value: "after" }
+    ]);
+});

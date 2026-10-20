@@ -96,6 +96,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
                 // the vertical default and the allow-off default are implied; only deviations are emitted
                 .AddUserAttribute("data-orientation", orientation == TypeOrientationTrafficLight.Horizontal ? orientation.ToValue() : null)
                 .AddUserAttribute("data-allow-off", allowOff ? null : "false");

@@ -122,6 +122,7 @@ webexpress.webui.RatingCtrl = class extends webexpress.webui.Ctrl {
             // update aria-label to reflect change
             this._element.setAttribute("aria-label", `${this._i18n("webexpress.webui:rating")}: ${this._value} / ${this._total}`);
             this._renderStars();
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
         }
     }
 

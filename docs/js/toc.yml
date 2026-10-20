@@ -4,6 +4,8 @@
   href: webexpress.webui.md
 - name: StateCtrl and Renderer
   href: state.md
+- name: Control Contract
+  href: contract.md
 - name: Avatar
   href: avatar.md
 - name: Avatar Dropdown

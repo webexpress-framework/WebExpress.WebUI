@@ -1,6 +1,7 @@
 /**
  * A field where search commands can be entered.
  * The following events are triggered:
+ * - webexpress.webui.Event.CHANGE_VALUE_EVENT
  * - webexpress.webui.Event.CHANGE_FILTER_EVENT
  * - webexpress.webui.Event.CHANGE_FAVORITE_EVENT
  * - webexpress.webui.Event.DROPDOWN_SHOW_EVENT
@@ -297,13 +298,15 @@ webexpress.webui.SearchCtrl = class extends webexpress.webui.MenuCtrl {
     }
 
     /**
-     * Sets the value of the search input and triggers a filter change event.
+     * Sets the value of the search input and triggers a filter change event, beside the value
+     * change every field announces.
      * @param {string} value - The new value to set.
      */
     set value(value) {
         if (this._value !== value) {
             this._value = value;
             this._searchInput.value = value;
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: value });
             this._dispatch(webexpress.webui.Event.CHANGE_FILTER_EVENT, { value: value });
         }
     }

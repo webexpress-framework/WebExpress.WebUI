@@ -530,6 +530,7 @@ webexpress.webui.InputSliderCtrl = class extends webexpress.webui.Ctrl {
         this.render();
         this._syncHidden();
         this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+            value: this.value,
             valueMin: this._valueMin,
             valueMax: this._valueMax
         });
@@ -600,6 +601,7 @@ webexpress.webui.InputSliderCtrl = class extends webexpress.webui.Ctrl {
         this._syncHidden();
         if (changed) {
             this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, {
+                value: this.value,
                 valueMin: this._valueMin,
                 valueMax: this._valueMax
             });

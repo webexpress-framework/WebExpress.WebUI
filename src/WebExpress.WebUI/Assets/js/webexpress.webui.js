@@ -264,6 +264,7 @@ webexpress.webui.Controller = new class {
                 try {
                     const instance = new ClassConstructor(element);
                     this.instanceMap.set(element, instance);
+                    webexpress.webui.Field.adopt(instance);
                 } catch (error) {
                     console.error(`Failed to create instance for selector "${selector}"`, error);
                 }
@@ -283,6 +284,7 @@ webexpress.webui.Controller = new class {
             try {
                 const instance = new ClassConstructor(element);
                 this.instanceMap.set(element, instance);
+                webexpress.webui.Field.adopt(instance);
                 return instance;
             } catch (error) {
                 console.error(`Failed to instantiate class "${classType}"`, error);
@@ -2179,17 +2181,52 @@ webexpress.webui.Ctrl = class {
     * Dispatches a custom event.
     * @param {string} type - Event type
     * @param {object} detail - Payload
+    * @param {object} [options={}] - cancelable: true for an announcement a listener may veto,
+    *     such as the one before a save.
+    * @returns {CustomEvent} The dispatched event, whose defaultPrevented tells the veto.
     */
-    _dispatch(type, detail) {
-        this._element.dispatchEvent(new CustomEvent(type, {
+    _dispatch(type, detail, options = {}) {
+        const event = new CustomEvent(type, {
             detail: {
                 sender: this._element,
                 id: this._element?.id,
                 ...detail
             },
             bubbles: true,
-            composed: true
-        }));
+            composed: true,
+            cancelable: options.cancelable === true
+        });
+        this._element.dispatchEvent(event);
+        return event;
+    }
+
+    /**
+     * Stores one change a control has already applied on screen - a card moved, a column
+     * resized - along the saving side of the control contract: the change is announced
+     * cancelable beforehand, a listener may veto it or replace its payload, and a stored change
+     * is announced as saved. A vetoed change never reaches the server: it is taken back and
+     * answered with an abort, which a caller does not report as a failure.
+     * @param {string} action - The change, named as the data error event names it.
+     * @param {*} payload - What is sent.
+     * @param {function(*): Promise<object>} send - Sends a payload and answers with the result.
+     * @param {function(): void} [takeBack] - Takes the change back on screen after a veto.
+     * @returns {Promise<object>} The normalized result { ok, status, data, error }.
+     */
+    async _saveAction(action, payload, send, takeBack) {
+        const before = this._dispatch(webexpress.webui.Event.BEFORE_SAVE_EVENT,
+            { action: action, payload: payload }, { cancelable: true });
+        if (before.defaultPrevented) {
+            if (typeof takeBack === "function") {
+                takeBack();
+            }
+            return webexpress.webui.Transport.fail("abort", 0, "the save was cancelled", false);
+        }
+
+        const result = await send(before.detail && before.detail.payload !== undefined ? before.detail.payload : payload);
+        if (result && result.ok) {
+            this._dispatch(webexpress.webui.Event.SAVED_EVENT, { action: action, data: result.data, status: result.status });
+        }
+        return result;
     }
 
     /**
@@ -2299,6 +2336,582 @@ webexpress.webui.Ctrl = class {
         return label;
     }
 }
+
+/**
+ * The field side of the control contract (see docs/js/contract.md): one way to read and drive
+ * anything a user fills in, whether it is a native input or a control.
+ *
+ * A form, a bind or an application never asks a field how it happens to be built - a text
+ * box, a tag input and a date picker answer here in the same shape. A control answers for
+ * itself through the members it implements (value, disabled, required, validate(), dirty,
+ * markPristine(), reset()), and what it leaves out is answered from its host and from the
+ * named input it submits through. A control therefore conforms with no more than a value
+ * accessor and the change event, and gains its own rules where its presentation needs them.
+ *
+ * A target is a control instance, the host element of one, or a native input, select or
+ * textarea.
+ */
+webexpress.webui.Field = new class {
+    /**
+     * Creates the field registry.
+     */
+    constructor() {
+        // the value each field is compared against to tell whether it was edited
+        this._baselines = new WeakMap();
+        // errors set from outside a field, such as a refusal of the server
+        this._errors = new WeakMap();
+        // the listeners waiting for the change that clears such an error
+        this._clearers = new WeakMap();
+        // the inner elements a disable switched off, the only ones it switches on again
+        this._locked = new WeakMap();
+        // the validity each field reported last, so only a turn is announced
+        this._reported = new WeakMap();
+    }
+
+    /**
+     * Resolves what a call addresses: the control living on a host element, or the element.
+     * @param {webexpress.webui.Ctrl|HTMLElement|null} target - The field.
+     * @returns {webexpress.webui.Ctrl|HTMLElement|null} The control or the native element.
+     */
+    resolve(target) {
+        if (!target) {
+            return null;
+        }
+        if (target instanceof webexpress.webui.Ctrl) {
+            return target;
+        }
+        return webexpress.webui.Controller.getInstanceByElement(target) || target;
+    }
+
+    /**
+     * Tells whether a target holds a value a user edits: a control whose value can be written,
+     * or a native input, select or textarea. A control that exposes its value read only reports
+     * data it loads and stores itself (a comment list, the watchers) and is no field.
+     * @param {webexpress.webui.Ctrl|HTMLElement|null} target - The candidate.
+     * @returns {boolean} True for a field.
+     */
+    isField(target) {
+        const field = this.resolve(target);
+        if (field instanceof webexpress.webui.Ctrl) {
+            return "value" in field && this._hasSetter(field, "value");
+        }
+        return this._isNative(field);
+    }
+
+    /**
+     * Records the current value of a field as its baseline. The controller calls this for every
+     * control it creates, so a field is pristine when it appears; a control that settles its
+     * initial value later, or a form that loads its fields, calls markPristine itself.
+     * @param {webexpress.webui.Ctrl} instance - The control the controller just created.
+     */
+    adopt(instance) {
+        if (!(instance instanceof webexpress.webui.Ctrl) || !this.isField(instance) || this._baselines.has(instance)) {
+            return;
+        }
+        try {
+            this.markPristine(instance);
+        } catch (error) {
+            // a value that cannot be read yet leaves the field without a baseline, which the
+            // first dirty check then takes
+        }
+    }
+
+    /**
+     * Returns the value of a field.
+     * @param {webexpress.webui.Ctrl|HTMLElement} target - The field.
+     * @returns {*} The value: what the control's accessor returns, a boolean for a checkbox,
+     *     an array for a multiple select and the text otherwise.
+     */
+    getValue(target) {
+        const field = this.resolve(target);
+        if (field instanceof webexpress.webui.Ctrl) {
+            return field.value;
+        }
+        return this._isNative(field) ? this._nativeValue(field) : null;
+    }
+
+    /**
+     * Sets the value of a field. A field announces the change like one the user made, so a
+     * native field, which stays silent on a write in code, fires change when its value moved.
+     * @param {webexpress.webui.Ctrl|HTMLElement} target - The field.
+     * @param {*} value - The new value.
+     */
+    setValue(target, value) {
+        const field = this.resolve(target);
+        if (field instanceof webexpress.webui.Ctrl) {
+            field.value = value;
+            return;
+        }
+        if (!this._isNative(field)) {
+            return;
+        }
+        const before = this._key(this._nativeValue(field));
+        this._writeNative(field, value);
+        if (this._key(this._nativeValue(field)) !== before) {
+            field.dispatchEvent(new CustomEvent("change", { bubbles: true }));
+        }
+    }
+
+    /**
+     * Tells whether a field is disabled: by its own say, by a disabled host or fieldset, or by
+     * the disabled input it submits through.
+     * @param {webexpress.webui.Ctrl|HTMLElement} target - The field.
+     * @returns {boolean} True when the field takes no input.
+     */
+    isDisabled(target) {
+        const field = this.resolve(target);
+        if (field instanceof webexpress.webui.Ctrl) {
+            if (typeof field.disabled === "boolean") {
+                return field.disabled;
+            }
+            const host = field._element;
+            return this._markedDisabled(host) || this._namedInputs(host).some((el) => el.disabled === true);
+        }
+        return !!field && (field.disabled === true || this._markedDisabled(field));
+    }
+
+    /**
+     * Enables or disables a field. A control with a disabled setter decides itself how it
+     * shows the state; for every other one the host is marked and the inputs and buttons
+     * inside it are switched off, and only those are switched on again.
+     * @param {webexpress.webui.Ctrl|HTMLElement} target - The field.
+     * @param {boolean} disabled - True to disable.
+     */
+    setDisabled(target, disabled) {
+        const field = this.resolve(target);
+        const flag = disabled === true;
+        if (!field) {
+            return;
+        }
+        if (field instanceof webexpress.webui.Ctrl && this._hasSetter(field, "disabled")) {
+            field.disabled = flag;
+            return;
+        }
+        if (this._isNative(field)) {
+            field.disabled = flag;
+            return;
+        }
+        const host = field._element;
+        const locked = this._locked.get(field) || new Set();
+        if (flag) {
+            host.setAttribute("aria-disabled", "true");
+            for (const el of Array.from(host.querySelectorAll("input, select, textarea, button"))) {
+                if (!el.disabled) {
+                    el.disabled = true;
+                    locked.add(el);
+                }
+            }
+            this._locked.set(field, locked);
+        } else {
+            host.removeAttribute("aria-disabled");
+            for (const el of locked) {
+                el.disabled = false;
+            }
+            this._locked.delete(field);
+        }
+    }
+
+    /**
+     * Tells whether a field must not stay empty. A control that keeps its value in a hidden
+     * input is barred from native constraint validation, so besides the required attribute
+     * the markers aria-required, data-required on the host and data-wx-required on the
+     * submitted input count.
+     * @param {webexpress.webui.Ctrl|HTMLElement} target - The field.
+     * @returns {boolean} True when a value is required.
+     */
+    isRequired(target) {
+        const field = this.resolve(target);
+        if (!field) {
+            return false;
+        }
+        if (field instanceof webexpress.webui.Ctrl && typeof field.required === "boolean") {
+            return field.required;
+        }
+        const host = this._host(field);
+        const marked = (el) => el.hasAttribute("required")
+            || el.getAttribute("aria-required") === "true"
+            || el.getAttribute("data-required") === "true"
+            || el.getAttribute("data-wx-required") === "true"
+            // a control that builds its hidden input in code may set the marker through the dataset only
+            || el.dataset?.wxRequired === "true";
+        if (marked(host)) {
+            return true;
+        }
+        // a native field is its own submitted input; a control submits through the inputs inside its host
+        return field instanceof webexpress.webui.Ctrl && this._namedInputs(host).some(marked);
+    }
+
+    /**
+     * Validates a field without presenting anything. The outcome is the list of what is wrong,
+     * empty for a valid field, in the shape of the server side ValidationResult: { type, text,
+     * source }, where type is "error" or "warning" and source tells which rule spoke - an
+     * external error, the required rule, the control's own validate() or the native
+     * constraints. A disabled field is not validated, as on the server.
+     * @param {webexpress.webui.Ctrl|HTMLElement} target - The field.
+     * @returns {Array<{type: string, text: string, source: string}>} The results.
+     */
+    validate(target) {
+        const field = this.resolve(target);
+        if (!field || this.isDisabled(field)) {
+            return [];
+        }
+
+        const results = [];
+        const external = this._errors.get(field);
+        if (external) {
+            results.push({ type: "error", text: external, source: "external" });
+        }
+
+        if (this.isRequired(field) && this._isMissing(field)) {
+            results.push({ type: "error", text: this._text("webexpress.webui:field.required", "This field is required."), source: "required" });
+        } else if (field instanceof webexpress.webui.Ctrl) {
+            if (typeof field.validate === "function") {
+                results.push(...this._normalize(field.validate()));
+            }
+        } else if (field.validity && field.validity.valid === false) {
+            results.push({ type: "error", text: field.validationMessage || this._text("webexpress.webui:field.invalid", "Invalid value."), source: "native" });
+        }
+
+        return results;
+    }
+
+    /**
+     * Validates a field and shows the outcome on it: aria-invalid on the host or the native
+     * element, and the change validity event when the field turned valid or invalid. A form
+     * that presents the errors of its fields itself validates through validate instead.
+     * @param {webexpress.webui.Ctrl|HTMLElement} target - The field.
+     * @returns {boolean} True when the field has no error.
+     */
+    report(target) {
+        const field = this.resolve(target);
+        if (!field) {
+            return true;
+        }
+        const results = this.validate(field);
+        const valid = !results.some((result) => result.type === "error");
+        const host = this._host(field);
+
+        if (valid) {
+            host.removeAttribute("aria-invalid");
+        } else {
+            host.setAttribute("aria-invalid", "true");
+        }
+
+        if (this._reported.has(field) ? this._reported.get(field) !== valid : !valid) {
+            host.dispatchEvent(new CustomEvent(webexpress.webui.Event.CHANGE_VALIDITY_EVENT, {
+                detail: { sender: host, id: host.id, valid: valid, results: results },
+                bubbles: true
+            }));
+        }
+        this._reported.set(field, valid);
+
+        return valid;
+    }
+
+    /**
+     * Sets an error that comes from outside the field, typically the server refusing a value,
+     * or clears it with null. The error holds until the value changes, so the user sees it
+     * until they act on it, and it takes part in validate like any rule of the field.
+     * @param {webexpress.webui.Ctrl|HTMLElement} target - The field.
+     * @param {string|null} text - The message, or null to clear.
+     */
+    setError(target, text) {
+        const field = this.resolve(target);
+        if (!field) {
+            return;
+        }
+
+        this._stopClearing(field);
+        if (text) {
+            this._errors.set(field, String(text));
+            this._clearOnChange(field);
+        } else {
+            this._errors.delete(field);
+        }
+        this.report(field);
+    }
+
+    /**
+     * Clears the external error of a field on its next change, whether the field announces it
+     * as a control or as a native input.
+     * @param {webexpress.webui.Ctrl|HTMLElement} field - The resolved field.
+     */
+    _clearOnChange(field) {
+        const host = this._host(field);
+        const types = [webexpress.webui.Event.CHANGE_VALUE_EVENT, "input", "change"];
+        const clear = () => this.setError(field, null);
+        for (const type of types) {
+            host.addEventListener(type, clear);
+        }
+        this._clearers.set(field, () => {
+            for (const type of types) {
+                host.removeEventListener(type, clear);
+            }
+        });
+    }
+
+    /**
+     * Stops waiting for the change that clears the external error of a field.
+     * @param {webexpress.webui.Ctrl|HTMLElement} field - The resolved field.
+     */
+    _stopClearing(field) {
+        const stop = this._clearers.get(field);
+        if (stop) {
+            stop();
+            this._clearers.delete(field);
+        }
+    }
+
+    /**
+     * Takes the current value of a field as its baseline: after it appeared, was loaded or was
+     * saved. A control with a markPristine of its own decides itself what its baseline is.
+     * @param {webexpress.webui.Ctrl|HTMLElement} target - The field.
+     */
+    markPristine(target) {
+        const field = this.resolve(target);
+        if (!field) {
+            return;
+        }
+        if (field instanceof webexpress.webui.Ctrl && typeof field.markPristine === "function") {
+            field.markPristine();
+            return;
+        }
+        const value = this.getValue(field);
+        this._baselines.set(field, { key: this._key(value), value: this._copy(value) });
+    }
+
+    /**
+     * Tells whether a field holds something else than its baseline. A field without a baseline
+     * takes the current value as one, so it is pristine until the next change.
+     * @param {webexpress.webui.Ctrl|HTMLElement} target - The field.
+     * @returns {boolean} True when the value differs from the baseline.
+     */
+    isDirty(target) {
+        const field = this.resolve(target);
+        if (!field) {
+            return false;
+        }
+        if (field instanceof webexpress.webui.Ctrl && typeof field.dirty === "boolean") {
+            return field.dirty;
+        }
+        const baseline = this._baselines.get(field);
+        if (!baseline) {
+            this.markPristine(field);
+            return false;
+        }
+        return this._key(this.getValue(field)) !== baseline.key;
+    }
+
+    /**
+     * Sets a field back to its baseline and drops an external error. A control with a reset of
+     * its own decides itself what going back means.
+     * @param {webexpress.webui.Ctrl|HTMLElement} target - The field.
+     */
+    reset(target) {
+        const field = this.resolve(target);
+        if (!field) {
+            return;
+        }
+        if (field instanceof webexpress.webui.Ctrl && typeof field.reset === "function") {
+            field.reset();
+            return;
+        }
+        if (this._errors.has(field)) {
+            this.setError(field, null);
+        }
+        const baseline = this._baselines.get(field);
+        if (baseline) {
+            this.setValue(field, this._copy(baseline.value));
+        }
+    }
+
+    /**
+     * Turns what a control's own validate returned into results. Older controls answer with a
+     * boolean, a message or a list of messages; all of them count.
+     * @param {*} outcome - The return value of validate().
+     * @returns {Array<{type: string, text: string, source: string}>} The results.
+     */
+    _normalize(outcome) {
+        if (outcome === false) {
+            return [{ type: "error", text: this._text("webexpress.webui:field.invalid", "Invalid value."), source: "control" }];
+        }
+        if (typeof outcome === "string") {
+            return outcome ? [{ type: "error", text: outcome, source: "control" }] : [];
+        }
+        if (!Array.isArray(outcome)) {
+            return [];
+        }
+        return outcome.filter(Boolean).map((entry) => typeof entry === "string"
+            ? { type: "error", text: entry, source: "control" }
+            : {
+                type: String(entry.type || "").toLowerCase() === "warning" ? "warning" : "error",
+                text: String(entry.text ?? entry.message ?? ""),
+                source: "control"
+            });
+    }
+
+    /**
+     * Tells whether nothing was entered into a field. A control whose empty state is a
+     * particular value - a rating of zero, a traffic light that is off - says so through its
+     * empty member, as its input does on the server.
+     * @param {webexpress.webui.Ctrl|HTMLElement} field - The resolved field.
+     * @returns {boolean} True when the required rule finds nothing.
+     */
+    _isMissing(field) {
+        if (field instanceof webexpress.webui.Ctrl && typeof field.empty === "boolean") {
+            return field.empty;
+        }
+        return this._isEmpty(this.getValue(field));
+    }
+
+    /**
+     * Tells whether a value counts as missing for the required rule.
+     * @param {*} value - The value.
+     * @returns {boolean} True for nothing, an empty or blank text, an empty list or an
+     *     unchecked checkbox.
+     */
+    _isEmpty(value) {
+        if (value === null || value === undefined || value === false) {
+            return true;
+        }
+        if (Array.isArray(value)) {
+            return value.length === 0;
+        }
+        return typeof value === "string" && value.trim() === "";
+    }
+
+    /**
+     * Gets the element that carries the marks of a field.
+     * @param {webexpress.webui.Ctrl|HTMLElement} field - The resolved field.
+     * @returns {HTMLElement} The host of a control or the native element.
+     */
+    _host(field) {
+        return field instanceof webexpress.webui.Ctrl ? field._element : field;
+    }
+
+    /**
+     * Tells whether an element is disabled by its markup or by a disabled fieldset around it.
+     * @param {HTMLElement} el - The element.
+     * @returns {boolean} True when it is marked disabled.
+     */
+    _markedDisabled(el) {
+        return !!el && (el.hasAttribute("disabled")
+            || el.getAttribute("aria-disabled") === "true"
+            // a custom input the server rendered disabled carries the class on its host
+            || el.classList?.contains("disabled") === true
+            || !!el.closest?.("fieldset[disabled]"));
+    }
+
+    /**
+     * Gets the named inputs inside a host, which are what the field submits through.
+     * @param {HTMLElement} host - The host.
+     * @returns {HTMLElement[]} The named inputs.
+     */
+    _namedInputs(host) {
+        return host && typeof host.querySelectorAll === "function"
+            ? Array.from(host.querySelectorAll("input[name], select[name], textarea[name]"))
+            : [];
+    }
+
+    /**
+     * Tells whether a property of an object is written through a setter. A plain data property
+     * of the same name would take the write without the control showing anything of it.
+     * @param {object} obj - The object.
+     * @param {string} name - The property.
+     * @returns {boolean} True when a setter exists along the prototype chain.
+     */
+    _hasSetter(obj, name) {
+        for (let proto = obj; proto; proto = Object.getPrototypeOf(proto)) {
+            const descriptor = Object.getOwnPropertyDescriptor(proto, name);
+            if (descriptor) {
+                return typeof descriptor.set === "function";
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Tells whether an element is a native field.
+     * @param {*} el - The candidate.
+     * @returns {boolean} True for an input, select or textarea.
+     */
+    _isNative(el) {
+        return !!el && typeof el.tagName === "string" && ["INPUT", "SELECT", "TEXTAREA"].includes(el.tagName.toUpperCase());
+    }
+
+    /**
+     * Reads the value of a native field.
+     * @param {HTMLElement} el - The native field.
+     * @returns {*} A boolean for a checkbox, an array for a multiple select, the text otherwise.
+     */
+    _nativeValue(el) {
+        if (el.type === "checkbox") {
+            return !!el.checked;
+        }
+        if (el.tagName.toUpperCase() === "SELECT" && el.multiple) {
+            return Array.from(el.options || []).filter((option) => option.selected).map((option) => option.value);
+        }
+        return el.value;
+    }
+
+    /**
+     * Writes the value of a native field. A list goes into a text field in the semicolon
+     * separated form the server reads lists in.
+     * @param {HTMLElement} el - The native field.
+     * @param {*} value - The value.
+     */
+    _writeNative(el, value) {
+        if (el.type === "checkbox") {
+            el.checked = !!value;
+        } else if (el.tagName.toUpperCase() === "SELECT" && el.multiple) {
+            const values = (Array.isArray(value) ? value : [value]).map(String);
+            Array.from(el.options || []).forEach((option) => { option.selected = values.includes(option.value); });
+        } else {
+            el.value = value == null ? "" : (Array.isArray(value) ? value.join(";") : String(value));
+        }
+    }
+
+    /**
+     * Serializes a value for comparison.
+     * @param {*} value - The value.
+     * @returns {string} The comparison key.
+     */
+    _key(value) {
+        try {
+            return JSON.stringify(value === undefined ? null : value);
+        } catch (error) {
+            return String(value);
+        }
+    }
+
+    /**
+     * Copies a value, so a baseline is not changed through the object the field still holds.
+     * @param {*} value - The value.
+     * @returns {*} The copy.
+     */
+    _copy(value) {
+        if (value === null || typeof value !== "object") {
+            return value;
+        }
+        try {
+            return JSON.parse(JSON.stringify(value));
+        } catch (error) {
+            return value;
+        }
+    }
+
+    /**
+     * Translates a message of the field contract.
+     * @param {string} key - The full i18n key.
+     * @param {string} fallback - The text without a catalogue.
+     * @returns {string} The message.
+     */
+    _text(key, fallback) {
+        const text = webexpress.webui.I18N?.translate(key);
+        // translate answers a missing key with the key itself
+        return text && text !== key ? text : fallback;
+    }
+};
 
 /**
  * The built-in transport adapter: fetch for requests, XMLHttpRequest for uploads, because
@@ -2796,6 +3409,12 @@ webexpress.webui.Event = class {
     static TABLE_SORT_EVENT = "webexpress.webui.table.sorted";
     // Event triggered when the value of an input or control changes.
     static CHANGE_VALUE_EVENT = "webexpress.webui.change.value";
+    // Event triggered when a field or a form turns from valid to invalid or back.
+    static CHANGE_VALIDITY_EVENT = "webexpress.webui.change.validity";
+    // Event triggered before a control saves; a listener may cancel it or replace the payload.
+    static BEFORE_SAVE_EVENT = "webexpress.webui.save.before";
+    // Event triggered when a control has saved and taken what it saved as its new baseline.
+    static SAVED_EVENT = "webexpress.webui.saved";
     // Event triggered when a control taking part in a shared document made a local change; the
     // detail carries the transformation steps (see webexpress.webui.ot.js).
     static COLLABORATION_STEPS_EVENT = "webexpress.webui.collaboration.steps";

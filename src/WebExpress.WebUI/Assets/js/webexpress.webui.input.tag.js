@@ -4,6 +4,7 @@
  * The following events are triggered:
  * - webexpress.webui.Event.ADD_EVENT
  * - webexpress.webui.Event.REMOVE_EVENT
+ * - webexpress.webui.Event.CHANGE_VALUE_EVENT
  */
 webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
     /**
@@ -120,6 +121,7 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
         // fire add event when a tag is added
         this._dispatch(webexpress.webui.Event.ADD_EVENT, { detail: value });
         this.render();
+        this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
         return true;
     }
 
@@ -149,6 +151,7 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
         // fire remove event when a tag is removed
         this._dispatch(webexpress.webui.Event.REMOVE_EVENT, { detail: tag });
         this.render();
+        this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
     }
 
     /**
@@ -221,10 +224,13 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Sets the tags from a semicolon-separated string or array.
+     * Sets the tags from a semicolon-separated string or array. Tags that differ from the
+     * current ones are announced; writing the current tags back is not.
      * @param {string|Array} value - Tags as semicolon-separated string or array.
      */
     set value(value) {
+        const before = this.value;
+
         // array input
         if (Array.isArray(value)) {
             this._tags = value
@@ -259,6 +265,10 @@ webexpress.webui.InputTagCtrl = class extends webexpress.webui.Ctrl {
         }
 
         this.render();
+
+        if (this.value !== before) {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
+        }
     }
 };
 

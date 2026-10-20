@@ -389,6 +389,7 @@ webexpress.webui.DnfCtrl = class extends webexpress.webui.Ctrl {
 
         this._groups = groups;
         this.render();
+        this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
     }
 };
 

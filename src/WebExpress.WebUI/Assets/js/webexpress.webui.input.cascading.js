@@ -314,8 +314,12 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
         // clean duplicates if any, though path usually shouldn't have them
         normalized = [...new Set(normalized)];
 
+        const changed = normalized.join(";") !== this._path.join(";");
         this._path = normalized;
         this._renderLevel(0, this._tree);
+        if (changed) {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: [...this._path] });
+        }
     }
 };
 

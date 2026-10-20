@@ -24,6 +24,12 @@ namespace WebExpress.WebUI.WebControl
         public byte[] Data { get; set; }
 
         /// <summary>
+        /// Gets a value indicating whether no file was given. The name decides, because a field
+        /// that keeps a stored file sends its name or uri without new data.
+        /// </summary>
+        public bool IsEmpty => string.IsNullOrWhiteSpace(Name);
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public ControlFormInputValueFile()

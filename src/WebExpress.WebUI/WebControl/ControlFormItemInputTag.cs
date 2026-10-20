@@ -95,6 +95,7 @@ namespace WebExpress.WebUI.WebControl
                 Role = role
             }
                 .AddUserAttribute("name", name)
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext.Request?.Culture, placeholder))
                 .AddUserAttribute("data-value", value)
                 .AddUserAttribute("data-color-css", color?.ToClass())

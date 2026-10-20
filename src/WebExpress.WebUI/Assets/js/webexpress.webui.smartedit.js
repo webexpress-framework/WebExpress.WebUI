@@ -4,7 +4,14 @@
  * When the pen is clicked, an editor form is displayed to change the value.
  * The following events are triggered:
  * - webexpress.webui.Event.START_INLINE_EDIT_EVENT: triggered when editing starts.
+ * - webexpress.webui.Event.BEFORE_SAVE_EVENT: triggered before a value is saved; cancelable,
+ *   a cancelled save leaves the edit open.
  * - webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT: triggered when a value is saved.
+ * - webexpress.webui.Event.TASK_START_EVENT, TASK_FINISH_EVENT: triggered around the request
+ *   to the form action.
+ * - webexpress.webui.Event.SAVED_EVENT: triggered when a saved value was taken over.
+ * - webexpress.webui.Event.DATA_ERROR_EVENT: triggered when the form action refused the value.
+ * - webexpress.webui.Event.CHANGE_VALUE_EVENT: triggered when the value changed.
  * - webexpress.webui.Event.END_INLINE_EDIT_EVENT: triggered when editing is finished (regardless if saved or canceled).
  *
  * Persistence is optional: with data-form-action the new value is submitted as
@@ -16,8 +23,9 @@
  * settles - it is taken over when the promise resolves to anything but false and set
  * back to the previous value when it resolves to false or rejects - and detail.confirm()
  * or detail.revert() decide it at once. Without any of the three the value is taken
- * over as soon as it is saved. A value that was set back leaves the cell ready to be
- * edited again.
+ * over as soon as it is saved, unless the form action failed: a value the server did not
+ * take is set back and reported, so the cell never shows a value as saved that is not.
+ * A value that was set back leaves the cell ready to be edited again.
  */
 webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
     _activeEdit = null;
@@ -240,6 +248,16 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             // every composite editor, which only adopts typed input on its own events
             const newValue = this._getEditorValue(element);
 
+            // an invalid value is not saved; the edit stays open with the field marked
+            if (this._editor && !webexpress.webui.Field.report(this._editor)) {
+                return;
+            }
+
+            const before = this._dispatch(webexpress.webui.Event.BEFORE_SAVE_EVENT, { value: newValue }, { cancelable: true });
+            if (before.defaultPrevented) {
+                return;
+            }
+
             // without a configured action the host owns the persistence and
             // listens for the save event; posting to the current document
             // instead would be a request nobody asked for
@@ -257,10 +275,12 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             this._prepareValueField(form, valueField, newValue);
             this._showEditSpinner(element);
 
+            this._dispatch(webexpress.webui.Event.TASK_START_EVENT, { name: "saving" });
             const result = await webexpress.webui.Transport.request(this._formAction, {
                 method: this._formMethod ?? "PUT",
                 body: new FormData(form)
             });
+            this._dispatch(webexpress.webui.Event.TASK_FINISH_EVENT, { name: "saving" });
 
             // the save event carries the status the application checks: the server's own
             // when it answered, 500 with the reason when nothing did - which is what the
@@ -279,9 +299,8 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
                 console.error("failed to edit", result.error.message);
             }
 
-            // unless the application decides, the new value is taken over whatever the
-            // outcome; the application checks the status
-            await this._settleSave(element, newValue, decision);
+            // unless the application decides, the outcome of the request does
+            await this._settleSave(element, newValue, decision ?? this._decideByResult(result, newValue));
         });
 
         btnCancel.addEventListener("click", (e) => {
@@ -325,6 +344,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
      * @param {string|any} value new or restored value
      */
     _finishEditing(save, element, value) {
+        const changed = save && JSON.stringify(value ?? null) !== JSON.stringify(this._previousValue ?? null);
         this._detachOutsideClick();
 
         element.innerHTML = "";
@@ -361,6 +381,37 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
         // edit modus beenden und cache löschen
         this._activeEdit = null;
         this._previousValue = null;
+
+        if (changed) {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: value });
+        }
+        if (save) {
+            this._dispatch(webexpress.webui.Event.SAVED_EVENT, { value: value });
+        }
+    }
+
+    /**
+     * Decides a save the host left open by the outcome of the request: a value the server took
+     * is taken over, one it did not take is set back and reported, an abort is set back
+     * silently.
+     * @param {object} result - The normalized result of the request.
+     * @param {*} value - The saved value.
+     * @returns {Promise<boolean>|null} The decision, or null to take the value over.
+     */
+    _decideByResult(result, value) {
+        if (result.ok) {
+            return null;
+        }
+        if (result.error.kind !== "abort") {
+            this._dispatch(webexpress.webui.Event.DATA_ERROR_EVENT, {
+                action: "save",
+                error: Object.assign({}, result.error, {
+                    message: result.error.message || this._i18n("webexpress.webui:field.save.failed", "The changes could not be saved.")
+                }),
+                value: value
+            });
+        }
+        return Promise.resolve(false);
     }
 
     /**
@@ -698,9 +749,13 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Sets the value on the underlying editor and updates the read-only view if not editing.
+     * The editor sits outside the document while it is not shown, so its own announcement
+     * would reach nobody; a change is announced on the host instead.
      * @param {string|string[]|any} value new value
      */
     set value(value) {
+        const before = JSON.stringify(this.value ?? null);
+
         if (this._editor) {
             const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
             if (ctrl && typeof ctrl.value !== "undefined") {
@@ -722,6 +777,10 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             this._element.innerHTML = "";
             const displayValue = this._getView(value);
             this._element.appendChild(displayValue);
+        }
+
+        if (JSON.stringify(this.value ?? null) !== before) {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
         }
     }
 };

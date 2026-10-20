@@ -214,6 +214,15 @@ webexpress.webui.InputTrafficLightCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Tells whether no lamp is lit; the field then submits nothing, which the required rule
+     * refuses on the server as well.
+     * @returns {boolean} True when the light is off.
+     */
+    get empty() {
+        return this._value === "off";
+    }
+
+    /**
      * Set the current state and notify listeners when it actually changed.
      * @param {string|null|undefined} v New state.
      */

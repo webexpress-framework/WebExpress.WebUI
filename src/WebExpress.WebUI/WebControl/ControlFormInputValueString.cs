@@ -13,6 +13,11 @@ namespace WebExpress.WebUI.WebControl
         public string Text { get; set; }
 
         /// <summary>
+        /// Gets a value indicating whether the text is missing or blank.
+        /// </summary>
+        public bool IsEmpty => string.IsNullOrWhiteSpace(Text);
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public ControlFormInputValueString()

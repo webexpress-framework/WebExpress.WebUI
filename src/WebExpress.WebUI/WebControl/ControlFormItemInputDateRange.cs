@@ -63,6 +63,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-webui-input-date"
             }
                 .AddUserAttribute("name", name)
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext, placeholder))
                 .AddUserAttribute("data-value", range)
                 .AddUserAttribute("data-range", "true")

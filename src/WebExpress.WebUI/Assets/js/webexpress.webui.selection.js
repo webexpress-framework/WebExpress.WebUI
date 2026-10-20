@@ -202,6 +202,7 @@ webexpress.webui.SelectionCtrl = class extends webexpress.webui.Ctrl {
         if (oldSerialized !== newSerialized) {
             this._values = normalized;
             this.render();
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
         }
     }
 };

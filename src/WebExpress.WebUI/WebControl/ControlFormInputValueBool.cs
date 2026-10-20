@@ -13,6 +13,12 @@ namespace WebExpress.WebUI.WebControl
         public bool Checked { get; set; }
 
         /// <summary>
+        /// Gets a value indicating whether the box is unchecked; a required box has to be
+        /// checked, as the browser treats a required checkbox.
+        /// </summary>
+        public bool IsEmpty => !Checked;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public ControlFormInputValueBool()

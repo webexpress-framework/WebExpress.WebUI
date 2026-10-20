@@ -421,8 +421,13 @@ webexpress.webui.ContentCtrl = class extends webexpress.webui.Ctrl {
      * @param {string} value - The raw content.
      */
     set value(value) {
-        this._value = value == null ? "" : String(value);
+        const next = value == null ? "" : String(value);
+        const changed = next !== this._value;
+        this._value = next;
         this.render();
+        if (changed) {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
+        }
     }
 
     /**

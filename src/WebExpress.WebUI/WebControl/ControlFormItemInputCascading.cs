@@ -110,6 +110,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder?.Invoke(renderContext)))
                 .AddUserAttribute("data-value", string.Join(";", value ?? []))
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));

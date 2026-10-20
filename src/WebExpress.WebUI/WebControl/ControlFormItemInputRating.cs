@@ -73,6 +73,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
                 .AddUserAttribute("data-stars", maxRating != uint.MaxValue ? maxRating.ToString() : null);
 
             if (!string.IsNullOrWhiteSpace(value))
@@ -83,6 +84,19 @@ namespace WebExpress.WebUI.WebControl
             }
 
             return html;
+        }
+
+        /// <summary>
+        /// Determines whether no rating was given. The stars count from one, so a rating of zero is
+        /// what the control sends when no star is chosen; the largest number stands for no rating
+        /// in a value the page sets itself, as the render reads it.
+        /// </summary>
+        /// <param name="value">The submitted value.</param>
+        /// <param name="renderContext">The context in which the inputs are validated.</param>
+        /// <returns>True when no star is chosen.</returns>
+        protected override bool IsEmpty(ControlFormInputValueUInt value, IRenderControlFormContext renderContext)
+        {
+            return value is null || value.Number == 0 || value.Number == uint.MaxValue;
         }
 
         /// <summary>

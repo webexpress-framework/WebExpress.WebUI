@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -117,6 +118,68 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Gets the i18n key of the message the required rule reports. An input whose message
+        /// names its kind of field overrides it.
+        /// </summary>
+        protected virtual string RequiredMessage => "webexpress.webui:form.validation.required";
+
+        /// <summary>
+        /// Determines whether a submitted value counts as missing for the required rule. The
+        /// value type decides by default; an input whose empty state is a particular value - a
+        /// rating of zero, an estimate sent without points - overrides it.
+        /// </summary>
+        /// <param name="value">The submitted value; null when none was submitted.</param>
+        /// <param name="renderContext">The context in which the inputs are validated.</param>
+        /// <returns>True when nothing was entered.</returns>
+        protected virtual bool IsEmpty(TValue value, IRenderControlFormContext renderContext)
+        {
+            return value is null || ((IControlFormInputValue)value).IsEmpty;
+        }
+
+        /// <summary>
+        /// Determines whether the input is required and its submitted value is missing. An input
+        /// that adds rules of its own asks this to skip them for a value that is not there.
+        /// </summary>
+        /// <param name="renderContext">The context in which the inputs are validated.</param>
+        /// <returns>True when a required value is missing.</returns>
+        protected bool IsMissing(IRenderControlFormContext renderContext)
+        {
+            return (Required?.Invoke(renderContext) ?? false)
+                && IsEmpty(renderContext.GetValue<TValue>(this), renderContext);
+        }
+
+        /// <summary>
+        /// Builds the message of the required rule. The form lists the messages of all fields above
+        /// them, so a message names the field it is about; it is filled in here, because the form
+        /// translates the text it is given but fills in nothing.
+        /// </summary>
+        /// <param name="renderContext">The context in which the inputs are validated.</param>
+        /// <returns>The message.</returns>
+        private string RequiredText(IRenderControlFormContext renderContext)
+        {
+            var culture = renderContext.Request?.Culture;
+            var label = Label?.Invoke(renderContext);
+            var field = string.IsNullOrWhiteSpace(label)
+                ? Name?.Invoke(renderContext)
+                : I18N.Translate(culture, label)?.TrimEnd(':');
+
+            return string.Format(I18N.Translate(culture, RequiredMessage) ?? RequiredMessage, field);
+        }
+
+        /// <summary>
+        /// Returns the value of the data-required mark a custom input renders on its host. Such
+        /// an input submits through a hidden field the browser's constraint validation does not
+        /// reach, so this mark is how the client side of the control contract learns that a
+        /// value is required.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>"true" for a required input; otherwise null, which renders no attribute.</returns>
+        protected string RequiredMark(IRenderControlFormContext renderContext)
+        {
+            return (Required?.Invoke(renderContext) ?? false) ? "true" : null;
+        }
+
+        /// <summary>
         /// Initializes the form emement.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -168,6 +231,15 @@ namespace WebExpress.WebUI.WebControl
 
             if (!disabled)
             {
+                // a missing value makes every further rule moot, so the page's handlers are not
+                // asked about a value that is not there
+                if (IsMissing(renderContext))
+                {
+                    validationResults.Add(new ValidationResult(TypeInputValidity.Error, RequiredText(renderContext)));
+
+                    return validationResults;
+                }
+
                 var eventArgument = new ControlFormEventItemValidate<TValue>
                 (
                     renderContext.GetValue<TValue>(this)

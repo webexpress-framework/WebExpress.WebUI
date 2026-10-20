@@ -3,6 +3,7 @@
  *
  * The following events are triggered:
  * - webexpress.webui.Event.FILE_SELECTED_EVENT
+ * - webexpress.webui.Event.CHANGE_VALUE_EVENT
  */
 webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
 
@@ -61,6 +62,17 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
         // dom
         this._initDOM();
         this._bindEvents();
+
+        // the server renders the picture the field holds - a stored one by its address, an
+        // upload a refused save brought back whole - and the field sends it back unchanged
+        // while the user keeps it; without it an untouched field would remove the picture
+        const initial = this._element.getAttribute("data-value") || "";
+        this._element.removeAttribute("data-value");
+        if (initial) {
+            this._hidden.value = initial;
+            this._updateFromHiddenInputValue(initial);
+        }
+
         this._requestRender();
     }
 
@@ -769,12 +781,24 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Writes the current picture into the hidden field and announces it when the value moved,
+     * so a form or a bind hears of a new picture like of any other edit.
+     */
+    _syncHiddenValue() {
+        const before = this._hidden.value;
+        this._writeHiddenValue();
+        if (this._hidden.value !== before) {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this._hidden.value });
+        }
+    }
+
+    /**
      * Writes the current picture into the hidden field, so whoever serializes the form finds
      * it there. Does nothing until the user has actually picked a picture: an untouched
      * dialog keeps the value the form loaded - an existing icon uri, for instance - which is
      * what tells the server that nothing about the picture changed.
      */
-    _syncHiddenValue() {
+    _writeHiddenValue() {
         if (this._syncHandle) {
             window.clearTimeout(this._syncHandle);
             this._syncHandle = 0;
@@ -1020,7 +1044,11 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
         // uri with a copy of itself on every save.
         this._dirty = false;
         this._sourceDataUrl = null;
-        this._loadedValue = (typeof value === "string") ? value : "";
+
+        // an upload the server gives back whole carries its name in front of the picture, which
+        // an image cannot read; nothing else on the page shows it yet, so it replaces nothing
+        const upload = (typeof value === "string") ? /^file:([^;]*);(data:[\s\S]*)$/.exec(value) : null;
+        this._loadedValue = (typeof value === "string" && !upload) ? value : "";
 
         if (typeof value !== "string" || !value) {
             // reset preview
@@ -1034,7 +1062,7 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
         const img = new window.Image();
         img.onload = () => {
             this._image = img;
-            this._filename = "avatar";
+            this._filename = (upload && upload[1]) || "avatar";
             this._isPassThrough = false;
             this._initTransform();
             this._zoom.disabled = false;
@@ -1044,7 +1072,7 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
             this._image = null;
             this._requestRender();
         };
-        img.src = value;
+        img.src = upload ? upload[2] : value;
     }
 
     /**
@@ -1056,7 +1084,8 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Sets the value of the input and updates the preview accordingly.
+     * Sets the value of the input and updates the preview accordingly. A value that differs
+     * from the current one is announced; writing the current value back is not.
      * @param {string} v new value (should be a data url or file:...)
      */
     set value(v) {
@@ -1064,8 +1093,12 @@ webexpress.webui.InputAvatarCtrl = class extends webexpress.webui.Ctrl {
             v = "";
         }
         if (this._hidden) {
+            const changed = this._hidden.value !== v;
             this._hidden.value = v;
             this._updateFromHiddenInputValue(v);
+            if (changed) {
+                this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: v });
+            }
         }
     }
 };

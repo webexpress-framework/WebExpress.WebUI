@@ -213,10 +213,42 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Gets the i18n key of the message the required rule reports.
+        /// </summary>
+        protected override string RequiredMessage => "webexpress.webui:form.inputtextbox.validation.required";
+
+        /// <summary>
+        /// Determines whether the text is missing. A rich text counts by what it shows rather than
+        /// by the state it is stored in, which is never blank; a state that cannot be read is no
+        /// missing value but an invalid one, which the validation reports on its own.
+        /// </summary>
+        /// <param name="value">The submitted value.</param>
+        /// <param name="renderContext">The context in which the inputs are validated.</param>
+        /// <returns>True when no text was entered.</returns>
+        protected override bool IsEmpty(ControlFormInputValueString value, IRenderControlFormContext renderContext)
+        {
+            var text = value?.Text;
+
+            if ((Format?.Invoke(renderContext) ?? TypeEditTextFormat.Default) == TypeEditTextFormat.Wysiwyg && EditorState.IsState(text))
+            {
+                try
+                {
+                    text = EditorState.ValidationText(text);
+                }
+                catch (System.Text.Json.JsonException)
+                {
+                    return false;
+                }
+            }
+
+            return string.IsNullOrWhiteSpace(text);
+        }
+
+        /// <summary>
         /// Validates the input elements within a form for correctness of the data.
         /// </summary>
         /// <param name="renderContext">The context in which the inputs are validated, containing form data and state.</param>
-        /// <returns>A collection of <see cref="ValidationResult"/> objects representing the validation 
+        /// <returns>A collection of <see cref="ValidationResult"/> objects representing the validation
         /// results for each input element. Each result indicates whether the input is valid or contains errors.
         /// </returns>
         public override IEnumerable<ValidationResult> Validate(IRenderControlFormContext renderContext)
@@ -224,13 +256,18 @@ namespace WebExpress.WebUI.WebControl
             var validationResults = new List<ValidationResult>(base.Validate(renderContext));
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
             var disabled = Disabled?.Invoke(renderContext) ?? false;
-            var required = Required?.Invoke(renderContext) ?? false;
             var minLength = MinLength?.Invoke(renderContext);
             var maxLength = MaxLength?.Invoke(renderContext);
 
             if (disabled)
             {
                 return [];
+            }
+
+            // the base has reported the missing value already
+            if (IsMissing(renderContext))
+            {
+                return validationResults;
             }
 
             if ((Format?.Invoke(renderContext) ?? TypeEditTextFormat.Default) == TypeEditTextFormat.Wysiwyg && EditorState.IsState(value))
@@ -244,13 +281,6 @@ namespace WebExpress.WebUI.WebControl
                     validationResults.Add(new ValidationResult(TypeInputValidity.Error, "webexpress.webui:editor.state.invalid"));
                     return validationResults;
                 }
-            }
-
-            if (required && string.IsNullOrWhiteSpace(value))
-            {
-                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, "webexpress.webui:form.inputtextbox.validation.required"));
-
-                return validationResults;
             }
 
             if (value is not null && minLength > value.Length)

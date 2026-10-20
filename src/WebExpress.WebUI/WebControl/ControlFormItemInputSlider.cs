@@ -140,6 +140,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
                 .AddUserAttribute("data-min", min.ToString(CultureInfo.InvariantCulture))
                 .AddUserAttribute("data-max", max.ToString(CultureInfo.InvariantCulture))
                 .AddUserAttribute("data-step", step.ToString(CultureInfo.InvariantCulture))

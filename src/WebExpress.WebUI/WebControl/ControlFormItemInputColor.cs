@@ -59,7 +59,8 @@ namespace WebExpress.WebUI.WebControl
                 Class = Css.Concatenate("wx-webui-input-color", GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
             }
-              .AddUserAttribute("data-value", value ?? color);
+              .AddUserAttribute("data-value", value ?? color)
+              .AddUserAttribute("data-required", RequiredMark(renderContext));
 
             return html;
         }

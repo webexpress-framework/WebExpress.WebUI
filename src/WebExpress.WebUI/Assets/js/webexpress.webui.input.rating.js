@@ -291,6 +291,15 @@ webexpress.webui.InputRatingCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Tells whether no star is chosen. The stars count from one, so zero is a value only for the
+     * number, not for the required rule.
+     * @returns {boolean} True for a rating of zero.
+     */
+    get empty() {
+        return this._value === 0;
+    }
+
+    /**
      * Set value (integer 0..total).
      * @param {number|string|null|undefined} v New value.
      */

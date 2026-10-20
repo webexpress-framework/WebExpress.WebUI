@@ -13,6 +13,7 @@
  *   var(--wx-highlight) defined in webexpress.webui.css.
  *
  * The following events are triggered:
+ * - webexpress.webui.Event.CHANGE_VALUE_EVENT
  * - webexpress.webui.Event.CHANGE_FILTER_EVENT
  */
 webexpress.webui.SearchContentCtrl = class extends webexpress.webui.Ctrl {
@@ -358,6 +359,7 @@ webexpress.webui.SearchContentCtrl = class extends webexpress.webui.Ctrl {
             if (this._searchInput && this._searchInput.value !== v) {
                 this._searchInput.value = v;
             }
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: v });
             // dispatch change filter event for integration
             this._dispatch(webexpress.webui.Event.CHANGE_FILTER_EVENT, { value: v });
         }

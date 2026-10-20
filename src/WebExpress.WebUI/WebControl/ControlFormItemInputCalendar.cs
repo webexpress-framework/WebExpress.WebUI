@@ -78,6 +78,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-webui-input-calendar"
             }
             .AddUserAttribute("name", name)
+            .AddUserAttribute("data-required", RequiredMark(renderContext))
             .AddUserAttribute("placeholder", I18N.Translate(renderContext, placeholder))
             .AddUserAttribute("data-value", value)
             .AddUserAttribute("data-format", !string.IsNullOrWhiteSpace(format)

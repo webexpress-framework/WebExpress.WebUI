@@ -51,7 +51,9 @@ function loadContent(options = {}) {
                 Ctrl: class {
                     constructor(element) { this._element = element; }
                     destroy() { }
+                    _dispatch() { }
                 },
+                Event: { CHANGE_VALUE_EVENT: "webexpress.webui.change.value" },
                 Controller: {
                     registerClass(selector, cls) { this.classRegistry.set(selector, cls); },
                     classRegistry: new Map(),

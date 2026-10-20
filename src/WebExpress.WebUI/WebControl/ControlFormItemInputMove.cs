@@ -124,6 +124,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 
             if (!string.IsNullOrEmpty(SelectedHeader?.Invoke(renderContext)))

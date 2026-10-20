@@ -110,6 +110,7 @@ webexpress.webui.TrafficLightCtrl = class extends webexpress.webui.Ctrl {
         if (next !== this._value) {
             this._value = next;
             this._applyVisualState();
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
         }
     }
 

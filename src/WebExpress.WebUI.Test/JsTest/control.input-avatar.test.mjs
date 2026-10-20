@@ -94,3 +94,39 @@ test("a pass-through image without a zoom range still reports a valid position",
     assert.equal(ctrl._minScale, ctrl._maxScale);
     assert.equal(zoom.value, "0");
 });
+
+/**
+ * Builds an avatar input the server rendered with a value, recording the sources the
+ * control hands to the images it loads; the stub has no image of its own.
+ * @param {string} value - The data-value the server rendered.
+ * @returns {object} The runtime, the controller and the recorded image sources.
+ */
+function renderedAvatar(value) {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.input.avatar.js"] });
+    const sources = [];
+    rt.sandbox.window.Image = class { set src(source) { sources.push(source); } };
+    const el = rt.createElement("div");
+    el.classList.add("wx-webui-input-avatar");
+    el.setAttribute("name", "avatar");
+    el.setAttribute("data-value", value);
+    rt.document.body.appendChild(el);
+    rt.wx.Controller.createInstances(el);
+    return { rt, ctrl: rt.wx.Controller.getInstanceByElement(el), sources };
+}
+
+test("a stored picture the server rendered is kept and sent back unchanged", () => {
+    const { rt, ctrl, sources } = renderedAvatar("/assets/avatar.png");
+
+    assert.equal(ctrl.value, "/assets/avatar.png", "an untouched field must not remove the picture");
+    assert.deepEqual(sources, ["/assets/avatar.png"]);
+    assert.equal(rt.wx.Field.isDirty(ctrl), false);
+});
+
+test("an upload the server gave back whole is shown from its data and sent back whole", () => {
+    const upload = "file:me;data:image/png;base64,iVBORw0KGgo=";
+    const { ctrl, sources } = renderedAvatar(upload);
+
+    assert.equal(ctrl.value, upload, "the name and the picture travel together");
+    assert.deepEqual(sources, ["data:image/png;base64,iVBORw0KGgo="], "the image reads the data, not the name");
+    assert.equal(ctrl._loadedValue, "", "no picture on the page stands for an upload not stored yet");
+});

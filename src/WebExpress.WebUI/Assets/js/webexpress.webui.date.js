@@ -136,6 +136,7 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
         if (!this._equals(normalized, this._value)) {
             this._value = normalized;
             this.render();
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
         }
     }
 

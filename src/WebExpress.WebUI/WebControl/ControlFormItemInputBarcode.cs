@@ -108,6 +108,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
                 // an unset form value arrives as an empty string rather than as
                 // null, so a null check alone would swallow the initial value
                 .AddUserAttribute("data-value", !string.IsNullOrEmpty(value) ? value : Value?.Invoke(renderContext))

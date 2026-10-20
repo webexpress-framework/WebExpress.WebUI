@@ -136,6 +136,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder?.Invoke(renderContext)))
                 .AddUserAttribute("data-max-groups", maxGroups > 0 ? maxGroups.ToString() : null)
                 .AddUserAttribute("data-value", string.IsNullOrEmpty(value) ? null : value)

@@ -19,6 +19,12 @@ namespace WebExpress.WebUI.WebControl
         public DateTime? To { get; set; }
 
         /// <summary>
+        /// Gets a value indicating whether neither end of the range was given. A range open at
+        /// one end still holds a value.
+        /// </summary>
+        public bool IsEmpty => !From.HasValue && !To.HasValue;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public ControlFormInputValueDateRange()
