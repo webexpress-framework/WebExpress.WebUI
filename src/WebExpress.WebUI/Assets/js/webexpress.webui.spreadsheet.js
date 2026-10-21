@@ -852,7 +852,7 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
         if (!Array.isArray(values)) throw new TypeError("Values must be an array of rows.");
         const rows = values.length, cols = Math.max(0, ...values.map(r => (Array.isArray(r) ? r.length : 0)));
         return this.batch(() => {
-            this._ensureSize(sheet, range.r1 + rows, range.c1 + cols);
+            if (!this._ensureSize(sheet, range.r1 + rows, range.c1 + cols)) return;
             const cells = [];
             values.forEach((row, r) => (Array.isArray(row) ? row : []).forEach((value, c) => {
                 cells.push({ row: range.r1 + r, col: range.c1 + c, cell: this._cellFromInput(sheet, range.r1 + r, range.c1 + c, value, options) });
@@ -1399,11 +1399,15 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
      * @param {webexpress.webui.SpreadsheetSheet} sheet - The sheet.
      * @param {number} rows - The rows needed.
      * @param {number} cols - The columns needed.
+     * @returns {boolean} True if the requested dimensions fit and any required growth succeeded.
      */
     _ensureSize(sheet, rows, cols) {
         const Address = webexpress.webui.SpreadsheetAddress;
-        if (rows > sheet.rowCount) this._commit({ type: "insertRows", sheet: sheet.id, index: sheet.rowCount, count: Math.min(Address.MAX_ROWS, rows) - sheet.rowCount, adjust: false });
-        if (cols > sheet.colCount) this._commit({ type: "insertCols", sheet: sheet.id, index: sheet.colCount, count: Math.min(Address.MAX_COLS, cols) - sheet.colCount, adjust: false });
+        // both axes must fit before growth or a destructive move starts
+        if (rows > Address.MAX_ROWS || cols > Address.MAX_COLS) return false;
+        if (rows > sheet.rowCount && !this._commit({ type: "insertRows", sheet: sheet.id, index: sheet.rowCount, count: rows - sheet.rowCount, adjust: false })) return false;
+        if (cols > sheet.colCount && !this._commit({ type: "insertCols", sheet: sheet.id, index: sheet.colCount, count: cols - sheet.colCount, adjust: false })) return false;
+        return true;
     }
 
     /**
@@ -1495,7 +1499,7 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
         const cells = [];
         const lines = vertical ? [src.c1, src.c2] : [src.r1, src.r2];
         return this.batch(() => {
-            this._ensureSize(sheet, dst.r2 + 1, dst.c2 + 1);
+            if (!this._ensureSize(sheet, dst.r2 + 1, dst.c2 + 1)) return;
             for (let line = lines[0]; line <= lines[1]; line++) {
                 const seq = [];
                 const length = vertical ? src.r2 - src.r1 + 1 : src.c2 - src.c1 + 1;
@@ -1578,7 +1582,7 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
         if (!dr && !dc && sheet === targetSheet) return false;
         const Address = webexpress.webui.SpreadsheetAddress;
         return this.batch(() => {
-            this._ensureSize(targetSheet, range.r2 + dr + 1, range.c2 + dc + 1);
+            if (!this._ensureSize(targetSheet, range.r2 + dr + 1, range.c2 + dc + 1)) return;
             const moved = [];
             this._forEachStored(sheet, range, (cell, row, col) => moved.push({ row, col, cell }));
             const clear = moved.map(({ row, col }) => ({ row, col, cell: null }));
@@ -1590,23 +1594,40 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
             this._commit({ type: "set", sheet: targetSheet.id, cells: moved.map(({ row, col, cell }) => ({ row: row + dr, col: col + dc, cell })) });
             // references into the moved block are re-aimed, everywhere in the workbook
             const lower = sheet.name.toLowerCase();
+            /**
+             * Keeps cell formulas and named ranges attached to the same moved cells.
+             * @param {object} ref - The reference with its original home sheet.
+             * @returns {object} The original reference or its destination coordinates.
+             */
+            const moveReference = ref => {
+                if ((ref.sheet ?? ref.home ?? "").toLowerCase() !== lower || ref.kind === "cols" || ref.kind === "rows") return ref;
+                if (!(ref.r1 >= range.r1 && ref.r2 <= range.r2 && ref.c1 >= range.c1 && ref.c2 <= range.c2)) return ref;
+                return { ...ref, r1: ref.r1 + dr, r2: ref.r2 + dr, c1: ref.c1 + dc, c2: ref.c2 + dc,
+                    sheet: targetSheet !== sheet || ref.sheet ? targetSheet.name : ref.sheet };
+            };
             const ops = [];
             for (const other of this._model.sheets) {
                 const rewritten = [];
                 other.forEachCell((cell, row, col) => {
                     if (!cell.f) return;
-                    const text = webexpress.webui.SpreadsheetFormula.rewrite(cell.f, other.name, ref => {
-                        if ((ref.sheet ?? ref.home ?? "").toLowerCase() !== lower || ref.kind === "cols" || ref.kind === "rows") return ref;
-                        if (!(ref.r1 >= range.r1 && ref.r2 <= range.r2 && ref.c1 >= range.c1 && ref.c2 <= range.c2)) return ref;
-                        const next = { ...ref, r1: ref.r1 + dr, r2: ref.r2 + dr, c1: ref.c1 + dc, c2: ref.c2 + dc };
-                        if (targetSheet !== sheet || ref.sheet) next.sheet = targetSheet === other && !ref.sheet ? null : targetSheet.name;
-                        return next;
+                    const home = other === targetSheet && Address.contains(destination, row, col) ? sheet.name : other.name;
+                    const text = webexpress.webui.SpreadsheetFormula.rewrite(cell.f, home, ref => {
+                        const next = moveReference(ref);
+                        // unqualified references outside the block still belong to the source sheet
+                        return home !== other.name && !next.sheet ? { ...next, sheet: home } : next;
                     });
                     if (text !== cell.f) rewritten.push({ row, col, cell: { ...cell, f: text } });
                 });
                 if (rewritten.length) ops.push({ type: "set", sheet: other.id, cells: rewritten });
             }
             ops.forEach(op => this._commit(op));
+            const names = {};
+            let namesChanged = false;
+            for (const [name, text] of Object.entries(this._model.names)) {
+                names[name] = webexpress.webui.SpreadsheetFormula.rewrite("=" + text, null, moveReference).slice(1);
+                namesChanged ||= names[name] !== text;
+            }
+            if (namesChanged) this._commit({ type: "names", value: names });
             const merges = sheet.merges.filter(m => Address.intersects(m, range));
             if (merges.length) {
                 this._commit({ type: "merges", sheet: sheet.id, merges: sheet.merges.filter(m => !Address.intersects(m, range)) });
@@ -1891,24 +1912,26 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
         const r2 = huge ? Math.min(range.r2, Math.max(range.r1, used ? used.r2 : range.r1)) : range.r2;
         const c2 = huge ? Math.min(range.c2, Math.max(range.c1, used ? used.c2 : range.c1)) : range.c2;
         const Model = webexpress.webui.SpreadsheetModel, Format = webexpress.webui.SpreadsheetFormat;
-        const cells = [], shown = [], text = [];
+        const cells = [], shown = [], text = [], values = [];
         const styles = {};
         for (let r = range.r1; r <= r2; r++) {
-            const row = [], shownRow = [], textRow = [];
+            const row = [], shownRow = [], textRow = [], valueRow = [];
             for (let c = range.c1; c <= c2; c++) {
                 const cell = sheet.getCell(r, c);
                 const style = Model.effectiveStyle(this._model, sheet, r, c);
-                const display = Format.display(this._engine.cellValue(sheet, r, c), cell, style, this.locale);
+                const value = this._engine.cellValue(sheet, r, c);
+                const display = Format.display(value, cell, style, this.locale);
                 if (cell?.st && this._model.styles[cell.st]) styles[cell.st] = this._model.styles[cell.st];
                 row.push(cell ? Model._copy(cell) : null);
                 shownRow.push({ text: display.text, style, align: display.align });
                 textRow.push(display.text);
+                valueRow.push(Model._copy(this._publicValue(value)));
             }
-            cells.push(row); shown.push(shownRow); text.push(textRow);
+            cells.push(row); shown.push(shownRow); text.push(textRow); values.push(valueRow);
         }
         const merges = sheet.merges.filter(m => m.r1 >= range.r1 && m.c1 >= range.c1 && m.r2 <= r2 && m.c2 <= c2)
             .map(m => ({ r1: m.r1 - range.r1, c1: m.c1 - range.c1, r2: m.r2 - range.r1, c2: m.c2 - range.c1 }));
-        const payload = { v: 1, id: Math.random().toString(36).slice(2), cut, source: { sheet: sheet.name, sheetId: sheet.id, row: range.r1, col: range.c1 }, rows: cells.length, cols: cells[0]?.length ?? 0, cells, merges, styles };
+        const payload = { v: 1, id: Math.random().toString(36).slice(2), cut, source: { sheet: sheet.name, sheetId: sheet.id, row: range.r1, col: range.c1 }, rows: cells.length, cols: cells[0]?.length ?? 0, cells, merges, styles, values };
         const Clipboard = webexpress.webui.SpreadsheetClipboard;
         return { text: Clipboard.toTSV(text), html: Clipboard.toHTML(payload, shown), json: JSON.stringify(payload), payload };
     }
@@ -1988,7 +2011,7 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
             return this.moveRange({ ...cut.range, sheet: cut.sheet }, { row: range.r1, col: range.c1, sheet: sheet.id });
         }
         let block;
-        if (payload?.cells) block = this._blockFromPayload(payload, sheet, range);
+        if (payload?.cells) block = this._blockFromPayload(payload);
         else if (table?.rows?.length) block = this._blockFromTable(table.rows, range);
         else if (formats.text !== undefined && formats.text !== null && formats.text !== "") block = this._blockFromText(formats.text);
         if (!block || !block.cells.length) return false;
@@ -1996,7 +2019,7 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
         const selHeight = range.r2 - range.r1 + 1, selWidth = range.c2 - range.c1 + 1;
         const tilesDown = selHeight % height === 0 ? selHeight / height : 1, tilesRight = selWidth % width === 0 ? selWidth / width : 1;
         return this.batch(() => {
-            this._ensureSize(sheet, range.r1 + height * tilesDown, range.c1 + width * tilesRight);
+            if (!this._ensureSize(sheet, range.r1 + height * tilesDown, range.c1 + width * tilesRight)) return;
             const cells = [], merges = [];
             for (let tr = 0; tr < tilesDown; tr++) for (let tc = 0; tc < tilesRight; tc++) {
                 block.cells.forEach((row, r) => row.forEach((cell, c) => {
@@ -2039,16 +2062,13 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Turns the own clipboard payload into a block of cells.
      * @param {object} payload - The payload.
-     * @param {webexpress.webui.SpreadsheetSheet} sheet - The target sheet.
-     * @param {object} range - The target range.
      * @returns {object} The block { cells, merges, styles, origin, values }.
      */
-    _blockFromPayload(payload, sheet, range) {
+    _blockFromPayload(payload) {
         const Model = webexpress.webui.SpreadsheetModel;
         const cells = (payload.cells ?? []).slice(0, 100000).map(row => (Array.isArray(row) ? row.slice(0, 16384) : []).map(cell => Model.normalizeCell(cell)));
-        const source = this._model.sheet(payload.source?.sheetId);
-        // pasting values takes the results the source shows, which only this workbook can compute
-        const values = source ? cells.map((row, r) => row.map((cell, c) => (cell?.f ? this._publicValue(this._engine.cellValue(source, payload.source.row + r, payload.source.col + c)) : cell?.v))) : null;
+        // the copy-time snapshot remains valid after source edits and in other workbooks
+        const values = cells.map((row, r) => row.map((cell, c) => Model.normalizeCell({ v: payload.values?.[r]?.[c], t: cell?.t })?.v ?? null));
         return {
             cells, values,
             merges: (payload.merges ?? []).filter(m => [m.r1, m.c1, m.r2, m.c2].every(Number.isInteger)),
@@ -2655,7 +2675,7 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
         const numeric = (r, c) => typeof this._engine.cellValue(sheet, r, c) === "number";
         if (last.r2 > last.r1 || last.c2 > last.c1) {
             return this.batch(() => {
-                this._ensureSize(sheet, last.r2 + 2, last.c2 + 1);
+                if (!this._ensureSize(sheet, last.r2 + 2, last.c2 + 1)) return;
                 for (let c = last.c1; c <= last.c2; c++) {
                     this._commit({ type: "set", sheet: sheet.id, cells: [{ row: last.r2 + 1, col: c, cell: { f: "=" + name + "(" + Address.rangeName({ r1: last.r1, c1: c, r2: last.r2, c2: c }) + ")" } }] });
                 }

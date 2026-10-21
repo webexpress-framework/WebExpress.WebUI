@@ -26,6 +26,17 @@ function roundTrip(model, op) {
     return again;
 }
 
+test("a refused cell operation leaves every earlier entry unchanged", () => {
+    const model = Model.fromJSON({ sheets: [{ name: "S", rowCount: 2, colCount: 2, data: [[10, "=A1*2"]] }] });
+    const before = JSON.stringify(model.toJSON());
+
+    assert.throws(() => model.apply({ type: "set", sheet: model.sheets[0].id, cells: [
+        { row: 0, col: 0, cell: { v: 99 } },
+        { row: 2, col: 0, cell: { v: 1 } }
+    ] }), { name: "RangeError" });
+    assert.equal(JSON.stringify(model.toJSON()), before);
+});
+
 test("column names and indices convert both ways", () => {
     for (const [index, name] of [[0, "A"], [25, "Z"], [26, "AA"], [701, "ZZ"], [702, "AAA"], [16383, "XFD"]]) {
         assert.equal(Address.columnName(index), name);

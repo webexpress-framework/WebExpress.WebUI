@@ -141,6 +141,36 @@ test("two users converge while editing cells, structure and sheets concurrently"
     assert.ok(hub.version >= 10);
 });
 
+test("a shared move preserves formulas and names through undo and redo", async () => {
+    const { a, b } = await pair({ sheets: [
+        { name: "S", rowCount: 6, colCount: 4, data: [[10, "=A1", "=Amount"]] },
+        { name: "T", rowCount: 6, colCount: 4, data: [[99]] }
+    ], names: { Amount: "S!$B$1" } });
+
+    a.moveRange("S!B1", "T!B3");
+    await settle();
+    converged(a, b);
+    assert.equal(b.getValue("T!B3"), 10);
+    assert.equal(b.getFormula("T!B3"), "=S!A1");
+    assert.equal(b.names.Amount, "T!$B$3");
+    assert.equal(b.getValue("S!C1"), 10);
+
+    a.undo();
+    await settle();
+    converged(a, b);
+    assert.equal(b.getFormula("S!B1"), "=A1");
+    assert.equal(b.names.Amount, "S!$B$1");
+    assert.equal(b.getValue("T!B3"), null);
+    assert.equal(a.canUndo(), false);
+
+    a.redo();
+    await settle();
+    converged(a, b);
+    assert.equal(b.getValue("T!B3"), 10);
+    assert.equal(b.names.Amount, "T!$B$3");
+    a.destroy(); b.destroy();
+});
+
 test("concurrent edits of one cell are decided by the order of the hub", async () => {
     const { a, b } = await pair({ sheets: [{ name: "S", rowCount: 5, colCount: 3 }] });
     a.setValue("A1", "from a");

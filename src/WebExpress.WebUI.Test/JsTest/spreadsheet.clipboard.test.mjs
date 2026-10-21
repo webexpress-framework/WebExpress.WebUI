@@ -143,6 +143,29 @@ test("paste modes take values, formats or formulas only", () => {
     assert.equal(ctrl.getStyle("B7").italic, undefined);
 });
 
+test("paste values uses the copied results across workbooks and after source edits", () => {
+    const rt = loadSpreadsheet();
+    const { ctrl: source } = createSpreadsheet(rt, { sheets: [{ name: "Source", data: [[10, "=A1*2", "=0", "=FALSE", "=1/0"]] }] });
+    const copied = source._clipboardData(source.sheet, { r1: 0, c1: 1, r2: 0, c2: 4 }, false);
+    source.setValue("A1", 11);
+
+    for (const id of [source.sheet.id, "other"]) {
+        const { ctrl: target } = createSpreadsheet(rt, { sheets: [{ id, name: "Target", data: [[99, "=A1*3"]] }] });
+        for (const formats of [{ json: copied.json }, { html: copied.html }]) {
+            assert.ok(target.pasteData(formats, { mode: "values", target: "A3" }));
+            assert.deepEqual(plain(target.getRange("A3:D3")), [[20, 0, false, "#DIV/0!"]]);
+            assert.equal(target.getFormula("A3"), null);
+            assert.ok(target.undo());
+            assert.equal(target.getValue("A3"), null);
+        }
+        target.destroy();
+    }
+
+    source.pasteData({ json: copied.json }, { mode: "values", target: "A3" });
+    assert.equal(source.getValue("A3"), 20, "the clipboard keeps the value at copy time");
+    source.destroy();
+});
+
 test("a block smaller than the selection is repeated across it", () => {
     const rt = loadSpreadsheet();
     const { ctrl } = createSpreadsheet(rt);

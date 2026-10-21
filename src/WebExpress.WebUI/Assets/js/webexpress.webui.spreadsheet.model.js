@@ -518,14 +518,17 @@ webexpress.webui.SpreadsheetModel = class {
      */
     _applySet(op, changes) {
         const sheet = this._target(op.sheet);
-        const previous = [];
-        for (const entry of op.cells ?? []) {
+        // a refused entry must not leave earlier writes outside history and change processing
+        const cells = (op.cells ?? []).map(entry => {
             const { row, col } = entry;
             if (!Number.isInteger(row) || !Number.isInteger(col) || row < 0 || col < 0 || row >= sheet.rowCount || col >= sheet.colCount) {
                 throw new RangeError("Cell outside the sheet: " + row + "," + col);
             }
+            return { row, col, cell: this.constructor.normalizeCell(entry.cell) };
+        });
+        const previous = [];
+        for (const { row, col, cell: after } of cells) {
             const before = sheet.getCell(row, col);
-            const after = this.constructor.normalizeCell(entry.cell);
             previous.push({ row, col, cell: before });
             if (this.constructor.sameCell(before, after)) continue;
             sheet.setCell(row, col, after);

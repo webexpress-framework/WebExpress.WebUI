@@ -315,6 +315,69 @@ test("filling continues numbers, dates, counted texts, names and formulas", () =
     ctrl.autoFill("L1:L2", "L1:L3");
 });
 
+test("moving formulas across sheets preserves their original references and undo", () => {
+    const { ctrl } = setup({ sheets: [
+        { name: "S", data: [[10, "=A1", "=B1"], [null, "=$B$1+A1"], [null, "=SUM(A:A)"], [null, "=SUM(1:1)"]] },
+        { name: "Target sheet", data: [[99, "=A1", null, "=S!B2"]] }
+    ] });
+    const before = ctrl.value;
+
+    assert.ok(ctrl.moveRange("S!B1:B4", "'Target sheet'!C3"));
+    assert.equal(ctrl.getFormula("C3"), "=S!A1");
+    assert.equal(ctrl.getValue("C3"), 10);
+    assert.equal(ctrl.getFormula("C4"), "='Target sheet'!$C$3+S!A1");
+    assert.equal(ctrl.getValue("C4"), 20);
+    assert.equal(ctrl.getFormula("C5"), "=SUM(S!A:A)");
+    assert.equal(ctrl.getFormula("C6"), "=SUM(S!1:1)");
+    assert.equal(ctrl.getFormula("S!C1"), "='Target sheet'!C3");
+    assert.equal(ctrl.getFormula("D1"), "='Target sheet'!C4");
+    assert.equal(ctrl.getFormula("B1"), "=A1", "existing target formulas keep their home sheet");
+    const after = ctrl.value;
+    assert.ok(ctrl.undo());
+    assert.equal(ctrl.value, before);
+    assert.equal(ctrl.canUndo(), false, "the entire move is one undo step");
+    assert.ok(ctrl.redo());
+    assert.equal(ctrl.value, after);
+    ctrl.destroy();
+});
+
+test("moving named ranges follows their cells on the same sheet and across sheets", () => {
+    for (const target of ["S!A3", "'Target sheet'!A3"]) {
+        const { ctrl } = setup({ sheets: [
+            { name: "S", data: [[10, "=Amount"], [20, "=SUM(Total)"]] },
+            { name: "Target sheet" }
+        ], names: { Amount: "S!$A$1", Total: "S!$A$1:$A$2", Other: "S!B1" } });
+        const before = ctrl.value;
+        assert.ok(ctrl.moveRange("S!A1:A2", target));
+        const prefix = target.slice(0, target.indexOf("!") + 1);
+        assert.deepEqual(plain(ctrl.names), { Amount: prefix + "$A$3", Total: prefix + "$A$3:$A$4", Other: "S!B1" });
+        assert.equal(ctrl.getValue("S!B1"), 10);
+        assert.equal(ctrl.getValue("S!B2"), 30);
+        const after = ctrl.value;
+        assert.ok(ctrl.undo());
+        assert.equal(ctrl.value, before);
+        assert.equal(ctrl.canUndo(), false);
+        assert.ok(ctrl.redo());
+        assert.equal(ctrl.value, after);
+        ctrl.destroy();
+    }
+});
+
+test("refused pastes and moves leave cells, dimensions and history unchanged", () => {
+    const { rt, host, ctrl } = setup({ sheets: [{ name: "S", rowCount: 2, colCount: 16384, cells: { A1: 10, B1: 20, XFD2: "keep" } }] });
+    const before = ctrl.value;
+    let changes = 0;
+    host.addEventListener(rt.wx.Event.CHANGE_VALUE_EVENT, () => changes++);
+
+    assert.equal(ctrl.pasteData({ text: "x\ty\nz\tw" }, { target: "XFD2" }), false);
+    assert.equal(ctrl.value, before, "a refused paste must not grow the other axis or overwrite a cell");
+    assert.equal(ctrl.moveRange("A1:B1", "XFD2"), false);
+    assert.equal(ctrl.value, before, "a refused move must not clear its source or destination");
+    assert.equal(ctrl.canUndo(), false);
+    assert.equal(changes, 0);
+    ctrl.destroy();
+});
+
 test("moving a range carries its content and re-aims references", () => {
     const { ctrl } = setup({ sheets: [{ name: "S", data: [[1, 2], ["=A1+B1"]], merges: ["A1:B1"] }, { name: "T" }] });
     ctrl.unmerge("A1");
