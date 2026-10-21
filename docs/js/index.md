@@ -53,6 +53,7 @@ This section documents the JavaScript UI controllers and components of `WebExpre
 - [Sla](sla.md)
 - [SmartEdit](smartedit.md)
 - [SmartView](smartview.md)
+- [Spreadsheet](spreadsheet.md)
 - [Split](split.md)
 - [Tab](tab.md)
 - [Table](table.md)

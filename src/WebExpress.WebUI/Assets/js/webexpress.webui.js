@@ -3492,4 +3492,42 @@ webexpress.webui.Event = class {
     static SLA_ACTION_EVENT = "webexpress.webui.sla.action";
     // Event triggered when a periodic service level agreement starts its next cycle.
     static SLA_CYCLE_EVENT = "webexpress.webui.sla.cycle";
+    // Event triggered when the selection or the active cell of a spreadsheet changes.
+    static SPREADSHEET_SELECTION_CHANGED_EVENT = "webexpress.webui.spreadsheet.selection.changed";
+    // Event triggered when cells of a spreadsheet changed: by the user, the api, undo, redo or another user.
+    static SPREADSHEET_CELL_CHANGED_EVENT = "webexpress.webui.spreadsheet.cell.changed";
+    // Event triggered when formulas of a spreadsheet were entered, changed or removed.
+    static SPREADSHEET_FORMULA_CHANGED_EVENT = "webexpress.webui.spreadsheet.formula.changed";
+    // Event triggered when a recalculation changed results of spreadsheet formulas.
+    static SPREADSHEET_CALCULATED_EVENT = "webexpress.webui.spreadsheet.calculated";
+    // Event triggered when a sheet was added to a spreadsheet.
+    static SPREADSHEET_SHEET_CREATED_EVENT = "webexpress.webui.spreadsheet.sheet.created";
+    // Event triggered when a sheet was removed from a spreadsheet.
+    static SPREADSHEET_SHEET_DELETED_EVENT = "webexpress.webui.spreadsheet.sheet.deleted";
+    // Event triggered when a sheet of a spreadsheet was renamed.
+    static SPREADSHEET_SHEET_RENAMED_EVENT = "webexpress.webui.spreadsheet.sheet.renamed";
+    // Event triggered when a sheet of a spreadsheet moved to another tab position.
+    static SPREADSHEET_SHEET_MOVED_EVENT = "webexpress.webui.spreadsheet.sheet.moved";
+    // Event triggered when another sheet of a spreadsheet became the active one.
+    static SPREADSHEET_SHEET_ACTIVATED_EVENT = "webexpress.webui.spreadsheet.sheet.activated";
+    // Event triggered when rows were inserted into a spreadsheet.
+    static SPREADSHEET_ROW_ADDED_EVENT = "webexpress.webui.spreadsheet.row.added";
+    // Event triggered when rows were deleted from a spreadsheet.
+    static SPREADSHEET_ROW_REMOVED_EVENT = "webexpress.webui.spreadsheet.row.removed";
+    // Event triggered when columns were inserted into a spreadsheet.
+    static SPREADSHEET_COLUMN_ADDED_EVENT = "webexpress.webui.spreadsheet.column.added";
+    // Event triggered when columns were deleted from a spreadsheet.
+    static SPREADSHEET_COLUMN_REMOVED_EVENT = "webexpress.webui.spreadsheet.column.removed";
+    // Event triggered when a spreadsheet undid a change.
+    static SPREADSHEET_UNDO_EVENT = "webexpress.webui.spreadsheet.undo";
+    // Event triggered when a spreadsheet redid a change.
+    static SPREADSHEET_REDO_EVENT = "webexpress.webui.spreadsheet.redo";
+    // Event triggered when editing a spreadsheet cell starts.
+    static SPREADSHEET_EDIT_STARTED_EVENT = "webexpress.webui.spreadsheet.edit.started";
+    // Event triggered when editing a spreadsheet cell ends, committed or cancelled.
+    static SPREADSHEET_EDIT_ENDED_EVENT = "webexpress.webui.spreadsheet.edit.ended";
+    // Event triggered when another user of a shared spreadsheet moved their selection.
+    static SPREADSHEET_PRESENCE_EVENT = "webexpress.webui.spreadsheet.presence";
+    // Event triggered when a change of a shared spreadsheet collided with someone else's.
+    static SPREADSHEET_CONFLICT_EVENT = "webexpress.webui.spreadsheet.conflict";
 }

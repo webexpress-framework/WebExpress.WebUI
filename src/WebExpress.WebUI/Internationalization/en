@@ -73,3 +73,5 @@ table.actions=Actions
 sidebar.label=Sidebar
 splitbutton.toggle=More options
 quickfilter.label=Filter
+form.inputspreadsheet.validation.required=The spreadsheet must not be empty!
+spreadsheet.state.invalid=The spreadsheet could not be read.

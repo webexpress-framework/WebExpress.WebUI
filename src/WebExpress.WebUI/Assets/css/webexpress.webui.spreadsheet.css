@@ -1,0 +1,885 @@
+/* spreadsheet: host, toolbar, formula bar, grid, sheet tabs and status bar */
+.wx-spreadsheet {
+    --wx-spreadsheet-grid: color-mix(in srgb, var(--wx-border-color) 70%, transparent);
+    --wx-spreadsheet-header-bg: var(--wx-tertiary-bg, var(--wx-secondary-bg));
+    --wx-spreadsheet-header-active: color-mix(in srgb, var(--wx-primary) 18%, var(--wx-spreadsheet-header-bg));
+    --wx-spreadsheet-selection: color-mix(in srgb, var(--wx-primary) 14%, transparent);
+    --wx-spreadsheet-height: 28rem;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
+    border: 1px solid var(--wx-border-color);
+    border-radius: var(--wx-border-radius, 4px);
+    min-width: 0;
+    position: relative;
+}
+
+.wx-spreadsheet.wx-spreadsheet-fill {
+    height: calc(100vh - var(--wx-spreadsheet-fill-offset, 20rem));
+}
+
+.wx-spreadsheet.wx-fullscreen-active {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    margin: 0;
+    max-width: none;
+    border-radius: 0;
+}
+
+.wx-spreadsheet-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 2px;
+    padding: 2px 6px;
+    border-bottom: 1px solid var(--wx-border-color);
+}
+
+.wx-spreadsheet-format-toolbar {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+.wx-spreadsheet-toolbar-end {
+    margin-left: auto;
+}
+
+.wx-spreadsheet-btn-group {
+    display: inline-flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.wx-spreadsheet-btn {
+    background: transparent;
+    border: none;
+    padding: 0.35em 0.45em;
+    color: var(--wx-body-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.3em;
+    font-size: 80%;
+    height: 2.2em;
+    /* the target size criterion asks for 24px, which the icon alone falls short of */
+    min-width: 24px;
+    min-height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.wx-spreadsheet-btn:hover {
+    background-color: var(--wx-secondary-bg);
+}
+
+.wx-spreadsheet-btn.active {
+    background-color: var(--wx-primary);
+    color: var(--wx-primary-contrast, #ffffff);
+}
+
+.wx-spreadsheet-btn:disabled,
+.wx-spreadsheet-btn[disabled] {
+    opacity: 0.4;
+    cursor: default;
+    pointer-events: none;
+}
+
+.wx-spreadsheet-btn:focus-visible,
+.wx-spreadsheet-tab:focus-visible {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: 1px;
+}
+
+.wx-spreadsheet-btn-text {
+    font-variant-numeric: tabular-nums;
+}
+
+.wx-spreadsheet-font .wx-spreadsheet-btn-text {
+    display: inline-block;
+    min-width: 6em;
+    text-align: left;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wx-spreadsheet-size .wx-spreadsheet-btn-text {
+    display: inline-block;
+    min-width: 2em;
+}
+
+.wx-spreadsheet-separator {
+    display: inline-block;
+    width: 1px;
+    height: 1.2em;
+    background-color: var(--wx-border-color);
+    margin: 0 0.35em;
+}
+
+.wx-spreadsheet-dropdown {
+    max-height: 22rem;
+    overflow: auto;
+}
+
+.wx-spreadsheet-dropdown .dropdown-item i,
+.wx-spreadsheet-menu .dropdown-item i {
+    margin-right: 0.5em;
+}
+
+/* the menu hangs on the body, outside the control, and .dropdown-menu carries no surface of
+   its own since the bootstrap removal; without one the grid shows through */
+.wx-spreadsheet-menu {
+    z-index: 2100;
+    min-width: 14rem;
+    max-height: 80vh;
+    overflow: auto;
+    color: var(--wx-body-color);
+    background-color: var(--wx-body-bg);
+    border: 1px solid var(--wx-border-color);
+    border-radius: var(--wx-border-radius, 0.375rem);
+}
+
+/* the browser centres a popover in the viewport; the menu is placed at the pointer instead */
+.wx-spreadsheet-menu[popover] {
+    inset: auto;
+    margin: 0;
+}
+
+.wx-spreadsheet-menu .dropdown-item {
+    display: flex;
+    align-items: center;
+}
+
+.wx-spreadsheet-menu kbd {
+    margin-left: auto;
+    padding-left: 1.5em;
+    background: none;
+    color: var(--wx-secondary-color);
+    font-size: 0.8em;
+}
+
+.wx-spreadsheet-people {
+    display: inline-flex;
+    gap: 2px;
+}
+
+.wx-spreadsheet-person {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.6em;
+    height: 1.6em;
+    border-radius: 50%;
+    color: #ffffff;
+    font-size: 0.75em;
+    font-weight: bold;
+}
+
+/* formula bar */
+.wx-spreadsheet-formulabar {
+    display: flex;
+    align-items: stretch;
+    gap: 4px;
+    padding: 3px 6px;
+    border-bottom: 1px solid var(--wx-border-color);
+}
+
+.wx-spreadsheet-namebox {
+    width: 7.5em;
+    flex: 0 0 auto;
+    font: inherit;
+    font-size: 0.85em;
+    padding: 1px 4px;
+    border: 1px solid var(--wx-border-color);
+    border-radius: 3px;
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
+}
+
+.wx-spreadsheet-namebox[aria-invalid="true"] {
+    border-color: var(--wx-danger);
+}
+
+.wx-spreadsheet-fx {
+    font-style: italic;
+    font-weight: bold;
+}
+
+.wx-spreadsheet-edit-action {
+    display: none;
+}
+
+.wx-spreadsheet-formulabar.wx-spreadsheet-editing .wx-spreadsheet-edit-action {
+    display: inline-flex;
+}
+
+.wx-spreadsheet-formula {
+    flex: 1 1 auto;
+    min-width: 0;
+    resize: none;
+    font-family: var(--wx-font-monospace, monospace);
+    font-size: 0.85em;
+    line-height: 1.5;
+    padding: 1px 6px;
+    border: 1px solid var(--wx-border-color);
+    border-radius: 3px;
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
+    height: 1.9em;
+    overflow: hidden;
+}
+
+.wx-spreadsheet-formula:focus {
+    height: auto;
+    min-height: 1.9em;
+    max-height: 8em;
+    overflow: auto;
+}
+
+/* find bar */
+.wx-spreadsheet-find {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 6px;
+    border-bottom: 1px solid var(--wx-border-color);
+    font-size: 0.85em;
+}
+
+.wx-spreadsheet-find[hidden] {
+    display: none;
+}
+
+.wx-spreadsheet-find .form-control {
+    width: 12em;
+}
+
+.wx-spreadsheet-find:not(.wx-spreadsheet-find-replace) .wx-spreadsheet-find-replace-only {
+    display: none;
+}
+
+.wx-spreadsheet-find-status {
+    color: var(--wx-secondary-color);
+}
+
+/* grid */
+.wx-spreadsheet-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    position: relative;
+}
+
+.wx-spreadsheet-viewport {
+    flex: 1 1 auto;
+    height: var(--wx-spreadsheet-height);
+    min-height: 8rem;
+    overflow: auto;
+    position: relative;
+    outline: none;
+    /* panning stays native; pinching is the grid's own zoom */
+    touch-action: pan-x pan-y;
+    overscroll-behavior: contain;
+}
+
+.wx-spreadsheet-fill .wx-spreadsheet-viewport,
+.wx-fullscreen-active .wx-spreadsheet-viewport {
+    height: auto;
+}
+
+.wx-spreadsheet-fill .wx-spreadsheet-container,
+.wx-fullscreen-active .wx-spreadsheet-container {
+    flex: 1 1 0;
+}
+
+.wx-spreadsheet-viewport[data-cursor="col-resize"] {
+    cursor: col-resize;
+}
+
+.wx-spreadsheet-viewport[data-cursor="row-resize"] {
+    cursor: row-resize;
+}
+
+.wx-spreadsheet-viewport[data-cursor="unhide"] {
+    cursor: pointer;
+}
+
+.wx-spreadsheet-focused .wx-spreadsheet-active {
+    box-shadow: 0 0 0 1px var(--wx-body-bg);
+}
+
+.wx-spreadsheet-viewport:focus-visible {
+    box-shadow: inset 0 0 0 2px var(--wx-primary);
+}
+
+.wx-spreadsheet-inner {
+    position: relative;
+}
+
+.wx-spreadsheet-pane {
+    position: sticky;
+    top: 0;
+    left: 0;
+    overflow: hidden;
+    isolation: isolate;
+    font-size: calc(13px * var(--wx-spreadsheet-zoom, 1));
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.wx-spreadsheet-row {
+    position: absolute;
+    left: 0;
+    width: 0;
+}
+
+.wx-spreadsheet-row-scroll {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    z-index: 1;
+}
+
+.wx-spreadsheet-frozen-row .wx-spreadsheet-row-scroll {
+    z-index: 3;
+}
+
+.wx-spreadsheet-cell {
+    position: absolute;
+    top: 0;
+    display: flex;
+    align-items: flex-end;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 0 3px 1px;
+    box-shadow: inset -1px -1px 0 var(--wx-spreadsheet-grid);
+    line-height: 1.35;
+}
+
+.wx-spreadsheet-frozen-row .wx-spreadsheet-cell,
+.wx-spreadsheet-cell.wx-spreadsheet-frozen {
+    background-color: var(--wx-body-bg);
+}
+
+.wx-spreadsheet-cell.wx-spreadsheet-frozen {
+    z-index: 2;
+}
+
+.wx-spreadsheet-frozen-row .wx-spreadsheet-cell.wx-spreadsheet-frozen {
+    z-index: 4;
+}
+
+.wx-spreadsheet-nogrid .wx-spreadsheet-cell {
+    box-shadow: none;
+}
+
+.wx-spreadsheet-cell[data-valign="top"] {
+    align-items: flex-start;
+}
+
+.wx-spreadsheet-cell[data-valign="middle"] {
+    align-items: center;
+}
+
+.wx-spreadsheet-text {
+    width: 100%;
+    white-space: pre;
+    overflow: hidden;
+    text-overflow: clip;
+}
+
+.wx-spreadsheet-cell[data-align="right"] .wx-spreadsheet-text {
+    text-align: right;
+}
+
+.wx-spreadsheet-cell[data-align="center"] .wx-spreadsheet-text {
+    text-align: center;
+}
+
+.wx-spreadsheet-cell[data-align="justify"] .wx-spreadsheet-text {
+    text-align: justify;
+}
+
+.wx-spreadsheet-cell.wx-spreadsheet-wrap .wx-spreadsheet-text {
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+/* text running over empty neighbours, as in the common spreadsheets */
+.wx-spreadsheet-cell.wx-spreadsheet-overflow {
+    overflow: visible;
+    z-index: 1;
+}
+
+.wx-spreadsheet-cell.wx-spreadsheet-overflow .wx-spreadsheet-text {
+    width: auto;
+    flex: 0 0 auto;
+}
+
+.wx-spreadsheet-cell.wx-spreadsheet-error .wx-spreadsheet-text {
+    color: var(--wx-danger);
+}
+
+.wx-spreadsheet-cell.wx-spreadsheet-check {
+    cursor: pointer;
+}
+
+.wx-spreadsheet-cell a {
+    color: var(--wx-link-color);
+    text-decoration: underline;
+}
+
+.wx-spreadsheet-border {
+    position: absolute;
+    inset: -1px 0 0 -1px;
+    pointer-events: none;
+}
+
+.wx-spreadsheet-commented::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    right: 0;
+    border-style: solid;
+    border-width: 0 6px 6px 0;
+    border-color: transparent var(--wx-danger) transparent transparent;
+}
+
+.wx-spreadsheet-flash {
+    animation: wx-spreadsheet-flash 1.2s ease-out;
+}
+
+@keyframes wx-spreadsheet-flash {
+    from { box-shadow: inset 0 0 0 2px var(--wx-spreadsheet-user), inset -1px -1px 0 var(--wx-spreadsheet-grid); }
+    to { box-shadow: inset 0 0 0 0 transparent, inset -1px -1px 0 var(--wx-spreadsheet-grid); }
+}
+
+/* headers */
+.wx-spreadsheet-headrow {
+    top: 0;
+    height: 24px;
+    z-index: 7;
+}
+
+.wx-spreadsheet-corner,
+.wx-spreadsheet-colheader,
+.wx-spreadsheet-rowheader {
+    position: absolute;
+    top: 0;
+    background-color: var(--wx-spreadsheet-header-bg);
+    color: var(--wx-secondary-color, var(--wx-body-color));
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    box-shadow: inset -1px -1px 0 var(--wx-border-color);
+    overflow: hidden;
+}
+
+.wx-spreadsheet-corner {
+    left: 0;
+    height: 24px;
+    z-index: 2;
+    cursor: cell;
+}
+
+.wx-spreadsheet-colheader {
+    height: 24px;
+}
+
+.wx-spreadsheet-colheader.wx-spreadsheet-frozen {
+    z-index: 1;
+}
+
+.wx-spreadsheet-rowheader {
+    left: 0;
+    height: 100%;
+    z-index: 6;
+}
+
+.wx-spreadsheet-header-active {
+    background-color: var(--wx-spreadsheet-header-active);
+    color: var(--wx-body-color);
+    font-weight: bold;
+}
+
+/* hidden rows and columns take no space, so their neighbour's header marks where they are;
+   a click on the mark shows them again */
+.wx-spreadsheet-hidden-before::before,
+.wx-spreadsheet-hidden-after::after {
+    content: "";
+    position: absolute;
+    border-radius: 1px;
+    background-color: var(--wx-primary);
+}
+
+.wx-spreadsheet-colheader.wx-spreadsheet-hidden-before::before,
+.wx-spreadsheet-colheader.wx-spreadsheet-hidden-after::after {
+    top: 6px;
+    bottom: 6px;
+    width: 3px;
+}
+
+.wx-spreadsheet-colheader.wx-spreadsheet-hidden-before::before {
+    left: 1px;
+}
+
+.wx-spreadsheet-colheader.wx-spreadsheet-hidden-after::after {
+    right: 2px;
+}
+
+.wx-spreadsheet-rowheader.wx-spreadsheet-hidden-before::before,
+.wx-spreadsheet-rowheader.wx-spreadsheet-hidden-after::after {
+    left: 25%;
+    right: 25%;
+    height: 3px;
+}
+
+.wx-spreadsheet-rowheader.wx-spreadsheet-hidden-before::before {
+    top: 1px;
+}
+
+.wx-spreadsheet-rowheader.wx-spreadsheet-hidden-after::after {
+    bottom: 2px;
+}
+
+/* overlay */
+.wx-spreadsheet-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    pointer-events: none;
+}
+
+.wx-spreadsheet-overlay > div {
+    position: absolute;
+    box-sizing: border-box;
+}
+
+.wx-spreadsheet-selection {
+    background-color: var(--wx-spreadsheet-selection);
+    border: 1px solid var(--wx-primary);
+}
+
+.wx-spreadsheet-active {
+    border: 2px solid var(--wx-primary);
+}
+
+.wx-spreadsheet-fill-handle,
+.wx-spreadsheet-touch-handle {
+    pointer-events: auto;
+    background-color: var(--wx-primary);
+    border: 1px solid var(--wx-body-bg);
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.wx-spreadsheet-touch-handle {
+    border-radius: 50%;
+}
+
+.wx-spreadsheet-marquee {
+    border: 2px dashed var(--wx-primary);
+    animation: wx-spreadsheet-marquee 0.8s linear infinite;
+}
+
+@keyframes wx-spreadsheet-marquee {
+    50% { border-color: color-mix(in srgb, var(--wx-primary) 40%, transparent); }
+}
+
+.wx-spreadsheet-preview {
+    border: 2px dashed var(--wx-secondary-color, #6c757d);
+    background-color: color-mix(in srgb, var(--wx-primary) 6%, transparent);
+}
+
+.wx-spreadsheet-reference {
+    border: 2px solid;
+    background-color: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+.wx-spreadsheet-peer {
+    border: 2px solid var(--wx-spreadsheet-user);
+    background-color: color-mix(in srgb, var(--wx-spreadsheet-user) 8%, transparent);
+}
+
+.wx-spreadsheet-user-label {
+    position: absolute;
+    bottom: 100%;
+    left: -2px;
+    padding: 0 4px;
+    font-size: 10px;
+    line-height: 14px;
+    color: #ffffff;
+    white-space: nowrap;
+    border-radius: 2px 2px 2px 0;
+}
+
+/* editor, suggestions, comments */
+.wx-spreadsheet-editor {
+    position: absolute;
+    z-index: 9;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 1px 3px;
+    border: 2px solid var(--wx-primary);
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
+    font: inherit;
+    line-height: 1.35;
+    resize: none;
+    overflow: hidden;
+    outline: none;
+    white-space: pre;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.wx-spreadsheet-editor[hidden] {
+    display: none;
+}
+
+.wx-spreadsheet-editor[aria-invalid="true"] {
+    border-color: var(--wx-danger);
+}
+
+.wx-spreadsheet-suggest,
+.wx-spreadsheet-hint {
+    position: absolute;
+    z-index: 10;
+    margin: 0;
+    padding: 2px 0;
+    list-style: none;
+    min-width: 14rem;
+    max-width: 28rem;
+    background-color: var(--wx-body-bg);
+    border: 1px solid var(--wx-border-color);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    font-size: 12px;
+}
+
+.wx-spreadsheet-suggest[hidden],
+.wx-spreadsheet-hint[hidden] {
+    display: none;
+}
+
+.wx-spreadsheet-suggest li {
+    padding: 2px 8px;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.wx-spreadsheet-suggest li[aria-selected="true"] {
+    background-color: var(--wx-highlight, var(--wx-primary));
+    color: var(--wx-highlight-contrast, #ffffff);
+}
+
+.wx-spreadsheet-suggest li span {
+    color: inherit;
+    opacity: 0.75;
+}
+
+.wx-spreadsheet-hint {
+    padding: 3px 8px;
+    font-family: var(--wx-font-monospace, monospace);
+}
+
+.wx-spreadsheet-comment-editor {
+    position: absolute;
+    z-index: 11;
+    width: 16rem;
+    padding: 6px;
+    background-color: var(--wx-body-bg);
+    border: 1px solid var(--wx-border-color);
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.wx-spreadsheet-comment-editor textarea {
+    width: 100%;
+    min-height: 5em;
+    font: inherit;
+    font-size: 13px;
+}
+
+.wx-spreadsheet-comment-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 4px;
+    margin-top: 4px;
+}
+
+.wx-spreadsheet-prompt {
+    min-width: 20rem;
+    border: 1px solid var(--wx-border-color);
+    border-radius: 6px;
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
+}
+
+.wx-spreadsheet-prompt label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* sheet tabs */
+.wx-spreadsheet-tabbar {
+    display: flex;
+    align-items: stretch;
+    border-top: 1px solid var(--wx-border-color);
+    background-color: var(--wx-spreadsheet-header-bg);
+    min-height: 2em;
+}
+
+.wx-spreadsheet-tabs {
+    display: flex;
+    overflow-x: auto;
+    scrollbar-width: thin;
+    min-width: 0;
+}
+
+.wx-spreadsheet-tab {
+    border: none;
+    border-right: 1px solid var(--wx-border-color);
+    border-bottom: 3px solid var(--wx-spreadsheet-tab-color, transparent);
+    background: transparent;
+    color: var(--wx-body-color);
+    padding: 0.2em 1em;
+    font-size: 0.85em;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.wx-spreadsheet-tab[aria-selected="true"] {
+    background-color: var(--wx-body-bg);
+    font-weight: bold;
+    border-top: 2px solid var(--wx-primary);
+}
+
+.wx-spreadsheet-tab-input {
+    width: 9em;
+    font-size: 0.85em;
+}
+
+.wx-spreadsheet-zoom {
+    margin-left: auto;
+    display: flex;
+    align-items: center;
+}
+
+.wx-spreadsheet-zoom-label {
+    min-width: 4em;
+    font-variant-numeric: tabular-nums;
+}
+
+/* status bar */
+.wx-spreadsheet-status {
+    display: flex;
+    align-items: center;
+    gap: 1em;
+    padding: 2px 8px;
+    border-top: 1px solid var(--wx-border-color);
+    font-size: 0.8em;
+    min-height: 1.8em;
+}
+
+.wx-spreadsheet-aggregates {
+    margin-left: auto;
+    font-variant-numeric: tabular-nums;
+}
+
+.wx-spreadsheet-finish {
+    display: none;
+}
+
+.wx-fullscreen-active .wx-spreadsheet-finish {
+    display: inline-block;
+}
+
+.wx-spreadsheet-readonly .wx-spreadsheet-pane {
+    cursor: default;
+}
+
+.wx-spreadsheet-painting .wx-spreadsheet-pane {
+    cursor: copy;
+}
+
+/* tablets and phones: the toolbar scrolls instead of wrapping into many rows, and the larger
+   touch targets of the coarse pointer apply */
+@media (max-width: 768px) {
+    .wx-spreadsheet-toolbar {
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        scrollbar-width: thin;
+    }
+
+    .wx-spreadsheet-format-toolbar {
+        flex-wrap: nowrap;
+    }
+
+    .wx-spreadsheet-namebox {
+        width: 5em;
+    }
+
+    .wx-spreadsheet-fx {
+        display: none;
+    }
+
+    .wx-spreadsheet-font .wx-spreadsheet-btn-text {
+        min-width: 3em;
+    }
+}
+
+@media (pointer: coarse) {
+    .wx-spreadsheet-btn,
+    .wx-spreadsheet-tab {
+        min-width: 44px;
+        min-height: 44px;
+    }
+
+    .wx-spreadsheet-formula,
+    .wx-spreadsheet-namebox,
+    .wx-spreadsheet-editor {
+        /* below 16px phones zoom the page when an input takes the focus */
+        font-size: 16px;
+    }
+
+    .wx-spreadsheet-fill-handle {
+        transform: scale(1.8);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wx-spreadsheet-marquee,
+    .wx-spreadsheet-flash {
+        animation: none;
+    }
+}
+
+@media (forced-colors: active) {
+    .wx-spreadsheet-active,
+    .wx-spreadsheet-selection {
+        border-color: Highlight;
+    }
+
+    .wx-spreadsheet-cell {
+        box-shadow: inset -1px -1px 0 CanvasText;
+    }
+}
+
+@media print {
+    .wx-spreadsheet-toolbar,
+    .wx-spreadsheet-formulabar,
+    .wx-spreadsheet-tabbar,
+    .wx-spreadsheet-status {
+        display: none;
+    }
+}

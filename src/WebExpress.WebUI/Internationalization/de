@@ -74,3 +74,5 @@ table.actions=Aktionen
 sidebar.label=Seitenleiste
 splitbutton.toggle=Weitere Optionen
 quickfilter.label=Filter
+form.inputspreadsheet.validation.required=Die Tabelle darf nicht leer sein!
+spreadsheet.state.invalid=Die Tabelle konnte nicht gelesen werden.
