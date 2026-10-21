@@ -39,6 +39,12 @@ modal.close.label=Schließen
 pdfviewer.fallback=Das PDF-Dokument kann hier nicht angezeigt werden.
 pdfviewer.open=PDF öffnen
 
+video.fallback=Das Video kann hier nicht abgespielt werden.
+video.open=Video öffnen
+
+audio.fallback=Das Audio kann hier nicht abgespielt werden.
+audio.open=Audio öffnen
+
 login.title=Anmelden
 
 confirm.label=Bestätigung

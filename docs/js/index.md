@@ -62,6 +62,7 @@ This section documents the JavaScript UI controllers and components of `WebExpre
 - [Toolbar](toolbar.md)
 - [Tree](tree.md)
 - [Upload](upload.md)
+- [Video and Audio](player.md)
 - [View](view.md)
 - [Wizard](wizard.md)
 - [WQL](wql.md)

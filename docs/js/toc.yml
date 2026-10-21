@@ -120,6 +120,8 @@
   href: tree.md
 - name: Upload
   href: upload.md
+- name: Video and Audio
+  href: player.md
 - name: View
   href: view.md
 - name: Wizard

@@ -2091,6 +2091,11 @@
     mask-image: url("../icons/control-alert.svg");
 }
 
+.wx-icon-light-control-audio {
+    -webkit-mask-image: url("../icons/control-audio.svg");
+    mask-image: url("../icons/control-audio.svg");
+}
+
 .wx-icon-light-control-attribute {
     -webkit-mask-image: url("../icons/control-attribute.svg");
     mask-image: url("../icons/control-attribute.svg");
@@ -2464,6 +2469,11 @@
 .wx-icon-light-control-upload {
     -webkit-mask-image: url("../icons/control-upload.svg");
     mask-image: url("../icons/control-upload.svg");
+}
+
+.wx-icon-light-control-video {
+    -webkit-mask-image: url("../icons/control-video.svg");
+    mask-image: url("../icons/control-video.svg");
 }
 
 .wx-icon-light-control-view {
