@@ -396,6 +396,30 @@ test("a stacked bar chart piles the series on one bar per category", () => {
     assert.ok(highA.getAttribute("d").includes("Q"), "the outer segment carries the rounded end");
 });
 
+test("a stacked area rests on the series beneath it, at the summed height", () => {
+    const rt = load();
+    // the configuration of a cumulative flow: filled lines on stacked axes, filled to "origin"
+    const { ctrl } = build(rt, {}, {
+        type: "line",
+        data: { labels: ["a", "b"], datasets: [
+            { label: "Done", data: [1, 2], fill: "origin", cubicInterpolationMode: "monotone" },
+            { label: "Open", data: [3, 4], fill: "origin", cubicInterpolationMode: "monotone" }
+        ] },
+        options: { scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } } }
+    });
+    const pairs = (el) => [...el.getAttribute("d").matchAll(/(-?[\d.]+),(-?[\d.]+)/g)].map((m) => ({ x: Number(m[1]), y: Number(m[2]), text: m[0] }));
+    const [lowArea, highArea] = ctrl.chart.querySelectorAll(".wx-chart-area");
+    const [lowLine, highLine] = ctrl.chart.querySelectorAll(".wx-chart-line").map(pairs);
+    const base = pairs(lowArea).at(-1).y;
+
+    assert.ok(Math.abs((base - highLine[0].y) / (base - lowLine[0].y) - 4) < 1e-9, "a: 1 + 3 stands four times as high as 1");
+    assert.ok(Math.abs((base - highLine[1].y) / (base - lowLine[1].y) - 3) < 1e-9, "b: 2 + 4 stands three times as high as 2");
+    for (const p of lowLine) {
+        assert.ok(highArea.getAttribute("d").includes(p.text), "the upper band's lower edge is the curve beneath");
+    }
+    assert.ok(pairs(lowArea).slice(-2).every((p) => p.y === base), "the lowest band rests on the axis");
+});
+
 test("an unsupported type is reported, not thrown", () => {
     const rt = load();
     const { ctrl, host } = build(rt, SERVER_BAR);
