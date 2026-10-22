@@ -307,5 +307,64 @@ namespace WebExpress.WebUI.Test.WebSpreadsheet
             Assert.Equal(46315.5, SpreadsheetDate.ToSerial(new DateTime(2026, 10, 20, 12, 0, 0)));
             Assert.Equal(new DateTime(2026, 10, 20, 12, 0, 0), SpreadsheetDate.FromSerial(46315.5));
         }
+
+        /// <summary>
+        /// Verifies that visibility survives a server round trip alongside sizes and styles.
+        /// </summary>
+        [Fact]
+        public void HiddenAxesAndSheetsSurviveRoundTrip()
+        {
+            // arrange
+            const string input = """
+                {"version":1,"sheets":[{"name":"Budget","rowCount":10,"colCount":4,
+                "rows":{"0":{"hidden":true},"1":{"hidden":true,"size":40,"s":{"bold":true}}},
+                "cols":{"0":{"hidden":true},"1":{"hidden":true,"size":120,"s":{"italic":true}}},
+                "props":{"hidden":true,"gridlines":false,"tabColor":"red"}}]}
+                """;
+
+            // act
+            var workbook = SpreadsheetWorkbook.Parse(input);
+            var sheet = JsonNode.Parse(workbook.ToJson())["sheets"][0];
+
+            // validation
+            Assert.True((bool)sheet["rows"]["0"]["hidden"]);
+            Assert.True((bool)sheet["rows"]["1"]["hidden"]);
+            Assert.Equal(40, (int)sheet["rows"]["1"]["size"]);
+            Assert.True((bool)sheet["rows"]["1"]["s"]["bold"]);
+            Assert.True((bool)sheet["cols"]["0"]["hidden"]);
+            Assert.True((bool)sheet["cols"]["1"]["hidden"]);
+            Assert.Equal(120, (int)sheet["cols"]["1"]["size"]);
+            Assert.True((bool)sheet["cols"]["1"]["s"]["italic"]);
+            Assert.True((bool)sheet["props"]["hidden"]);
+            Assert.False((bool)sheet["props"]["gridlines"]);
+            Assert.Equal("red", (string)sheet["props"]["tabColor"]);
+        }
+
+        /// <summary>
+        /// Verifies that only boolean true hides valid rows, columns and sheets.
+        /// </summary>
+        /// <param name="flag">The JSON visibility value.</param>
+        [Theory]
+        [InlineData("false")]
+        [InlineData("null")]
+        [InlineData("\"true\"")]
+        [InlineData("1")]
+        public void InvalidOrFalseHiddenFlagsRemainVisible(string flag)
+        {
+            // arrange
+            var input = """
+                {"sheets":[{"name":"S","rowCount":2,"colCount":2,
+                "rows":{"0":{"hidden":FLAG},"-1":{"hidden":true},"2":{"hidden":true}},
+                "cols":{"0":{"hidden":FLAG},"-1":{"hidden":true},"2":{"hidden":true}},"props":{"hidden":FLAG}}]}
+                """.Replace("FLAG", flag);
+
+            // act
+            var sheet = JsonNode.Parse(SpreadsheetWorkbook.Parse(input).ToJson())["sheets"][0];
+
+            // validation
+            Assert.Null(sheet["rows"]);
+            Assert.Null(sheet["cols"]);
+            Assert.Null(sheet["props"]);
+        }
     }
 }

@@ -63,6 +63,16 @@ namespace WebExpress.WebUI.WebSpreadsheet
         public IDictionary<int, int> ColumnWidths { get; } = new Dictionary<int, int>();
 
         /// <summary>
+        /// Gets the zero-based rows hidden from the reading and editing views.
+        /// </summary>
+        public ISet<int> HiddenRows { get; } = new HashSet<int>();
+
+        /// <summary>
+        /// Gets the zero-based columns hidden from the reading and editing views.
+        /// </summary>
+        public ISet<int> HiddenColumns { get; } = new HashSet<int>();
+
+        /// <summary>
         /// Gets the styles of whole columns, by zero-based column.
         /// </summary>
         public IDictionary<int, SpreadsheetStyle> ColumnStyles { get; } = new Dictionary<int, SpreadsheetStyle>();
@@ -81,6 +91,11 @@ namespace WebExpress.WebUI.WebSpreadsheet
         /// Gets or sets whether gridlines are shown.
         /// </summary>
         public bool Gridlines { get; set; } = true;
+
+        /// <summary>
+        /// Gets or sets whether the sheet is hidden from the workbook view.
+        /// </summary>
+        public bool Hidden { get; set; }
 
         /// <summary>
         /// Gets the filled cells, by A1 name, in row-major order.
@@ -331,8 +346,8 @@ namespace WebExpress.WebUI.WebSpreadsheet
 
             json["cells"] = cells;
 
-            var rows = Axis(RowHeights, RowStyles);
-            var columns = Axis(ColumnWidths, ColumnStyles);
+            var rows = Axis(RowHeights, RowStyles, HiddenRows);
+            var columns = Axis(ColumnWidths, ColumnStyles, HiddenColumns);
 
             if (rows.Count > 0) json["rows"] = rows;
             if (columns.Count > 0) json["cols"] = columns;
@@ -343,6 +358,7 @@ namespace WebExpress.WebUI.WebSpreadsheet
 
             if (SpreadsheetStyle.IsColor(TabColor)) props["tabColor"] = TabColor;
             if (!Gridlines) props["gridlines"] = false;
+            if (Hidden) props["hidden"] = true;
             if (props.Count > 0) json["props"] = props;
 
             return json;
@@ -379,8 +395,8 @@ namespace WebExpress.WebUI.WebSpreadsheet
                 sheet.SetData(data.Select(row => row is JsonArray values ? values.Select(v => SpreadsheetCell.FromNode(v)) : []));
             }
 
-            ReadAxis(json["rows"], sheet.RowHeights, sheet.RowStyles);
-            ReadAxis(json["cols"], sheet.ColumnWidths, sheet.ColumnStyles);
+            ReadAxis(json["rows"], sheet.RowHeights, sheet.RowStyles, sheet.HiddenRows, sheet.RowCount);
+            ReadAxis(json["cols"], sheet.ColumnWidths, sheet.ColumnStyles, sheet.HiddenColumns, sheet.ColumnCount);
 
             if (json["merges"] is JsonArray merges)
             {
@@ -403,27 +419,30 @@ namespace WebExpress.WebUI.WebSpreadsheet
             {
                 sheet.TabColor = props["tabColor"] is JsonValue c && c.TryGetValue<string>(out var color) && SpreadsheetStyle.IsColor(color) ? color : null;
                 sheet.Gridlines = !(props["gridlines"] is JsonValue g && g.TryGetValue<bool>(out var gridlines) && !gridlines);
+                sheet.Hidden = props["hidden"] is JsonValue h && h.TryGetValue<bool>(out var hidden) && hidden;
             }
 
             return sheet;
         }
 
         /// <summary>
-        /// Writes the sizes and styles of rows or columns.
+        /// Writes the sizes, styles and visibility of rows or columns.
         /// </summary>
         /// <param name="sizes">The sizes.</param>
         /// <param name="styles">The styles.</param>
+        /// <param name="hidden">The hidden indices.</param>
         /// <returns>The object by index.</returns>
-        private static JsonObject Axis(IDictionary<int, int> sizes, IDictionary<int, SpreadsheetStyle> styles)
+        private static JsonObject Axis(IDictionary<int, int> sizes, IDictionary<int, SpreadsheetStyle> styles, ISet<int> hidden)
         {
             var json = new JsonObject();
 
-            foreach (var index in sizes.Keys.Union(styles.Keys).Order())
+            foreach (var index in sizes.Keys.Union(styles.Keys).Union(hidden).Order())
             {
                 var entry = new JsonObject();
 
                 if (sizes.TryGetValue(index, out var size)) entry["size"] = Math.Clamp(size, 0, 2000);
                 if (styles.TryGetValue(index, out var style) && style?.ToJson() is { } s) entry["s"] = s;
+                if (hidden.Contains(index)) entry["hidden"] = true;
                 if (entry.Count > 0) json[index.ToString(CultureInfo.InvariantCulture)] = entry;
             }
 
@@ -431,12 +450,14 @@ namespace WebExpress.WebUI.WebSpreadsheet
         }
 
         /// <summary>
-        /// Reads the sizes and styles of rows or columns.
+        /// Reads the sizes, styles and visibility of rows or columns.
         /// </summary>
         /// <param name="node">The object by index.</param>
         /// <param name="sizes">Receives the sizes.</param>
         /// <param name="styles">Receives the styles.</param>
-        private static void ReadAxis(JsonNode node, IDictionary<int, int> sizes, IDictionary<int, SpreadsheetStyle> styles)
+        /// <param name="hidden">Receives the hidden indices.</param>
+        /// <param name="count">The number of rows or columns.</param>
+        private static void ReadAxis(JsonNode node, IDictionary<int, int> sizes, IDictionary<int, SpreadsheetStyle> styles, ISet<int> hidden, int count)
         {
             if (node is not JsonObject json)
             {
@@ -453,6 +474,11 @@ namespace WebExpress.WebUI.WebSpreadsheet
                 if (entry["size"] is JsonValue s && s.TryGetValue<double>(out var size) && size >= 0)
                 {
                     sizes[index] = (int)Math.Min(2000, Math.Round(size));
+                }
+
+                if (index < count && entry["hidden"] is JsonValue h && h.TryGetValue<bool>(out var isHidden) && isHidden)
+                {
+                    hidden.Add(index);
                 }
 
                 if (SpreadsheetStyle.FromJson(entry["s"]) is { } style)
