@@ -18,6 +18,18 @@ webexpress.webui.Controller = new class {
         this._wxRegisteredElements = new WeakSet(); // prevent duplicate bindings
         this.observer = new MutationObserver(this.handleMutations.bind(this));
 
+        // while the parser builds the page, an element is reported as soon as its start tag
+        // is read, before its children exist; a control created then reads half its content
+        // (a tab control misses the templates further down), so the parsed page is
+        // instantiated once, when it is complete
+        this._parsing = document.readyState === "loading";
+        if (this._parsing) {
+            document.addEventListener("DOMContentLoaded", () => {
+                this._parsing = false;
+                this.createInstances(document.documentElement);
+            }, { once: true });
+        }
+
         // observe attribute changes
         this.observer.observe(document, {
             childList: true,
@@ -223,6 +235,10 @@ webexpress.webui.Controller = new class {
                     // really re-attached.
                     if (node.isConnected) {
                         delete node._wxDetached;
+                    }
+                    // the quickfilters of the parsed page are registered on DOMContentLoaded as well
+                    if (this._parsing) {
+                        continue;
                     }
                     this.createInstances(node);
                     // quickfilter
@@ -2945,6 +2961,11 @@ webexpress.webui.FetchTransport = class {
                 try {
                     data = contentType.includes("application/json") ? await response.json() : { text: await response.text() };
                 } catch (parseError) {
+                    // the body stream fails as well when the request is aborted after the
+                    // headers arrived; that is a cancellation, not an unreadable answer
+                    if (this._aborted(init, parseError)) {
+                        return webexpress.webui.Transport.fail("abort", 0, "request was aborted", false);
+                    }
                     return this._report(this._result(false, response, contentType, null, "parse", "response could not be read", false), init);
                 }
             }
@@ -2956,13 +2977,23 @@ webexpress.webui.FetchTransport = class {
 
             return this._result(true, response, contentType, data, null, "", false);
         } catch (networkError) {
-            // the signal is the authority on why the request ended: an abort with a reason
-            // rejects with that reason rather than with an AbortError
-            const aborted = (init.signal && init.signal.aborted) || (networkError && networkError.name === "AbortError");
+            const aborted = this._aborted(init, networkError);
             const result = webexpress.webui.Transport.fail(aborted ? "abort" : "network", 0, networkError ? networkError.message : "network error", !aborted);
 
             return aborted ? result : this._report(result, init);
         }
+    }
+
+    /**
+     * Tells whether a request ended because it was aborted. The signal is the authority on
+     * why it ended: an abort with a reason rejects with that reason rather than with an
+     * AbortError.
+     * @param {object} init - The request init carrying the signal.
+     * @param {*} error - The rejection.
+     * @returns {boolean} True for an abort.
+     */
+    _aborted(init, error) {
+        return !!((init && init.signal && init.signal.aborted) || (error && error.name === "AbortError"));
     }
 
     /**

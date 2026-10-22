@@ -65,6 +65,27 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, float> Maximum { get; set; } = _ => float.MaxValue;
 
         /// <summary>
+        /// Gets or sets the title of the second value axis, on which the datasets with the
+        /// <see cref="ControlChartDataset.YAxisId"/> "y1" are measured.
+        /// </summary>
+        public Func<IRenderControlContext, string> TitleY1 { get; set; }
+
+        /// <summary>
+        /// Gets or sets the minimum value of the second value axis.
+        /// </summary>
+        public Func<IRenderControlContext, float> MinimumY1 { get; set; } = _ => float.MinValue;
+
+        /// <summary>
+        /// Gets or sets the maximum value of the second value axis.
+        /// </summary>
+        public Func<IRenderControlContext, float> MaximumY1 { get; set; } = _ => float.MaxValue;
+
+        /// <summary>
+        /// Gets or sets whether the second value axis begins at zero.
+        /// </summary>
+        public Func<IRenderControlContext, bool> Y1BeginAtZero { get; set; } = _ => false;
+
+        /// <summary>
         /// Gets or sets whether the chart is responsive. The setter returns the instance for fluent chaining.
         /// </summary>
         public Func<IRenderControlContext, bool> Responsive { get; set; } = _ => false;
@@ -204,6 +225,10 @@ namespace WebExpress.WebUI.WebControl
             var titleX = TitleX?.Invoke(renderContext);
             var minimum = Minimum?.Invoke(renderContext) ?? float.MinValue;
             var maximum = Maximum?.Invoke(renderContext) ?? float.MaxValue;
+            var titleY1 = TitleY1?.Invoke(renderContext);
+            var minimumY1 = MinimumY1?.Invoke(renderContext) ?? float.MinValue;
+            var maximumY1 = MaximumY1?.Invoke(renderContext) ?? float.MaxValue;
+            var y1BeginAtZero = Y1BeginAtZero?.Invoke(renderContext) ?? false;
             var width = Width?.Invoke(renderContext) ?? 0;
             var height = Height?.Invoke(renderContext) ?? 0;
             var datasets = Data?.Invoke(renderContext);
@@ -234,6 +259,11 @@ namespace WebExpress.WebUI.WebControl
                 // set min/max values for y axis
                 .AddUserAttribute("data-scale-y-min", minimum > float.MinValue ? minimum.ToString(CultureInfo.InvariantCulture) : null)
                 .AddUserAttribute("data-scale-y-max", maximum < float.MaxValue ? maximum.ToString(CultureInfo.InvariantCulture) : null)
+                // set the second value axis
+                .AddUserAttribute("data-scale-y1-begin-at-zero", y1BeginAtZero ? "true" : null)
+                .AddUserAttribute("data-scale-y1-title", I18N.Translate(renderContext, titleY1))
+                .AddUserAttribute("data-scale-y1-min", minimumY1 > float.MinValue ? minimumY1.ToString(CultureInfo.InvariantCulture) : null)
+                .AddUserAttribute("data-scale-y1-max", maximumY1 < float.MaxValue ? maximumY1.ToString(CultureInfo.InvariantCulture) : null)
                 // set width and height
                 .AddUserAttribute("data-width", width > 0 ? width.ToString(CultureInfo.InvariantCulture) : null)
                 .AddUserAttribute("data-height", height > 0 ? height.ToString(CultureInfo.InvariantCulture) : null)
@@ -243,10 +273,6 @@ namespace WebExpress.WebUI.WebControl
             var dsIndex = 0;
             foreach (var ds in datasets ?? [])
             {
-                if (dsIndex >= 10)
-                {
-                    break;
-                }
                 var prefix = $"data-dataset{dsIndex}-";
                 if (!string.IsNullOrWhiteSpace(ds.Title))
                 {
@@ -267,6 +293,38 @@ namespace WebExpress.WebUI.WebControl
                 if (ds.BorderWidth > 0)
                 {
                     html = html.AddUserAttribute(prefix + "border-width", ds.BorderWidth.ToString(CultureInfo.InvariantCulture));
+                }
+                if (ds.Type != TypeDatasetChart.Default)
+                {
+                    html = html.AddUserAttribute(prefix + "type", ds.Type.ToType());
+                }
+                if (ds.Fill != TypeFillChart.None)
+                {
+                    html = html.AddUserAttribute(prefix + "fill", ds.Fill.ToType());
+                }
+                if (ds.Point != TypePointChart.Circle)
+                {
+                    html = html.AddUserAttribute(prefix + "point-style", ds.Point.ToType());
+                }
+                if (ds.Curve != TypeCurveChart.Straight)
+                {
+                    html = html.AddUserAttribute(prefix + "curve", ds.Curve.ToType());
+                    if (ds.Curve == TypeCurveChart.Bezier)
+                    {
+                        html = html.AddUserAttribute(prefix + "tension", Math.Clamp(ds.Tension, 0f, 1f).ToString(CultureInfo.InvariantCulture));
+                    }
+                }
+                if (ds.Trendline != TypeTrendlineChart.None)
+                {
+                    html = html.AddUserAttribute(prefix + "trendline", ds.Trendline.ToType());
+                    if (ds.Trendline == TypeTrendlineChart.MovingAverage && ds.TrendlinePeriod > 1)
+                    {
+                        html = html.AddUserAttribute(prefix + "trendline-period", ds.TrendlinePeriod.ToString(CultureInfo.InvariantCulture));
+                    }
+                }
+                if (!string.IsNullOrWhiteSpace(ds.YAxisId) && ds.YAxisId != "y")
+                {
+                    html = html.AddUserAttribute(prefix + "y-axis-id", ds.YAxisId);
                 }
                 dsIndex++;
             }

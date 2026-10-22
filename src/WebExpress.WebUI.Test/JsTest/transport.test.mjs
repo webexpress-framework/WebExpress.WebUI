@@ -91,6 +91,40 @@ test("the built-in adapter never rejects: a network failure and an abort are res
     assert.equal(reported.length, 1, "a failure is announced, an abort is not");
 });
 
+test("an abort while the body is read is an abort, not an unreadable answer", async () => {
+    const controller = new AbortController();
+    // the headers arrived; the body stream then fails with the reason of the abort
+    const rt = loadWebUi({
+        browser: true,
+        fetch: async (url, init) => ({
+            ok: true,
+            status: 200,
+            headers: { get: () => "application/json" },
+            json: async () => { controller.abort(new Error("superseded")); throw init.signal.reason; }
+        })
+    });
+    const reported = [];
+    rt.document.addEventListener("webexpress.webui.transport.error", (e) => reported.push(e.detail));
+
+    const result = await rt.wx.Transport.request("/api/thing", { signal: controller.signal });
+
+    assert.equal(result.ok, false);
+    assert.equal(result.error.kind, "abort", "the signal decides, not the rejection of the body");
+    assert.equal(result.error.retriable, false);
+    assert.equal(reported.length, 0, "an abort is not announced");
+});
+
+test("a body that cannot be read without an abort stays a parse failure", async () => {
+    const rt = loadWebUi({
+        browser: true,
+        fetch: async () => ({ ok: true, status: 200, headers: { get: () => "application/json" }, json: async () => { throw new SyntaxError("bad json"); } })
+    });
+
+    const result = await rt.wx.Transport.request("/api/thing", { signal: new AbortController().signal });
+
+    assert.equal(result.error.kind, "parse");
+});
+
 test("an installed adapter takes over the requests and can leave the upload to the built-in one", async () => {
     const rt = loadWebUi({ browser: true, fetch: async () => { throw new Error("fetch must not be reached"); } });
     const seen = [];

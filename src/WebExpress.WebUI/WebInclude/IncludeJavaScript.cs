@@ -10,7 +10,6 @@ namespace WebExpress.WebUI.WebInclude
     /// This class is used to define and manage the inclusion of JavaScript files required for the
     /// functionality of a web application.
     /// </remarks>
-    [Asset("/assets/js/chart.js")]
     [Asset("/assets/js/webexpress.webui.js")]
     [Asset("/assets/js/webexpress.webui.renderer.js")]
     [Asset("/assets/js/webexpress.webui.state.js")]

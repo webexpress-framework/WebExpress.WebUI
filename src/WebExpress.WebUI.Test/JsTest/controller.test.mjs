@@ -154,6 +154,41 @@ test("a stale insertion record does not strip the mark from a held element", () 
     assert.equal(wx.Controller.instanceMap.has(element), true);
 });
 
+test("an element reported while the page is parsed is instantiated once the page is complete", () => {
+    const { wx, document, createElement } = loadWebUi({ readyState: "loading" });
+    let seen = null;
+    class Tabs extends wx.Ctrl {
+        constructor(element) {
+            super(element);
+            seen = element.querySelectorAll("template").length;
+        }
+    }
+    wx.Controller.registerClass("wx-probe-tabs", Tabs);
+
+    // the parser reports the host as soon as its start tag is read; its templates follow later
+    const host = createElement("div");
+    host.classList.add("wx-probe-tabs");
+    document.body.appendChild(host);
+    host.appendChild(createElement("template"));
+    wx.Controller.handleMutations([childListMutation({ added: [host] })]);
+
+    assert.equal(wx.Controller.instanceMap.has(host), false, "a half parsed host is not instantiated");
+
+    host.appendChild(createElement("template"));
+    document.readyState = "interactive";
+    document.dispatchEvent({ type: "DOMContentLoaded" });
+
+    assert.equal(wx.Controller.instanceMap.has(host), true, "the complete page is instantiated");
+    assert.equal(seen, 2, "the control sees every template of its host");
+
+    // from now on an inserted element is instantiated at once
+    const later = createElement("div");
+    later.classList.add("wx-probe-tabs");
+    document.body.appendChild(later);
+    wx.Controller.handleMutations([childListMutation({ added: [later] })]);
+    assert.equal(wx.Controller.instanceMap.has(later), true);
+});
+
 test("a detached element parked inside a removed container keeps its instance", () => {
     const { wx, document, createElement } = loadWebUi();
     registerProbe(wx, "wx-probe");
