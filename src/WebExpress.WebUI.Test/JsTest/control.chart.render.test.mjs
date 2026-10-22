@@ -62,6 +62,113 @@ const SERVER_BAR = {
     "data-dataset1-border-width": "2"
 };
 
+test("polar datasets share the radius scale and expose the frontmost sector under the pointer", () => {
+    const rt = load();
+    const { ctrl, host } = build(rt, {}, {
+        type: "polarArea",
+        data: { labels: ["East", "West"], datasets: [
+            { label: "A", data: [2, 3] },
+            { label: "B", data: [8, 10] },
+            { label: "Hidden", data: [100, 100], hidden: true }
+        ] }
+    });
+    assert.equal(host.querySelectorAll(".wx-chart-polar").length, 4);
+    const a = ctrl._targets.find((t) => t.title === "East" && t.rows[0].name === "A");
+    const b = ctrl._targets.find((t) => t.title === "East" && t.rows[0].name === "B");
+    const outer = Math.max(...host.querySelectorAll(".wx-chart-grid circle").map((el) => Number(el.getAttribute("r"))));
+    assert.ok(Math.abs(a.sector.r1 / outer - 0.2) < 1e-10);
+    assert.ok(Math.abs(b.sector.r1 / outer - 0.8) < 1e-10);
+    assert.equal(ctrl._targets[ctrl._locate(a.anchor.x, a.anchor.y)].rows[0].name, "A");
+    assert.equal(ctrl._targets[ctrl._locate(b.anchor.x, b.anchor.y)].rows[0].name, "B");
+    const marks = host.querySelectorAll(".wx-chart-polar");
+    assert.ok(marks.indexOf(b.marks[0]) < marks.indexOf(a.marks[0]), "the first dataset is painted in front");
+    host.querySelector(".wx-chart-legend-item").click();
+    assert.equal(host.querySelectorAll(".wx-chart-polar").length, 2);
+    assert.ok(ctrl._targets.every((t) => t.title === "West"));
+});
+
+test("fixed category bounds clip the original line without flattening out-of-range values", () => {
+    const rt = load();
+    const { ctrl, host } = build(rt, {}, {
+        type: "line",
+        data: { labels: ["Start", "Peak", "End"], datasets: [{ data: [0, 20, 0] }] },
+        options: { scales: { y: { min: 0, max: 10 } } }
+    });
+    const baseline = ctrl._targets[0].rows[0].pos.y;
+    const top = ctrl._targets[1].guide.line.y1;
+    const peak = ctrl._targets[1].rows[0].pos.y;
+    assert.equal(peak, 2 * top - baseline, "the path keeps the actual value beyond the axis maximum");
+    const line = host.querySelector(".wx-chart-line");
+    assert.ok(line.getAttribute("d").includes(`,${peak}`));
+    const clip = host.querySelector("clipPath");
+    assert.ok(clip, "SVG clipping confines the original geometry to the plot");
+    assert.equal(host.querySelector(".wx-chart-series").getAttribute("clip-path"), `url(#${clip.id})`);
+    assert.equal(Number(clip.querySelector("rect").getAttribute("y")), top);
+    assert.equal(Number(clip.querySelector("rect").getAttribute("height")), baseline - top);
+    assert.equal(ctrl._targets[1].anchor.y, top, "the tooltip stays reachable at the plot edge");
+    assert.equal(ctrl._targets[1].dots.length, 0, "hidden points do not leave hover dots outside the plot");
+});
+
+test("legend activation preserves keyboard focus through repeated toggles without stealing it", () => {
+    const rt = load();
+    const createElement = rt.document.createElement.bind(rt.document);
+    rt.document.createElement = (tag) => {
+        const element = createElement(tag);
+        element.focus = (options) => {
+            assert.equal(options.preventScroll, true);
+            rt.document.activeElement = element;
+        };
+        return element;
+    };
+    const { ctrl, host } = build(rt, SERVER_BAR);
+    // the stub retains fragments; flatten the skeleton as a browser does so a redraw reuses it
+    host.replaceChildren(...host.firstChild.childNodes);
+    rt.document.activeElement = host.querySelector(".wx-chart-legend-item");
+    rt.document.activeElement.click();
+    assert.equal(rt.document.activeElement, host.querySelector(".wx-chart-legend-item"));
+    assert.equal(rt.document.activeElement.getAttribute("aria-pressed"), "false");
+    rt.document.activeElement.click();
+    assert.equal(rt.document.activeElement, host.querySelector(".wx-chart-legend-item"));
+    assert.equal(rt.document.activeElement.getAttribute("aria-pressed"), "true");
+    rt.document.activeElement = rt.document.body;
+    ctrl._render();
+    assert.equal(rt.document.activeElement, rt.document.body);
+});
+
+test("clipping also preserves negative values, horizontal spans and secondary-axis curves", () => {
+    const rt = load();
+    const clipIds = new Set();
+    for (const horizontal of [false, true]) {
+        for (const value of [-20, 20]) {
+            const { ctrl, host } = build(rt, {}, {
+                type: horizontal ? "bar" : "line",
+                data: { labels: ["Start", "Peak", "End"], datasets: [
+                    { data: [0, value, 0], type: "line", yAxisID: horizontal ? "y" : "right", tension: 0.4, fill: true }
+                ] },
+                options: { indexAxis: horizontal ? "y" : "x", scales: {
+                    x: horizontal ? { min: -10, max: 10 } : {},
+                    right: { min: -10, max: 10 }
+                } }
+            });
+            const clip = host.querySelector("clipPath");
+            clipIds.add(clip.id);
+            const rect = clip.querySelector("rect");
+            const start = Number(rect.getAttribute(horizontal ? "x" : "y"));
+            const length = Number(rect.getAttribute(horizontal ? "width" : "height"));
+            const coordinate = horizontal ? "x" : "y";
+            const expected = start + length * (horizontal ? (value + 10) / 20 : (10 - value) / 20);
+            assert.ok(Math.abs(ctrl._targets[1].rows[0].pos[coordinate] - expected) < 1e-10);
+            const numbers = host.querySelector(".wx-chart-line").getAttribute("d").match(/-?\d+(?:\.\d+)?/g).map(Number);
+            const controls = numbers.filter((v, i) => i % 2 === (horizontal ? 0 : 1));
+            assert.ok(controls.filter((v) => v < start || v > start + length).length > 1,
+                "Bezier handles and their peak remain outside the viewport instead of flattening the curve");
+            assert.equal(ctrl._targets[1].dots.length, 0);
+            assert.ok(host.querySelector(".wx-chart-area"));
+        }
+    }
+    assert.equal(clipIds.size, 4, "each chart owns its clipping definition");
+});
+
 test("the attributes the server renders become the configuration and leave the markup", () => {
     const rt = load();
     const { ctrl, host } = build(rt, SERVER_BAR);

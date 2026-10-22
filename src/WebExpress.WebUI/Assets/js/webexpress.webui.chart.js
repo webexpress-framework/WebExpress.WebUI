@@ -1437,6 +1437,12 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
         }
         const plot = { x: left, y: top, w: Math.max(10, width - left - right), h: Math.max(10, height - top - bottom) };
 
+        // clip the geometry after mapping values so fixed bounds do not change slopes or stacked spans
+        const clipId = `wx-chart-${this._uid}-plot`;
+        const clip = this._svg("clipPath", { id: clipId, clipPathUnits: "userSpaceOnUse" }, layers.defs);
+        this._svg("rect", { x: plot.x, y: plot.y, width: plot.w, height: plot.h }, clip);
+        layers.series.setAttribute("clip-path", `url(#${clipId})`);
+
         const scaleOf = { [valId]: scale };
         if (second) {
             scaleOf[secondId] = second;
@@ -1444,7 +1450,7 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
         const clampTo = (sc, v) => Math.min(sc.max, Math.max(sc.min, v));
         const vPxOn = (id, v) => {
             const sc = scaleOf[id];
-            const ratio = (clampTo(sc, v) - sc.min) / (sc.max - sc.min || 1);
+            const ratio = (v - sc.min) / (sc.max - sc.min || 1);
             return horizontal ? plot.x + plot.w * ratio : plot.y + plot.h * (1 - ratio);
         };
         const vPx = (v) => vPxOn(valId, v);
@@ -1661,6 +1667,8 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
             const anchor = horizontal
                 ? { x: Math.max(...rows.map((r) => r.pos.x)), y: c }
                 : { x: c, y: Math.min(...rows.map((r) => r.pos.y)) };
+            anchor.x = Math.min(plot.x + plot.w, Math.max(plot.x, anchor.x));
+            anchor.y = Math.min(plot.y + plot.h, Math.max(plot.y, anchor.y));
             const guide = hasBars
                 ? { band: horizontal ? { x: plot.x, y: c - slot / 2, w: plot.w, h: slot } : { x: c - slot / 2, y: plot.y, w: slot, h: plot.h } }
                 : { line: horizontal ? { x1: plot.x, y1: c, x2: plot.x + plot.w, y2: c } : { x1: c, y1: plot.y, x2: c, y2: plot.y + plot.h } };
@@ -1669,7 +1677,8 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
                 rows: rows,
                 anchor: anchor,
                 guide: guide,
-                dots: rows.filter((r) => r.line && !r.trend),
+                dots: rows.filter((r) => r.line && !r.trend &&
+                    r.pos.x >= plot.x && r.pos.x <= plot.x + plot.w && r.pos.y >= plot.y && r.pos.y <= plot.y + plot.h),
                 marks: marks[i] || [],
                 at: c
             });
@@ -1940,17 +1949,18 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
         const opts = this._config.options || {};
         const rOpts = (opts.scales && opts.scales.r) || {};
         const labels = this._labels();
-        const s = this._series().find((entry) => entry.visible);
+        const series = this._series().filter((entry) => entry.visible);
         const cx = width / 2;
         const cy = height / 2;
         const radius = Math.max(10, Math.min(width, height) / 2 - 8);
-        if (!s) {
+        if (!series.length) {
             return;
         }
 
-        const values = this._dataOf(s.ds).map((p) => this._valueOf(p));
-        const shown = values.map((v, i) => i).filter((i) => this._isVisible("l" + i));
-        const max = Math.max(0, ...shown.map((i) => values[i] || 0));
+        const values = series.map((s) => this._dataOf(s.ds).map((p) => this._valueOf(p)));
+        const count = Math.max(labels.length, ...values.map((data) => data.length));
+        const shown = Array.from({ length: count }, (v, i) => i).filter((i) => this._isVisible("l" + i));
+        const max = Math.max(0, ...values.flatMap((data) => shown.map((i) => data[i] || 0)));
         const scale = Chart.niceScale(0, max, Math.floor(radius / 35) + 1,
             isFinite(rOpts.min) ? Number(rOpts.min) : 0, isFinite(rOpts.max) ? Number(rOpts.max) : null);
         const rPx = (v) => radius * (Math.min(scale.max, Math.max(scale.min, v)) - scale.min) / (scale.max - scale.min || 1);
@@ -1963,28 +1973,34 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
 
         const step = Math.PI * 2 / Math.max(1, shown.length);
         const start = -Math.PI / 2 + (Number(opts.startAngle) || 0) * Math.PI / 180;
-        shown.forEach((i, n) => {
-            const v = values[i];
-            if (v === null || !(v > scale.min)) {
-                return;
-            }
-            const a0 = start + n * step;
-            const a1 = a0 + step;
-            const r1 = rPx(v);
-            const paint = this._paint(s.ds, i, i);
-            const wedge = this._svg("path", { class: "wx-chart-mark wx-chart-polar", d: this._arcPath(cx, cy, 0, r1, a0, a1) }, layers.series);
-            this._applyPaint(wedge, paint);
-            this._animate(wedge, "scale", this._stagger(n, shown.length) * 0.6, "l" + i, { x: cx, y: cy });
-            const mid = (a0 + a1) / 2;
-            this._targets.push({
-                title: labels[i] != null ? String(labels[i]) : "",
-                rows: [{ name: this._seriesName(s.ds, s.index), value: this._format(v), paint: paint }],
-                anchor: { x: cx + r1 * 0.6 * Math.cos(mid), y: cy + r1 * 0.6 * Math.sin(mid) },
-                dots: [],
-                marks: [wedge],
-                sector: { r0: 0, r1: Math.max(r1, 6), a0: a0, a1: a1 }
+        // the first dataset is in front; hit targets follow the same front-to-back order
+        for (let k = series.length - 1; k >= 0; k--) {
+            const s = series[k];
+            const targets = [];
+            shown.forEach((i, n) => {
+                const v = values[k][i];
+                if (v === null || !(v > scale.min)) {
+                    return;
+                }
+                const a0 = start + n * step;
+                const a1 = a0 + step;
+                const r1 = rPx(v);
+                const paint = this._paint(s.ds, i, i);
+                const wedge = this._svg("path", { class: "wx-chart-mark wx-chart-polar", d: this._arcPath(cx, cy, 0, r1, a0, a1) }, layers.series);
+                this._applyPaint(wedge, paint);
+                this._animate(wedge, "scale", this._stagger(n, shown.length) * 0.6, "l" + i, { x: cx, y: cy });
+                const mid = (a0 + a1) / 2;
+                targets.push({
+                    title: labels[i] != null ? String(labels[i]) : "",
+                    rows: [{ name: this._seriesName(s.ds, s.index), value: this._format(v), paint: paint }],
+                    anchor: { x: cx + r1 * 0.6 * Math.cos(mid), y: cy + r1 * 0.6 * Math.sin(mid) },
+                    dots: [],
+                    marks: [wedge],
+                    sector: { r0: 0, r1: Math.max(r1, 6), a0: a0, a1: a1 }
+                });
             });
-        });
+            this._targets.unshift(...targets);
+        }
 
         // the tick labels sit on the upright radius, haloed against the wedges beneath
         for (const t of scale.ticks) {
@@ -2196,13 +2212,13 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Builds the path of a line through points: straight, as a Bezier curve or as a monotone
-     * curve. A Bezier curve swings out between the points, so its control points are held inside
-     * the plot; a monotone curve never swings past its neighbouring points, so a peak in the
-     * drawing is a peak in the data.
+     * curve. Bezier control points are bounded by the plot extended to include the data, so
+     * fixed axis limits do not flatten offscreen peaks. A monotone curve never swings past
+     * its neighbouring points, so a peak in the drawing is a peak in the data.
      * @param {Array<{x: number, y: number}>} points - The points, in order along the axis.
      * @param {{tension: number, monotone: boolean}|number} curve - The curve, or a bare tension.
      * @param {{x: number, y: number, w: number, h: number}} [bounds] - The plot area the
-     *     control points of a Bezier curve stay within.
+     *     control points of a Bezier curve stay within, extended to include offscreen data.
      * @param {boolean} [vertical] - Whether the points run along the y axis (horizontal bars).
      * @returns {string} The path data.
      */
@@ -2215,8 +2231,14 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
             return this._monotonePath(points, vertical);
         }
 
-        const clamp = (p) => (bounds
-            ? { x: Math.min(bounds.x + bounds.w, Math.max(bounds.x, p.x)), y: Math.min(bounds.y + bounds.h, Math.max(bounds.y, p.y)) }
+        const limits = bounds ? {
+            left: Math.min(bounds.x, ...points.map((p) => p.x)),
+            right: Math.max(bounds.x + bounds.w, ...points.map((p) => p.x)),
+            top: Math.min(bounds.y, ...points.map((p) => p.y)),
+            bottom: Math.max(bounds.y + bounds.h, ...points.map((p) => p.y))
+        } : null;
+        const clamp = (p) => (limits
+            ? { x: Math.min(limits.right, Math.max(limits.left, p.x)), y: Math.min(limits.bottom, Math.max(limits.top, p.y)) }
             : p);
         let d = `M${points[0].x},${points[0].y}`;
         for (let j = 1; j < points.length; j++) {
@@ -2396,6 +2418,9 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
      * @param {string} type - The chart type.
      */
     _renderLegend(type) {
+        const focused = document.activeElement;
+        const focusKey = this._legendEl.contains(focused) ? focused.getAttribute("data-legend-key") : null;
+        let focusItem = null;
         const legend = ((this._config.options || {}).plugins || {}).legend || {};
         const byLabel = webexpress.webui.ChartCtrl.LABEL_LEGEND_TYPES.includes(type);
         const all = this._series();
@@ -2429,7 +2454,11 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
             const item = document.createElement("button");
             item.type = "button";
             item.className = "wx-chart-legend-item";
+            item.setAttribute("data-legend-key", entry.key);
             item.setAttribute("aria-pressed", visible ? "true" : "false");
+            if (entry.key === focusKey) {
+                focusItem = item;
+            }
 
             const swatch = document.createElement("span");
             swatch.className = "wx-chart-swatch" + (entry.line ? " wx-chart-swatch-line" : "");
@@ -2450,6 +2479,9 @@ webexpress.webui.ChartCtrl = class extends webexpress.webui.Ctrl {
             frag.appendChild(item);
         }
         this._legendEl.replaceChildren(frag);
+        if (display && focusItem) {
+            focusItem.focus({ preventScroll: true });
+        }
     }
 
     /**
