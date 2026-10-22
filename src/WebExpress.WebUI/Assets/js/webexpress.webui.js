@@ -112,6 +112,12 @@ webexpress.webui.Controller = new class {
             return; // already bound
         }
 
+        // a template is inert; its data-wx-* attributes belong to the control that
+        // instantiates it (the tab control binds its items with them), not to a WebUI bind
+        if (element.tagName && element.tagName.toUpperCase() === "TEMPLATE") {
+            return;
+        }
+
         let bound = false;
 
         // primary actions – delegate to the Actions registry

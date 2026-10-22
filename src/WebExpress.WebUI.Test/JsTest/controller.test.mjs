@@ -189,6 +189,27 @@ test("an element reported while the page is parsed is instantiated once the page
     assert.equal(wx.Controller.instanceMap.has(later), true);
 });
 
+test("a template keeps its data-wx-bind for the control that instantiates it", () => {
+    const { wx, document, createElement } = loadWebUi();
+    const bound = [];
+    wx.Binds.register("title", { bind: (el) => bound.push(el) });
+    const warnings = [];
+    const warn = console.warn;
+    console.warn = (...args) => warnings.push(args.join(" "));
+
+    try {
+        const template = createElement("template");
+        template.setAttribute("data-wx-bind", "title, uri");
+        document.body.appendChild(template);
+        wx.Controller.createInstances(template);
+    } finally {
+        console.warn = warn;
+    }
+
+    assert.equal(bound.length, 0, "no WebUI bind is attached to the template");
+    assert.deepEqual(warnings, [], "an item binding of a template is no unknown WebUI bind");
+});
+
 test("a detached element parked inside a removed container keeps its instance", () => {
     const { wx, document, createElement } = loadWebUi();
     registerProbe(wx, "wx-probe");
