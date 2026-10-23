@@ -1,5 +1,5 @@
-using System;
 using System.Linq;
+using System;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
@@ -31,6 +31,15 @@ namespace WebExpress.WebUI.WebControl
         /// knows - the one a session expired for, say - spares the user typing it again.
         /// </summary>
         public Func<IRenderControlContext, string> Username { get => _login.Username; set => _login.Username = value; }
+
+        /// <summary>
+        /// Gets or sets the destination used after external authentication completes.
+        /// </summary>
+        public Func<IRenderControlContext, WebExpress.WebCore.WebUri.IUri> RedirectUri
+        {
+            get => _login.RedirectUri;
+            set => _login.RedirectUri = value;
+        }
 
         /// <summary>
         /// Gets or sets a value indicating whether the dialog opens as soon as the page
@@ -86,7 +95,8 @@ namespace WebExpress.WebUI.WebControl
             var size = Size?.Invoke(renderContext) ?? TypeModalSize.Default;
             var closeLabel = CloseLabel?.Invoke(renderContext);
             var scrollable = Scrollable?.Invoke(renderContext) ?? true;
-            var autoShow = AutoShow?.Invoke(renderContext) ?? false;
+            var autoShow = (AutoShow?.Invoke(renderContext) ?? false) ||
+                renderContext.Request?.GetParameter("wx-auth-error") is not null;
 
             var header = new HtmlElementTextContentDiv(new HtmlText(I18N.Translate(renderContext, title)))
             {

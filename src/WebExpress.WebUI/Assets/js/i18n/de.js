@@ -570,6 +570,9 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "login.username": "Benutzername",
     "login.password": "Passwort",
     "login.submit": "Anmelden",
+    "login.rememberme": "Angemeldet bleiben",
+    "login.external.submit": "Mit {0} anmelden",
+    "login.external.failed": "Die externe Anmeldung konnte nicht abgeschlossen werden. Bitte erneut versuchen.",
     "login.failed": "Anmeldung fehlgeschlagen. Bitte überprüfen Sie Ihre Zugangsdaten.",
     "login.error": "Es ist ein Fehler aufgetreten. Bitte versuchen Sie es erneut.",
 

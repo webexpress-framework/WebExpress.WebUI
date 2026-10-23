@@ -1,6 +1,6 @@
 /// <summary>
 /// Represents a login control that provides a user interface for entering credentials
-/// and performs basic authentication via a fetch request.
+/// and authenticates through the framework credential endpoint.
 ///
 /// On its own the control draws a card with a heading around the form. Inside the body
 /// of a dialog the dialog is the card: the title bar names it and the footer holds its
@@ -30,6 +30,9 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
         // the outline level of the title: second level on a page of its own, deeper when embedded
         this._headingLevel = Math.min(6, Math.max(1, parseInt(element.dataset.headingLevel, 10) || 2));
         this._plain = !!element.closest(webexpress.webui.LoginCtrl.DIALOG_BODY_SELECTOR);
+        this._loginUri = element.dataset.loginUri || "/api/auth/login";
+        this._externalLogins = JSON.parse(element.dataset.externalLogins || "[]");
+        this._authenticationFailed = element.dataset.authError === "true";
 
         // the form and its fields are addressed by id - the labels point at the fields, a
         // button lifted out of the form points back at it - so two logins on one page (a
@@ -40,15 +43,19 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
         this._form = null;
         this._usernameInput = null;
         this._passwordInput = null;
+        this._rememberMeInput = null;
         this._loginBtn = null;
         this._buttonGroup = null;
 
         // clean up the host element
         element.textContent = "";
         element.classList.add(this._plain ? "wx-login-plain" : "wx-login");
+        element.removeAttribute("data-login-uri");
         element.removeAttribute("data-username");
         element.removeAttribute("data-title");
         element.removeAttribute("data-heading-level");
+        element.removeAttribute("data-external-logins");
+        element.removeAttribute("data-auth-error");
 
         this._buildDom();
         this._attachEventHandlers();
@@ -91,11 +98,19 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Builds the form with its two fields and the submit button.
+     * Builds the credential form with an explicit browser persistence choice.
      */
     _buildForm() {
         this._form = document.createElement("form");
         this._form.id = this._id + "-form";
+        if (this._authenticationFailed) {
+            const error = document.createElement("div");
+            error.className = "alert alert-danger wx-login-external-error";
+            error.setAttribute("role", "alert");
+            error.textContent = this._i18n("webexpress.webui:login.external.failed",
+                "External sign-in could not be completed. Please try again.");
+            this._form.appendChild(error);
+        }
 
         // create username group
         const userGroup = document.createElement("div");
@@ -155,7 +170,68 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
         // assemble form
         this._form.appendChild(userGroup);
         this._form.appendChild(passGroup);
+        this._buildRememberMe();
         this._form.appendChild(this._buttonGroup);
+        this._buildExternalLogins();
+    }
+
+    /**
+     * Exposes the same persistence choice for credential and external sign-in.
+     * @returns {void}
+     */
+    _buildRememberMe() {
+        const group = document.createElement("div");
+        group.className = "form-check form-switch mb-3";
+        this._rememberMeInput = document.createElement("input");
+        this._rememberMeInput.type = "checkbox";
+        this._rememberMeInput.className = "form-check-input";
+        this._rememberMeInput.id = this._id + "-remember-me";
+        this._rememberMeInput.name = "rememberMe";
+        this._rememberMeInput.checked = true;
+        this._rememberMeInput.setAttribute("role", "switch");
+        this._rememberMeInput.addEventListener("change", () => this._updateExternalLogins());
+        const label = document.createElement("label");
+        label.className = "form-check-label";
+        label.setAttribute("for", this._rememberMeInput.id);
+        label.textContent = this._i18n("webexpress.webui:login.rememberme", "Stay signed in");
+        group.appendChild(this._rememberMeInput);
+        group.appendChild(label);
+        this._form.appendChild(group);
+    }
+
+    /**
+     * Updates real link destinations so keyboard navigation and new tabs retain the choice.
+     * @returns {void}
+     */
+    _updateExternalLogins() {
+        const links = this._form.querySelectorAll(".wx-login-external a");
+        for (let index = 0; index < links.length; index++) {
+            const uri = new URL(this._externalLogins[index].uri, window.location.href);
+            uri.searchParams.set("rememberMe", String(this._rememberMeInput.checked));
+            links[index].setAttribute("href", uri.pathname + uri.search + uri.hash);
+        }
+    }
+
+    /**
+     * Keeps external navigation independent of credential validation and the modal submit button.
+     * @returns {void}
+     */
+    _buildExternalLogins() {
+        if (this._externalLogins.length === 0) {
+            return;
+        }
+        const group = document.createElement("div");
+        group.className = "wx-login-external d-grid gap-2 mt-3";
+        for (const provider of this._externalLogins) {
+            const link = document.createElement("a");
+            link.className = "btn btn-outline-primary";
+            link.setAttribute("href", provider.uri);
+            link.textContent = this._i18n("webexpress.webui:login.external.submit", "Sign in with {0}")
+                .replace("{0}", provider.label);
+            group.appendChild(link);
+        }
+        this._form.appendChild(group);
+        this._updateExternalLogins();
     }
 
     /**
@@ -197,16 +273,13 @@ webexpress.webui.LoginCtrl = class extends webexpress.webui.Ctrl {
             const username = this._usernameInput.value;
             const password = this._passwordInput.value;
 
-            // create basic auth token
-            const token = btoa(username + ":" + password);
-
-            // the request goes through the transport with the authorization header
-            webexpress.webui.Transport.request(window.location.href, {
+            webexpress.webui.Transport.request(this._loginUri, {
                 method: "POST",
                 headers: {
-                    "Authorization": "Basic " + token,
+                    "X-WebExpress-Auth": "1",
                     "Content-Type": "application/json"
-                }
+                },
+                body: JSON.stringify({ username, password, rememberMe: this._rememberMeInput.checked })
             }).then((result) => {
                 if (result.ok) {
                     // the session cookie arrived with this response, http-only and set by

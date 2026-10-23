@@ -570,6 +570,9 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "login.username": "Username",
     "login.password": "Password",
     "login.submit": "Login",
+    "login.rememberme": "Stay signed in",
+    "login.external.submit": "Sign in with {0}",
+    "login.external.failed": "External sign-in could not be completed. Please try again.",
     "login.failed": "Login failed. Please check your credentials.",
     "login.error": "An error occurred. Please try again.",
 
