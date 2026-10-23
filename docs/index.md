@@ -2,7 +2,7 @@
 
 # WebExpress
 
-WebExpress is a lightweight web server optimized for use in low-performance environments (e.g. Raspberry PI). By providing 
+WebExpress is a lightweight web server optimized for use in low-performance environments (e.g. Raspberry Pi). By providing 
 a powerful plugin system and a comprehensive API, web applications can be easily and quickly integrated into a .NET 
 language (e.g. C#). Some advantages of WebExpress are:
 

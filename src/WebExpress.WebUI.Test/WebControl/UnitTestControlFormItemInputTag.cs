@@ -149,7 +149,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(null, @"<div class=""wx-webui-input-tag""></div>")]
         [InlineData("", @"<div class=""wx-webui-input-tag""></div>")]
         [InlineData(" ", @"<div class=""wx-webui-input-tag""></div>")]
-        [InlineData("gold", @"<div class=""wx-webui-input-tag"" data-color-style=""background: gold;""></div>")]
+        [InlineData("gold", @"<div class=""wx-webui-input-tag"" data-color-style=""background: gold;color: #000;""></div>")]
         public void UserColor(string color, string expected)
         {
             // arrange
@@ -173,8 +173,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-tag""></div>*")]
-        [InlineData("abc", @"*<div class=""wx-webui-input-tag"" data-value=""abc""></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-tag""></div>*")]
+        [InlineData("abc", @"*<div id=""*"" class=""wx-webui-input-tag"" data-value=""abc""></div>*")]
         public void ValueForm(string value, string expected)
         {
             // arrange
@@ -202,8 +202,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-tag""></div>*")]
-        [InlineData("abc", @"*<div class=""wx-webui-input-tag"" data-value=""abc""></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-tag""></div>*")]
+        [InlineData("abc", @"*<div id=""*"" class=""wx-webui-input-tag"" data-value=""abc""></div>*")]
         public void ValueItem(string value, string expected)
         {
             // arrange

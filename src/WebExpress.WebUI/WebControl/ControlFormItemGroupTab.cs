@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.WebControl
         public virtual Func<IRenderControlContext, TypeLayoutTab> Layout
         {
             get => (Func<IRenderControlContext, TypeLayoutTab>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -99,18 +99,22 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            EnsureInputIds();
+
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);
-            var layout = Layout?.Invoke(renderContext);
+            var layout = Layout?.Invoke(renderContext) ?? TypeLayoutTab.Default;
             var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-tab", Classes),
-                Style = GetStyles(),
+                Style = GetStyles(renderContext),
                 Role = role
             }
-                .AddUserAttribute("data-layout", layout.ToString().ToLower())
+                .AddUserAttribute("data-layout", layout != TypeLayoutTab.Default
+                    ? layout.ToString().ToLower()
+                    : null)
                 .Add(_views.Select(x => x.Render(renderContext, visualTree)));
 
             return html;

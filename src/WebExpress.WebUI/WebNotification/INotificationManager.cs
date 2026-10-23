@@ -33,7 +33,7 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="type">The notification type.</param>
         /// <param name="scops">The scopes for the notification.</param>
         /// <returns>The created notification.</returns>
-        INotification AddNotification(IApplicationContext applicationContext, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, IEnumerable<IScope> scops = null);
+        INotification AddNotification(IApplicationContext applicationContext, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, IEnumerable<IScope> scops = null, string link = null);
 
         /// <summary>
         /// Creates a new notification in the session.
@@ -47,7 +47,7 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="type">The notification type.</param>
         /// <param name="scops">The scopes for the notification.</param>
         /// <returns>The created notification.</returns>
-        INotification AddNotification(IApplicationContext applicationContext, Request request, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, IEnumerable<IScope> scops = null);
+        INotification AddNotification(IApplicationContext applicationContext, Request request, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, IEnumerable<IScope> scops = null, string link = null);
 
         /// <summary>
         /// Returns all notifications from the session.

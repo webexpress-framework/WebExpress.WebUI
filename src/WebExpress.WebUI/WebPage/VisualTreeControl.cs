@@ -6,7 +6,6 @@ using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebComponent;
 using WebExpress.WebCore.WebEndpoint;
 using WebExpress.WebCore.WebHtml;
-using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebMessage;
 using WebExpress.WebCore.WebPage;
 using WebExpress.WebCore.WebTheme;
@@ -58,13 +57,6 @@ namespace WebExpress.WebUI.WebPage
         /// when the application has no theme.
         /// </summary>
         public IThemeContext Theme { get; protected set; }
-
-        /// <summary>
-        /// Gets the icon theme for the page. Mirrors <see cref="Theme"/> /
-        /// <c>Theme.IconTheme</c>; falls back to
-        /// <see cref="TypeIconTheme.Default"/> when no theme is registered.
-        /// </summary>
-        public TypeIconTheme IconTheme => Theme?.IconTheme ?? TypeIconTheme.Default;
 
         /// <summary>
         /// Returns the favicons.
@@ -135,8 +127,7 @@ namespace WebExpress.WebUI.WebPage
             //   2. Otherwise fall back to the first theme registered for the
             //      application (preserves the long-standing "default = first"
             //      convention documented in the Theme model).
-            //   3. Otherwise leave Theme null - downstream IconTheme falls back
-            //      to TypeIconTheme.Default.
+            //   3. Otherwise leave Theme null.
             // Per-user theme overrides are wired by application code: the
             // page's Process override calls UseTheme<T>() based on whatever
             // store the application maintains (session, identity profile, …).
@@ -147,28 +138,37 @@ namespace WebExpress.WebUI.WebPage
 
             _favicons.Add(new Favicon(RouteEndpoint.Combine(contextPath, WebEx.Favicon)));
 
+            // an include names a file of its plugin, not a route - only the asset manager
+            // knows where that plugin's assets are mounted for this application, and a
+            // route composed here instead would drift from the mount silently: the browser
+            // takes the html 404 page as a stylesheet with no rules.
             foreach (var include in _componentHub?.IncludeManager
                 .GetIncludes(pageContext.ApplicationContext))
             {
                 if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
                 {
-                    var includeBaseUri = RouteEndpoint.Combine(contextPath, include.PluginContext.PluginId.ToString());
-                    foreach (var file in include.Files.Where(x => x.Type == WebCore.WebInclude.TypeInclude.StyleSheet))
+                    foreach (var file in include.Files)
                     {
-                        _cssLinks.Add(RouteEndpoint.Combine(includeBaseUri, file.FileName));
-                    }
-                }
-            }
+                        var route = _componentHub?.AssetManager?.GetAssetRoute
+                        (
+                            pageContext.ApplicationContext,
+                            include.PluginContext,
+                            file.FileName
+                        )?.ToString();
 
-            foreach (var include in _componentHub?.IncludeManager
-                .GetIncludes(pageContext.ApplicationContext))
-            {
-                if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
-                {
-                    var includeBaseUri = RouteEndpoint.Combine(contextPath, include.PluginContext.PluginId.ToString());
-                    foreach (var file in include.Files.Where(x => x.Type == WebCore.WebInclude.TypeInclude.JavaScript))
-                    {
-                        _headerScriptLinks.Add(RouteEndpoint.Combine(includeBaseUri, file.FileName));
+                        if (route is null)
+                        {
+                            continue;
+                        }
+
+                        if (file.Type == WebCore.WebInclude.TypeInclude.StyleSheet)
+                        {
+                            _cssLinks.Add(route);
+                        }
+                        else if (file.Type == WebCore.WebInclude.TypeInclude.JavaScript)
+                        {
+                            _headerScriptLinks.Add(route);
+                        }
                     }
                 }
             }
@@ -413,6 +413,8 @@ namespace WebExpress.WebUI.WebPage
         public virtual IHtmlNode Render(IVisualTreeContext context)
         {
             var html = new HtmlElementRootHtml();
+            // assistive technology picks pronunciation rules from the document language
+            html.AddUserAttribute("lang", context.Request?.Culture?.Name);
             html.Head.Title = I18N.Translate(context.Request, Title);
             html.Head.Favicons = Favicons?.Select(x => new Favicon(x.Url, x.Mediatype));
             html.Head.Styles = Styles;

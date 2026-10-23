@@ -78,7 +78,7 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
             if (this._colorCss) {
                 tagElement.classList.add(this._colorCss);
             } else if (this._colorStyle) {
-                tagElement.style.cssText = this._colorStyle;
+                webexpress.webui.ContrastColor.paint(tagElement, this._colorStyle);
             } else {
                 tagElement.classList.add("wx-tag-primary");
             }
@@ -115,6 +115,7 @@ webexpress.webui.TagCtrl = class extends webexpress.webui.Ctrl {
         if (this._tags.join(";") !== newTags.join(";")) {
             this._tags = newTags;
             this.render();
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
         }
     }
 };

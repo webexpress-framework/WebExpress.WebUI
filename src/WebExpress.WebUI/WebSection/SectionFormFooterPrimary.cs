@@ -3,7 +3,8 @@
 namespace WebExpress.WebUI.WebSection
 {
     /// <summary>
-    /// Represents the primary footer section of a form.
+    /// Names the primary footer area of a form as a section — a placeholder slot into which
+    /// fragments can be inserted, typically holding the main action buttons at the bottom of a form.
     /// </summary>
     public class SectionFormFooterPrimary : ISection
     {

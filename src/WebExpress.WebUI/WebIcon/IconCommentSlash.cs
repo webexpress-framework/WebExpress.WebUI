@@ -1,4 +1,4 @@
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a comment-slash.
@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconCommentSlash : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-comment-slash";
+        public override string Symbol => "comment-slash";
     }
 }

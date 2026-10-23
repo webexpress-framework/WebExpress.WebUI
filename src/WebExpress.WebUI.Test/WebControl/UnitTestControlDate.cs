@@ -1,4 +1,5 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+﻿using System.Globalization;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
 
@@ -82,6 +83,56 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that a set date travels culture-neutral next to the culture-formatted text, so the
+        /// client does not have to parse a format it may not understand.
+        /// </summary>
+        [Theory]
+        [InlineData("yyyy-MM-dd", @"<div class=""wx-webui-date"" data-format=""yyyy-MM-dd"" data-value=""2026-10-03"">2026-10-03</div>")]
+        [InlineData("dd. MMMM yyyy", @"<div class=""wx-webui-date"" data-format=""dd. MMMM yyyy"" data-value=""2026-10-03"">03. Oktober 2026</div>")]
+        public void DateValue(string format, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de-DE"));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlDate(null)
+            {
+                Format = _ => format,
+                Date = _ => new DateTime(2026, 10, 3)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the inherited styling properties of the control reach the rendered element.
+        /// </summary>
+        [Fact]
+        public void Styling()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlDate(null)
+            {
+                Classes = ["my-date"],
+                Styles = ["width: 10rem;"],
+                Role = _ => "note"
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-date my-date"" style=""width: 10rem;"" role=""note"" data-format=""yyyy-MM-dd""></div>", html);
+        }
+
+        /// <summary>
         /// Tests the color property of the date control.
         /// </summary>
         [Theory]
@@ -120,7 +171,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(null, @"<div class=""wx-webui-date"" data-format=""yyyy-MM-dd""></div>")]
         [InlineData("", @"<div class=""wx-webui-date"" data-format=""yyyy-MM-dd""></div>")]
         [InlineData(" ", @"<div class=""wx-webui-date"" data-format=""yyyy-MM-dd""></div>")]
-        [InlineData("gold", @"<div class=""wx-webui-date"" data-color-style=""background: gold;"" data-format=""yyyy-MM-dd""></div>")]
+        [InlineData("gold", @"<div class=""wx-webui-date"" data-color-style=""background: gold;color: #000;"" data-format=""yyyy-MM-dd""></div>")]
         public void UserColor(string color, string expected)
         {
             // arrange

@@ -42,7 +42,7 @@ webexpress.webui.Syntax.register("cmd", null, (code) => {
 
     // Converts a matched token to an HTML span element for syntax highlighting
     function tokenToSpan(token, value) {
-        return `<span class="${token}">${value}</span>`;
+        return `<span class="${token}">${webexpress.webui.Syntax.escape(value)}</span>`;
     }
 
     // Process each line for highlighting
@@ -53,7 +53,7 @@ webexpress.webui.Syntax.register("cmd", null, (code) => {
 
         for (const match of matches) {
             const index = match.index;
-            result += line.slice(lastIndex, index);
+            result += webexpress.webui.Syntax.escape(line.slice(lastIndex, index));
 
             for (const key in match.groups) {
                 if (match.groups[key] !== undefined) {
@@ -64,7 +64,7 @@ webexpress.webui.Syntax.register("cmd", null, (code) => {
             lastIndex = index + match[0].length;
         }
 
-        result += line.slice(lastIndex);
+        result += webexpress.webui.Syntax.escape(line.slice(lastIndex));
         return `<span>${result}</span>`;
     }).join('');
 });

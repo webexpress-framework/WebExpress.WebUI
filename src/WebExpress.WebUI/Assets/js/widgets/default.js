@@ -3,8 +3,7 @@
  */
 webexpress.webui.DashboardWidgets.register("widget_stats", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.stats.title"),
-    icon: "fas fa-server",
-    removable: false,
+    icon: "server",
 
     /**
      * Renders the widget content.
@@ -14,8 +13,10 @@ webexpress.webui.DashboardWidgets.register("widget_stats", {
     render: function (container, data) {
         // build internal markup
         const params = data.params;
-        const heading = document.createElement("h2");
-        heading.className = "text-success";
+        // the figure is the value of the widget, not a section of the page: it keeps the size
+        // of a second-level heading without entering the outline
+        const heading = document.createElement("p");
+        heading.className = "h2 text-success";
         heading.textContent = params.title || webexpress.webui.I18N.translate("webexpress.webui:widget.stats.default.heading");
 
         const paragraph = document.createElement("p");
@@ -33,7 +34,7 @@ webexpress.webui.DashboardWidgets.register("widget_stats", {
  */
 webexpress.webui.DashboardWidgets.register("widget_chart", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.chart.title"),
-    icon: "fas fa-chart-line",
+    icon: "chart-line",
 
     /**
      * Renders the widget content.
@@ -85,11 +86,9 @@ webexpress.webui.DashboardWidgets.register("widget_chart", {
             }
         }
 
-        // append the configured element to the widget container
+        // the controller creates the chart once the card is attached, which also
+        // tears it down with the card; a hand-made instance would be built twice
         container.appendChild(chartBox);
-
-        // instantiate the chart controller which automatically parses the data-* attributes
-        new webexpress.webui.ChartCtrl(chartBox);
     }
 });
 
@@ -98,7 +97,7 @@ webexpress.webui.DashboardWidgets.register("widget_chart", {
  */
 webexpress.webui.DashboardWidgets.register("widget_alerts", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.alerts.title"),
-    icon: "fas fa-bell",
+    icon: "bell",
 
     /**
      * Renders the widget content.
@@ -134,7 +133,7 @@ webexpress.webui.DashboardWidgets.register("widget_alerts", {
  */
 webexpress.webui.DashboardWidgets.register("widget_info", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.info.title"),
-    icon: "fas fa-info-circle",
+    icon: "circle-info",
 
     /**
      * Renders a simple informational card with optional title/desc.
@@ -161,7 +160,7 @@ webexpress.webui.DashboardWidgets.register("widget_info", {
  */
 webexpress.webui.DashboardWidgets.register("widget_progress", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.progress.title"),
-    icon: "fas fa-tasks",
+    icon: "list-check",
     /**
      * Renders a simple progress bar.
      * @param {HTMLElement} container - The container element to render into.
@@ -178,7 +177,7 @@ webexpress.webui.DashboardWidgets.register("widget_progress", {
         barInner.style.width = value + "%";
         barInner.textContent = value + "%";
 
-        // optionally adjust bootstrap color
+        // optionally adjust WebExpress color
         if (params.color) {
             barInner.classList.add("bg-" + params.color);
         }
@@ -193,7 +192,7 @@ webexpress.webui.DashboardWidgets.register("widget_progress", {
  */
 webexpress.webui.DashboardWidgets.register("widget_avatar", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.avatar.title"),
-    icon: "fas fa-user",
+    icon: "user",
 
     /**
      * Renders a user/character avatar with name and optional caption.
@@ -231,7 +230,7 @@ webexpress.webui.DashboardWidgets.register("widget_avatar", {
  */
 webexpress.webui.DashboardWidgets.register("widget_list", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.list.title"),
-    icon: "fas fa-list",
+    icon: "list",
 
     /**
      * Renders a list of arbitrary items.
@@ -258,7 +257,7 @@ webexpress.webui.DashboardWidgets.register("widget_list", {
  */
 webexpress.webui.DashboardWidgets.register("widget_bignumber", {
     title: webexpress.webui.I18N.translate("webexpress.webui:widget.bignumber.title"),
-    icon: "fas fa-hashtag",
+    icon: "hashtag",
 
     /**
      * Renders a large numeric value with label (e.g., for KPIs).

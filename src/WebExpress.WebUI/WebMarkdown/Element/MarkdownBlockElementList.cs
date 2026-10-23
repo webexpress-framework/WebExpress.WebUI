@@ -4,7 +4,8 @@ using System.Linq;
 namespace WebExpress.WebUI.WebMarkdown.Element
 {
     /// <summary>
-    /// Represents a list element in a Markdown document.
+    /// A list node in the parsed Markdown tree — an ordered or unordered list that contains the
+    /// individual list items as its children.
     /// </summary>
     public class MarkdownBlockElementList : MarkdownBlockElement
     {

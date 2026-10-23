@@ -9,7 +9,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a dropdown item link control.
+    /// A clickable link entry inside a dropdown menu.
     /// </summary>
     public class ControlDropdownItemLink : IControlDropdownItem
     {
@@ -112,7 +112,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-icon", (icon as Icon)?.Class)
                 .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-tooltip", tooltip)
+                .AddUserAttribute("data-tooltip", I18N.Translate(renderContext, tooltip))
                 .AddUserAttribute("data-color", color?.ToClass())
                 .AddUserAttribute("data-uri", uri?.ToString())
                 .AddUserAttribute("data-target", target?.ToValue());

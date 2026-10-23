@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconFaceGrinBeamSweat : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-face-grin-beam-sweat";
+        public override string Symbol => "face-grin-beam-sweat";
     }
 }

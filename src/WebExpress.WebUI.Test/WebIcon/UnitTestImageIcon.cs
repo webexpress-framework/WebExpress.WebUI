@@ -17,8 +17,8 @@ namespace WebExpress.WebUI.Test.WebIcon
         /// Tests the web image icon.
         /// </summary>
         [Theory]
-        [InlineData(typeof(ImageIcon), "/assets/img/webexpress.svg", @"<img style=""width: 16px; height: 16px;"" src=""/assets/img/webexpress.svg"">")]
-        [InlineData(typeof(ImageIconWebExpress), null, @"<img style=""width: 16px; height: 16px;"" src=""/assets/img/webexpress.svg"">")]
+        [InlineData(typeof(ImageIcon), "/assets/img/webexpress.svg", @"<img style=""width: 16px; height: 16px;"" src=""/assets/img/webexpress.svg"" alt>")]
+        [InlineData(typeof(ImageIconWebExpress), null, @"<img style=""width: 16px; height: 16px;"" src=""/assets/img/webexpress.svg"" alt>")]
         public void Id(Type iconType, string uri, string expected)
         {
             // arrange

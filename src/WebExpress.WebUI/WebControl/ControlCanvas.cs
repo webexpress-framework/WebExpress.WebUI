@@ -1,15 +1,13 @@
-﻿using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a canvas control that can contain other controls.
+    /// Renders an empty HTML <c>&lt;canvas&gt;</c> drawing surface for client-side script to paint on.
+    /// The control holds no child controls; whatever appears on the canvas is drawn by script that
+    /// addresses it through its id.
     /// </summary>
-    /// <remarks>
-    /// The ControlCanvas class provides a container for other controls, allowing for the dynamic construction
-    /// of user interfaces. It supports adding, removing, and rendering child controls.
-    /// </remarks>
     public class ControlCanvas : Control
     {
         /// <summary>
@@ -34,8 +32,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementScriptingCanvas()
             {
                 Id = Id,
-                Class = Css.Concatenate("", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-canvas", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             };
         }

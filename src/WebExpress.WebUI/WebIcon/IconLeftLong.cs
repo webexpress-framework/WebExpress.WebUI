@@ -1,4 +1,4 @@
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a left-long.
@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconLeftLong : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-left-long";
+        public override string Symbol => "left-long";
     }
 }

@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a property for background color for the graph control.
+    /// The predefined background colors used for graph and chart controls.
     /// </summary>
     public class PropertyColorBackgroundGraph : PropertyColor<TypeColorBackgroundGraph>
     {

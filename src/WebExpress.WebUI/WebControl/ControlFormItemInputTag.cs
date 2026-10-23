@@ -8,7 +8,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a tag input control.
+    /// A form input for entering a set of tags (keywords), each shown as a removable chip.
     /// </summary>
     public class ControlFormItemInputTag : ControlFormItemInput<ControlFormInputValueStringList>
     {
@@ -51,6 +51,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Determines whether a label element may point at the field. The client moves the id onto the
+        /// hidden input that posts the value, which is no labelable element, so the caption is a span.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>True if a label element may point at the field.</returns>
+        public override bool IsLabelable(IRenderControlFormContext renderContext)
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -84,6 +95,7 @@ namespace WebExpress.WebUI.WebControl
                 Role = role
             }
                 .AddUserAttribute("name", name)
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext.Request?.Culture, placeholder))
                 .AddUserAttribute("data-value", value)
                 .AddUserAttribute("data-color-css", color?.ToClass())

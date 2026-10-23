@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconPersonCircleQuestion : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-person-circle-question";
+        public override string Symbol => "person-circle-question";
     }
 }

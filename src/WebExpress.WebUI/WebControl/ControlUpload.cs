@@ -69,7 +69,9 @@ namespace WebExpress.WebUI.WebControl
         public ControlUpload(string id)
             : base(id)
         {
-            _form = new ControlForm($"upload_{id}".GetHashCode().ToString("X"));
+            // the name has to be the same in every process: a string hash code is randomized per
+            // process, so an upload sent after a restart or to another cluster node would be dropped
+            _form = new ControlForm($"upload_{id}");
             _inputFile = new ControlFormItemInputFile("file");
 
             _inputFile.ValidateItem += OnValidate;
@@ -123,8 +125,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-upload", GetClasses()),
-                Style = GetStyles()
+                Class = Css.Concatenate("wx-webui-upload", GetClasses(renderContext)),
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("data-uri", uri)
                 .AddUserAttribute("placeholder", I18N.Translate(formRenderContext, placeholder))

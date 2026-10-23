@@ -1,17 +1,14 @@
 ﻿using System;
-using System.Linq;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a table control.
+    /// A table control whose rows can be reordered by the user via drag and drop.
     /// </summary>
     public class ControlTableReorderable : ControlTable, IControlTableReorderable
     {
-
-
         /// <summary>
         /// Gets or sets a value indicating whether columns can be removed.
         /// </summary>
@@ -47,47 +44,13 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var classes = Classes.ToList();
-            var role = Role?.Invoke(renderContext);
+            var html = CreateTableElement(renderContext, "wx-webui-table-reorderable");
 
-            var html = new HtmlElementTextContentDiv()
-            {
-                Id = Id,
-                Class = Css.Concatenate("wx-webui-table-reorderable", classes),
-                Style = GetStyles(),
-                Role = role
-            }
-                .AddUserAttribute("data-color", (Color?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass())
-                .AddUserAttribute("data-striped", (Striped?.Invoke(renderContext) ?? TypeStripedTable.Default).ToClass())
-                .AddUserAttribute("data-border", (TableBorder?.Invoke(renderContext) ?? TypeBorderTable.Default).ToClass())
-                .AddUserAttribute("data-movable-row", MovableRow?.Invoke(renderContext) == true ? "true" : null)
-                .AddUserAttribute("data-allow-column-remove", AllowColumnRemove?.Invoke(renderContext) == true ? "true" : null)
-                .AddUserAttribute("data-persist-key", PersistKey?.Invoke(renderContext))
-                .Add
-                (
-                    new HtmlElementTextContentDiv()
-                    {
-                        Class = Css.Concatenate("wx-table-columns", (HeaderColor?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass())
-                    }
-                        .AddUserAttribute("data-color", (HeaderColor?.Invoke(renderContext) ?? TypeColorTable.Default).ToClass())
-                        .AddUserAttribute("data-suppress-headers", SuppressHeaders?.Invoke(renderContext) == true ? "true" : null)
-                        .Add
-                        (
-                            Columns.Select
-                            (
-                                column => column.Render(renderContext, visualTree)
-                            )
-                        )
-                )
-                .Add
-                (
-                    Rows.Select
-                    (
-                        row => row.Render(renderContext, visualTree)
-                    )
-                );
+            html.AddUserAttribute("data-movable-row", MovableRow?.Invoke(renderContext) == true ? "true" : null);
+            html.AddUserAttribute("data-allow-column-remove", AllowColumnRemove?.Invoke(renderContext) == true ? "true" : null);
+            html.AddUserAttribute("data-persist-key", PersistKey?.Invoke(renderContext));
 
-            return html;
+            return html.Add(RenderContent(renderContext, visualTree));
         }
     }
 }

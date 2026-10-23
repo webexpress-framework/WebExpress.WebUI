@@ -4,7 +4,8 @@ using System.Linq;
 namespace WebExpress.WebUI.WebMarkdown.Element
 {
     /// <summary>
-    /// Represents a paragraph element.
+    /// A paragraph node in the parsed Markdown tree — a block of running text. It holds the inline
+    /// elements (text, links, images, …) that make up the paragraph.
     /// </summary>
     public class MarkdownBlockElementParagraph : MarkdownBlockElement
     {

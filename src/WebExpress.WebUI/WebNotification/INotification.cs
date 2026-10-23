@@ -41,6 +41,14 @@ namespace WebExpress.WebUI.WebNotification
         string Icon { get; set; }
 
         /// <summary>
+        /// Returns the address the notification is about, so the reader can go to the thing
+        /// that changed instead of having to find it. Can be null, for a notification that
+        /// reports something without a page of its own.
+        /// </summary>
+        [JsonPropertyName("link")]
+        string Link { get; set; }
+
+        /// <summary>
         /// Returns the creation time.
         /// </summary>
         [JsonPropertyName("created")]

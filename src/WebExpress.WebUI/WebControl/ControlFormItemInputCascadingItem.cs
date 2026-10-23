@@ -12,7 +12,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a cascading node for the <see cref="ControlFormItemInputCascading"/>.
+    /// A single selectable entry in a <see cref="ControlFormItemInputCascading"/>, whose visibility
+    /// depends on the value chosen in the parent input.
     /// </summary>
     public class ControlFormItemInputCascadingItem : IControlFormItemInputCascadingItem
     {
@@ -129,7 +130,7 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Class = Css.Concatenate("wx-cascading-item"),
             }
-                .AddUserAttribute("data-label", I18N.Translate(text))
+                .AddUserAttribute("data-label", I18N.Translate(renderContext, text))
                 .AddUserAttribute("data-icon", icon is Icon ? (icon as Icon).Class : null)
                 .AddUserAttribute("data-image", image?.ToString() ?? (icon is ImageIcon imageIcon ? imageIcon.Uri?.ToString() : null))
                 .AddUserAttribute("data-label-color", labelColor != TypeColorSelection.Default

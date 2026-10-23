@@ -8,7 +8,7 @@ namespace WebExpress.WebUI.WebControl
     /// element raises the configured event (default: SELECT_ITEM_EVENT), the
     /// bound control's <c>show()</c> method is invoked - which makes this the
     /// counterpart to the user-driven dismiss button on
-    /// <see cref="ControlPanelDismissible"/>. Pairs naturally with
+    /// <see cref="ControlDismissible"/>. Pairs naturally with
     /// <see cref="ControlList"/>, <see cref="ControlTile"/> or
     /// <see cref="ControlTree"/>.
     /// </summary>

@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebUri;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
@@ -15,8 +15,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the image control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<img>")]
-        [InlineData("id", @"<img id=""id"">")]
+        [InlineData(null, @"<img alt>")]
+        [InlineData("id", @"<img id=""id"" alt>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -30,6 +30,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -37,9 +38,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the route property of the image control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<img>")]
-        [InlineData("/a", @"<img src=""/a"">")]
-        [InlineData("/a/b", @"<img src=""/a/b"">")]
+        [InlineData(null, @"<img alt>")]
+        [InlineData("/a", @"<img src=""/a"" alt>")]
+        [InlineData("/a/b", @"<img src=""/a/b"" alt>")]
         public void Route(string uri, string expected)
         {
             // arrange
@@ -54,6 +55,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -61,9 +63,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the width property of the image control.
         /// </summary>
         [Theory]
-        [InlineData(-1, @"<img>")]
-        [InlineData(0, @"<img>")]
-        [InlineData(1, @"<img width=""1"">")]
+        [InlineData(-1, @"<img alt>")]
+        [InlineData(0, @"<img alt>")]
+        [InlineData(1, @"<img alt width=""1"">")]
         public void Width(int width, string expected)
         {
             // arrange
@@ -78,6 +80,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -85,9 +88,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the height property of the image control.
         /// </summary>
         [Theory]
-        [InlineData(-1, @"<img>")]
-        [InlineData(0, @"<img>")]
-        [InlineData(1, @"<img height=""1"">")]
+        [InlineData(-1, @"<img alt>")]
+        [InlineData(0, @"<img alt>")]
+        [InlineData(1, @"<img alt height=""1"">")]
         public void Height(int height, string expected)
         {
             // arrange
@@ -102,6 +105,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -109,10 +113,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the tooltip property of the image control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<img>")]
-        [InlineData("a", @"<img alt=""a"" data-toggle=""tooltip"" title=""a"">")]
-        [InlineData("b", @"<img alt=""b"" data-toggle=""tooltip"" title=""b"">")]
-        [InlineData("a<br/>b", @"<img alt=""a<br/>b"" data-toggle=""tooltip"" title=""a<br/>b"">")]
+        [InlineData(null, @"<img alt>")]
+        [InlineData("a", @"<img alt=""a"" title=""a"">")]
+        [InlineData("b", @"<img alt=""b"" title=""b"">")]
+        [InlineData("a<br/>b", @"<img alt=""a<br/>b"" title=""a<br/>b"">")]
         public void Tooltip(string tooltip, string expected)
         {
             // arrange
@@ -127,6 +131,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }

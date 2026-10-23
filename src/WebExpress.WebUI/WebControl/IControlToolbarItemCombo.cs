@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a toolbar item combo control.
+    /// Contract for a combined, multi-part entry on a toolbar.
     /// </summary>
     public interface IControlToolbarItemCombo : IControlToolbarItem
     {

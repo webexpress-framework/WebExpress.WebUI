@@ -1,7 +1,7 @@
 .wx-modalpage {
 }
 
-.wx-modalpage > .modal-dialog > .modal-content > form {
+.wx-modalpage > form {
     background-color: transparent !important;
     margin: 0 !important;
 }

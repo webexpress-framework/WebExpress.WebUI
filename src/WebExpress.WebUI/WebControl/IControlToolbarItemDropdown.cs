@@ -7,7 +7,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a toolbar item dropdown control.
+    /// Contract for a toolbar entry that opens a dropdown.
     /// </summary>
     public interface IControlToolbarItemDropdown : IControlToolbarItem
     {

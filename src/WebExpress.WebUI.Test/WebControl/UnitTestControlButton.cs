@@ -167,7 +167,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<button type=""button"" class=""wx-button btn""></button>")]
-        [InlineData(typeof(IconStar), @"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>")]
+        [InlineData(typeof(IconStar), @"<button type=""button"" class=""wx-button btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -262,12 +262,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>", html1.Trim());
-            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>", html2.Trim());
-            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>", html3.Trim());
-            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>", html4.Trim());
-            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>", html5.Trim());
-            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""fas fa-star""></i></button>", html6.Trim());
+            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html1.Trim());
+            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html2.Trim());
+            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html3.Trim());
+            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html4.Trim());
+            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html5.Trim());
+            Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html6.Trim());
         }
     }
 }

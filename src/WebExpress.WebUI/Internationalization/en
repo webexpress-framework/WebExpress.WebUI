@@ -1,8 +1,18 @@
-﻿# en-US language resource file
+# en-US language resource file
 plugin.name=WebExpress.WebUI
 plugin.description=Provides basic components.
 
 notificationmanager.initialization=The notification manager has been initialized.
+
+pdfpluginmanager.initialization=The PDF plugin manager has been initialized.
+pdfpluginmanager.register=The PDF plugin '{0}' of '{1}' has been registered.
+pdfpluginmanager.duplicate=The PDF plugin '{0}' of '{1}' was not registered, because the name is already taken.
+pdfpluginmanager.noname=The PDF plugin '{0}' was not registered, because it has no name attribute.
+
+markdownpluginmanager.initialization=The markdown plugin manager has been initialized.
+markdownpluginmanager.register=The markdown plugin '{0}' of '{1}' has been registered.
+markdownpluginmanager.duplicate=The markdown plugin '{0}' of '{1}' was not registered, because the name is already taken.
+markdownpluginmanager.noname=The markdown plugin '{0}' was not registered, because it has no name attribute.
 
 form.empty.id=The form does not have an id!
 form.submit.label=Submit
@@ -11,7 +21,11 @@ form.next.label=Next
 form.cancel.label=Cancel
 form.move.available=Available options
 form.move.selected=Selected options
+form.validation.required=The field "{0}" must not be empty!
 form.inputfile.validation.required=The text field must not be empty!
+form.inputavatar.validation.invalid=The picture could not be read!
+form.inputavatar.validation.type=The picture has a format that is not accepted!
+form.inputavatar.validation.svg=The SVG picture contains code and is not accepted!
 form.inputtextbox.validation.required=The text field must not be empty!
 form.inputtextbox.validation.min=The text does not correspond to the minimum length of {0}!
 form.inputtextbox.validation.max=The text is larger than the maximum length of {0}!
@@ -21,6 +35,17 @@ form.inputpassword.validation.min=The password does not meet the minimum length 
 form.inputpassword.validation.max=The password exceeds the maximum length of {0} characters!
 
 modal.close.label=Close
+
+pdfviewer.fallback=The PDF document cannot be displayed here.
+pdfviewer.open=Open PDF
+
+video.fallback=The video cannot be played here.
+video.open=Open video
+
+audio.fallback=The audio cannot be played here.
+audio.open=Open audio
+
+login.title=Login
 
 confirm.label=Confirm
 confirm.header=Request Confirmation
@@ -41,3 +66,18 @@ fileupload.file.validation.error.nofile=No file was specified.
 
 darkmode.text.light=Activate dark mode
 darkmode.text.dark=Activate light mode
+
+masterdetail.empty.title=No item selected
+masterdetail.empty.message=Please select an item from the list.
+
+carousel.previous=Previous slide
+carousel.next=Next slide
+breadcrumb.label=Breadcrumb
+toolbar.label=Toolbar
+form.actions=Actions
+table.actions=Actions
+sidebar.label=Sidebar
+splitbutton.toggle=More options
+quickfilter.label=Filter
+form.inputspreadsheet.validation.required=The spreadsheet must not be empty!
+spreadsheet.state.invalid=The spreadsheet could not be read.

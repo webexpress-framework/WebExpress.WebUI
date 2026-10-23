@@ -1,13 +1,13 @@
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
-    /// Represents an icon for a text-height.
+    /// Represents an icon for text height.
     /// </summary>
     public class IconTextHeight : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-text-height";
+        public override string Symbol => "text-height";
     }
 }

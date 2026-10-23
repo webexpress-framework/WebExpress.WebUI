@@ -5,7 +5,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form item input group control.
+    /// Groups several inputs into one unit, optionally with shared add-ons such as a prefix or suffix.
     /// </summary>
     public class ControlFormItemInputGroup : ControlFormItemInput<ControlFormInputValueString>
     {

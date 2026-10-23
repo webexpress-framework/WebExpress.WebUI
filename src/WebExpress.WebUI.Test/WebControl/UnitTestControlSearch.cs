@@ -81,7 +81,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-search""><div id=""1"" class=""wx-search-suggestion"" data-icon=""fas fa-home"" data-favorited=""true"">Home</div>*</div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-search""><div id=""1"" class=""wx-search-suggestion"" data-icon=""wx-icon-light wx-icon-light-home"" data-favorited=""true"">Home</div>*</div>", html);
 
         }
 
@@ -90,7 +90,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-webui-search""></div>")]
-        [InlineData(typeof(IconStar), @"<div class=""wx-webui-search"" data-icon=""fas fa-star""></div>")]
+        [InlineData(typeof(IconStar), @"<div class=""wx-webui-search"" data-icon=""wx-icon-light wx-icon-light-star""></div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -135,6 +135,32 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the footer control is rendered into the marked element the client lifts
+        /// into the suggestion menu.
+        /// </summary>
+        [Fact]
+        public void Footer()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+
+            var control = new ControlSearch()
+            {
+                Footer = new ControlText("footer")
+                {
+                    Text = _ => "more"
+                }
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-search""><div class=""wx-search-footer"">*more*</div></div>", html);
         }
 
         /// <summary>

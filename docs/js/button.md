@@ -16,7 +16,7 @@ The initial state and appearance of the button are defined using standard HTML a
 
 | Attribute    | Description                                                                        | Example
 |--------------|------------------------------------------------------------------------------------|---------------------------------
-| `data-icon`  | Specifies the CSS class for an icon to be displayed on the button.                 | `data-icon="fas fa-save"`
+| `data-icon`  | Specifies the CSS class for an icon to be displayed on the button.                 | `data-icon="floppy-disk"`
 | `data-image` | Provides the URL for an image to be displayed on the button.                       | `data-image="/path/to/icon.png"`
 | `data-color` | Applies a color-related CSS class, typically from a framework.                     | `data-color="btn-primary"`
 | `data-size`  | Applies a size-related CSS class.                                                  | `data-size="btn-sm"`
@@ -43,7 +43,7 @@ const buttonCtrl = webexpress.webui.Controller.getInstanceByElement(buttonElemen
 // change the label and icon programmatically
 if (buttonCtrl) {
     buttonCtrl.label = 'Updated Label';
-    buttonCtrl.icon = 'fas fa-check';
+    buttonCtrl.icon = 'check';
 }
 ```
 
@@ -71,16 +71,16 @@ The following examples illustrate the declarative configuration for various butt
 
 ```html
 <!-- A standard button with an icon and text -->
-<button id="save-button" class="wx-webui-button" data-icon="fas fa-save" data-color="btn-primary">
+<button id="save-button" class="wx-webui-button" data-icon="floppy-disk" data-color="btn-primary">
     Save
 </button>
 
 <!-- A button with an icon only, useful for toolbars -->
-<button id="settings-button" class="wx-webui-button" data-icon="fas fa-cog" data-size="btn-sm" title="Settings">
+<button id="settings-button" class="wx-webui-button" data-icon="cog" data-size="btn-sm" title="Settings">
 </button>
 
 <!-- A disabled button -->
-<button id="disabled-button" class="wx-webui-button" data-icon="fas fa-trash" disabled>
+<button id="disabled-button" class="wx-webui-button" data-icon="trash" disabled>
     Delete
 </button>
 ```

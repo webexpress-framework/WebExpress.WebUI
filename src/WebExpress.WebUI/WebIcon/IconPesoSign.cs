@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconPesoSign : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-peso-sign";
+        public override string Symbol => "peso-sign";
     }
 }

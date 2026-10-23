@@ -1,0 +1,160 @@
+/*
+ * Box rendered by webexpress.webui.BoxCtrl.
+ *
+ * A box draws exactly one frame around content that belongs together, and the frame is the
+ * whole statement: a hairline groups, a dashed line marks something provisional, a raised
+ * surface lifts content out of the flow, a bar on the leading edge points at it. Every frame is
+ * expressed through the same handful of custom properties, so a layout is a set of values
+ * rather than a set of rules, and an accent or a host stylesheet can re-declare one value
+ * without knowing which frame is drawn.
+ *
+ * The box inside the editor is the same box: the editor keeps a box add-on in its generic
+ * card frame, and that frame carries the layout as a data attribute, so every rule below
+ * names both the rendered box and the body of such a frame - the author sees the frame the
+ * reader will get.
+ *
+ * All colours come from the WebExpress CSS variables that ship with WebExpress.WebUI, so a box
+ * follows the light / dark switch without extra rules. --wx-box-shadow is deliberately not
+ * used as a name here: it is the framework-wide elevation, and a box that redefined it would
+ * take the shadow off every dropdown inside it.
+ */
+
+.wx-box,
+.wx-addon-frame[data-addon-id="box"] > .wx-addon-body-container {
+    --wx-box-padding-y: 0.75rem;
+    --wx-box-padding-x: 1rem;
+    --wx-box-line-width: var(--wx-border-width);
+    --wx-box-line-style: solid;
+    --wx-box-line-color: var(--wx-border-color);
+    --wx-box-accent-width: 0.25rem;
+    --wx-box-radius: var(--wx-border-radius);
+    --wx-box-fill: transparent;
+    --wx-box-elevation: none;
+    --wx-box-label-size: 0.75rem;
+    --wx-box-label-spacing: 0.08em;
+
+    display: block;
+    min-width: 0;
+    padding: var(--wx-box-padding-y) var(--wx-box-padding-x);
+    border: var(--wx-box-line-width) var(--wx-box-line-style) var(--wx-box-line-color);
+    border-radius: var(--wx-box-radius);
+    background-color: var(--wx-box-fill);
+    box-shadow: var(--wx-box-elevation);
+}
+
+/* ---------------------------------------------------------------- header */
+
+/* the label is set like a section label - small, upper case, in the secondary color - so it
+   reads as the name of the group and not as its first line of content */
+.wx-box-header {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin: 0 0 0.5rem 0;
+    color: var(--wx-secondary-color);
+}
+
+.wx-box-header.hide {
+    display: none;
+}
+
+.wx-box-title {
+    font-size: var(--wx-box-label-size);
+    font-weight: 600;
+    letter-spacing: var(--wx-box-label-spacing);
+    text-transform: uppercase;
+    line-height: 1.4;
+}
+
+.wx-box-icon {
+    font-size: var(--wx-box-label-size);
+    line-height: 1;
+    flex: none;
+}
+
+img.wx-box-icon {
+    width: 1em;
+    height: 1em;
+    object-fit: contain;
+}
+
+/* ------------------------------------------------------------------ body */
+
+.wx-box-body {
+    min-width: 0;
+}
+
+/* the last block inside a box would otherwise add its own margin to the padding of the frame
+   and the box would look taller at the bottom than at the top */
+.wx-box-body > :last-child,
+.wx-addon-frame[data-addon-id="box"] > .wx-addon-body-container > :last-child {
+    margin-bottom: 0;
+}
+
+/* --------------------------------------------------------------- layouts */
+
+.wx-box-dashed,
+.wx-addon-frame[data-addon-id="box"][data-layout="dashed"] > .wx-addon-body-container {
+    --wx-box-line-style: dashed;
+}
+
+.wx-box-dotted,
+.wx-addon-frame[data-addon-id="box"][data-layout="dotted"] > .wx-addon-body-container {
+    --wx-box-line-style: dotted;
+}
+
+/* a double line needs three pixels to show both of them */
+.wx-box-double,
+.wx-addon-frame[data-addon-id="box"][data-layout="double"] > .wx-addon-body-container {
+    --wx-box-line-style: double;
+    --wx-box-line-width: calc(var(--wx-border-width) * 3);
+}
+
+/* the bar takes the line color, so the accent recolors it like any other frame */
+.wx-box-accent,
+.wx-addon-frame[data-addon-id="box"][data-layout="accent"] > .wx-addon-body-container {
+    --wx-box-radius: var(--wx-border-radius-sm);
+    border-width: 0 0 0 var(--wx-box-accent-width);
+}
+
+/* the line stays in the layout at zero opacity rather than being dropped, so a raised, an
+   inset and a solid box beside each other keep their content on one grid */
+.wx-box-raised,
+.wx-addon-frame[data-addon-id="box"][data-layout="raised"] > .wx-addon-body-container {
+    --wx-box-line-color: transparent;
+    --wx-box-fill: var(--wx-body-bg);
+    --wx-box-elevation: var(--wx-box-shadow);
+}
+
+.wx-box-inset,
+.wx-addon-frame[data-addon-id="box"][data-layout="inset"] > .wx-addon-body-container {
+    --wx-box-line-color: transparent;
+    --wx-box-fill: var(--wx-tertiary-bg);
+}
+
+.wx-box-none,
+.wx-addon-frame[data-addon-id="box"][data-layout="none"] > .wx-addon-body-container {
+    --wx-box-line-color: transparent;
+}
+
+/* ---------------------------------------------------------------- accent */
+
+/* the accent is set on the host, so the frame takes it through currentColor and the label
+   inherits it; the content is not what was accented, so the body goes back to the body color */
+.wx-box-accented {
+    --wx-box-line-color: currentColor;
+}
+
+.wx-box-accented > .wx-box-header {
+    color: inherit;
+}
+
+.wx-box-accented > .wx-box-body {
+    color: var(--wx-body-color);
+}
+
+/* a filled frame has no line to color, so the accent tints the fill instead - lightly, because
+   the fill is a ground and the content has to stay readable on it */
+.wx-box-accented.wx-box-inset {
+    --wx-box-fill: color-mix(in srgb, currentColor 12%, transparent);
+}

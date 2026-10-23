@@ -2,6 +2,9 @@
 
 namespace WebExpress.WebUI.WebControl
 {
+    /// <summary>
+    /// Contract for a control that renders a list of links and lets links be added to its content.
+    /// </summary>
     public interface IControlLinkList : IControl
     {
         /// <summary> 

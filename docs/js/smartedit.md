@@ -2,7 +2,7 @@
 
 # SmartEditCtrl
 
-The `SmartEditCtrl` is a versatile control for in-line editing of values directly within HTML elements. It extends the functionality of conventional display elements with the ability to edit these values comfortably and without changing the editing context. When hovering over a target element with the mouse, a pencil icon appears to the right of the content, which serves as an edit button. A click on the pencil opens an editor form at that exact position, allowing the values to be edited. The input can either be accepted and saved or canceled. The choice of editor is flexible and can be customized, allowing for the use of simple text fields or specialized components like a code editor.
+The `SmartEditCtrl` is a versatile control for in-line editing of values directly within HTML elements. It extends the functionality of conventional display elements with the ability to edit these values comfortably and without changing the editing context. When hovering over a target element with the mouse, a pen icon appears to the right of the content, which serves as an edit button. A click on the pen opens an editor form at that exact position, allowing the values to be edited. The input can either be accepted and saved or canceled. The choice of editor is flexible and can be customized, allowing for the use of simple text fields or specialized components like a code editor.
 
 ```
    ┌──────────────────────────────────────────┐
@@ -18,13 +18,20 @@ Configuration is done declaratively via `data-*` attributes on the HTML element.
 | `data-object-name` | The name of the data object being edited.
 | `data-form-action` | The URL to which the form data is sent upon saving.
 | `data-form-method` | The HTTP method for the request (e.g., `PUT`, `POST`). Defaults to `PUT`.
+| `data-placeholder` | Text the read view shows for an empty value. Falls back to the `placeholder` attribute of the editor itself.
+
+### Empty Values
+
+An empty value would leave an empty read view: nothing to hover, nothing to click, and therefore no way to reach the editor — on exactly the values that most need one. The read view falls back to the placeholder instead, shown muted (`wx-smart-edit-placeholder`), which both names the field and gives the pen an area to appear in. A control whose editor carries no placeholder and whose host declares none keeps the empty read view it always had.
+
+Note that the pen is pinned to the right edge of the control's own box (`position: absolute; right: 1em`). A host that lets the box shrink to the width of its text therefore gets the pen inside the sentence rather than at the end of the column; give the box the width of the space it should own.
 
 ### Functionality
 
 The control operates autonomously and manages the entire editing workflow:
 
-- **Dynamic DOM Manipulation**: Upon initialization, the target element is equipped with mouse events, so the pencil icon is shown on mouseover and removed on mouseout. A double-click also initiates editing.
-- **Editor Integration**: After clicking the pencil, the original display content is temporarily replaced by a form containing the editor and control buttons (Save, Cancel). The editor component is the first child element of the `wx-webui-smart-edit` container, allowing for flexible integration of different editor types.
+- **Dynamic DOM Manipulation**: Upon initialization, the target element is equipped with mouse events, so the pen icon is shown on mouseover and removed on mouseout. A double-click also initiates editing.
+- **Editor Integration**: After clicking the pen, the original display content is temporarily replaced by a form containing the editor and control buttons (Save, Cancel). The editor component is the first child element of the `wx-webui-smart-edit` container, allowing for flexible integration of different editor types.
 - **State Management and Events**: During editing, the element is protected by the internal reference `_activeEdit`, ensuring that only one edit can be active at a time. After editing is complete—whether by saving or canceling—the original display is restored, and corresponding events are dispatched.
 - **Application Integration**: Changes are communicated to the application via a `fetch` request to the configured endpoint. The control dispatches the following global custom events on the `document`:
     - `webexpress.webui.Event.START_INLINE_EDIT_EVENT`: Fired when editing begins.
@@ -78,6 +85,21 @@ document.addEventListener(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, (e) => 
 });
 ```
 
+#### Confirming or setting back a save
+
+A host that stores the value itself - an editor without `data-form-action` - may fail to store it. The save event lets it decide the outcome instead of leaving an unsaved value on screen:
+
+- `e.detail.waitUntil(promise)` keeps the editor open, with its spinner, until the promise settles. A promise that resolves to anything but `false` takes the value over; one that resolves to `false` or rejects sets it back to the value from before the edit.
+- `e.detail.confirm()` and `e.detail.revert()` decide at once.
+
+Without any of the three the value is taken over as soon as the event was dispatched, as before. A value that was set back leaves the editor ready for another attempt. The same applies after a `data-form-action` submit, where the host can read `e.detail.status` and revert a refused write.
+
+```javascript
+host.addEventListener(webexpress.webui.Event.SAVE_INLINE_EDIT_EVENT, (e) => {
+    e.detail.waitUntil(service.update({ name: e.detail.value }).then((result) => result.ok));
+});
+```
+
 ### HTML Usage Example
 
 To use the control, wrap your editor element within a container and assign it the class `wx-webui-smart-edit`.
@@ -98,5 +120,9 @@ To use the control, wrap your editor element within a container and assign it th
     </div>
 </div>
 ```
+
+## Read view of an editor
+
+When the editor is a WYSIWYG [editor](editor.md), the read view is not the raw stored value - that value is the editor's working surface, with add-on frames, table column resizers and the guard paragraphs around non-editable blocks. SmartEdit builds a [ContentCtrl](content.md) for it instead, which converts the value into the document it describes. The SmartEdit placeholder is passed through, so an unset value still names the field and still offers the area the pen appears over.
 
 This control provides an efficient, user-friendly inline editing experience in web applications.

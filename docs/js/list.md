@@ -2,7 +2,7 @@
 
 # ListCtrl
 
-The `ListCtrl` is a flexible flat-list component that renders a collection of items inside a `<ul>` element. It supports item selection, drag-and-drop reordering, inline editing, per-item context menus (options), deletable rows, change-flash highlighting, and cookie-based order persistence.
+The `ListCtrl` is a flexible flat-list component that renders a collection of items inside a `<ul>` element. It supports item selection, drag-and-drop reordering, inline editing, per-item context menus (options), deletable rows, change-flash highlighting, and localStorage-based order persistence.
 
 ```
    ┌───────────────────────────────────────┐
@@ -29,17 +29,17 @@ The initialization and behaviour of the `ListCtrl` are controlled via `data-` at
 | `data-delete-confirm` | Set to `"true"` to show a browser `confirm()` dialog before deleting a row. |
 | `data-delete-label`   | Label text for the delete button. Default: `"Delete"`. |
 | `data-delete-title`   | Tooltip text for the delete button. Default: `"Delete item"`. |
-| `data-persist-key`    | Cookie key used to persist item order across page loads. Falls back to the element's `id` if omitted. Only effective when all items have an `id`. |
+| `data-persist-key`    | localStorage key used to persist item order across page loads. Falls back to the element's `id` if omitted. Only effective when all items have an `id`. |
 
 ### Item element attributes (`wx-list-item`)
 
 | Attribute                   | Description |
 |-----------------------------|-------------|
 | `id`                        | Unique identifier for the item. Required for persistence and programmatic selection. |
-| `data-color`                | A Bootstrap or custom CSS class added to the `<li>` element (e.g. `"text-danger"`). |
+| `data-color`                | A WebExpress or custom CSS class added to the `<li>` element (e.g. `"text-danger"`). |
 | `data-editable`             | Set to `"true"` to make the item content inline-editable via `SmartEditCtrl`. |
 | `data-image`                | URL of an image to show in the item content area. |
-| `data-icon`                 | CSS class of a Font Awesome icon to prepend (e.g. `"fa-solid fa-star"`). |
+| `data-icon`                 | Name of an icon to prepend (e.g. `"star"`). |
 | `data-uri`                  | Link target URI rendered inside the item content. |
 | `data-target`               | Link target (`_blank`, `_self`, …). |
 | `data-modal`                | Modal selector to open on click. |
@@ -68,7 +68,7 @@ Place a child `<div class="wx-list-options">` inside the host element to define 
 
 **Change-flash highlight** — after a `render()` call, items whose text content has changed since the previous render receive a brief CSS flash animation (`wx-row-flash`). This can be suppressed for a single cycle with `suppressNextChangeFlash()` or toggled globally with `setChangeFlash(bool)`.
 
-**Persistence** — when `data-persist-key` is set (or when the host element has an `id`), the current item order is serialised as JSON and stored in a cookie (30 days, `SameSite=Lax`) after every reorder. On the next page load the order is restored automatically. Persistence only works when every item carries an `id` attribute.
+**Persistence** — when `data-persist-key` is set (or when the host element has an `id`), the current item order is serialised as JSON and stored in localStorage after every reorder. On the next page load the order is restored automatically. Persistence only works when every item carries an `id` attribute.
 
 ## Programmatic Control
 
@@ -167,7 +167,7 @@ el.addEventListener(webexpress.webui.Event.ROW_REORDER_EVENT, (e) => {
 ```html
 <!--
     A selectable, movable list with options menu and order persistence.
-    The cookie key is derived from the element id ("character-list").
+    The storage key is derived from the element id ("character-list").
 -->
 <ul id="character-list"
     class="wx-webui-list"
@@ -180,13 +180,13 @@ el.addEventListener(webexpress.webui.Event.ROW_REORDER_EVENT, (e) => {
 
     <!-- global options menu entries (shared by all items) -->
     <div class="wx-list-options">
-        <div data-icon="fa-solid fa-pen" data-uri="/edit">Edit</div>
-        <div data-icon="fa-solid fa-trash" data-uri="/delete">Delete</div>
+        <div data-icon="pen" data-uri="/edit">Edit</div>
+        <div data-icon="trash" data-uri="/delete">Delete</div>
     </div>
 
     <!-- list items -->
     <div class="wx-list-item" id="char-1"
-         data-icon="fa-solid fa-user"
+         data-icon="user"
          data-wx-primary-action="frame"
          data-wx-primary-target="#detail-frame"
          data-wx-primary-uri="/characters/1">
@@ -194,7 +194,7 @@ el.addEventListener(webexpress.webui.Event.ROW_REORDER_EVENT, (e) => {
     </div>
 
     <div class="wx-list-item" id="char-2"
-         data-icon="fa-solid fa-user"
+         data-icon="user"
          data-wx-primary-action="frame"
          data-wx-primary-target="#detail-frame"
          data-wx-primary-uri="/characters/2">
@@ -202,7 +202,7 @@ el.addEventListener(webexpress.webui.Event.ROW_REORDER_EVENT, (e) => {
     </div>
 
     <div class="wx-list-item" id="char-3"
-         data-icon="fa-solid fa-user"
+         data-icon="user"
          data-wx-primary-action="frame"
          data-wx-primary-target="#detail-frame"
          data-wx-primary-uri="/characters/3">

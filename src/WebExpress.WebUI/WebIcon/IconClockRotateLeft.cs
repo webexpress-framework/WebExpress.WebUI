@@ -1,4 +1,4 @@
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a clock-rotate-left.
@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconClockRotateLeft : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-clock-rotate-left";
+        public override string Symbol => "clock-rotate-left";
     }
 }

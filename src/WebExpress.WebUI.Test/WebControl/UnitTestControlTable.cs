@@ -34,6 +34,31 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that the fill mode marks the host, which is what makes a shell
+        /// hand a height down to the table instead of letting it grow.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-table""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(true, @"<div class=""wx-webui-table wx-fill""><div class=""wx-table-columns""></div></div>")]
+        public void Fill(bool fill, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable()
+            {
+                Fill = _ => fill
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the table border property of the table control.
         /// </summary>
         [Theory]
@@ -212,6 +237,34 @@ namespace WebExpress.WebUI.Test.WebControl
             var expected = @"<div class=""wx-webui-table""><div class=""wx-table-columns""></div><div class=""wx-table-row""><div></div></div><div class=""wx-table-row""><div></div></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the footer follows the rows as one element the table script reads, and
+        /// that a table without footer cells renders no footer element at all.
+        /// </summary>
+        [Fact]
+        public void AddFooter()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTable();
+
+            control.AddColumn("Item");
+            control.AddColumn("Count");
+            control.AddRow(new ControlTableCell() { Text = _ => "Screws" }, new ControlTableCell() { Text = _ => "120" });
+            control.AddFooter(new ControlTableCell() { Text = _ => "Total" }, new ControlTableCell() { Text = _ => "120" });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            var expected = @"<div class=""wx-webui-table""><div class=""wx-table-columns""><div data-label=""Item""></div><div data-label=""Count""></div></div><div class=""wx-table-row""><div>Screws</div><div>120</div></div><div class=""wx-table-footer""><div>Total</div><div>120</div></div></div>";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+            Assert.Equal(2, control.Footer.Count());
         }
 
     }

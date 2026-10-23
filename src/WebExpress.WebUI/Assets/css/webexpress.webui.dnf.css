@@ -1,0 +1,233 @@
+/*
+ * Disjunctive normal form.
+ *
+ * Two levels have to stay apart at a glance: the terms of one conjunction, and
+ * the conjunctions themselves. The conjunction is drawn as a framed row that
+ * holds a selection field, the disjunction as a full width OR rule between two
+ * such rows. Everything the chips themselves look like comes from the selection
+ * control, so a term reads the same here as it does in a plain selection field.
+ */
+
+.wx-dnf {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+}
+
+/* ------------------------------------------------------------------ input */
+
+.wx-dnf-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35em;
+}
+
+.wx-dnf-group {
+    position: relative;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 0.3em;
+    border: var(--wx-border-width) solid var(--wx-border-color);
+    border-radius: var(--wx-border-radius);
+    padding: 0.2em 0.4em 0.2em 0.2em;
+}
+
+/* the selection is the content of the row and takes whatever is left of it */
+.wx-dnf-group > .wx-selection {
+    flex: 1;
+    min-width: 0;
+}
+
+/* the field inside a group carries the group frame instead of its own */
+.wx-dnf-group > .wx-selection > div:nth-child(2) {
+    border: 0;
+    background-color: transparent;
+}
+
+/*
+ * The chips of a conjunction stand further apart than in a plain selection
+ * field. Inside a frame that already reads as one row, a tight run of chips
+ * reads as a single term rather than as several ANDed ones, which is the
+ * distinction the group exists to draw.
+ */
+.wx-dnf-group > .wx-selection > div:nth-child(2) > ul {
+    gap: 0.5em;
+}
+
+/*
+ * The remove affordance answers a hover anywhere on its chip: at this size the
+ * glyph is a far smaller target than the chip it removes, so pointing at the
+ * chip already has to announce what clicking the x would do.
+ */
+.wx-dnf-group > .wx-selection > div:nth-child(2) > ul > li:hover > a {
+    color: var(--wx-danger) !important;
+}
+
+.wx-dnf-group > a {
+    flex: 0 0 auto;
+    text-decoration: none;
+    font-size: 0.9em;
+    color: var(--wx-secondary);
+    cursor: pointer;
+}
+
+.wx-dnf-group > a:hover {
+    color: var(--wx-danger);
+}
+
+/*
+ * The AND marker of a conjunction. It rides on the group frame like a legend,
+ * which keeps it out of the flow of the chips - the chips are rendered by the
+ * selection control and are not this control's to interleave.
+ */
+.wx-dnf-badge {
+    position: absolute;
+    top: -0.7em;
+    left: 0.6em;
+    z-index: 1;
+    padding: 0 0.35em;
+    border-radius: 0.2em;
+    background-color: var(--wx-body-bg);
+    color: var(--wx-secondary-color);
+    font-size: 0.7em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.4;
+}
+
+.wx-dnf-conjunction {
+    border-color: var(--wx-secondary);
+}
+
+/*
+ * The OR rule between two conjunctions. The word sits on a hairline that runs
+ * the full width, so the disjunction reads as the outer, weaker binding and the
+ * framed rows as the inner, stronger one.
+ */
+.wx-dnf-separator {
+    display: flex;
+    align-items: center;
+    gap: 0.6em;
+    color: var(--wx-secondary-color);
+    font-size: 0.75em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.wx-dnf-separator::before,
+.wx-dnf-separator::after {
+    content: "";
+    flex: 1;
+    height: var(--wx-border-width);
+    background-color: var(--wx-border-color);
+}
+
+.wx-dnf-actions {
+    display: flex;
+}
+
+.wx-dnf-add {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    border: 0;
+    background: none;
+    padding: 0.1em 0.2em;
+    color: var(--wx-link-color);
+    font-size: 0.9em;
+    cursor: pointer;
+}
+
+.wx-dnf-add:hover:not(:disabled) {
+    color: var(--wx-link-hover-color);
+}
+
+.wx-dnf-add:disabled {
+    color: var(--wx-secondary);
+    cursor: default;
+}
+
+.wx-dnf.wx-disabled,
+.wx-dnf-group.wx-disabled {
+    opacity: 0.65;
+    pointer-events: none;
+}
+
+/* ------------------------------------------------------------------ view */
+
+/*
+ * The read-only expression is a single run of text-like chips: the operators are
+ * real nodes here, because this control owns the whole rendering and a reader
+ * copying the expression should get the words with it.
+ */
+.wx-dnf-view {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3em;
+}
+
+.wx-dnf-view .wx-dnf-group {
+    display: inline-flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.3em;
+    border: 0;
+    padding: 0;
+}
+
+.wx-dnf-view .wx-dnf-bracketed::before {
+    content: "(";
+    color: var(--wx-secondary);
+}
+
+.wx-dnf-view .wx-dnf-bracketed::after {
+    content: ")";
+    color: var(--wx-secondary);
+}
+
+.wx-dnf-term {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4em;
+    padding: 0.1em 0.4em;
+    border-radius: 0.2em;
+    white-space: nowrap;
+}
+
+.wx-dnf-term.is-disabled {
+    opacity: 0.65;
+}
+
+.wx-dnf-operator {
+    /* the muted text color follows the theme; the fixed gray falls short of 4.5:1 on dark */
+    color: var(--wx-secondary-color);
+    font-size: 0.75em;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+}
+
+.wx-dnf-placeholder {
+    color: var(--wx-secondary-color);
+}
+
+/*
+ * The compact form is what a table cell gets: one line that clips instead of
+ * growing the row. The full expression stays reachable through the title the
+ * control writes.
+ */
+.wx-dnf-compact {
+    flex-wrap: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.wx-dnf-compact .wx-dnf-group {
+    flex-wrap: nowrap;
+}

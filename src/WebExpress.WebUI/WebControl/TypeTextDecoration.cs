@@ -1,17 +1,19 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the type of text decoration.
+    /// Whether the decoration a text would get from its element is kept or suppressed, for example
+    /// to remove the underline of a link. Adding a decoration is not supported.
     /// </summary>
     public enum TypeTextDecoration
     {
         /// <summary>
-        /// The default text decoration.
+        /// The text keeps the decoration of its element.
         /// </summary>
         Default,
 
         /// <summary>
-        /// No text decoration.
+        /// For text whose element brings a decoration that would be noise there, such as a link
+        /// inside a card that is already recognizable as clickable.
         /// </summary>
         None
     }

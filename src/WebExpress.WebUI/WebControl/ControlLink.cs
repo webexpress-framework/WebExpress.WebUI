@@ -31,7 +31,7 @@ namespace WebExpress.WebUI.WebControl
         public System.Func<IRenderControlContext, TypeActive> Active
         {
             get => (System.Func<IRenderControlContext, TypeActive>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -40,7 +40,7 @@ namespace WebExpress.WebUI.WebControl
         public System.Func<IRenderControlContext, TypeTextDecoration> Decoration
         {
             get => (System.Func<IRenderControlContext, TypeTextDecoration>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -64,13 +64,13 @@ namespace WebExpress.WebUI.WebControl
         public System.Func<IRenderControlContext, TypeTarget> Target { get; set; }
 
         /// <summary>
-        /// Gets or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a
         /// click to open a modal or similar target.
         /// </summary>
         public System.Func<IRenderControlContext, IAction> PrimaryAction { get; set; }
 
         /// <summary>
-        /// Gets or sets the secondary action, typically triggered by a 
+        /// Gets or sets the secondary action, typically triggered by a
         /// double-click to open a modal or similar target.
         /// </summary>
         public System.Func<IRenderControlContext, IAction> SecondaryAction { get; set; }
@@ -101,7 +101,7 @@ namespace WebExpress.WebUI.WebControl
         public System.Func<IRenderControlContext, TypeVerticalAlignment> VerticalAlignment
         {
             get => (System.Func<IRenderControlContext, TypeVerticalAlignment>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -110,7 +110,7 @@ namespace WebExpress.WebUI.WebControl
         public System.Func<IRenderControlContext, PropertySizeText> Size
         {
             get => (System.Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -134,10 +134,10 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
         /// <remarks>
-        /// This method allows adding one or multiple controls to the content collection 
-        /// of the control panel. It is useful for dynamically constructing the user interface by 
+        /// This method allows adding one or multiple controls to the content collection
+        /// of the control panel. It is useful for dynamically constructing the user interface by
         /// appending various controls to the panel's content.
-        /// 
+        ///
         /// Example usage:
         /// <code>
         /// var link = new ControlLink();
@@ -145,7 +145,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlText { Text = "B" };
         /// link.Add(text1, text2);
         /// </code>
-        /// 
+        ///
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         public void Add(params IControl[] controls)
@@ -158,10 +158,10 @@ namespace WebExpress.WebUI.WebControl
         /// </summary>
         /// <param name="controls">The controls to add to the content.</param>
         /// <remarks>
-        /// This method allows adding one or multiple controls to the content collection 
-        /// of the control panel. It is useful for dynamically constructing the user interface by 
+        /// This method allows adding one or multiple controls to the content collection
+        /// of the control panel. It is useful for dynamically constructing the user interface by
         /// appending various controls to the panel's content.
-        /// 
+        ///
         /// Example usage:
         /// <code>
         /// var link = new ControlLink();
@@ -169,7 +169,7 @@ namespace WebExpress.WebUI.WebControl
         /// var text2 = new ControlText { Text = "B" };
         /// link.Add(text1, text2);
         /// </code>
-        /// 
+        ///
         /// This method accepts any control that implements the <see cref="IControl"/> interface.
         /// </remarks>
         public void Add(IEnumerable<IControl> controls)
@@ -206,7 +206,7 @@ namespace WebExpress.WebUI.WebControl
                 }
             }
 
-            return string.Join("&amp;", from x in dict where !string.IsNullOrWhiteSpace(x.Value.Value) select x.Value.ToString());
+            return string.Join("&", from x in dict where !string.IsNullOrWhiteSpace(x.Value.Value) select x.Value.ToString());
         }
 
         /// <summary>
@@ -236,17 +236,26 @@ namespace WebExpress.WebUI.WebControl
             var tooltip = Tooltip?.Invoke(renderContext);
             var text = Text?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
+            var active = Active?.Invoke(renderContext);
 
             var html = new HtmlElementTextSemanticsA([.. controls.Select(x => x.Render(renderContext, visualTree))])
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-link", icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-link", icon is ImageIcon ? "d-inline-flex align-items-baseline" : null, GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 Href = Uri?.Invoke(renderContext)?.ToString() + (param.Length > 0 ? "?" + param : string.Empty),
                 Target = Target?.Invoke(renderContext) ?? TypeTarget.None,
                 Title = string.IsNullOrEmpty(title) ? I18N.Translate(renderContext.Request, tooltip) : I18N.Translate(renderContext.Request, title)
             };
+
+            // a link has no disabled attribute, so the state is spoken through aria and the
+            // link leaves the tab order, as a disabled button would
+            if (active == TypeActive.Disabled)
+            {
+                html.AddUserAttribute("aria-disabled", "true");
+                html.AddUserAttribute("tabindex", "-1");
+            }
 
             if (icon is not null)
             {
@@ -263,7 +272,6 @@ namespace WebExpress.WebUI.WebControl
 
             if (!string.IsNullOrWhiteSpace(tooltip))
             {
-                html.AddUserAttribute("data-bs-toggle", "tooltip");
             }
 
             PrimaryAction?.Invoke(renderContext)?.ApplyUserAttributes(html, TypeAction.Primary);

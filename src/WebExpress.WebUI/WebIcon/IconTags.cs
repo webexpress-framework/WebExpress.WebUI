@@ -6,8 +6,8 @@
     public class IconTags : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-tags";
+        public override string Symbol => "tags";
     }
 }

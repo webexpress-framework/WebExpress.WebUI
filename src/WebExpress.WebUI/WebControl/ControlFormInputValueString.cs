@@ -3,7 +3,7 @@
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form input value of type string.
+    /// Represents the value of a form input field as text.
     /// </summary>
     public class ControlFormInputValueString : IControlFormInputValue
     {
@@ -11,6 +11,11 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the string value.
         /// </summary>
         public string Text { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the text is missing or blank.
+        /// </summary>
+        public bool IsEmpty => string.IsNullOrWhiteSpace(Text);
 
         /// <summary>
         /// Initializes a new instance of the class.

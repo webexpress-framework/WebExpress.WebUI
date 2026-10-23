@@ -34,6 +34,31 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that the fill mode marks the host, which is what makes a shell
+        /// hand a height down to the tiles instead of letting them grow.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-tile""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-tile wx-fill""></div>")]
+        public void Fill(bool fill, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTile()
+            {
+                Fill = _ => fill
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the movable property of the tile control.
         /// </summary>
         [Theory]

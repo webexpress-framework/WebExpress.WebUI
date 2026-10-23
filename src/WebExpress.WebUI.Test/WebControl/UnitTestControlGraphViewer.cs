@@ -14,9 +14,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the graph view control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-graph-viewer"" role=""region""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-graph-viewer"" role=""region""></div>")]
-        [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<div id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C"" class=""wx-webui-graph-viewer"" role=""region""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-graph-viewer"" role=""group""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-graph-viewer"" role=""group""></div>")]
+        [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<div id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C"" class=""wx-webui-graph-viewer"" role=""group""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -36,9 +36,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the node style property of the graph view control.
         /// </summary>
         [Theory]
-        [InlineData(TypeStyleGraphNode.Default, @"<div class=""wx-webui-graph-viewer"" role=""region""></div>")]
-        [InlineData(TypeStyleGraphNode.LabelInside, @"<div class=""wx-webui-graph-viewer"" role=""region""></div>")]
-        [InlineData(TypeStyleGraphNode.LabelBelow, @"<div class=""wx-webui-graph-viewer"" role=""region"" data-node-style=""label-below""></div>")]
+        [InlineData(TypeStyleGraphNode.Default, @"<div class=""wx-webui-graph-viewer"" role=""group""></div>")]
+        [InlineData(TypeStyleGraphNode.LabelInside, @"<div class=""wx-webui-graph-viewer"" role=""group""></div>")]
+        [InlineData(TypeStyleGraphNode.LabelBelow, @"<div class=""wx-webui-graph-viewer"" role=""group"" data-node-style=""label-below""></div>")]
         public void NodeStyle(TypeStyleGraphNode style, string expected)
         {
             // arrange
@@ -61,9 +61,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the edge style property of the graph view control.
         /// </summary>
         [Theory]
-        [InlineData(TypeStyleGraphEdge.Default, @"<div class=""wx-webui-graph-viewer"" role=""region""></div>")]
-        [InlineData(TypeStyleGraphEdge.Straight, @"<div class=""wx-webui-graph-viewer"" role=""region"" data-edge-style=""straight""></div>")]
-        [InlineData(TypeStyleGraphEdge.Smooth, @"<div class=""wx-webui-graph-viewer"" role=""region"" data-edge-style=""smooth""></div>")]
+        [InlineData(TypeStyleGraphEdge.Default, @"<div class=""wx-webui-graph-viewer"" role=""group""></div>")]
+        [InlineData(TypeStyleGraphEdge.Straight, @"<div class=""wx-webui-graph-viewer"" role=""group"" data-edge-style=""straight""></div>")]
+        [InlineData(TypeStyleGraphEdge.Smooth, @"<div class=""wx-webui-graph-viewer"" role=""group"" data-edge-style=""smooth""></div>")]
         public void EdgeStyle(TypeStyleGraphEdge style, string expected)
         {
             // arrange
@@ -108,7 +108,7 @@ namespace WebExpress.WebUI.Test.WebControl
             Assert.Contains(node2, control.Nodes);
             Assert.Contains(edge1, control.Edges);
 
-            var expected = @"<div id=""id"" class=""wx-webui-graph-viewer"" role=""region""><div id=""node1"" class=""wx-graph-node""></div><div id=""node2"" class=""wx-graph-node""></div><div id=""edge1"" class=""wx-graph-edge""></div></div>";
+            var expected = @"<div id=""id"" class=""wx-webui-graph-viewer"" role=""group""><div id=""node1"" class=""wx-graph-node""></div><div id=""node2"" class=""wx-graph-node""></div><div id=""edge1"" class=""wx-graph-edge""></div></div>";
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }

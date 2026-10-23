@@ -62,8 +62,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form datepicker control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-date"" *></div>*")]
-        [InlineData("2023-10-10", @"*<div class=""wx-webui-input-date"" data-value=""2023-10-10"" *></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-date"" *></div>*")]
+        [InlineData("2023-10-10", @"*<div id=""*"" class=""wx-webui-input-date"" data-value=""2023-10-10"" *></div>*")]
         public void Value(string value, string expected)
         {
             // arrange

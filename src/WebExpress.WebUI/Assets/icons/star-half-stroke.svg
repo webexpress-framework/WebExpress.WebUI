@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round">
+  <g stroke-width="1.25">
+   <path d="m10.5 3 1.94 5.33 5.67 0.2-4.47 3.49 1.56 5.45-4.7-3.17-4.7 3.17 1.56-5.45-4.47-3.49 5.67-0.2z"/>
+  </g>
+  <g stroke-width=".93054">
+   <ellipse cx="15.525" cy="9.8254" rx=".25967" ry=".26555" style="paint-order:stroke fill markers"/>
+   <ellipse cx="14.019" cy="9.0116" rx=".25967" ry=".26555" style="paint-order:stroke fill markers"/>
+   <ellipse cx="11.198" cy="9.0116" rx=".25967" ry=".26555" style="paint-order:stroke fill markers"/>
+   <ellipse cx="12.619" cy="11.613" rx=".25967" ry=".26555" style="paint-order:stroke fill markers"/>
+   <ellipse cx="11.198" cy="10.723" rx=".25967" ry=".26555" style="paint-order:stroke fill markers"/>
+   <ellipse cx="12.619" cy="9.8254" rx=".25967" ry=".26555" style="paint-order:stroke fill markers"/>
+   <ellipse cx="11.198" cy="12.57" rx=".25967" ry=".26555" style="paint-order:stroke fill markers"/>
+   <ellipse cx="12.619" cy="13.448" rx=".25967" ry=".26555" style="paint-order:stroke fill markers"/>
+   <ellipse cx="12.619" cy="15.129" rx=".25967" ry=".26555" style="paint-order:stroke fill markers"/>
+   <ellipse cx="14.019" cy="10.723" rx=".25967" ry=".26555" style="paint-order:stroke fill markers"/>
+   <ellipse cx="11.198" cy="7.2441" rx=".25967" ry=".26555" style="paint-order:stroke fill markers"/>
+  </g>
+ </g>
+</svg>

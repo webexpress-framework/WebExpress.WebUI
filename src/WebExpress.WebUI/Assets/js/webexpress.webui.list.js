@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Flat list control.
  * The following events are triggered:
  *  - webexpress.webui.Event.ROW_REORDER_EVENT          // emitted after reorder with new/previous order
@@ -89,7 +89,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         this._items = this._parseItems(element.querySelectorAll(":scope > .wx-list-item, :scope > .wx-list-item-link, :scope > .wx-list-item-button"));
 
         // load persisted state (order by id)
-        this._loadStateFromCookie();
+        this._loadState();
 
         // cleanup attributes
         this._cleanupAttributes(element, [
@@ -249,7 +249,8 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
      * @param {boolean} [dispatch=true] Whether to dispatch the selection event.
      */
     selectItem(itemId, dispatch = true) {
-        const item = this._items.find(it => it.id === itemId);
+        // a nested item is selectable like any other, so the lookup descends
+        const item = this._flatItems().find(it => it.id === itemId);
         if (item) {
             this._handleSelectionChange(item, null, dispatch);
         } else {
@@ -307,7 +308,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         }
         this._items = this._normalizeItems(items);
         this._selectedItem = null; // reset selection on full update
-        this._schedulePersist();
+        this._loadState();
         this.render();
     }
 
@@ -338,10 +339,12 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             return false;
         }
         const idx = this._items.findIndex(it => it.id === itemId);
-        if (idx === -1) {
-            return false;
+        if (idx !== -1) {
+            return this._deleteItemByIndex(idx);
         }
-        return this._deleteItemByIndex(idx);
+
+        // the id may name an item nested beneath another one
+        return this._deleteNestedItem(this._flatItems().find(it => it.id === itemId));
     }
 
     /**
@@ -369,6 +372,19 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
      * Setup event delegation for static list events (like delete).
      */
     _setupEventDelegation() {
+        // the keys a button answers to select a plain row the way a click does
+        this._list.addEventListener("keydown", (e) => {
+            if ((e.key !== "Enter" && e.key !== " ") || !this._selectable) {
+                return;
+            }
+            const body = e.target.closest ? e.target.closest(".wx-list-body[role=\"button\"]") : null;
+            const item = body?.closest("li")?._dataItemRef;
+            if (body && item) {
+                e.preventDefault();
+                this._handleSelectionChange(item, e);
+            }
+        });
+
         this._list.addEventListener("click", (e) => {
             const target = e.target;
 
@@ -420,7 +436,8 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         // remove active class from previous
         if (this._selectedItem && this._selectedItem._anchorLi) {
             this._selectedItem._anchorLi.classList.remove("active", "wx-list-item-active");
-            this._selectedItem._anchorLi.removeAttribute("aria-selected");
+            this._selectedItem._anchorLi.removeAttribute("aria-current");
+            this._selectedItem._anchorLi.querySelector(":scope > .wx-list-body[role=\"button\"]")?.setAttribute("aria-pressed", "false");
         }
 
         this._selectedItem = item;
@@ -428,7 +445,8 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
         // add active class and highlight border to new selection
         if (this._selectedItem && this._selectedItem._anchorLi) {
             this._selectedItem._anchorLi.classList.add("active", "wx-list-item-active");
-            this._selectedItem._anchorLi.setAttribute("aria-selected", "true");
+            this._selectedItem._anchorLi.setAttribute("aria-current", "true");
+            this._selectedItem._anchorLi.querySelector(":scope > .wx-list-body[role=\"button\"]")?.setAttribute("aria-pressed", "true");
         }
 
         if (dispatch) {
@@ -541,6 +559,8 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 bgColorCss: ds.bgcolorCss || null,
                 bgColorStyle: ds.bgcolorStyle || null,
                 target: ds.target || null,
+                title: ds.title || null,
+                tooltip: ds.tooltip || null,
                 itemType: itemType,
                 disabled: div.hasAttribute("disabled") || ds.disabled === "true",
                 options: null,
@@ -584,11 +604,57 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Returns every item of the list, nested ones included, in display order.
+     * @remarks
+     * `_items` holds the roots, so a lookup by id has to descend - otherwise an
+     * item that sits beneath another is unreachable for selection or deletion.
+     * @returns {Array<Object>} The items.
+     */
+    _flatItems() {
+        const result = [];
+        const walk = (items) => {
+            for (const item of items) {
+                result.push(item);
+                if (item.children && item.children.length) {
+                    walk(item.children);
+                }
+            }
+        };
+
+        walk(this._items);
+
+        return result;
+    }
+
+    /**
+     * Returns the items that are on screen: the roots and the descendants of
+     * every expanded node, in display order.
+     * @returns {Array<Object>} The visible items.
+     */
+    _visibleItems() {
+        const result = [];
+        const walk = (items) => {
+            for (const item of items) {
+                result.push(item);
+                if (item.children && item.children.length && item.expanded) {
+                    walk(item.children);
+                }
+            }
+        };
+
+        walk(this._items);
+
+        return result;
+    }
+
+    /**
      * Builds a single item from raw data.
      * @param {Object|string} data Raw.
+     * @param {Object|null} parent The item this one is nested beneath, if any.
+     * @param {number} depth The nesting level, zero at the root.
      * @returns {Object} Item.
      */
-    _buildItem(data) {
+    _buildItem(data, parent = null, depth = 0) {
         if (typeof data === "string") {
             return {
                 id: null,
@@ -605,10 +671,15 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 itemType: "default",
                 disabled: false,
                 options: null,
+                children: [],
+                expanded: true,
+                parent: parent,
+                depth: depth,
                 _anchorLi: null
             };
         }
-        return {
+
+        const item = {
             id: data.id || null,
             class: data.class || null,
             style: data.style || null,
@@ -626,13 +697,28 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             disabled: !!data.disabled,
             uri: data.uri || data.href || null,
             target: data.target || null,
+            title: data.title || null,
+            tooltip: data.tooltip || null,
             options: Array.isArray(data.options) ? data.options : null,
+            // a node that owns children is drawn with an expander and its children
+            // indented beneath it; the default is open, which is what an item that
+            // says nothing about it means
+            children: [],
+            expanded: typeof data.expanded === "boolean" ? data.expanded : true,
+            parent: parent,
+            depth: depth,
             _anchorLi: null,
             // action attributes
             primaryAction: data.primaryAction,
             secondaryAction: data.secondaryAction,
             bind: data.bind,
         };
+
+        if (Array.isArray(data.children)) {
+            item.children = data.children.map(child => this._buildItem(child, item, depth + 1));
+        }
+
+        return item;
     }
 
     /**
@@ -770,13 +856,102 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Renders list items into the UL.
+     * Builds one guide column of a tree row.
+     * @param {boolean} continues - Whether the branch of this level goes on below the row.
+     * @param {boolean} own - Whether the column belongs to the row itself, which carries
+     *     the elbow that joins the row to its parent.
+     * @returns {HTMLElement} The guide element.
+     */
+    _createTreeGuide(continues, own) {
+        const guide = document.createElement("span");
+
+        guide.className = "wx-tree-guide"
+            + (continues ? " wx-tree-guide-through" : "")
+            + (own ? " wx-tree-guide-elbow" : "");
+
+        return guide;
+    }
+
+    /**
+     * Builds the tree affordance of a row: one guide column per nesting level and,
+     * for a node that owns children, the expander that opens and closes it.
+     * @remarks
+     * It is prepended to the list item rather than placed inside the content,
+     * because a link row wraps its content in an anchor and a button may not
+     * live inside one. A leaf gets an invisible placeholder of the same width,
+     * so the text of siblings stays aligned whether or not they have children.
+     *
+     * The indentation is drawn as connecting lines rather than as blank space: an
+     * ancestor whose branch continues carries a through line and the level of the
+     * row itself carries the elbow, so at depth two and beyond it stays readable
+     * which parent a row belongs to.
+     * @param {Object} it The item the row shows.
+     * @returns {HTMLElement|null} The wrapper, or null for a flat list.
+     */
+    _buildTreeToggle(it) {
+        const nested = it.children && it.children.length;
+
+        // a list without any nesting is left exactly as it was: no wrapper, no
+        // indent, no placeholder column
+        if (!nested && !it.depth && !this._hasNesting) {
+            return null;
+        }
+
+        const wrapper = document.createElement("span");
+        wrapper.className = "wx-list-tree";
+
+        const guides = webexpress.webui.treeGuides(it);
+
+        for (let level = 0; level < guides.length; level++) {
+            wrapper.appendChild(this._createTreeGuide(guides[level], level === guides.length - 1));
+        }
+
+        if (nested) {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "wx-list-tree-toggle";
+            btn.setAttribute("aria-expanded", String(!!it.expanded));
+            btn.setAttribute("aria-label", this._i18n("webexpress.webui:list.tree.toggle", "Expand or collapse"));
+
+            const icon = document.createElement("span");
+            // the chevron is a drawing of the icon set: the class alone is a mask without a shape
+            icon.className = "wx-tree-indicator-angle " + this._iconClass("angle-down") + (it.expanded ? " wx-tree-expand" : "");
+            btn.appendChild(icon);
+
+            btn.addEventListener("click", (e) => {
+                // the row itself carries the selection action, so the toggle must not
+                // reach it - opening a node is not selecting it
+                e.preventDefault();
+                e.stopPropagation();
+                it.expanded = !it.expanded;
+                this.render();
+            });
+
+            wrapper.appendChild(btn);
+        } else {
+            const placeholder = document.createElement("span");
+            placeholder.className = "wx-list-tree-toggle-placeholder";
+            wrapper.appendChild(placeholder);
+        }
+
+        return wrapper;
+    }
+
+    /**
+     * Renders list items into the UL. A list whose items own children is drawn
+     * as a tree: only the descendants of expanded nodes are rendered, indented
+     * by their depth.
      */
     _renderItems() {
 
         this._list.innerHTML = "";
 
-        for (const it of this._items) {
+        // whether any row of the list has children decides whether every row
+        // reserves the expander column, so the text of a flat list is not
+        // indented for a tree it does not have
+        this._hasNesting = this._items.some(it => it.children && it.children.length);
+
+        for (const it of this._visibleItems()) {
             const li = document.createElement("li");
 
             if (this._layout && this._layout !== "list-unstyled") {
@@ -786,7 +961,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             // restore selection state
             if (this._selectedItem === it) {
                 li.classList.add("active", "wx-list-item-active");
-                li.setAttribute("aria-selected", "true");
+                li.setAttribute("aria-current", "true");
             }
 
             if (it.colorCss) {
@@ -824,6 +999,13 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             li._dataItemRef = it;
             it._anchorLi = li;
 
+            // the indent and the expander sit leftmost, so the nesting is read
+            // before anything else on the row
+            const tree = this._buildTreeToggle(it);
+            if (tree) {
+                li.appendChild(tree);
+            }
+
             if (this._movableItem) {
                 const handle = document.createElement("span");
                 handle.className = "wx-list-drag-handle user-select-none";
@@ -859,6 +1041,14 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                     actionEl.setAttribute("aria-disabled", "true");
                     actionEl.disabled = true;
                 }
+            }
+
+            // the hover text belongs on the interactive element when there is one, so
+            // it also surfaces on keyboard focus; title wins over tooltip, the same
+            // precedence ControlLink applies
+            const hoverText = it.title || it.tooltip;
+            if (hoverText) {
+                (actionEl || li).setAttribute("title", hoverText);
             }
 
             const body = document.createElement("div");
@@ -907,14 +1097,25 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 li.appendChild(actionEl);
             } else {
                 li.appendChild(body);
+                // a plain row of a selectable list is chosen by clicking it; the keyboard reaches
+                // its body as a toggle, while a row with its own link or button is reached through
+                // that. the body rather than the row, so the option and delete buttons beside it
+                // are not nested inside the toggle
+                if (this._selectable) {
+                    body.setAttribute("role", "button");
+                    body.setAttribute("tabindex", "0");
+                    body.setAttribute("aria-pressed", this._selectedItem === it ? "true" : "false");
+                }
             }
 
             // options or delete button
             if (it.options && it.options.length) {
                 const opt = document.createElement("div");
-                opt.dataset.icon = this._iconClass("fas fa-cog", "wx-icon-light-cog");
+                opt.dataset.icon = this._iconClass("cog");
                 opt.dataset.size = "btn-sm";
                 opt.dataset.border = "false";
+                // the menu shows an icon alone, so it says what it is
+                opt.title = this._i18n("webexpress.webui:table.options.label", "Options");
                 new webexpress.webui.DropdownCtrl(opt).items = it.options;
                 li.appendChild(opt);
             } else if (this._deletable) {
@@ -982,12 +1183,42 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Removes an item that is nested beneath another one, together with
+     * everything below it.
+     * @remarks
+     * A nested item does not live in the root array, so the index based delete
+     * cannot reach it; it is spliced out of its parent's children instead.
+     * @param {Object} item The item to remove.
+     * @returns {boolean} True if it was removed.
+     */
+    _deleteNestedItem(item) {
+        const siblings = item && item.parent ? item.parent.children : null;
+        const index = siblings ? siblings.indexOf(item) : -1;
+
+        if (index === -1) {
+            return false;
+        }
+
+        siblings.splice(index, 1);
+
+        if (this._selectedItem === item) {
+            this._handleSelectionChange(null, null, true);
+        }
+
+        this._schedulePersist();
+        this.render();
+
+        return true;
+    }
+
+    /**
      * Internal delete helper to remove an item instance.
      * @param {Object} item The item to delete.
      */
     _deleteItemInternal(item) {
         const idx = this._items.indexOf(item);
         if (idx === -1) {
+            this._deleteNestedItem(item);
             return;
         }
         this._deleteItemByIndex(idx);
@@ -1328,7 +1559,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Persists state to cookie (order by id if all items have id).
+     * Persists state to localStorage (order by id if all items have id).
      */
     _persistState() {
         if (!this._persistKey) {
@@ -1342,20 +1573,19 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             order: allHaveIds ? this._items.map(it => it.id) : null
         };
 
-        const json = encodeURIComponent(JSON.stringify(state));
-        this._setCookie(this._persistKey, json, 365);
+        webexpress.webui.LocalStorage.setJson(this._persistKey, state);
     }
 
     /**
-     * Loads persisted state from cookie.
+     * Loads persisted state from localStorage.
      */
-    _loadStateFromCookie() {
-        const raw = this._getCookie(this._persistKey);
+    _loadState() {
+        const raw = webexpress.webui.LocalStorage.getJson(this._persistKey);
         if (!raw) {
             return;
         }
         try {
-            const obj = JSON.parse(decodeURIComponent(raw));
+            const obj = raw;
             if (!obj || obj.v !== 1) {
                 return;
             }
@@ -1378,40 +1608,9 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 this._items = reordered;
             }
         } catch (e) {
-            // silent fail on cookie parse error
+            // silent fail on localStorage parse error
             console.debug("Failed to load list state", e);
         }
-    }
-
-    /**
-     * Retrieves cookie value.
-     * @param {string} name Cookie name.
-     * @returns {string|null} Value.
-     */
-    _getCookie(name) {
-        if (!name) {
-            return null;
-        }
-        const matches = document.cookie.match(new RegExp(
-            "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, "\\$1") + "=([^;]*)"
-        ));
-        return matches ? decodeURIComponent(matches[1]) : null;
-    }
-
-    /**
-     * Sets a cookie (SameSite=Lax).
-     * @param {string} name Name.
-     * @param {string} value Value.
-     * @param {number} days Days to expire.
-     */
-    _setCookie(name, value, days) {
-        let expires = "";
-        if (days) {
-            const d = new Date();
-            d.setTime(d.getTime() + (days * 86400000));
-            expires = "; expires=" + d.toUTCString();
-        }
-        document.cookie = `${name}=${value || ""}${expires}; path=/; SameSite=Lax`;
     }
 
     /**

@@ -38,7 +38,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-profile""></div>")]
-        [InlineData("me", @"<div class=""wx-profile""><b class=""bg-info text-light"">m</b>me</div>")]
+        [InlineData("me", @"<div class=""wx-profile""><b class=""text-bg-info"">m</b>me</div>")]
         public void User(string user, string expected)
         {
             // arrange
@@ -61,7 +61,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-profile""></div>")]
-        [InlineData("http://example.com", @"<div class=""wx-profile""><img src=""http://example.com/""></div>")]
+        [InlineData("http://example.com", @"<div class=""wx-profile""><img src=""http://example.com/"" alt></div>")]
         public void Image(string uri, string expected)
         {
             // arrange

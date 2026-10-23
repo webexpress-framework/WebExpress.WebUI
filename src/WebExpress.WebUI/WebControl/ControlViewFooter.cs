@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a view footer control.
+    /// The footer area of a view control.
     /// </summary>
     public class ControlViewFooter : IControlViewFooter
     {

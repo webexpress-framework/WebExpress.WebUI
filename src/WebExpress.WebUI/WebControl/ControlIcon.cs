@@ -11,6 +11,8 @@ namespace WebExpress.WebUI.WebControl
     /// </summary>
     public class ControlIcon : Control
     {
+        private Func<IRenderControlContext, PropertyColorBackground> _backgroundColor;
+
         /// <summary>
         /// Gets or sets the icon.
         /// </summary>
@@ -22,12 +24,28 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, string> Title { get; set; }
 
         /// <summary>
+        /// Gets or sets the colour behind the icon.
+        /// </summary>
+        /// <remarks>
+        /// Held separately from the other properties instead of going through
+        /// <c>SetProperty</c>, because it must not reach the icon element: a drawn icon is
+        /// painted by masking <c>background-color</c>, so a background set there replaces
+        /// the glyph's own colour rather than sitting behind it. It is applied to a wrapper
+        /// at render time instead.
+        /// </remarks>
+        public override Func<IRenderControlContext, PropertyColorBackground> BackgroundColor
+        {
+            get => _backgroundColor;
+            set => _backgroundColor = value;
+        }
+
+        /// <summary>
         /// Return or specifies the vertical orientation.
         /// </summary>
         public Func<IRenderControlContext, TypeVerticalAlignment> VerticalAlignment
         {
             get => (Func<IRenderControlContext, TypeVerticalAlignment>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -36,7 +54,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertySizeText> Size
         {
             get => (Func<IRenderControlContext, PropertySizeText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -59,8 +77,8 @@ namespace WebExpress.WebUI.WebControl
             var icon = Icon?.Invoke(renderContext);
             var title = Title?.Invoke(renderContext);
             var css = icon is ImageIcon
-                ? Css.Concatenate("wx-icon", GetClasses())
-                : GetClasses();
+                ? Css.Concatenate("wx-icon", GetClasses(renderContext))
+                : GetClasses(renderContext);
             var role = Role?.Invoke(renderContext);
 
             var html = icon?.Render
@@ -70,11 +88,26 @@ namespace WebExpress.WebUI.WebControl
                 Id,
                 title,
                 css,
-                GetStyles(),
+                GetStyles(renderContext),
                 role
             );
 
-            return html;
+            var background = _backgroundColor?.Invoke(renderContext);
+            var backgroundClass = background?.ToClass();
+            var backgroundStyle = background?.ToStyle();
+
+            // every control is seeded with the default background, which paints nothing -
+            // reacting to that would put a wrapper around every icon in the framework
+            if (html is null || (string.IsNullOrWhiteSpace(backgroundClass) && string.IsNullOrWhiteSpace(backgroundStyle)))
+            {
+                return html;
+            }
+
+            return new HtmlElementTextSemanticsSpan(html)
+            {
+                Class = Css.Concatenate("wx-icon-backdrop", backgroundClass),
+                Style = backgroundStyle
+            };
         }
     }
 }

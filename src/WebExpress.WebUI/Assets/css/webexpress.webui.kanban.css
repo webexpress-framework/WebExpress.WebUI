@@ -10,6 +10,68 @@
     padding-bottom: 1rem; /* reserve space for the scrollbar */
 }
 
+/* Fill mode: the board takes the height its host offers instead of growing with
+   its longest column, which is what an application shell asks of the content of
+   a pane. The board is its own scrollport on both axes already - the horizontal
+   overflow above makes it one - so all this mode adds is the bound that gives it
+   something to scroll: without a height the board simply grows and the pane
+   around it scrolls instead, dragging the column headers out of view.
+
+   Both the basis and the height are stated: a flex column host drives the basis,
+   and where a host hands nothing down the height still has to come from the
+   environment rather than from the content. 100% would resolve to auto against
+   an auto-height host, which is the content - the one answer this mode must not
+   give. The floor keeps a pane too short for a card scrolling rather than
+   crushing the columns. */
+.wx-kanban.wx-fill {
+    flex: 1 1 var(--wx-kanban-height, 70vh);
+    height: var(--wx-kanban-height, 70vh);
+    max-height: 100%;
+    min-height: 12rem;
+    overflow: auto;
+}
+
+/* The column headers are what a board is read by, so they stay while the cards
+   below them scroll. They only carry a background here: over the page they sit
+   on nothing, over scrolling cards they have to cover them. The toolbar above is
+   left to scroll away - it is reached once, and pinning it too would mean
+   knowing its height to offset the headers by. */
+.wx-kanban.wx-fill > .wx-kanban-headers {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    background: var(--wx-body-bg);
+}
+
+/* A board without swimlanes has no header band: each column carries its own
+   header inside the single row. Those stay the same way, against the board that
+   is the scrollport either way. */
+.wx-kanban.wx-fill > .wx-kanban-swimlane .wx-kanban-column-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--wx-body-bg);
+}
+
+/* The columns of such a board run to the bottom of the pane rather than ending
+   under the last card, so the drop zone is the column the user sees. Swimlanes
+   are left alone: a lane is as tall as its cards, and lanes sharing the pane
+   equally would say the opposite. The header band is what tells the two apart -
+   it exists only where there are swimlanes. */
+.wx-kanban.wx-fill:not(:has(> .wx-kanban-headers)) > .wx-kanban-swimlane {
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+}
+
+/* the height only reaches the columns if the row hands it on; the cells fill the
+   row on their own, the grid stretches them. Neither is allowed to shrink below
+   its cards - that is what turns a board too tall for the pane into a scrolling
+   one instead of a clipped one */
+.wx-kanban.wx-fill:not(:has(> .wx-kanban-headers)) > .wx-kanban-swimlane > .wx-kanban-row {
+    flex: 1 1 auto;
+}
+
 /* Kanban grid row keeps all columns in one horizontal line */
 .wx-kanban-row {
     display: grid;
@@ -20,13 +82,187 @@
     grid-auto-columns: minmax(280px, 1fr);
     gap: 0.5rem;
     align-items: stretch;
-    min-width: 100%;
-    width: max-content; /* grid fits content, enables horizontal scroll */
+    width: 100%;
+    min-width: calc(var(--wx-board-cols, 3) * 280px + (var(--wx-board-cols, 3) - 1) * 0.5rem);
 }
 
 /* Header row sits visually closer to first swimlane */
 .wx-kanban-headers.wx-kanban-row {
     margin-bottom: -0.5rem;
+}
+
+/* a column of a row and a header of the header band anchor the width divider on
+   their right edge */
+.wx-kanban-col,
+.wx-kanban-headers > .wx-kanban-column-header {
+    position: relative;
+}
+
+/* the divider between two columns sits in the middle of the gap and reaches down
+   the whole row, however short the column on its left is */
+.wx-kanban-col-resizer {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: calc(-0.25rem - 6px);
+    width: 12px;
+    z-index: 1;
+    cursor: col-resize;
+    /* a touch drag moves the divider instead of scrolling the board */
+    touch-action: none;
+}
+
+/* the visible line, drawn only when the divider is in play */
+.wx-kanban-col-resizer::after {
+    content: "";
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 5px;
+    width: 2px;
+    border-radius: 1px;
+    background-color: transparent;
+    transition: background-color 0.15s;
+}
+
+.wx-kanban-col-resizer:hover::after,
+.wx-kanban-col-resizer:focus-visible::after,
+.wx-kanban-col-resizer.wx-kanban-col-resizer-active::after {
+    background-color: var(--wx-primary, #0d6efd);
+}
+
+.wx-kanban-col-resizer:focus-visible {
+    outline: none;
+}
+
+/* the drag keeps its cursor and selects no text while the pointer crosses the cards */
+.wx-kanban-resizing {
+    cursor: col-resize;
+    user-select: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wx-kanban-col-resizer::after {
+        transition: none;
+    }
+}
+
+/* board "…" menu bar, right aligned above the columns; it stays put while the
+   columns scroll horizontally because it is sized to the board, not the rows */
+.wx-kanban-toolbar {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    position: sticky;
+    left: 0;
+}
+
+/* the "…" menu container; its dropdown is a native popover anchored to the
+   trigger, so the container only sizes the trigger */
+.wx-kanban-menu {
+    display: inline-flex;
+}
+
+/* the board, per-column and per-swimlane "…" trigger buttons */
+.wx-kanban-menu-btn {
+    border: none;
+    background: transparent;
+    padding: 0.15rem 0.4rem;
+    line-height: 1;
+    border-radius: 0.25rem;
+    cursor: pointer;
+    color: var(--wx-secondary-color, #6c757d);
+    transition: color 0.15s, background-color 0.15s;
+}
+
+.wx-kanban-menu-btn:hover,
+.wx-kanban-menu-btn:focus {
+    color: var(--wx-body-color);
+    background-color: var(--wx-tertiary-bg, rgba(0, 0, 0, 0.05));
+}
+
+/* the column "…" menu sits at the far end of the header */
+.wx-kanban-column-header.wx-board-col-header {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.wx-board-col-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* trailing badges (column card count, swimlane count, card ticket) share the
+   same look as the tab badge */
+.wx-board-col-badge,
+.wx-kanban-swimlane-badge,
+.wx-kanban-card-badge {
+    margin-left: 0.4rem;
+    font-size: 0.7em;
+    font-weight: 600;
+    vertical-align: middle;
+    line-height: 1;
+    flex: 0 0 auto;
+}
+
+/* neutral fallback when no color utility class is supplied */
+.wx-board-col-badge:not([class*="text-bg-"]):not([class*="bg-"]),
+.wx-kanban-swimlane-badge:not([class*="text-bg-"]):not([class*="bg-"]),
+.wx-kanban-card-badge:not([class*="text-bg-"]):not([class*="bg-"]) {
+    color: var(--wx-secondary-color, #6c757d);
+    background-color: var(--wx-tertiary-bg, #eef0f2);
+}
+
+/* the card header is a flex row with a growing title, so the gap already
+   spaces the badge; drop the extra left margin there */
+.wx-kanban-card .card-header .wx-kanban-card-badge {
+    margin-left: 0;
+}
+
+.wx-board-col-menu {
+    margin-left: auto;
+}
+
+/* the per-column and per-swimlane "…" triggers stay hidden until the header (or
+   swimlane) is hovered; an open menu keeps its trigger visible. the board menu
+   is unaffected and stays visible as the entry point for adding columns / lanes */
+.wx-board-col-header .wx-board-col-menu .wx-kanban-menu-btn,
+.wx-kanban-swimlane-menu .wx-kanban-menu-btn {
+    /* faded rather than hidden: a hidden button cannot take the focus, so the keyboard
+       could never reach the menu */
+    opacity: 0;
+}
+
+.wx-board-col-header:hover .wx-board-col-menu .wx-kanban-menu-btn,
+.wx-board-col-header:focus-within .wx-board-col-menu .wx-kanban-menu-btn,
+.wx-kanban-swimlane:hover .wx-kanban-swimlane-menu .wx-kanban-menu-btn,
+.wx-kanban-swimlane:focus-within .wx-kanban-swimlane-menu .wx-kanban-menu-btn,
+.wx-kanban-menu.wx-menu-open .wx-kanban-menu-btn {
+    opacity: 1;
+}
+
+/* the color palette shown in the column menu */
+.wx-board-col-color-grid {
+    display: grid;
+    grid-template-columns: repeat(6, 1fr);
+    gap: 4px;
+    padding: 0.25rem 1rem 0.5rem;
+}
+
+.wx-board-col-swatch {
+    width: 20px;
+    height: 20px;
+    padding: 0;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.wx-board-col-swatch.active {
+    outline: 2px solid var(--wx-body-color, #212529);
+    outline-offset: 1px;
 }
 
 /* Column header styling */
@@ -35,16 +271,41 @@
     font-weight: 600;
     margin: 0;
     padding-bottom: 0.5rem;
-    border-bottom: 2px solid var(--bs-border-color, #dee2e6);
-    color: var(--bs-heading-color, #495057);
+    border-bottom: 2px solid var(--wx-border-color, #dee2e6);
+    color: var(--wx-heading-color, var(--wx-body-color));
     background: transparent;
     /* dark theme adaptation */
     transition: background 0.15s, color 0.15s;
 }
 
-[data-bs-theme="dark"] .wx-kanban-column-header {
-    color: var(--bs-heading-color, #e7eaf0);
-    border-bottom-color: var(--bs-border-color, #495057);
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-column-header {
+    color: var(--wx-heading-color, #e7eaf0);
+    border-bottom-color: var(--wx-border-color, #495057);
+}
+}
+
+/* the surface of a swimlane. it used to come from the expandable container the lane was built
+   on; the lane is a section now, and a section is flat by construction, so the lane carries the
+   surface it always had itself. the section gap replaces the margin the container supplied. */
+.wx-kanban-swimlane {
+    --wx-section-gap: 1em;
+
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
+    border-radius: var(--wx-border-radius, 0.25rem);
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.025);
+    padding: 0.75rem 1rem;
+    transition: background 0.15s, box-shadow 0.15s;
+}
+
+/* the swimlane header label. it carries the primary tint the WebExpress
+   text-primary utility used to supply, but without the !important that would
+   beat the inline accent color a colored lane sets. the emphasis shade rather
+   than the raw primary: small text in the raw tint falls short of the contrast
+   the body background asks for, on either theme */
+.wx-kanban-swimlane-header {
+    color: var(--wx-primary-text-emphasis, var(--wx-primary, #0d6efd));
 }
 
 /* Swimlane title style */
@@ -52,16 +313,18 @@
     font-size: 1.15rem;
     font-weight: bold;
     margin: 0.5em 0 0.75em 0;
-    color: var(--bs-primary, #0d6efd);
+    color: var(--wx-primary-text-emphasis, var(--wx-primary, #0d6efd));
     border-bottom: 1px solid rgba(0,0,0,0.05);
     padding-bottom: 0.25rem;
     background: transparent;
     transition: color 0.15s, border-bottom 0.15s;
 }
 
-[data-bs-theme="dark"] .wx-kanban-swimlane-title {
-    color: var(--bs-primary, #6ea8fe);
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-swimlane-title {
+    color: var(--wx-primary-text-emphasis, #6ea8fe);
     border-bottom: 1px solid rgba(255,255,255,0.05);
+}
 }
 
 /* Column dropzone cell */
@@ -72,16 +335,19 @@
     min-height: 150px;
     padding: 0.25rem;
     padding-bottom: 2rem;
-    background-color: var(--bs-gray-100, #f8f9fa);
+    background-color: var(--wx-gray-100, #f8f9fa);
     border-radius: 0.25rem;
     border: 2px dashed transparent;
     transition: background-color 0.2s, border 0.2s;
     height: 100%;
 }
 
-[data-bs-theme="dark"] .wx-kanban-cell {
-    background: var(--bs-gray-900, #393b40);
-    border-color: var(--bs-border-color, #495057);
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-cell {
+    background: var(--wx-gray-900, #393b40);
+    /* keep the resting border transparent (as in light mode); the dashed
+       border is only shown on drag-hover via .wx-drag-over-empty below */
+}
 }
 
 /* Visual feedback when hovering over an empty dropzone */
@@ -90,9 +356,11 @@
     border-color: rgba(13, 110, 253, 0.4);
 }
 
-[data-bs-theme="dark"] .wx-kanban-cell.wx-drag-over-empty {
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-cell.wx-drag-over-empty {
     background-color: rgba(13, 110, 253, 0.12);
     border-color: rgba(90, 170, 255, 0.30);
+}
 }
 
 /* Kanban Cards */
@@ -107,18 +375,40 @@
     padding: 0.75rem 1rem;
     border-top: 4px solid var(--kanban-color, transparent);
     user-select: none;
-    color: var(--bs-body-color, #333);
+    color: var(--wx-body-color, #333);
 }
 
-[data-bs-theme="dark"] .wx-kanban-card {
-    background: var(--bs-gray-800, #23272b);
-    color: var(--bs-gray-100, #f8f9fa);
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-card {
+    background: var(--wx-gray-800, #23272b);
+    color: var(--wx-gray-100, #f8f9fa);
     box-shadow: 0 2px 10px rgba(0,0,0,0.21);
+}
 }
 
 /* cursor pointer for cards with actions */
 .wx-kanban-card[data-wx-primary-action],
 .wx-kanban-card[data-wx-secondary-action] {
+    cursor: pointer;
+}
+
+/* The selected card. The accent is an inset shadow rather than a border, because a
+   border would shift the card content against its unselected neighbours — the same
+   reason the master-detail marks its active item that way. It is drawn on all sides
+   except the top, which already carries the column color strip. */
+.wx-kanban-card.wx-kanban-card-active {
+    box-shadow: inset 0 0 0 2px var(--wx-primary, #0d6efd), 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-card.wx-kanban-card-active {
+    box-shadow: inset 0 0 0 2px var(--wx-primary, #0d6efd), 0 2px 10px rgba(0, 0, 0, 0.21);
+}
+}
+
+/* a selectable board marks its cards as clickable; the grab cursor stays on the
+   drag affordance the card already is */
+.wx-kanban:not([data-selectable="false"]) .wx-kanban-card {
     cursor: pointer;
 }
 
@@ -129,6 +419,9 @@
 }
 
 .wx-kanban-card .card-header {
+    padding: 0;
+    border: 0;
+    min-width: 0;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -138,13 +431,15 @@
 
 .wx-kanban-card .card-header .card-icon {
     font-size: 1.1rem;
-    color: var(--bs-secondary, #6c757d);
+    color: var(--wx-secondary, #6c757d);
     display: flex;
     align-items: center;
 }
 
-[data-bs-theme="dark"] .wx-kanban-card .card-header .card-icon {
-    color: var(--bs-gray-400, #bdc8d6);
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-card .card-header .card-icon {
+    color: var(--wx-gray-400, #bdc8d6);
+}
 }
 
 .wx-kanban-card .card-header .card-image {
@@ -154,16 +449,37 @@
 }
 
 .wx-kanban-card .card-header .card-title {
+    min-width: 0;
+    overflow-wrap: anywhere;
     font-size: 1rem;
     font-weight: 600;
     margin: 0;
-    color: var(--bs-heading-color, #212529);
+    color: var(--wx-heading-color, #212529);
     flex-grow: 1;
     background: transparent;
 }
 
-[data-bs-theme="dark"] .wx-kanban-card .card-header .card-title {
-    color: var(--bs-heading-color, #fff);
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-card .card-header .card-title {
+    color: var(--wx-heading-color, #fff);
+}
+}
+
+/* assignee avatar, same look as the scrum backlog rows: an initials badge or,
+   when the card carries an image, a round photo */
+.wx-kanban-card .card-header .card-assignee {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 22px;
+    height: 22px;
+    border-radius: 9999px;
+    font-size: 0.62rem;
+    font-weight: 700;
+    color: #fff;
+    background: var(--wx-secondary, #6c757d);
+    object-fit: cover;
 }
 
 .wx-kanban-card .card-text {
@@ -173,8 +489,47 @@
     background: transparent;
 }
 
-[data-bs-theme="dark"] .wx-kanban-card .card-text {
-    color: var(--bs-gray-300, #abb4be);
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-card .card-text {
+    color: var(--wx-gray-300, #abb4be);
+}
+}
+
+/* optional footer: application-defined chips (priority, story points, …) */
+.wx-kanban-card .card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+    margin-top: 0.5rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+}
+
+.wx-kanban-card .card-footer-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    font-size: 0.72rem;
+    font-weight: 600;
+    line-height: 1;
+    padding: 0.2rem 0.5rem;
+    border-radius: 999px;
+    background: var(--wx-tertiary-bg, #eef0f2);
+    color: var(--wx-secondary-color, #6c757d);
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-kanban-card .card-footer-chip {
+    background: var(--wx-gray-700, #33373d);
+    color: var(--wx-gray-300, #abb4be);
+}
+}
+
+.wx-kanban-card .card-footer-chip .wx-icon-img {
+    width: 0.9em;
+    height: 0.9em;
 }
 
 /* Visual Drop Indicator (blue line for insert) */
@@ -202,4 +557,91 @@
 .wx-kanban-card.wx-drag-over-bottom::before {
     bottom: -10px;
     opacity: 1;
+}
+
+/* ---- editable / movable / deletable column headers ----
+   shared affordance classes also used by the dashboard control. the grip,
+   pencil and delete icons stay hidden until the header is hovered (visibility,
+   not display, so the header does not jump). */
+.wx-board-col-grip {
+    cursor: grab;
+    user-select: none;
+    margin-right: 0.25rem;
+    vertical-align: middle;
+    line-height: 1;
+    color: var(--wx-secondary-color, #6c757d);
+    opacity: 0;
+}
+
+.wx-board-col-grip:active {
+    cursor: grabbing;
+}
+
+.wx-board-col-edit,
+.wx-board-col-delete {
+    border: none;
+    background: transparent;
+    padding: 0 0.15rem;
+    margin-left: 0.15rem;
+    vertical-align: middle;
+    line-height: 1;
+    font-size: 0.85em;
+    cursor: pointer;
+    color: var(--wx-secondary-color, #6c757d);
+    opacity: 0;
+}
+
+.wx-board-col-grip:hover,
+.wx-board-col-edit:hover,
+.wx-board-col-delete:hover {
+    color: var(--wx-body-color);
+}
+
+.wx-board-col-header:hover .wx-board-col-grip,
+.wx-board-col-header:hover .wx-board-col-edit,
+.wx-board-col-header:hover .wx-board-col-delete,
+.wx-board-col-header:focus-within .wx-board-col-grip,
+.wx-board-col-header:focus-within .wx-board-col-edit,
+.wx-board-col-header:focus-within .wx-board-col-delete {
+    opacity: 1;
+}
+
+.wx-board-col-header.wx-board-col-dragging {
+    opacity: 0.5;
+}
+
+/* insertion indicator while a column is dragged over a header: a primary line
+   on the edge where the column would land */
+.wx-board-col-header.wx-board-col-drop-before {
+    box-shadow: inset 3px 0 0 var(--wx-primary, #0d6efd);
+}
+
+.wx-board-col-header.wx-board-col-drop-after {
+    box-shadow: inset -3px 0 0 var(--wx-primary, #0d6efd);
+}
+
+/* short landing flash after a column reorder so the user sees where it went */
+.wx-kanban-column-header.wx-board-col-moved {
+    animation: wx-board-col-moved 0.8s ease-out;
+}
+
+@keyframes wx-board-col-moved {
+    0% { background-color: rgba(13, 110, 253, 0.18); }
+    100% { background-color: transparent; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .wx-kanban-column-header.wx-board-col-moved {
+        animation: none;
+    }
+}
+
+.wx-board-col-input {
+    font: inherit;
+    color: inherit;
+    max-width: 100%;
+    padding: 0.05rem 0.3rem;
+    border: 1px solid var(--wx-border-color, #ced4da);
+    border-radius: 0.2rem;
+    background: var(--wx-body-bg);
 }

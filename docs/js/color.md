@@ -115,6 +115,10 @@ The control is configured through attributes and dataset entries on the host ele
 |`data-value`   |Initial hex color value (e.g. `#00ff00`). If omitted, the default `#000000` is used.
 |`disabled`     |When present, interaction is blocked and relevant UI elements are visually disabled.
 |`data-palette` |Optional JSON string representing an array of hex color strings to override the default palette (for example `data-palette='["#ff0000","#00ff00"]'`). Invalid JSON is ignored and the default palette remains in use.
+|`data-allow-empty` |When `true`, accepts an empty value and provides a removal action. The initial value defaults to empty in this mode.
+|`data-compact` |When `true`, displays a toolbar icon with a narrow color indicator instead of a form field preview.
+|`data-icon` |Symbolic light icon name for the compact trigger. Defaults to `palette`.
+|`data-empty-color` |Sets the empty preview to `currentColor` when specified. Otherwise an empty value is transparent.
 
 Relevant CSS classes set by the control: `wx-color-input` (host), `wx-color-trigger` (dropdown trigger), `wx-color-preview-box` (preview), `wx-color-dropdown` (dropdown container), `wx-color-palette-grid` (palette grid), and `wx-native-color-picker` (native color input).
 
@@ -135,6 +139,8 @@ Disabled state:
 ## Programmatic Control
 
 The control exposes `value` as a get/set property and a `render()` method that synchronizes UI with internal state. Value changes trigger a framework change event.
+
+Editor integration uses `setValue(value, false)` to update previews without emitting an edit when the selection moves. CSS colors such as the RGB notation produced by browser style serialization are converted to hexadecimal values for the native picker. The method returns whether the supplied value was accepted. The `disabled` property synchronizes the trigger, palette, removal action and native picker. The removal action emits an empty value even when the preview is already empty, because a mixed editor selection can still contain several different colors.
 
 ### Accessing an Automatically Created Instance
 

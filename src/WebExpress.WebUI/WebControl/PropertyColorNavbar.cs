@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a property for the color of a navbar.
+    /// The predefined colors that can be applied to a navigation bar.
     /// </summary>
     public class PropertyColorNavbar : PropertyColor<TypeColorNavbar>
     {

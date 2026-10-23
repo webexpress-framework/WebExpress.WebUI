@@ -156,10 +156,10 @@ Initialize declaratively on a host element (e.g., `<div class="wx-webui-input-av
 
 | Attribute             | Description                                                                                        | Example
 |-----------------------|----------------------------------------------------------------------------------------------------|-----------------------------------------------
-| `name`                | Enables form integration; creates a hidden field to participate in submit.                         | `name="avatar"`
+| `name`                | Name of the hidden field the picture is submitted in; `avatar` when absent.                        | `name="avatar"`
 | `accept`              | Allowed file types; overrides the default.                                                         | `accept="image/png,image/svg+xml"`
 | `placeholder`         | Placeholder text in the dropzone.                                                                  | `placeholder="Drop image here or double click"`
-| `data-field`          | Name of the hidden field; default is `${name}_data`.                                               | `data-field="avatar_data"`
+| `data-value`          | The picture the field holds: the address of a stored picture, or an upload in the field format.    | `data-value="/assets/avatar.png"`
 | `data-viewport`       | Edge length of the preview area in CSS pixels (square).                                            | `data-viewport="320"`
 | `data-shape`          | Crop mask: `circle` (default) or `rect`.                                                           | `data-shape="rect"`
 | `data-size`           | Target output size in pixels (square).                                                             | `data-size="512"`
@@ -184,14 +184,12 @@ Note: `data-output-format` and `data-output-quality` affect raster formats only.
 
 ## Form Integration
 
-When the host has a `name` attribute, a hidden input is created (name from `data-field` or default `${name}_data`). On form submit:
+The control submits through a hidden input named after the host's `name`. What the field holds:
 
-- Raster images: the cropped result is generated according to the configuration and serialized as a Data URL (`data:<mime>;base64,…`) into the hidden field.
-- SVG/GIF (pass-through): the original file is serialized as a Data URL (`image/svg+xml` or `image/gif`) into the hidden field.
+- Nothing picked: the picture it was given in `data-value` (or through `value`), unchanged - typically the address of the stored picture. This tells the server that nothing about the picture changed; an empty field means the picture was removed.
+- A picked picture: `file:<name>;data:<mime>;base64,<payload>`. Raster images are cropped and exported according to the configuration; SVG and GIF are passed through unchanged.
 
-Server-side guidance:
-- Decode the Data URL to obtain the file bytes and content type.
-- For SVG, consider sanitizing/validating content due to potential active payloads.
+`ControlFormItemInputAvatar` reads the three forms on the server: empty, a kept picture (its address or name, no data) and an upload. It renders an upload back whole into `data-value`, so a form shown again after a refused save keeps the picked picture. An upload that cannot be read, or whose type is not among the accepted ones (by default the image types the browser side offers), is refused by the validation. An SVG is passed through unchanged and served as a document later, so the server takes it only as a picture without code: it refuses scripts, event handler attributes, script addresses (`javascript:` and the like, also in animations and stylesheets), embedded HTML (`foreignObject`, `iframe`, `object`, `embed`), nested documents as `data:` addresses, stylesheet processing instructions, document types and anything that is no well-formed SVG.
 
 Alternative: Instead of the hidden field, intercept submit and send a `FormData` with the cropped `Blob` (raster) or original `File` (SVG/GIF) via `fetch` for `multipart/form-data`.
 
@@ -251,11 +249,11 @@ Note: The API is primarily designed for declarative use. Methods prefixed with a
 ```
 
 ```html
-<!-- SVG pass-through (no cropping), hidden field explicitly named "logo_svg" -->
+<!-- SVG pass-through (no cropping), keeping the stored logo until another one is picked -->
 <div id="logo"
      class="wx-webui-input-avatar"
      name="logo"
-     data-field="logo_svg"
+     data-value="/assets/logo.svg"
      accept="image/svg+xml"
      placeholder="Drop SVG here or double click">
 </div>

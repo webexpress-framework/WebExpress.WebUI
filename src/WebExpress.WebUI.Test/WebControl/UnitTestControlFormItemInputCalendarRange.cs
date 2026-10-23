@@ -61,8 +61,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form calendar range control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-calendar"" *></div>*")]
-        [InlineData("2023-10-10", @"*<div class=""wx-webui-input-calendar"" data-range=""true"" data-format=""yyyy-MM-dd""></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-calendar"" *></div>*")]
+        [InlineData("2023-10-10", @"*<div id=""*"" class=""wx-webui-input-calendar"" data-range=""true"" data-format=""yyyy-MM-dd""></div>*")]
         public void Value(string value, string expected)
         {
             // arrange

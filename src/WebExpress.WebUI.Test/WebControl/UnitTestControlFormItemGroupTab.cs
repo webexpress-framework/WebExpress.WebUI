@@ -63,7 +63,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the layout property of the tab control.
         /// </summary>
         [Theory]
-        [InlineData(TypeLayoutTab.Default, @"<div class=""wx-webui-tab"" data-layout=""default""></div>")]
+        [InlineData(TypeLayoutTab.Default, @"<div class=""wx-webui-tab""></div>")]
         [InlineData(TypeLayoutTab.Pill, @"<div class=""wx-webui-tab"" data-layout=""pill""></div>")]
         [InlineData(TypeLayoutTab.Underline, @"<div class=""wx-webui-tab"" data-layout=""underline""></div>")]
         public void Layout(TypeLayoutTab layout, string expected)

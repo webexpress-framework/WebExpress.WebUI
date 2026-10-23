@@ -6,7 +6,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents a sidebar item header control within a fragment context.
+    /// Base class for a sidebar heading entry that is contributed as a fragment, so the framework
+    /// can add a section heading into a page's sidebar from a plugin.
     /// </summary>
     public abstract class FragmentControlSidebarItemHeader : ControlSidebarItemHeader, IFragmentWebUIElement<IRenderControlContext, IVisualTreeControl>, IFragmentControlSidebarItem
     {
@@ -33,7 +34,7 @@ namespace WebExpress.WebUI.WebFragment
         /// <returns>An HTML node representing the rendered fragments. Can be null if no nodes are present.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            if (!FragmentContext.Conditions.Check(renderContext?.Request))
+            if (!FragmentContext.Check(renderContext?.Request))
             {
                 return null;
             }

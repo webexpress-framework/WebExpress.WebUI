@@ -167,8 +167,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-graph-edge""></div>")]
-        [InlineData("500,280;640,320", @"<div class=""wx-graph-edge"" data-waypoints=""[{""x"":500,""y"":280},{""x"":640,""y"":320}]""></div>")]
-        [InlineData("100,100", @"<div class=""wx-graph-edge"" data-waypoints=""[{""x"":100,""y"":100}]""></div>")]
+        [InlineData("500,280;640,320", @"<div class=""wx-graph-edge"" data-waypoints=""[{&quot;x&quot;:500,&quot;y&quot;:280},{&quot;x&quot;:640,&quot;y&quot;:320}]""></div>")]
+        [InlineData("100,100", @"<div class=""wx-graph-edge"" data-waypoints=""[{&quot;x&quot;:100,&quot;y&quot;:100}]""></div>")]
         public void Waypoints(string waypointString, string expected)
         {
             // arrange

@@ -33,6 +33,90 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that the reorderable table fills its host like the plain table does.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-table-reorderable""><div class=""wx-table-columns""></div></div>")]
+        [InlineData(true, @"<div class=""wx-webui-table-reorderable wx-fill""><div class=""wx-table-columns""></div></div>")]
+        public void Fill(bool fill, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableReorderable()
+            {
+                Fill = _ => fill
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the rows of the reorderable table can be selected like the rows of the
+        /// plain table.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-table-reorderable"">*</div>")]
+        [InlineData(true, @"<div class=""wx-webui-table-reorderable"" data-selectable=""true"">*</div>")]
+        public void Selectable(bool selectable, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableReorderable
+            {
+                Selectable = _ => selectable
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the reorderable table renders every attribute of the plain table and
+        /// its own ones behind them, so a setting of the base cannot get lost in the
+        /// derived table.
+        /// </summary>
+        [Fact]
+        public void AllAttributes()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableReorderable("crew")
+            {
+                Fill = _ => true,
+                Selectable = _ => true,
+                Color = _ => TypeColorTable.Primary,
+                Striped = _ => TypeStripedTable.Row,
+                TableBorder = _ => TypeBorderTable.Bordered,
+                HeaderColor = _ => TypeColorTable.Dark,
+                SuppressHeaders = _ => true,
+                MovableRow = _ => true,
+                AllowColumnRemove = _ => true,
+                PersistKey = _ => "crew"
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            var expected = @"<div id=""crew"" class=""wx-webui-table-reorderable wx-fill"" data-color=""table-primary"" data-striped=""table-striped"" data-border=""table-bordered"" data-selectable=""true"" data-movable-row=""true"" data-allow-column-remove=""true"" data-persist-key=""crew""><div class=""wx-table-columns table-dark"" data-color=""table-dark"" data-suppress-headers=""true""></div></div>";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the table border property of the table control.
         /// </summary>
         [Theory]
@@ -250,6 +334,31 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // expected HTML
             var expected = @"<div class=""wx-webui-table-reorderable""><div class=""wx-table-columns""></div><div class=""wx-table-row""><div></div></div><div class=""wx-table-row""><div></div></div></div>";
+
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the reorderable table renders its footer after the rows like the
+        /// plain table does.
+        /// </summary>
+        [Fact]
+        public void AddFooter()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableReorderable();
+
+            control.AddRow(new ControlTableCell() { Text = _ => "a" });
+            control.AddFooter(new ControlTableCell() { Text = _ => "sum" });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            var expected = @"<div class=""wx-webui-table-reorderable""><div class=""wx-table-columns""></div><div class=""wx-table-row""><div>a</div></div><div class=""wx-table-footer""><div>sum</div></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

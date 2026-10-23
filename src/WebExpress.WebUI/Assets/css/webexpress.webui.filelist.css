@@ -30,3 +30,34 @@
     align-items: center;
     gap: 0.5em;
 }
+
+/* Earlier versions of a file, folded behind the row of the current one */
+.wx-file-list > .wx-upload-preview > table > tbody > tr.wx-file-version > td:first-child > div {
+    /* indented so a version reads as belonging to the file above it */
+    padding-left: 1.5em;
+}
+
+.wx-file-list .wx-file-version-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25em;
+    padding: 0 0.25em;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: var(--wx-secondary-color);
+}
+
+.wx-file-list .wx-file-version-count {
+    font-size: 0.75em;
+    line-height: 1;
+    padding: 0.15em 0.4em;
+    border-radius: 1em;
+    background-color: var(--wx-secondary-bg);
+}
+
+.wx-file-list .wx-file-version-label {
+    font-size: 0.75em;
+    color: var(--wx-secondary-color);
+    font-variant-numeric: tabular-nums;
+}

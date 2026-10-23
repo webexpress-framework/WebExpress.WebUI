@@ -138,10 +138,10 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the horizontal alignment of the items.
         /// </summary>
-        public virtual Func<IRenderControlFormContext, TypeJustifiedFlex> Justify
+        public virtual Func<IRenderControlContext, TypeJustifiedFlex> Justify
         {
             get => (Func<IRenderControlContext, TypeJustifiedFlex>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -352,9 +352,9 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = formLayout == TypeLayoutForm.Inline
-                    ? Css.Concatenate("wx-form wx-form-inline", GetClasses())
-                    : Css.Concatenate("wx-form", GetClasses()),
-                Style = GetStyles(),
+                    ? Css.Concatenate("wx-form wx-form-inline", GetClasses(renderContext))
+                    : Css.Concatenate("wx-form", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 Action = uri?.ToString(),
                 Method = (method == RequestMethod.NONE
@@ -422,7 +422,9 @@ namespace WebExpress.WebUI.WebControl
                 form.Add(item.Render(renderContext, visualTree));
             }
 
-            var main = new HtmlElementSectionMain();
+            // the page owns the main landmark; a second one inside the form would nest
+            // landmarks and leave a reader with two "main" regions to choose from
+            var main = new HtmlElementTextContentDiv() { Class = "wx-form-main" };
             var group = default(ControlFormItemGroup);
 
             group = itemLayout switch

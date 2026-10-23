@@ -32,6 +32,22 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, bool> Required { get; }
 
         /// <summary>
+        /// Gives the input an id when it was created without one, so the label a form group
+        /// renders beside it can point at it.
+        /// </summary>
+        void EnsureId();
+
+        /// <summary>
+        /// Determines whether the field carries its id on a native, labelable element. A custom
+        /// input that keeps the id on a host div or on a hidden input cannot be reached by a
+        /// label's for attribute, so the form group captions it with a span the client names the
+        /// focusable part by instead.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>True if a label element may point at the field.</returns>
+        bool IsLabelable(IRenderControlFormContext renderContext);
+
+        /// <summary>
         /// Gets the elements that are displayed in front of the control.
         /// </summary>
         IEnumerable<IControl> Prepend { get; }

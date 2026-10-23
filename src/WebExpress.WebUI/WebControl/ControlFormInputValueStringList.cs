@@ -17,6 +17,11 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<string> Items => _items;
 
         /// <summary>
+        /// Gets a value indicating whether the list holds no item.
+        /// </summary>
+        public bool IsEmpty => _items.Count == 0;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public ControlFormInputValueStringList()

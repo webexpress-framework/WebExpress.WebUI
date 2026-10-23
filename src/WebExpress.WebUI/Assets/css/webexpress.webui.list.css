@@ -1,11 +1,11 @@
 .wx-list {
-    color: var(--bs-body-color);
-    background-color: var(--bs-body-bg);
+    color: var(--wx-body-color);
+    background-color: var(--wx-body-bg);
     display: block;
     margin: 0;
     padding: 0;
-    border: 1px solid var(--bs-border-color);
-    border-radius: var(--bs-border-radius, 10px);
+    border: 1px solid var(--wx-border-color);
+    border-radius: var(--wx-border-radius, 10px);
     height: 100%;
 }
 
@@ -19,11 +19,11 @@
     -webkit-user-select: none;
     text-transform: uppercase;
     letter-spacing: 0.06em;
-    background-color: var(--bs-table-head-bg, var(--bs-tertiary-bg));
+    background-color: var(--wx-table-head-bg, var(--wx-tertiary-bg));
     position: relative;
     user-select: none;
     border-bottom: none;
-    color: var(--bs-table-head-color, var(--bs-secondary-color));
+    color: var(--wx-table-head-color, var(--wx-secondary-color));
     transition: background-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 }
 
@@ -34,14 +34,14 @@
     text-overflow: ellipsis;
     white-space: nowrap;
     font-size: 0.875rem;
-    color: var(--bs-secondary-color);
+    color: var(--wx-secondary-color);
     text-transform: uppercase;
     letter-spacing: 0.04em;
 }
 
 .wx-list-sort-btn {
     flex: 0 0 auto;
-    color: var(--bs-secondary-color);
+    color: var(--wx-secondary-color);
     line-height: 1;
     border: none;
     background: none;
@@ -53,13 +53,13 @@
 
 .wx-list-sort-btn:hover,
 .wx-list-sort-btn[aria-pressed="true"] {
-    color: var(--bs-primary);
+    color: var(--wx-primary);
 }
 
 .wx-list-sort-btn:focus-visible {
     outline: 0;
-    box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) var(--bs-focus-ring-color, rgba(var(--bs-primary-rgb), 0.25));
-    border-radius: var(--bs-border-radius-sm);
+    box-shadow: 0 0 0 var(--wx-focus-ring-width, 0.25rem) var(--wx-focus-ring-color, rgba(var(--wx-primary-rgb), 0.25));
+    border-radius: var(--wx-border-radius-sm);
 }
 
 .wx-list-sort-indicator {
@@ -85,7 +85,7 @@
     align-items: flex-start;
     gap: 0.5rem;
     padding: 0.375rem 0.5rem;
-    border-bottom: var(--bs-border-width) solid var(--bs-border-color);
+    border-bottom: var(--wx-border-width) solid var(--wx-border-color);
     background-color: transparent;
     transition: background-color 120ms ease-in;
 }
@@ -96,21 +96,21 @@
 }
 
 .wx-list-item:hover {
-    /* use bootstrap subtle background for hover */
-    background-color: var(--bs-tertiary-bg);
+    /* use WebExpress subtle background for hover */
+    background-color: var(--wx-tertiary-bg);
 }
 
 /* active / selected item - highlight with a left accent border */
 .wx-list-item-active,
 .wx-list-item.active {
-    background-color: var(--bs-primary-bg-subtle, rgba(var(--bs-primary-rgb), 0.08));
-    border-left: 3px solid var(--bs-primary);
+    background-color: var(--wx-primary-bg-subtle, rgba(var(--wx-primary-rgb), 0.08));
+    border-left: 3px solid var(--wx-primary);
     padding-left: calc(0.5rem - 3px); /* compensate border-left so content stays aligned */
 }
 
 .wx-list-item-active:hover,
 .wx-list-item.active:hover {
-    background-color: rgba(var(--bs-primary-rgb), 0.14);
+    background-color: rgba(var(--wx-primary-rgb), 0.14);
 }
 
 /* drag handle */
@@ -122,8 +122,8 @@
     line-height: 1;
     opacity: 0.85;
     padding: 0.125rem 0.25rem;
-    border-radius: var(--bs-border-radius-sm);
-    color: var(--bs-secondary-color);
+    border-radius: var(--wx-border-radius-sm);
+    color: var(--wx-secondary-color);
 }
 
 .wx-list-drag-handle:active {
@@ -133,9 +133,9 @@
 
 .wx-list-drag-handle:focus-visible {
     outline: 0;
-    /* use bootstrap focus ring */
-    box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) var(--bs-focus-ring-color, rgba(var(--bs-primary-rgb), 0.25));
-    background-color: rgba(var(--bs-primary-rgb), 0.08);
+    /* use WebExpress focus ring */
+    box-shadow: 0 0 0 var(--wx-focus-ring-width, 0.25rem) var(--wx-focus-ring-color, rgba(var(--wx-primary-rgb), 0.25));
+    background-color: rgba(var(--wx-primary-rgb), 0.08);
 }
 
 /* main content area inside item */
@@ -157,7 +157,7 @@
     word-break: break-word;
 }
 
-/* compact inline-edit input uses bootstrap control sizing */
+/* compact inline-edit input uses WebExpress control sizing */
 .wx-list-content .form-control {
     padding: 0.25rem 0.5rem;
     height: calc(1.5em + 0.5rem + 2px);
@@ -184,9 +184,9 @@
 .wx-list-drag-placeholder {
     list-style: none;
     margin: 0.125rem 0;
-    border: calc(var(--bs-border-width) + 1px) dashed var(--bs-border-color);
-    background-color: rgba(var(--bs-primary-rgb), 0.075);
-    border-radius: var(--bs-border-radius);
+    border: calc(var(--wx-border-width) + 1px) dashed var(--wx-border-color);
+    background-color: rgba(var(--wx-primary-rgb), 0.075);
+    border-radius: var(--wx-border-radius);
     min-height: 2.25rem; /* safety when js height is not set */
     pointer-events: none; /* do not intercept pointer while dragging */
 }
@@ -198,19 +198,19 @@
 
 /* optional delete button (pairs with .btn.btn-link.text-danger) */
 .wx-list-delete {
-    /* keep bootstrap's link-danger color and only tweak interactions */
+    /* keep WebExpress's link-danger color and only tweak interactions */
     padding: 0.125rem 0.25rem;
-    border-radius: var(--bs-border-radius-sm);
+    border-radius: var(--wx-border-radius-sm);
 }
 
     .wx-list-delete:hover {
         text-decoration: underline;
-        background-color: rgba(var(--bs-danger-rgb), 0.06);
+        background-color: rgba(var(--wx-danger-rgb), 0.06);
     }
 
     .wx-list-delete:focus-visible {
         outline: 0;
-        box-shadow: 0 0 0 var(--bs-focus-ring-width, 0.25rem) rgba(var(--bs-danger-rgb), 0.35);
+        box-shadow: 0 0 0 var(--wx-focus-ring-width, 0.25rem) rgba(var(--wx-danger-rgb), 0.35);
     }
 
 /* reserve trailing space when rows without controls should align with rows that have controls */
@@ -219,10 +219,10 @@
     flex: 0 0 auto;
 }
 
-/* change flash animation using bootstrap warning color */
+/* change flash animation using WebExpress warning color */
 @keyframes wx-row-flash {
     0% {
-        background-color: rgba(var(--bs-warning-rgb), 0.85);
+        background-color: rgba(var(--wx-warning-rgb), 0.85);
     }
 
     100% {
@@ -269,43 +269,43 @@
 }
 
 .wx-list-bg-primary {
-    background-color: var(--bs-primary);
+    background-color: var(--wx-primary);
 }
 
 .wx-list-bg-secondary {
-    background-color: var(--bs-secondary);
+    background-color: var(--wx-secondary);
 }
 
 .wx-list-bg-success {
-    background-color: var(--bs-success);
+    background-color: var(--wx-success);
 }
 
 .wx-list-bg-info {
-    background-color: var(--bs-info);
+    background-color: var(--wx-info);
 }
 
 .wx-list-bg-warning {
-    background-color: var(--bs-warning);
+    background-color: var(--wx-warning);
 }
 
 .wx-list-bg-danger {
-    background-color: var(--bs-danger);
+    background-color: var(--wx-danger);
 }
 
 .wx-list-bg-light {
-    background-color: var(--bs-light);
+    background-color: var(--wx-light);
 }
 
 .wx-list-bg-dark {
-    background-color: var(--bs-dark);
+    background-color: var(--wx-dark);
 }
 
 .wx-list-bg-white {
-    background-color: var(--bs-white);
+    background-color: var(--wx-white);
 }
 
 .wx-list-bg-transparent {
-    background-color: var(--bs-transparent);
+    background-color: transparent;
 }
 
 /* link / button item types */
@@ -329,4 +329,42 @@
 .wx-list-item-button-el.disabled {
     pointer-events: none;
     opacity: 0.6;
+}
+
+/* --- tree: a list whose items own children --- */
+.wx-list-tree {
+    /* the guides bleed over the row padding so the lines of consecutive rows meet */
+    --wx-tree-guide-bleed: 0.375rem;
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    align-self: stretch;
+}
+
+.wx-list-tree-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0;
+    border: none;
+    border-radius: 4px;
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+    transition: background-color 0.1s;
+}
+
+.wx-list-tree-toggle:hover {
+    background-color: var(--wx-tertiary-bg);
+}
+
+/* a leaf reserves the same width, so the text of siblings stays aligned */
+.wx-list-tree-toggle-placeholder {
+    display: inline-block;
+    width: 1.25rem;
+    flex-shrink: 0;
+    visibility: hidden;
 }

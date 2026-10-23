@@ -1,4 +1,4 @@
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a x-ray.
@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconXRay : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-x-ray";
+        public override string Symbol => "x-ray";
     }
 }

@@ -7,7 +7,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a file list control.
+    /// Contract for a single file entry within a file-list control.
     /// </summary>
     public interface IControlFileListItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {
@@ -25,6 +25,12 @@ namespace WebExpress.WebUI.WebControl
         /// Gets the name of the file, including its extension.
         /// </summary>
         Func<IRenderControlContext, string> Name { get; }
+
+        /// <summary>
+        /// Gets the version of the file, which orders it among the other entries
+        /// of the same name. Zero means the file has one version only.
+        /// </summary>
+        Func<IRenderControlContext, int> Version { get; }
 
         /// <summary>
         /// Gets the uri of the file.

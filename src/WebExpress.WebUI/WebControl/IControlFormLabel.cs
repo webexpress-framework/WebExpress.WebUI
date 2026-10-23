@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Interface for form label controls.
+    /// Contract for a form label, the caption that describes a form field.
     /// </summary>
     public interface IControlFormLabel
     {

@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the orientation of the toolbar.
+    /// Whether a toolbar is laid out horizontally or vertically.
     /// </summary>
     public enum TypeOrientationToolBar
     {

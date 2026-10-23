@@ -1,6 +1,4 @@
-﻿using WebExpress.WebCore.WebIcon;
-
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for layer.
@@ -8,16 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconLayer : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the class using the light theme.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public IconLayer()
-            : base(TypeIconTheme.Light)
-        {
-        }
-
-        /// <summary>
-        /// Returns the CSS class associated with the icon.
-        /// </summary>
-        public override string Class => "wx-icon-light wx-icon-light-layer";
+        public override string Symbol => "layer";
     }
 }

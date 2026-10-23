@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebIcon;
+using System.Globalization;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -35,6 +36,31 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the active property of the buttonlink control. A link cannot carry a disabled
+        /// attribute, so the disabled state is spoken through aria and the link leaves the tab order.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeActive.None, @"<a class=""btn""></a>")]
+        [InlineData(TypeActive.Active, @"<a class=""btn active""></a>")]
+        [InlineData(TypeActive.Disabled, @"<a class=""btn disabled"" aria-disabled=""true"" tabindex=""-1""></a>")]
+        public void Active(TypeActive active, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlButtonLink()
+            {
+                Active = _ => active
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            Assert.Equal(expected, html.Trim());
+        }
+
+        /// <summary>
         /// Tests the text property of the buttonlink control.
         /// </summary>
         [Theory]
@@ -62,10 +88,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<a class=""btn""></a>")]
-        [InlineData("a", @"<a class=""btn"" title=""a"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("b", @"<a class=""btn"" title=""b"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("a<br/>b", @"<a class=""btn"" title=""a<br/>b"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("webexpress.WebUI:plugin.name", @"<a class=""btn"" title=""WebExpress.WebUI"" data-bs-toggle=""tooltip""></a>")]
+        [InlineData("a", @"<a class=""btn"" title=""a""></a>")]
+        [InlineData("b", @"<a class=""btn"" title=""b""></a>")]
+        [InlineData("a<br/>b", @"<a class=""btn"" title=""a<br/>b""></a>")]
+        [InlineData("webexpress.WebUI:plugin.name", @"<a class=""btn"" title=""WebExpress.WebUI""></a>")]
         public void Tooltip(string tooltip, string expected)
         {
             // arrange
@@ -192,7 +218,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<a class=""btn""></a>")]
-        [InlineData(typeof(IconStar), @"<a class=""btn""><i class=""fas fa-star""></i></a>")]
+        [InlineData(typeof(IconStar), @"<a class=""btn""><i class=""wx-icon-light wx-icon-light-star""></i></a>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -259,6 +285,31 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that both halves of the buttonlink control resolve their text against
+        /// the culture the page is requested in. The mock server is configured en while
+        /// the mock request asks for German, so a half that falls back to the server
+        /// default answers in the wrong language while its neighbours stay German.
+        /// </summary>
+        [Fact]
+        public void TextAndTooltipFollowTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de"));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlButtonLink()
+            {
+                Text = _ => "webexpress.webui:form.submit.label",
+                Tooltip = _ => "webexpress.webui:form.cancel.label"
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            Assert.Equal(@"<a class=""btn"" title=""Abbrechen"">Speichern</a>", html.Trim());
+        }
+
+        /// <summary>
         /// Tests the content property of the buttonlink control.
         /// </summary>
         [Fact]
@@ -277,9 +328,9 @@ namespace WebExpress.WebUI.Test.WebControl
             var html2 = control2.Render(context, visualTree);
             var html3 = control3.Render(context, visualTree);
 
-            Assert.Equal(@"<a class=""btn""><i class=""fas fa-star""></i></a>", html1.Trim());
-            Assert.Equal(@"<a class=""btn""><i class=""fas fa-star""></i></a>", html2.Trim());
-            Assert.Equal(@"<a class=""btn""><i class=""fas fa-star""></i></a>", html3.Trim());
+            Assert.Equal(@"<a class=""btn""><i class=""wx-icon-light wx-icon-light-star""></i></a>", html1.Trim());
+            Assert.Equal(@"<a class=""btn""><i class=""wx-icon-light wx-icon-light-star""></i></a>", html2.Trim());
+            Assert.Equal(@"<a class=""btn""><i class=""wx-icon-light wx-icon-light-star""></i></a>", html3.Trim());
         }
     }
 }

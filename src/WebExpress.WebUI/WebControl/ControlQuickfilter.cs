@@ -1,12 +1,14 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a quickfilter control.
+    /// Renders a quick-filter bar offering one-click buttons to filter a list.
     /// </summary>
     public class ControlQuickfilter : Control, IControlQuickfilter
     {
@@ -16,6 +18,15 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the items of the quickfilter control.
         /// </summary>
         public IEnumerable<IControlQuickfilterItem> Items => _items;
+
+        /// <summary>
+        /// Gets or sets the action that edits a user-defined filter, typically an
+        /// <see cref="ActionModal"/> opening the application's filter dialog.
+        /// What a filter selects is the application's business, so the framework
+        /// ships no editor: the options menu of a user-defined chip triggers this
+        /// action, with the id of the filter appended to its uri.
+        /// </summary>
+        public Func<IRenderControlContext, IAction> EditAction { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -73,12 +84,49 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
+                // filter is not a role; the chips form a named group
                 Class = "wx-webui-quickfilter",
-                Role = "filter"
+                Role = "group"
             }
-                .Add(_items.Select(x => x.Render(renderContext, visualTree)));
+                .AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:quickfilter.label"))
+                .Add(_items.Select(x => x.Render(renderContext, visualTree)))
+                .Add(RenderEditAction(renderContext));
 
             return html;
+        }
+
+        /// <summary>
+        /// Renders the authored edit action as the prototype the client copies onto the menu of
+        /// every user-defined chip.
+        /// </summary>
+        /// <remarks>
+        /// The action is authored once but belongs to every user-defined chip, and those exist only
+        /// on the client; it therefore travels as a hidden element the client reads.
+        ///
+        /// Every rendering of a quickfilter has to emit it. A derived control that builds its own
+        /// element must call this as well, otherwise the chips it produces offer removing but no
+        /// editing — the client shows that entry only when it found the prototype.
+        /// </remarks>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>The prototype, or null when no edit action was authored.</returns>
+        protected IHtmlNode RenderEditAction(IRenderControlContext renderContext)
+        {
+            var editAction = EditAction?.Invoke(renderContext);
+
+            if (editAction is null)
+            {
+                return null;
+            }
+
+            var prototype = new HtmlElementTextContentDiv()
+            {
+                Class = "wx-quickfilter-edit-action",
+                Style = "display:none"
+            };
+
+            editAction.ApplyUserAttributes(prototype, TypeAction.Primary);
+
+            return prototype;
         }
     }
 }

@@ -9,6 +9,10 @@ using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.WebControl
 {
+    /// <summary>
+    /// Groups form items into a tabbed view, so a long form can be split across several tabs with
+    /// only the selected tab's fields shown at a time.
+    /// </summary>
     public class ControlFormItemGroupTabView : IControlFormItemGroupTabView
     {
         private readonly ControlFormItemGroup _group;

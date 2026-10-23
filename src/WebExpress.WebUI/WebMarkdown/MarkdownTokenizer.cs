@@ -172,6 +172,14 @@ namespace WebExpress.WebUI.WebMarkdown
                     continue;
                 }
 
+                // an escaped pipe is text, so a table cell can hold a pipe without being split
+                if (IsEscapedPipe(_input, _pos))
+                {
+                    tokens.Add(new MarkdownToken(MarkdownTokenType.Text, "|", _pos, 2));
+                    _pos += 2;
+                    continue;
+                }
+
                 // check for code block marker (three backticks) before single backtick
                 if (_input[_pos] == '`' && _pos + 2 < _length &&
                     _input[_pos + 1] == '`' && _input[_pos + 2] == '`')
@@ -364,6 +372,11 @@ namespace WebExpress.WebUI.WebMarkdown
         /// <returns>True if a special character, code marker, or URL is found.</returns>
         private static bool IsSpecialMarkdownChar(string input, int pos)
         {
+            if (IsEscapedPipe(input, pos))
+            {
+                return true;
+            }
+
             // Check for code block marker
             if
             (
@@ -426,6 +439,17 @@ namespace WebExpress.WebUI.WebMarkdown
             }
 
             return false;
+        }
+
+        /// <summary>
+        /// Determines whether a backslash-escaped pipe (<c>\|</c>) starts at the position.
+        /// </summary>
+        /// <param name="input">The input string.</param>
+        /// <param name="pos">Current position in the string.</param>
+        /// <returns>True if an escaped pipe starts at the position; otherwise, false.</returns>
+        private static bool IsEscapedPipe(string input, int pos)
+        {
+            return input[pos] == '\\' && pos + 1 < input.Length && input[pos + 1] == '|';
         }
 
         /// <summary>

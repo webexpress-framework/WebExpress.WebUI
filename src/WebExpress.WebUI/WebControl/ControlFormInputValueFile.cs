@@ -4,7 +4,7 @@ using WebExpress.WebCore.WebMessage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form input value of type file.
+    /// Represents the value of a form input field as an uploaded file.
     /// </summary>
     public class ControlFormInputValueFile : IControlFormInputValue
     {
@@ -22,6 +22,12 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the file data.
         /// </summary>
         public byte[] Data { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether no file was given. The name decides, because a field
+        /// that keeps a stored file sends its name or uri without new data.
+        /// </summary>
+        public bool IsEmpty => string.IsNullOrWhiteSpace(Name);
 
         /// <summary>
         /// Initializes a new instance of the class.

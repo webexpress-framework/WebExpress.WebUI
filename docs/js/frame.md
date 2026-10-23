@@ -16,18 +16,19 @@ Initialization and behavior are controlled exclusively via `data-` attributes on
 
 Additional behavior:
 - Requests use `fetch()` with `credentials: "same-origin"`.
-- While loading, a skeleton placeholder is inserted (`placeholder`, `placeholder-glow`, and other utility classes).
-- In case of errors, a collapsible error box is shown via `ExpandableCtrl` with internationalized texts.
+- While loading **into an empty frame**, a skeleton placeholder is inserted (`placeholder`, `placeholder-glow`, and other utility classes). A frame that already holds content shows no placeholder: the outgoing content stays until its replacement is ready, so a swap from one page to the next is a single exchange instead of a flash through an empty frame.
+- In case of errors, a collapsible error box is shown via [`SectionCtrl`](section.md) with internationalized texts.
+- The embedded content came from a document of its own, so its page-level landmarks step down once it sits inside this page: a `<main>` becomes a region named after the embedded document's title, a banner or footer a plain group, and every named landmark (`nav`, `aside`, toolbars, regions) carries the embedded title as a suffix, so a reader can tell it from the host page's. Its headings are spoken one level below the heading that precedes the frame, with their own steps kept (`role="heading"` + `aria-level`); the tags stay as they are for the look.
 
 ## Functionality
 
 During construction, `data-uri`, `data-selector`, and `data-autoload` are read and then removed from the host element. If autoload is enabled, `load()` is executed immediately.
 
-The `load()` method first inserts a placeholder and emits `webexpress.webui.Event.DATA_REQUESTED_EVENT`. The resource is loaded using `fetch(this._uri, { credentials: "same-origin" })`. Upon a successful response, the HTML text is parsed, the desired area is determined via `this._selector` (fallback: `document.body`), and its `innerHTML` is transferred to the host element. Afterwards, `webexpress.webui.Event.DATA_ARRIVED_EVENT` is emitted.
+The `load()` method inserts a placeholder when the frame is empty - it is skipped when there is content to keep on screen - and emits `webexpress.webui.Event.DATA_REQUESTED_EVENT`. The resource is loaded using `fetch(this._uri, { credentials: "same-origin" })`. Upon a successful response, the HTML text is parsed, the desired area is determined via `this._selector` (fallback: `document.body`), and its `innerHTML` is transferred to the host element. Afterwards, `webexpress.webui.Event.DATA_ARRIVED_EVENT` is emitted.
 
 If an error occurs (network error or `!response.ok`), the container is cleared and a collapsible error alert with headline, details, and stacktrace is shown. The alert uses i18n keys:
-- `webexpress.webui:frame.contentNotLoaded.label` (default: "Content could not be loaded.")
-- `webexpress.webui:frame.contentNotLoaded.details` (default: empty)
+- `webexpress.webui:page.contentNotLoaded.label` (default: "Content could not be loaded.")
+- `webexpress.webui:page.contentNotLoaded.details` (default: "An error occurred while loading external content.")
 
 The class is registered under the key `"wx-webui-frame"` and can be automatically instantiated via `data-controller`.
 

@@ -4,10 +4,43 @@
     flex-wrap: wrap;
     flex-direction: column;
     align-items: stretch;
-    color: var(--bs-body-color);
-    font-family: var(--bs-body-font-family);
-    font-size: var(--bs-body-font-size);
-    line-height: var(--bs-body-line-height);
+    color: var(--wx-body-color);
+    font-family: var(--wx-body-font-family);
+    font-size: var(--wx-body-font-size);
+    line-height: var(--wx-body-line-height);
+}
+
+/* Fill mode: the tiles take the height their host offers instead of growing with
+   their number, which is what an application shell asks of the content of a
+   pane. The pager and the info line below the tiles then stay in place while the
+   tiles scroll, rather than sitting at the end of a list the pane scrolls past.
+
+   The wrapping has to go: a column that wraps answers a height it cannot fill by
+   starting a second column beside the first, so the tiles would spread sideways
+   instead of overflowing downwards. The container below wraps as before - that
+   is the wrapping the layout is actually built on.
+
+   Both the basis and the height are stated: a flex column host drives the basis,
+   and where a host hands nothing down the height still has to come from the
+   environment rather than from the content. */
+.wx-tile.wx-fill {
+    flex-wrap: nowrap;
+    flex: 1 1 var(--wx-tile-height, 70vh);
+    height: var(--wx-tile-height, 70vh);
+    max-height: 100%;
+    min-height: 12rem;
+    overflow: hidden;
+}
+
+.wx-tile.wx-fill > .wx-tile-container {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
+
+/* whatever else the host carries - the pager, the info line - is a band */
+.wx-tile.wx-fill > *:not(.wx-tile-container) {
+    flex: 0 0 auto;
 }
 
 .wx-tile-container {
@@ -21,8 +54,8 @@
 
 /* Tile card */
 .wx-tile-container > .wx-tile-card {
-    border: 1px solid var(--bs-border-color);
-    border-radius: var(--bs-border-radius);
+    border: 1px solid var(--wx-border-color);
+    border-radius: var(--wx-border-radius);
     box-shadow: 0 2px 6px rgba(0,0,0,.05);
     width: 200px;
     min-height: 110px;
@@ -37,7 +70,7 @@
 }
 
 .wx-tile-card:hover {
-    border-color: var(--bs-border-color-translucent, var(--bs-border-color));
+    border-color: var(--wx-border-color-translucent, var(--wx-border-color));
 }
 
 .wx-tile-card:active {
@@ -59,7 +92,7 @@
     line-height: 1;
     cursor: pointer;
     padding: 2px 6px;
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
 }
 
 .wx-tile-card:hover .wx-tile-remove-btn,
@@ -70,14 +103,125 @@
 
 .wx-tile-card .wx-tile-remove-btn:hover,
 .wx-tile-card .wx-tile-remove-btn:focus {
-    color: var(--bs-danger);
+    color: var(--wx-danger);
     outline: none;
 }
 
 .wx-tile-card .wx-tile-remove-btn:focus-visible {
-    outline: 2px solid var(--bs-danger);
+    outline: 2px solid var(--wx-danger);
     outline-offset: 2px;
     border-radius: 4px;
+}
+
+/* Grid layout: a fixed number of tiles per row instead of a free flow */
+.wx-tile-container-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--wx-tile-columns, 2), minmax(0, 1fr));
+    gap: 1rem;
+}
+
+.wx-tile-container-grid > .wx-tile-card {
+    width: auto;
+}
+
+/* Kicker row: the kind a card belongs to, plus an optional qualifier */
+.wx-tile-card-kicker {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
+    margin: 0.75em 0.85em 0;
+    min-height: 1.1em;
+}
+
+.wx-tile-card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45em;
+    font-size: 0.68em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--wx-secondary-color, #6c757d);
+}
+
+.wx-tile-card-badge-dot {
+    display: inline-block;
+    width: 0.72em;
+    height: 0.72em;
+    border-radius: 2px;
+    background: var(--wx-secondary, #6c757d);
+    flex: 0 0 auto;
+}
+
+.wx-tile-card-chip {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1em 0.45em;
+    border-radius: var(--wx-border-radius-sm, 0.25rem);
+    font-size: 0.62em;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    background: var(--wx-warning-bg-subtle, #fff3cd);
+    color: var(--wx-warning-text-emphasis, #997404);
+}
+
+/* Metadata footer, separated from the body by a hairline */
+.wx-tile-card-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35em 1.1em;
+    padding: 0.5em 0.85em 0.65em;
+    margin: 0 0.85em;
+    border-top: 1px dashed var(--wx-border-color, #dee2e6);
+    font-size: 0.75em;
+    color: var(--wx-secondary-color, #6c757d);
+}
+
+/* Selection: a primary frame over a tinted ground, plus a check badge, so the
+   chosen card stands out clearly while its content stays readable. The badge
+   carries the state independently of colour.
+
+   The selectors carry the card class twice, and the grid variant additionally
+   names its container: `.wx-tile-container > .wx-tile-card` above sets `border`
+   and `box-shadow` as shorthands and `.wx-tile-card:hover` sets `border-color`,
+   all of which would otherwise outrank a single-class rule and erase the frame. */
+.wx-tile-card.wx-tile-card-selected,
+.wx-tile-container > .wx-tile-card.wx-tile-card-selected,
+.wx-tile-container > .wx-tile-card.wx-tile-card-selected:hover {
+    border-color: var(--wx-primary, #0d6efd);
+    box-shadow: 0 0 0 2px var(--wx-primary, #0d6efd) inset, 0 4px 12px rgba(var(--wx-primary-rgb, 13, 110, 253), .18);
+    background-color: var(--wx-primary-bg-subtle, #cfe2ff);
+}
+
+/* the generic title rule below resets the colour to inherit, so the selected
+   variant is written with the extra class to outrank it */
+.wx-tile-card.wx-tile-card-selected .card-title {
+    color: var(--wx-primary-text-emphasis, #052c65);
+}
+
+.wx-tile-card-check {
+    position: absolute;
+    top: 0.5rem;
+    right: 0.5rem;
+    width: 1.5em;
+    height: 1.5em;
+    border-radius: 9999px;
+    background: var(--wx-primary, #0d6efd);
+    color: var(--wx-primary-contrast, #fff);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    line-height: 1;
+    z-index: 2;
+}
+
+/* keep the badge clear of the kicker row and of a card that has none */
+.wx-tile-card .wx-tile-card-kicker,
+.wx-tile-card .card-title {
+    padding-right: 1.9em;
 }
 
 /* Content structure */
@@ -109,7 +253,7 @@
 
 .wx-tile-card.wx-dragging {
     opacity: .55;
-    border-color: var(--bs-secondary);
+    border-color: var(--wx-secondary);
     cursor: grabbing;
 }
 
@@ -141,10 +285,10 @@
     opacity: 50%;
     background: repeating-linear-gradient(
         45deg,
-        var(--bs-secondary-bg),
-        var(--bs-secondary-bg) 6px,
-        var(--bs-tertiary-bg) 6px,
-        var(--bs-tertiary-bg) 12px
+        var(--wx-secondary-bg),
+        var(--wx-secondary-bg) 6px,
+        var(--wx-tertiary-bg) 6px,
+        var(--wx-tertiary-bg) 12px
     );
 }
 
@@ -156,10 +300,10 @@
     opacity: 50%;
     background: repeating-linear-gradient(
         45deg,
-        var(--bs-secondary-bg),
-        var(--bs-secondary-bg) 6px,
-        var(--bs-tertiary-bg) 6px,
-        var(--bs-tertiary-bg) 12px
+        var(--wx-secondary-bg),
+        var(--wx-secondary-bg) 6px,
+        var(--wx-tertiary-bg) 6px,
+        var(--wx-tertiary-bg) 12px
     );
 }
 
@@ -179,12 +323,12 @@
 
 /* start/end drop zones */
 .wx-drop-target {
-    outline: 2px dashed var(--bs-success);
+    outline: 2px dashed var(--wx-success);
 }
 
 /* Focus accessibility */
 .wx-tile-card:focus-visible {
-    outline: 2px solid var(--bs-primary);
+    outline: 2px solid var(--wx-primary);
     outline-offset: 2px;
     z-index: 4;
 }
@@ -201,9 +345,35 @@
 
 .wx-tile-picker {
     display: block;
-    background: var(--bs-body-bg);
+    background: var(--wx-body-bg);
     padding: 1.2rem 1.5rem;
     min-height: 180px;
+}
+
+/* Search box above the tiles */
+.wx-tile-picker-search {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.wx-tile-picker-search > i {
+    position: absolute;
+    top: 50%;
+    left: 0.85rem;
+    transform: translateY(-50%);
+    pointer-events: none;
+    color: var(--wx-secondary-color, #6c757d);
+}
+
+.wx-tile-picker-search > input {
+    padding-left: 2.4rem;
+}
+
+/* Shown when search or filter leaves no tile visible */
+.wx-tile-picker-empty {
+    padding: 2rem 0;
+    text-align: center;
+    color: var(--wx-secondary-color, #6c757d);
 }
 
 /* Tile picker grid */
@@ -218,55 +388,55 @@
 }
 
 @keyframes wx-tile-flash {
-    0% { box-shadow: 0 0 0 0 var(--bs-warning); }
-    50% { box-shadow: 0 0 10px 5px var(--bs-warning); }
-    100% { box-shadow: 0 0 0 0 var(--bs-warning); }
+    0% { box-shadow: 0 0 0 0 var(--wx-warning); }
+    50% { box-shadow: 0 0 10px 5px var(--wx-warning); }
+    100% { box-shadow: 0 0 0 0 var(--wx-warning); }
 }
 
 /* Color variants (applied to .wx-tile-card) */
 .wx-tile-primary {
-    background: var(--bs-primary);
-    color: var(--bs-light);
+    background: var(--wx-primary);
+    color: var(--wx-light);
 }
 
 .wx-tile-secondary {
-    background: var(--bs-secondary);
-    color: var(--bs-light);
+    background: var(--wx-secondary);
+    color: var(--wx-light);
 }
 
 .wx-tile-success {
-    background: var(--bs-success);
-    color: var(--bs-light);
+    background: var(--wx-success);
+    color: var(--wx-light);
 }
 
 .wx-tile-info {
-    background: var(--bs-info);
-    color: var(--bs-dark);
+    background: var(--wx-info);
+    color: var(--wx-dark);
 }
 
 .wx-tile-warning {
-    background: var(--bs-warning);
-    color: var(--bs-dark);
+    background: var(--wx-warning);
+    color: var(--wx-dark);
 }
 
 .wx-tile-danger {
-    background: var(--bs-danger);
-    color: var(--bs-light);
+    background: var(--wx-danger);
+    color: var(--wx-light);
 }
 
 .wx-tile-light {
-    background: var(--bs-light);
-    color: var(--bs-body-color);
+    background: var(--wx-light);
+    color: var(--wx-body-color);
 }
 
 .wx-tile-dark {
-    background: var(--bs-dark);
-    color: var(--bs-light);
+    background: var(--wx-dark);
+    color: var(--wx-light);
 }
 
 .wx-tile-white {
-    background: var(--bs-white);
-    color: var(--bs-body-color);
+    background: var(--wx-white);
+    color: var(--wx-body-color);
 }
 
 .wx-tile-transparent {

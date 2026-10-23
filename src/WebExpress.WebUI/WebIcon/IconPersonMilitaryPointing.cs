@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconPersonMilitaryPointing : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-person-military-pointing";
+        public override string Symbol => "person-military-pointing";
     }
 }

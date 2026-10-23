@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the form label control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<label class=""wx-form-label""></label>")]
-        [InlineData("id", @"<label id=""id"" class=""wx-form-label""></label>")]
+        [InlineData(null, @"<span class=""wx-form-label""></span>")]
+        [InlineData("id", @"<span id=""id"" class=""wx-form-label""></span>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -38,8 +38,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the name property of the form label control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<label class=""wx-form-label""></label>")]
-        [InlineData("abc", @"<label class=""wx-form-label""></label>")]
+        [InlineData(null, @"<span class=""wx-form-label""></span>")]
+        [InlineData("abc", @"<span class=""wx-form-label""></span>")]
         public void Name(string name, string expected)
         {
             // arrange
@@ -63,8 +63,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the form label control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<label class=""wx-form-label""></label>")]
-        [InlineData("abc", @"<label class=""wx-form-label"">abc</label>")]
+        [InlineData(null, @"<span class=""wx-form-label""></span>")]
+        [InlineData("abc", @"<span class=""wx-form-label"">abc</span>")]
         public void Text(string text, string expected)
         {
             // arrange
@@ -88,7 +88,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the form item property of the form label control.
         /// </summary>
         [Theory]
-        [InlineData(false, @"<label class=""wx-form-label""></label>")]
+        [InlineData(false, @"<span class=""wx-form-label""></span>")]
         [InlineData(true, @"<label class=""wx-form-label"" for=""*""></label>")]
         public void FormItem(bool formItem, string expected)
         {
@@ -100,6 +100,38 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlFormItemLabel(null)
             {
                 FormItem = formItem ? new ControlFormItemInputText() : null
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that a field without a labelable element is captioned by a span, since the
+        /// browser flags a label whose for attribute reaches no labelable element.
+        /// </summary>
+        [Theory]
+        [InlineData("rating", @"<span id=""l"" class=""wx-form-label""></span>")]
+        [InlineData("wysiwyg", @"<span id=""l"" class=""wx-form-label""></span>")]
+        [InlineData("multiline", @"<label id=""l"" class=""wx-form-label"" for=""*""></label>")]
+        public void FormItemLabelable(string field, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemLabel("l")
+            {
+                FormItem = field switch
+                {
+                    "rating" => new ControlFormItemInputRating(),
+                    "wysiwyg" => new ControlFormItemInputText() { Format = _ => TypeEditTextFormat.Wysiwyg },
+                    _ => new ControlFormItemInputText() { Format = _ => TypeEditTextFormat.Multiline }
+                }
             };
 
             // act

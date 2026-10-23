@@ -15,9 +15,11 @@ webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
         const lineNumbers = element.dataset.lineNumbers === "true";
         const isBase64 = element.dataset.base64 === "true";
 
-        // extract code from innerHTML and normalize line endings
-        let rawCode = (element?.innerHTML ?? "").trim().replace(/\r\n/g, "\n");
-        this._code = isBase64 && rawCode ? atob(rawCode) : rawCode;
+        // the text, not the markup: innerHTML re-escapes "<" and "&", which would then be
+        // shown as entities; a base64 payload reads the same either way
+        const source = element.querySelector("pre");
+        let rawCode = (source ? source.textContent : (element?.textContent ?? "").trim()).replace(/\r\n/g, "\n");
+        this._code = isBase64 && rawCode ? this._decode(rawCode) : rawCode;
 
         // clean up and add styling class
         element.innerHTML = "";
@@ -39,6 +41,19 @@ webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Decodes the transported source. The server encodes utf-8 bytes, while atob answers one
+     * character per byte, so the bytes have to be decoded as utf-8 again - without that step
+     * every umlaut, dash and quotation mark in the source arrives as mojibake.
+     * @param {string} encoded - The base64 payload.
+     * @returns {string} The source.
+     */
+    _decode(encoded) {
+        const bytes = Uint8Array.from(atob(encoded), (character) => character.charCodeAt(0));
+
+        return new TextDecoder().decode(bytes);
+    }
+
+    /**
      * Creates the code box for display.
      * @param {string|null} language - The programming language.
      * @param {boolean} lineNumbers - Whether to show line numbers.
@@ -50,6 +65,12 @@ webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
         if (language) {
             codeElement.classList.add(`language-${language}`);
         }
+        // a long line scrolls sideways; the box has to take the focus for the keyboard to scroll
+        // it, and a focusable box is named. a group rather than a region: a page of samples
+        // would otherwise list one landmark per block
+        codeElement.setAttribute("tabindex", "0");
+        codeElement.setAttribute("role", "group");
+        codeElement.setAttribute("aria-label", language || this._i18n("webexpress.webui:code.label", "Code"));
         return codeElement;
     }
 
@@ -72,7 +93,7 @@ webexpress.webui.CodeCtrl = class extends webexpress.webui.Ctrl {
     _createCopyButton() {
         const copyButton = document.createElement("button");
         const icon = document.createElement("i");
-        icon.className = "fas fa-copy";
+        icon.className = this._iconClass("copy");
         copyButton.classList.add("btn", "btn-sm");
         copyButton.title = this._i18n("webexpress.webui:copy", "Copy");
         copyButton.appendChild(icon);

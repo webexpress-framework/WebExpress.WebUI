@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebHtml;
+﻿using System.Globalization;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
@@ -118,6 +119,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData("a", @"<div class=""wx-dropdown-item"" data-tooltip=""a""></div>")]
         [InlineData("b", @"<div class=""wx-dropdown-item"" data-tooltip=""b""></div>")]
         [InlineData("a<br/>b", @"<div class=""wx-dropdown-item"" data-tooltip=""a<br/>b""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-dropdown-item"" data-tooltip=""WebExpress.WebUI""></div>")]
         public void Tooltip(string tooltip, string expected)
         {
             // arrange
@@ -133,6 +135,36 @@ namespace WebExpress.WebUI.Test.WebControl
             var html = control.Render(context, visualTree);
 
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests that both texts of the dropdown item link control resolve against the culture
+        /// the page is requested in. The mock server is configured en while the mock request
+        /// asks for German, so a text resolved against the server default answers in the wrong
+        /// language while its neighbours on the same page stay German.
+        /// </summary>
+        [Fact]
+        public void TextAndTooltipFollowTheRequestCulture()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(CultureInfo.GetCultureInfo("de"));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlDropdownItemLink()
+            {
+                Text = _ => "webexpress.webui:form.submit.label",
+                Tooltip = _ => "webexpress.webui:form.cancel.label"
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders
+            (
+                @"<div class=""wx-dropdown-item"" data-tooltip=""Abbrechen"">Speichern</div>",
+                html.Trim()
+            );
         }
 
         /// <summary>
@@ -188,7 +220,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-dropdown-item""></div>")]
-        [InlineData(typeof(IconStar), @"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>")]
+        [InlineData(typeof(IconStar), @"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -238,12 +270,12 @@ namespace WebExpress.WebUI.Test.WebControl
             var html5 = control5.Render(context, visualTree);
             var html6 = control6.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html1.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html2.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html3.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html4.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html5.Trim());
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""fas fa-star""></div>", html6.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>", html1.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>", html2.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>", html3.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>", html4.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>", html5.Trim());
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-dropdown-item"" data-icon=""wx-icon-light wx-icon-light-star""></div>", html6.Trim());
         }
     }
 }

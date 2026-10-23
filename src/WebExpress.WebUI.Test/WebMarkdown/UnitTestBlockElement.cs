@@ -358,8 +358,8 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         /// the number of rows, and the flattened cell values in reading order.
         /// </summary>
         [Theory]
-        [InlineData("WebExpress.WebUI.Test.Data.TableExample1.md", 5, 3, 0)]
-        [InlineData("WebExpress.WebUI.Test.Data.TableExample2.md", 7, 3, 0)]
+        [InlineData("WebExpress.WebUI.Test.Data.TableExample1.md", 4, 3, 0)]
+        [InlineData("WebExpress.WebUI.Test.Data.TableExample2.md", 6, 3, 0)]
         [InlineData("WebExpress.WebUI.Test.Data.TableExample3.md", 4, 3, 0)]
         public void Table(string fileName, int expectedColumnCount, int expectedRowCount, int expectedFooterCount)
         {
@@ -375,6 +375,160 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             Assert.Equal(expectedColumnCount, table.Columns.Count());
             Assert.Equal(expectedRowCount, table.Rows.Count());
             Assert.Equal(expectedFooterCount, table.Footers.Count());
+            Assert.All(table.Rows, row => Assert.Equal(expectedColumnCount, row.Count()));
+        }
+
+        /// <summary>
+        /// Tests that the closing pipe of a row ends its last cell instead of opening a
+        /// further, empty one, while a cell that is empty on purpose is kept.
+        /// </summary>
+        [Theory]
+        [InlineData("| a | b |\n|---|---|\n| 1 | 2 |", 2)]
+        [InlineData("| a | b |  \n|---|---|  \n| 1 | 2 |  ", 2)]
+        [InlineData("| a | b\n|---|---\n| 1 | 2", 2)]
+        [InlineData("| a | b | |\n|---|---|---|\n| 1 | 2 | |", 3)]
+        public void TableClosingPipe(string markdown, int expectedColumnCount)
+        {
+            // act
+            var table = Assert.IsType<MarkdownBlockElementTable>(Assert.Single(MarkdownParser.Parse(markdown).Elements));
+
+            // validation
+            Assert.Equal(expectedColumnCount, table.Columns.Count());
+            var row = Assert.Single(table.Rows).ToList();
+            Assert.Equal(expectedColumnCount, row.Count);
+            Assert.Equal("2", row[1].PlainText);
+        }
+
+        /// <summary>
+        /// Tests that the delimiter row declares the alignment of its columns and that it
+        /// is carried to the header, the body and the footer cells of each column.
+        /// </summary>
+        [Theory]
+        [InlineData("|:---|---:|:---:|---|")]
+        [InlineData("| :--- | ---: | :---: | --- |")]
+        [InlineData("|:-|-:|:-:|--|")]
+        public void TableAlignment(string delimiter)
+        {
+            // arrange
+            var markdown = $"| a | b | c | d |\n{delimiter}\n| 1 | 2 | 3 | 4 |\n|---|---|---|---|\n| x | y | z | w |";
+            MarkdownCellAlign[] expected = [MarkdownCellAlign.Left, MarkdownCellAlign.Right, MarkdownCellAlign.Center, MarkdownCellAlign.Left];
+
+            // act
+            var table = Assert.IsType<MarkdownBlockElementTable>(Assert.Single(MarkdownParser.Parse(markdown).Elements));
+
+            // validation
+            Assert.Equal(new[] { "a", "b", "c", "d" }, table.Columns.Select(c => c.PlainText));
+            Assert.Equal(new[] { "1", "2", "3", "4" }, Assert.Single(table.Rows).Select(c => c.PlainText));
+            Assert.Equal(new[] { "x", "y", "z", "w" }, table.Footers.Select(c => c.PlainText));
+            Assert.Equal(expected, table.Columns.Select(c => c.Align));
+            Assert.Equal(expected, Assert.Single(table.Rows).Select(c => c.Align));
+            Assert.Equal(expected, table.Footers.Select(c => c.Align));
+        }
+
+        /// <summary>
+        /// Tests that a row ending in <c>&gt;&gt;</c> continues on the next line: the cells of
+        /// both lines are joined column by column into one row, and the marker is no cell.
+        /// </summary>
+        [Theory]
+        [InlineData("| Name | City |\n|---|---|\n| Mario | Mushroom |>>\n| | Kingdom |\n| Peach | Royal Castle |")]
+        [InlineData("| Name | City |\n|---|---|\n| Mario | Mushroom | >>  \n|  | Kingdom\n| Peach | Royal Castle")]
+        [InlineData("| Name | City |\n|---|---|\n| Mario | Mushroom >>\n| | Kingdom |\n| Peach | Royal Castle |")]
+        public void TableContinuation(string markdown)
+        {
+            // act
+            var table = Assert.IsType<MarkdownBlockElementTable>(Assert.Single(MarkdownParser.Parse(markdown).Elements));
+            var rows = table.Rows.Select(r => r.Select(c => c.PlainText).ToArray()).ToList();
+
+            // validation
+            Assert.Equal(2, table.Columns.Count());
+            Assert.Equal(2, rows.Count);
+            Assert.Equal(new[] { "Mario", "Mushroom Kingdom" }, rows[0]);
+            Assert.Equal(new[] { "Peach", "Royal Castle" }, rows[1]);
+        }
+
+        /// <summary>
+        /// Tests that continued lines can span more than two lines and that a marker on
+        /// the last line of the table, with nothing to continue into, is dropped.
+        /// </summary>
+        [Fact]
+        public void TableContinuationChain()
+        {
+            // act
+            var table = Assert.IsType<MarkdownBlockElementTable>(Assert.Single(MarkdownParser.Parse("| a | b |\n|---|---|\n| 1 | x |>>\n| | y |>>\n| | z |>>").Elements));
+
+            // validation
+            Assert.Equal(new[] { "1", "x y z" }, Assert.Single(table.Rows).Select(c => c.PlainText));
+        }
+
+        /// <summary>
+        /// Tests that inline code survives in every part of a table; a code span is cut
+        /// from the source text, so a cell must keep the source its tokens point into.
+        /// </summary>
+        [Fact]
+        public void TableInlineCode()
+        {
+            // act
+            var table = Assert.IsType<MarkdownBlockElementTable>(Assert.Single(MarkdownParser.Parse("| `h` | b |\n|---|---|\n| `r` | 2 |>>\n| | `c` |\n|---|---|\n| `f` | 3 |").Elements));
+
+            // validation
+            Assert.Equal("h", table.Columns.First().PlainText);
+            Assert.Equal(new[] { "r", "2 c" }, Assert.Single(table.Rows).Select(c => c.PlainText));
+            Assert.Equal("f", table.Footers.First().PlainText);
+        }
+
+        /// <summary>
+        /// Tests that a cell holds inline content in one paragraph, so text that would open
+        /// a block at the start of a line stays text inside a cell.
+        /// </summary>
+        [Theory]
+        [InlineData("#12")]
+        [InlineData("- open")]
+        [InlineData("1. first")]
+        [InlineData("> quoted")]
+        public void TableCellIsInline(string text)
+        {
+            // act
+            var table = Assert.IsType<MarkdownBlockElementTable>(Assert.Single(MarkdownParser.Parse($"| a | b |\n|---|---|\n| {text} | **bold** and `code` |").Elements));
+            var row = Assert.Single(table.Rows).ToList();
+
+            // validation
+            var plain = Assert.IsType<MarkdownBlockElementParagraph>(Assert.Single(row[0].Content));
+            Assert.Equal(text, string.Concat(plain.Content.Select(x => x.PlainText)));
+            var formatted = Assert.IsType<MarkdownBlockElementParagraph>(Assert.Single(row[1].Content));
+            Assert.IsType<MarkdownInlineElementBold>(formatted.Content.First());
+            Assert.IsType<MarkdownInlineElementCode>(formatted.Content.Last());
+        }
+
+        /// <summary>
+        /// Tests that a table that has a header but no body yet is read as such.
+        /// </summary>
+        [Fact]
+        public void TableWithoutBody()
+        {
+            // act
+            var table = Assert.IsType<MarkdownBlockElementTable>(Assert.Single(MarkdownParser.Parse("| a | b |\n|:---|---:|").Elements));
+
+            // validation
+            Assert.Equal(new[] { "a", "b" }, table.Columns.Select(c => c.PlainText));
+            Assert.Equal(new[] { MarkdownCellAlign.Left, MarkdownCellAlign.Right }, table.Columns.Select(c => c.Align));
+            Assert.Empty(table.Rows);
+        }
+
+        /// <summary>
+        /// Tests that a body row of lone hyphens - the usual "not available" - stays a row
+        /// instead of being taken for a footer delimiter.
+        /// </summary>
+        [Fact]
+        public void TableHyphenRow()
+        {
+            // act
+            var table = Assert.IsType<MarkdownBlockElementTable>(Assert.Single(MarkdownParser.Parse("| a | b |\n|---|---|\n| - | - |\n| 1 | 2 |").Elements));
+
+            // validation
+            Assert.Equal(2, table.Rows.Count());
+            Assert.Empty(table.Footers);
+            Assert.Equal(new[] { "-", "-" }, table.Rows.First().Select(c => c.PlainText));
+            Assert.Equal(new[] { "1", "2" }, table.Rows.Last().Select(c => c.PlainText));
         }
 
         /// <summary>

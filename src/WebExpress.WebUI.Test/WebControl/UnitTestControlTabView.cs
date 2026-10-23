@@ -65,7 +65,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-tab-view""></div>")]
-        [InlineData(typeof(IconFolder), @"<div class=""wx-tab-view"" data-icon=""fas fa-folder""></div>")]
+        [InlineData(typeof(IconFolder), @"<div class=""wx-tab-view"" data-icon=""wx-icon-light wx-icon-light-folder""></div>")]
         [InlineData(typeof(ImageIconWebExpress), @"<div class=""wx-tab-view"" data-image=""/assets/img/webexpress.svg""></div>")]
         public void Icon(Type iconType, string expected)
         {
@@ -84,6 +84,78 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the badge property of the tab view control.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-tab-view""></div>")]
+        [InlineData("42", @"<div class=""wx-tab-view"" data-badge=""42""></div>")]
+        public void Badge(string badge, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTabView()
+            {
+                Badge = _ => badge
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the badge color property with a system color, which is emitted
+        /// as its css class.
+        /// </summary>
+        [Fact]
+        public void BadgeWithSystemColor()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTabView()
+            {
+                Badge = _ => "3",
+                BadgeColor = _ => new PropertyColorBackgroundBadge(TypeColorBackgroundBadge.Danger)
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-tab-view"" data-badge=""3"" data-badge-color=""text-bg-danger""></div>", html);
+        }
+
+        /// <summary>
+        /// Tests the badge color property with a user-defined color, which is
+        /// emitted as an inline style instead of a css class.
+        /// </summary>
+        [Fact]
+        public void BadgeWithUserColor()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTabView()
+            {
+                Badge = _ => "7",
+                BadgeColor = _ => new PropertyColorBackgroundBadge("#7c3aed")
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-tab-view"" data-badge=""7"" data-badge-style=""background:#7c3aed;color:#fff;""></div>", html);
         }
 
         /// <summary>

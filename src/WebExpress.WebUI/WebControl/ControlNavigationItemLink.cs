@@ -5,7 +5,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a navigation item link control.
+    /// A clickable link entry within a navigation bar.
     /// </summary>
     public class ControlNavigationItemLink : ControlLink, IControlNavigationItem
     {

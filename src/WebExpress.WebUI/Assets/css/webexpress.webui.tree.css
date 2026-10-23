@@ -1,17 +1,17 @@
 @keyframes tree-rotate {
     0% {
-        transform: rotate(0deg);
+        transform: rotate(-90deg);
     }
 
     100% {
-        transform: rotate(90deg);
+        transform: rotate(0deg);
     }
 }
 
 .wx-tree {
     list-style-type: none;
     padding-left: 0;
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
     .wx-tree > ul {
@@ -19,23 +19,15 @@
         margin-left: 0.2em;
     }
 
-.wx-tree-indicator-dot {
-    content: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+DQo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDEzNSAxOTAiPg0KCTxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJPCFbQ0RBVEFbDQoJCS5zdDEge2ZpbGw6IzdmN2Y3ZjtzdHJva2U6bm9uZTt9DQoJXV0+DQoJPC9zdHlsZT4NCiAgICA8ZyB0cmFuc2Zvcm09InRyYW5zbGF0ZSgzMCwtNTgpIj4NCiAgICAgICAgPHBhdGggZD0iTTAgMTUzLjk2IEEzNy45MzU5IDM3LjkzNTkgMCAwIDEgNzUuODcgMTUzLjk2IEEzNy45MzU5IDM3LjkzNTkgMCAxIDEgMCAxNTMuOTYgWiIgY2xhc3M9InN0MSIvPg0KICAgPC9nPg0KPC9zdmc+DQo=');
-    height: 1em;
-}
 
-.wx-tree-indicator-angle {
-    content: url('data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiIHN0YW5kYWxvbmU9Im5vIj8+DQo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIJdmlld0JveD0iMCAwIDEzNSAxOTAiPg0KCTxzdHlsZSB0eXBlPSJ0ZXh0L2NzcyI+DQoJPCFbQ0RBVEFbDQoJCS5zdDEge2ZpbGw6IzdmN2Y3ZjtzdHJva2U6bm9uZTt9DQoJXV0+DQoJPC9zdHlsZT4NCgkJPGcgdHJhbnNmb3JtPSJ0cmFuc2xhdGUoMTgsLTE4KSI+DQoJCQk8cGF0aCBkPSJNMS42NiAxNzMuMiBMMTguNyAxOTAuMjMgQTUuNjY5MjkgNS42NjkyOSAtMTgwIDAgMCAyNi43MiAxOTAuMjMgTDk4Ljg3IDExOC4wOCBBNS42NjkyOSA1LjY2OTI5IC0xODAgMCAwIDk4Ljg3DQoJCQkJCQkgMTEwLjA2IEwyNi43MiAzNy45IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMTguNyAzNy45IEwxLjY2IDU0Ljk0IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMS42NiA2Mi45Ng0KCQkJCQkJIEw0OC43NiAxMTAuMDYgQTUuNjY5MjkgNS42NjkyOSAwIDAgMSA0OC43NiAxMTguMDggTDEuNjYgMTY1LjE4IEE1LjY2OTI5IDUuNjY5MjkgLTE4MCAwIDAgMS42NiAxNzMuMiBaIg0KCQkJCQljbGFzcz0ic3QxIi8+DQoJCTwvZz4NCjwvc3ZnPg==');
-    height: 0.8rem;
-}
 
 .wx-tree-expand {
-    transform: rotate(90deg);
+    transform: rotate(0deg);
     transform-origin: center;
 }
 
 .wx-tree-expand-animation {
-    transform: rotate(90deg);
+    transform: rotate(0deg);
     transform-origin: center;
     animation-name: tree-rotate;
     animation-duration: 0.2s;
@@ -64,6 +56,7 @@
     cursor: pointer;
 }
 
+/* a row is a pointer target: it keeps the 24px the target size criterion asks for */
 .wx-tree-label-container {
     display: inline-flex;
     align-items: center;
@@ -72,20 +65,31 @@
     padding-right: 0.4em;
     padding-top: 0.2em;
     padding-bottom: 0.2em;
+    min-height: 24px;
     background: 0 0;
     border: 0;
-    color: var(--bs-link-color);
+    color: var(--wx-link-color);
     text-decoration: none;
+    /* a label is a button where it is no link, and a button centres its text: a label that
+       wraps would stand apart from its neighbours instead of lining up with them */
+    text-align: start;
+}
+
+.wx-tree-label-container:focus-visible {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: -2px;
+    border-radius: var(--wx-border-radius);
 }
 
 .wx-tree-label-container > div:hover {
-    color: var(--bs-link-hover-color);
+    color: var(--wx-link-hover-color);
 }
 
+/* pure white on the primary surface is the pairing that still reaches 4.5:1 */
 .wx-tree-label-container.active {
-    color: var(--bs-light);
-    background-color: var(--bs-primary);
-    border-radius: var(--bs-border-radius);
+    color: var(--wx-primary-contrast);
+    background-color: var(--wx-primary);
+    border-radius: var(--wx-border-radius);
 }
 
 .wx-tree-label-container > img {
@@ -101,7 +105,66 @@
 .wx-tree-drag-indicator {
     position: absolute;
     height: 2px;
-    border-bottom: 2px dashed var(--bs-success);
+    border-bottom: 2px dashed var(--wx-success);
     z-index: 1000;
     pointer-events: none; /* prevent interaction with the indicator */
 }
+
+/* both indicators are drawings of the icon set, so they follow the text colour of
+   whatever they sit in and therefore work in both themes; what the tree adds is one
+   size for the two and the restraint of a marker next to a label */
+.wx-tree-indicator-dot,
+.wx-tree-indicator-angle {
+    display: inline-block;
+    width: 0.8rem;
+    height: 0.8rem;
+    background-color: currentColor;
+    opacity: 0.6;
+}
+
+.wx-tree-indicator-angle {
+    transform: rotate(-90deg);
+    transition: transform .15s ease;
+}
+
+/* --- guide columns ---------------------------------------------------------
+   One column per nesting level in front of a tree row. A level whose branch
+   continues past the row draws a through line; the column of the row itself
+   draws the elbow that joins it to its parent. The lines bleed over the row
+   padding by --wx-tree-guide-bleed, which each control sets to its own vertical
+   cell padding so the segments of consecutive rows meet instead of leaving a
+   gap. Colours come from the theme tokens, so both themes are covered. */
+.wx-tree-guide {
+    position: relative;
+    display: inline-block;
+    box-sizing: border-box;
+    width: 1.2rem;
+    flex: 0 0 auto;
+    align-self: stretch;
+}
+
+.wx-tree-guide-through::before,
+.wx-tree-guide-elbow::before {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: calc(-1 * var(--wx-tree-guide-bleed, 0px));
+    bottom: calc(-1 * var(--wx-tree-guide-bleed, 0px));
+    border-left: 1px solid var(--wx-border-color);
+}
+
+/* the last child of a branch: the line stops at the elbow instead of going on */
+.wx-tree-guide-elbow:not(.wx-tree-guide-through)::before {
+    bottom: 50%;
+}
+
+.wx-tree-guide-elbow::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    right: 0;
+    top: 50%;
+    border-top: 1px solid var(--wx-border-color);
+}
+
+.wx-tree-indicator-angle.wx-tree-expand, .wx-tree-indicator-angle.wx-tree-expand-animation { transform: none; }

@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the horizontal alignment.
+    /// How the tabs of a tab control are aligned horizontally.
     /// </summary>
     public enum TypeHorizontalAlignmentTab
     {

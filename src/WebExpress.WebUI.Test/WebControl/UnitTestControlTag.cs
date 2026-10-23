@@ -14,8 +14,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-tag"" role=""tag""></div>")]
-        [InlineData("id", @"<div id=""id"" class=""wx-webui-tag"" role=""tag""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-tag""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-tag""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -37,8 +37,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-tag"" role=""tag""></div>")]
-        [InlineData("abc", @"<div class=""wx-webui-tag"" role=""tag"" data-value=""abc""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-tag""></div>")]
+        [InlineData("abc", @"<div class=""wx-webui-tag"" data-value=""abc""></div>")]
         public void Value(string text, string expected)
         {
             // arrange
@@ -61,16 +61,16 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the color property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorTag.Default, @"<div class=""wx-webui-tag"" role=""tag""></div>")]
-        [InlineData(TypeColorTag.Primary, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-primary""></div>")]
-        [InlineData(TypeColorTag.Secondary, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-secondary""></div>")]
-        [InlineData(TypeColorTag.Info, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-info""></div>")]
-        [InlineData(TypeColorTag.Success, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-success""></div>")]
-        [InlineData(TypeColorTag.Warning, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-warning""></div>")]
-        [InlineData(TypeColorTag.Danger, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-danger""></div>")]
-        [InlineData(TypeColorTag.Light, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-light""></div>")]
-        [InlineData(TypeColorTag.Highlight, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-highlight""></div>")]
-        [InlineData(TypeColorTag.Dark, @"<div class=""wx-webui-tag"" role=""tag"" data-color-css=""wx-tag-dark""></div>")]
+        [InlineData(TypeColorTag.Default, @"<div class=""wx-webui-tag""></div>")]
+        [InlineData(TypeColorTag.Primary, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-primary""></div>")]
+        [InlineData(TypeColorTag.Secondary, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-secondary""></div>")]
+        [InlineData(TypeColorTag.Info, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-info""></div>")]
+        [InlineData(TypeColorTag.Success, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-success""></div>")]
+        [InlineData(TypeColorTag.Warning, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-warning""></div>")]
+        [InlineData(TypeColorTag.Danger, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-danger""></div>")]
+        [InlineData(TypeColorTag.Light, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-light""></div>")]
+        [InlineData(TypeColorTag.Highlight, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-highlight""></div>")]
+        [InlineData(TypeColorTag.Dark, @"<div class=""wx-webui-tag"" data-color-css=""wx-tag-dark""></div>")]
         public void SystemColor(TypeColorTag color, string expected)
         {
             // arrange
@@ -93,10 +93,10 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the color property of the tag control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-tag"" role=""tag""></div>")]
-        [InlineData("", @"<div class=""wx-webui-tag"" role=""tag""></div>")]
-        [InlineData(" ", @"<div class=""wx-webui-tag"" role=""tag""></div>")]
-        [InlineData("gold", @"<div class=""wx-webui-tag"" role=""tag"" data-color-style=""background: gold;""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-tag""></div>")]
+        [InlineData("", @"<div class=""wx-webui-tag""></div>")]
+        [InlineData(" ", @"<div class=""wx-webui-tag""></div>")]
+        [InlineData("gold", @"<div class=""wx-webui-tag"" data-color-style=""background: gold;color: #000;""></div>")]
         public void UserColor(string color, string expected)
         {
             // arrange

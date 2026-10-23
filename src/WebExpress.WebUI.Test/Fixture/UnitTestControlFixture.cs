@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Configuration;
 using System.Globalization;
 using System.Net;
 using System.Reflection;
@@ -46,6 +47,7 @@ namespace WebExpress.WebUI.Test.Fixture
                 Environment.CurrentDirectory,
                 Environment.CurrentDirectory,
                 Environment.CurrentDirectory,
+                new ConfigurationBuilder().Build(),
                 CultureInfo.GetCultureInfo("en"),
                 new Log() { LogMode = LogMode.Off },
                 null
@@ -197,6 +199,21 @@ namespace WebExpress.WebUI.Test.Fixture
             request.AddParameter(parameters);
 
             return new RenderControlContext(null, CreatePageContextMock(applicationContext, scopes), request);
+        }
+
+        /// <summary>
+        /// Creates a mock render context for a request that asks for the given language.
+        /// The plain mock request carries no Accept-Language, so its culture collapses to
+        /// the server culture; a control whose text has to follow the reader rather than
+        /// the server can only be told apart from one that does not when the two differ.
+        /// </summary>
+        /// <param name="culture">The culture the request asks for.</param>
+        /// <returns>A mock render context for testing.</returns>
+        public static IRenderControlContext CreateRenderContextMock(CultureInfo culture)
+        {
+            var request = CreateRequestMock($"GET / HTTP/1.1\r\nAccept-Language: {culture.Name}\r\n\r\n");
+
+            return new RenderControlContext(null, CreatePageContextMock(), request);
         }
 
         /// <summary>

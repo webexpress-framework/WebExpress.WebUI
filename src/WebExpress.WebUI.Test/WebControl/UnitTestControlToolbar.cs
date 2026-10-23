@@ -15,9 +15,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the toolbar control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<nav class=""wx-webui-toolbar px-2 navbar-expand-sm""></nav>")]
-        [InlineData("id", @"<nav id=""id"" class=""wx-webui-toolbar px-2 navbar-expand-sm""></nav>")]
-        [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<nav id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C"" class=""wx-webui-toolbar px-2 navbar-expand-sm""></nav>")]
+        [InlineData(null, @"<div class=""wx-webui-toolbar px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData("id", @"<div id=""id"" class=""wx-webui-toolbar px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData("03C6031F-04A9-451F-B817-EBD6D32F8B0C", @"<div id=""03C6031F-04A9-451F-B817-EBD6D32F8B0C"" class=""wx-webui-toolbar px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -31,6 +31,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -38,18 +39,18 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the background color property of the toolbar control.
         /// </summary>
         [Theory]
-        [InlineData(TypeColorBackground.Default, @"<nav class=""wx-webui-toolbar px-2 navbar-expand-sm""></nav>")]
-        [InlineData(TypeColorBackground.Primary, @"<nav class=""wx-webui-toolbar bg-primary px-2 navbar-expand-sm""></nav>")]
-        [InlineData(TypeColorBackground.Info, @"<nav class=""wx-webui-toolbar bg-info px-2 navbar-expand-sm""></nav>")]
-        [InlineData(TypeColorBackground.Success, @"<nav class=""wx-webui-toolbar bg-success px-2 navbar-expand-sm""></nav>")]
-        [InlineData(TypeColorBackground.Secondary, @"<nav class=""wx-webui-toolbar bg-secondary px-2 navbar-expand-sm""></nav>")]
-        [InlineData(TypeColorBackground.Warning, @"<nav class=""wx-webui-toolbar bg-warning px-2 navbar-expand-sm""></nav>")]
-        [InlineData(TypeColorBackground.Danger, @"<nav class=""wx-webui-toolbar bg-danger px-2 navbar-expand-sm""></nav>")]
-        [InlineData(TypeColorBackground.Dark, @"<nav class=""wx-webui-toolbar bg-dark px-2 navbar-expand-sm""></nav>")]
-        [InlineData(TypeColorBackground.Light, @"<nav class=""wx-webui-toolbar bg-light px-2 navbar-expand-sm""></nav>")]
-        [InlineData(TypeColorBackground.Highlight, @"<nav class=""wx-webui-toolbar bg-highlight px-2 navbar-expand-sm""></nav>")]
-        [InlineData(TypeColorBackground.White, @"<nav class=""wx-webui-toolbar bg-white px-2 navbar-expand-sm""></nav>")]
-        [InlineData(TypeColorBackground.Transparent, @"<nav class=""wx-webui-toolbar bg-transparent px-2 navbar-expand-sm""></nav>")]
+        [InlineData(TypeColorBackground.Default, @"<div class=""wx-webui-toolbar px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData(TypeColorBackground.Primary, @"<div class=""wx-webui-toolbar bg-primary px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData(TypeColorBackground.Info, @"<div class=""wx-webui-toolbar bg-info px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData(TypeColorBackground.Success, @"<div class=""wx-webui-toolbar bg-success px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData(TypeColorBackground.Secondary, @"<div class=""wx-webui-toolbar bg-secondary px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData(TypeColorBackground.Warning, @"<div class=""wx-webui-toolbar bg-warning px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData(TypeColorBackground.Danger, @"<div class=""wx-webui-toolbar bg-danger px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData(TypeColorBackground.Dark, @"<div class=""wx-webui-toolbar bg-dark px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData(TypeColorBackground.Light, @"<div class=""wx-webui-toolbar bg-light px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData(TypeColorBackground.Highlight, @"<div class=""wx-webui-toolbar bg-highlight px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData(TypeColorBackground.White, @"<div class=""wx-webui-toolbar bg-white px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
+        [InlineData(TypeColorBackground.Transparent, @"<div class=""wx-webui-toolbar bg-transparent px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""></div>")]
         public void BackgroundColor(TypeColorBackground backgroundColor, string expected)
         {
             // arrange
@@ -64,6 +65,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -82,7 +84,8 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<nav class=""wx-webui-toolbar px-2 navbar-expand-sm""><div class=""wx-toolbar-button"" data-label=""abc""></div></nav>", html);
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-toolbar px-2 navbar-expand-sm"" role=""toolbar"" aria-label=""Toolbar""><div class=""wx-toolbar-button"" data-label=""abc""></div></div>", html);
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a star-half-stroke.
@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconStarHalfStroke : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-star-half-stroke";
+        public override string Symbol => "star-half-stroke";
     }
 }

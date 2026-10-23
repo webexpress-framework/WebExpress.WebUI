@@ -14,10 +14,62 @@
     width: 100%;
 }
 
-/* styling for the content area to match bootstrap border radiuses */
+/* the header row: the tab list takes the width, the tools that are not tabs sit at its
+   end. they stand beside the list rather than in it, because a tab list may hold nothing
+   but tabs; the bottom edge of bordered tabs runs on under the tools so the row reads
+   as one bar */
+.wx-tab-header {
+    display: flex;
+    align-items: stretch;
+    margin-bottom: 0.375rem;
+}
+
+.wx-tab-header:has(> .nav-tabs) {
+    margin-bottom: 0;
+}
+
+.wx-tab-header > ul.wx-tab-nav {
+    flex: 1 1 auto;
+    /* the list would otherwise carry the margin of a list in running text, which is
+       more than a control needs to its own content */
+    margin-bottom: 0;
+}
+
+.wx-tab-tools {
+    display: flex;
+    align-items: center;
+    flex: 0 0 auto;
+}
+
+.wx-tab-tools:empty {
+    display: none;
+}
+
+/* a toolbar taller than the tabs stretches the list, but not the tabs in it; bordered
+   tabs have to sit on the bottom edge, or the active one no longer covers the list
+   border and a line runs through its open side */
+.wx-tab-header > ul.nav-tabs {
+    align-items: flex-end;
+}
+
+.wx-tab-header:has(> .nav-tabs) > .wx-tab-tools {
+    border-bottom: 1px solid var(--wx-border-color);
+}
+
+.wx-tab-tools-item {
+    display: flex;
+    align-items: center;
+}
+
+/* styling for the content area to match WebExpress border radiuses */
 .wx-tab-content {
-    background-color: var(--bs-body-bg);
-    border-radius: 0 0 var(--bs-border-radius) var(--bs-border-radius);
+    background-color: var(--wx-body-bg);
+    border-radius: 0 0 var(--wx-border-radius) var(--wx-border-radius);
+    /* the markup applies a p-3 utility; the vertical half of it is halved at the
+       top and dropped at the bottom, where it only pushed the pager off the edge
+       of the region */
+    padding-top: 0.5rem;
+    padding-bottom: 0;
 }
 
 /* ensure pointer cursor for dynamically generated tab links */
@@ -26,18 +78,20 @@
     cursor: pointer;
 }
 
-/* specific transition for the close button inside the tab header */
-.wx-form-designer-tabs .nav-link span {
-    transition: color 0.2s ease-in-out;
+/* the trailing count badge of a tab header; a text-bg-* color class or an
+   inline style overrides the neutral default */
+.wx-tab-nav .wx-tab-badge {
+    margin-left: 0.45em;
+    font-size: 0.72em;
+    vertical-align: baseline;
+    background-color: var(--wx-secondary-bg);
+    color: var(--wx-secondary-color);
 }
 
-/* hover effect for the close button to indicate destructiveness */
-.wx-form-designer-tabs .nav-link span:hover {
-    color: var(--bs-danger) !important;
+/* dark theme adjustments if necessary, mostly handled by standard WebExpress variables */
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-tab-content {
+    background-color: var(--wx-dark);
+    border-color: var(--wx-border-color);
 }
-
-/* dark theme adjustments if necessary, mostly handled by standard bootstrap variables */
-[data-bs-theme="dark"] .wx-tab-content {
-    background-color: var(--bs-dark);
-    border-color: var(--bs-border-color);
 }

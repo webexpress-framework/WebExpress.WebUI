@@ -1,5 +1,9 @@
-/* Main container for the search field */
+/* Main container for the search field.
+   It is the containing block of the suggestion menu below, which is positioned
+   absolutely: without it the menu anchors to whatever positioned ancestor the
+   surrounding page happens to have and lands far from the box. */
 .wx-search {
+    position: relative;
 }
 
 /* Styling for the search box container */
@@ -14,7 +18,7 @@
 /* Styling for the search icon */
 .wx-search > div:nth-child(1) > label {
     margin-right: 0.5em;
-    color: var(--bs-gray-500); /* Use theme-aware gray color variable */
+    color: var(--wx-gray-500); /* Use theme-aware gray color variable */
 }
 
 /* Styling for the input field */
@@ -22,7 +26,7 @@
     border: 0px;
     outline: none;
     flex-grow: 1 !important;
-    color: var(--bs-body-color); /* Use theme-aware text color */
+    color: var(--wx-body-color); /* Use theme-aware text color */
     background-color: inherit; /* Use theme-aware background color */
 }
 
@@ -30,31 +34,26 @@
 .wx-search > div:nth-child(1) > span {
     margin-left: 0.5em;
     cursor: pointer;
-    color: var(--bs-gray-500); /* Use theme-aware gray color */
+    color: var(--wx-gray-500); /* Use theme-aware gray color */
 }
 
 /* Hover effect for the clear button */
 .wx-search > div:nth-child(1) > span:hover {
-    color: var(--bs-secondary); /* Use theme-aware secondary color */
+    color: var(--wx-danger);
 }
 
 /* Styling for the suggestion container */
-.wx-search > div:nth-child(2) {
-    position: absolute;
-    top: 100%;
-    left: 0;
-    width: 100%;
+.wx-search > div:nth-child(2) {    width: 100%;
     max-height: 200px;
     overflow-y: auto;
-    background-color: var(--bs-body-bg); /* Use theme-aware background color */
-    border: var(--bs-border-width) solid var(--bs-border-color); /* Use theme-aware border color */
-    border-radius: var(--bs-border-radius); /* Use theme-aware border radius */
+    background-color: var(--wx-body-bg); /* Use theme-aware background color */
+    border: var(--wx-border-width) solid var(--wx-border-color); /* Use theme-aware border color */
+    border-radius: var(--wx-border-radius); /* Use theme-aware border radius */
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Slight shadow for better visibility */
     list-style: none;
     z-index: 1000;
     padding: 0;
     resize: both;
-    display: none;
     flex-direction: column;
     height: 25em;
 }
@@ -102,16 +101,27 @@
 
 /* Styling for suggestion label */
 .wx-search > div:nth-child(2) > ul > li > a > span {
-    color: var(--bs-body-color);
+    color: var(--wx-body-color);
 }
 
 .wx-search > div:nth-child(2) > footer {
-    color: var(--bs-gray);
-    background-color: var(--bs-light);
+    color: var(--wx-gray);
+    background-color: var(--wx-light);
     flex-direction: row;
     padding: 0.2em;
 }
 
-[data-bs-theme=dark] .wx-search > div:nth-child(2) > footer {
-    background-color: var(--bs-secondary-bg);
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-search > div:nth-child(2) > footer {
+    background-color: var(--wx-secondary-bg);
+}
+}
+
+.wx-search-clear { border: 0; background: transparent; padding: 0; min-width: 24px; min-height: 24px; color: var(--wx-secondary-color); }
+.wx-search-clear:hover, .wx-search-clear:focus-visible { color: var(--wx-danger); }
+
+/* the text field inside the box has no outline of its own, so the box shows the focus */
+.wx-search:focus-within {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: 2px;
 }

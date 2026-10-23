@@ -1,0 +1,57 @@
+/*
+ * Estimate input control. The estimate is chosen from a row of chips, one per
+ * scale value; the active chip carries the current estimate. Colors use the
+ * WebExpress custom properties with hex fallbacks so the control stays legible
+ * across themes even when the variables are undefined.
+ */
+.wx-estimate-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.wx-estimate-chip {
+    min-width: 34px;
+    border: 1px solid var(--wx-border-color, #dee2e6);
+    background: var(--wx-body-bg, #fff);
+    color: var(--wx-body-color, #212529);
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-radius: 9999px;
+    padding: 0.2rem 0.55rem;
+    cursor: pointer;
+}
+
+.wx-estimate-chip:hover,
+.wx-estimate-chip:focus-visible {
+    border-color: var(--wx-primary, #0d6efd);
+    background: rgba(13, 110, 253, 0.08);
+}
+
+/* selection accent for an uncolored scale: the active chip is filled */
+.wx-estimate-container:not(.wx-estimate-colored) .wx-estimate-chip.active {
+    border-color: var(--wx-primary, #0d6efd);
+    background: var(--wx-primary, #0d6efd);
+    color: #fff;
+}
+
+/* selection accent for a colored scale: a ring keeps the chip's own color visible */
+.wx-estimate-colored .wx-estimate-chip.active {
+    border-color: var(--wx-primary, #0d6efd);
+    font-weight: 700;
+    box-shadow: 0 0 0 2px var(--wx-body-bg, #fff), 0 0 0 4px var(--wx-primary, #0d6efd);
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-estimate-chip {
+    background: var(--wx-tertiary-bg, #2b3035);
+    color: var(--wx-body-color, #dee2e6);
+}
+}
+
+/* a chip of a colored scale takes the text that reads on its fill, in either theme: the body
+   color of the theme is not it on a red or green ground. the container in the selector lifts
+   the rule over the theme rule above, which a scoped rule of equal specificity would beat */
+.wx-estimate-container .wx-estimate-chip[class*="bg-"] {
+    color: var(--wx-on-surface);
+}
