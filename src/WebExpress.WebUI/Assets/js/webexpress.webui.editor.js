@@ -224,13 +224,15 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Reads an initial or assigned value. JSON is taken as editor state and validated, any other
      * string is imported as HTML and sanitized, so no unchecked data becomes part of a document.
-     * @param {object|string} value - The editor state or an HTML import.
+     * @param {object|string|null} value - The editor state, an HTML import, or nothing for an empty document.
      * @returns {object} A validated editor state.
-     * @throws {TypeError} If the value is neither an object nor a string.
+     * @throws {TypeError} If the value is neither an object, a string nor absent.
      */
     _readValue(value) {
         const Model = webexpress.webui.EditorModel;
-        if (typeof value === "object" && value !== null) return webexpress.webui.EditorHtml.restoreContainers(Model.validate(value));
+        // a record whose text was never written sends null; like every other field the editor reads that as empty
+        if (value === null || value === undefined) value = "";
+        if (typeof value === "object") return webexpress.webui.EditorHtml.restoreContainers(Model.validate(value));
         if (typeof value !== "string") throw new TypeError("Editor value must be JSON state or an HTML import.");
         if (value.trim().startsWith("{")) return webexpress.webui.EditorHtml.restoreContainers(Model.validate(JSON.parse(value)));
         return this._sanitizeHtml(value).state;
