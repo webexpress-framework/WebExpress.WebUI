@@ -2,6 +2,17 @@
  * German translation for WebExpress
  */
 webexpress.webui.I18N.register("de", "webexpress.webui", {
+    "cookiebanner.title": "Datenschutzeinstellungen",
+    "cookiebanner.notice": "Diese Anwendung verwendet notwendige Cookies und Browserspeicher. Einzelheiten stehen in den Datenschutzhinweisen.",
+    "cookiebanner.consent": "Wählen Sie, welche optionalen Zwecke diese Anwendung aktivieren darf. Notwendige Funktionen bleiben verfügbar.",
+    "cookiebanner.privacy": "Datenschutzhinweise",
+    "cookiebanner.confirm": "Verstanden",
+    "cookiebanner.accept": "Alle akzeptieren",
+    "cookiebanner.reject": "Nur notwendige",
+    "cookiebanner.settings": "Cookie-Einstellungen",
+    "cookiebanner.necessary": "notwendig",
+    "cookiebanner.save": "Auswahl speichern",
+    "cookiebanner.cancel": "Abbrechen",
     "editor.color": "Farbe",
     "calendar": "Kalender",
     "carousel.previous": "Vorherige Folie",

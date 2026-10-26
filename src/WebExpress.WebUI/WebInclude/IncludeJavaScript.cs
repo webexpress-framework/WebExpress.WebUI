@@ -13,6 +13,7 @@ namespace WebExpress.WebUI.WebInclude
     [Asset("/assets/js/webexpress.webui.js")]
     [Asset("/assets/js/webexpress.webui.renderer.js")]
     [Asset("/assets/js/webexpress.webui.state.js")]
+    [Asset("/assets/js/webexpress.webui.cookie.banner.js")]
     [Asset("/assets/js/webexpress.webui.native.js")]
     [Asset("/assets/js/webexpress.webui.carousel.js")]
     [Asset("/assets/js/webexpress.webui.avatar.js")]

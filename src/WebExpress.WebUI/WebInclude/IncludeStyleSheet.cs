@@ -10,6 +10,7 @@ namespace WebExpress.WebUI.WebInclude
     /// This class is used to define and manage the inclusion of StyleSheet files required for the
     /// functionality of a web application.
     /// </remarks>
+    [Asset("/assets/css/webexpress.webui.cookie.banner.css")]
     [Asset("/assets/css/webexpress.webui.css")]
     [Asset("/assets/css/webexpress.webui.avatar.css")]
     [Asset("/assets/css/webexpress.webui.avatar.dropdown.css")]

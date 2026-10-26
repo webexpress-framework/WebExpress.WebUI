@@ -3418,6 +3418,11 @@ webexpress.webui.MenuCtrl = class extends webexpress.webui.Ctrl {
  * A utility class for defining and managing event names within the WebExpress UI framework.
  */
 webexpress.webui.Event = class {
+    /**
+     * Announces an applied cookie notice or consent decision.
+     */
+    static COOKIE_CHANGE_EVENT = "webexpress.webui.cookie.change";
+
     // Event triggered when the visibility of an element changes.
     static CHANGE_VISIBILITY_EVENT = "webexpress.webui.change.visibility";
     // Event triggered when an element is clicked.

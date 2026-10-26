@@ -1,0 +1,75 @@
+.wx-cookie-banner {
+    color: var(--wx-body-color, #212529);
+    font-size: 1rem;
+}
+
+.wx-cookie-banner [hidden] {
+    display: none !important;
+}
+
+.wx-cookie-banner-panel,
+.wx-cookie-banner-dialog {
+    background: var(--wx-body-bg, #fff);
+    color: var(--wx-body-color, #212529);
+    border: 1px solid var(--wx-border-color, #767676);
+    border-radius: .5rem;
+    padding: 1.25rem;
+    box-shadow: 0 .5rem 2rem #0003;
+    overflow: auto;
+    max-height: 85dvh;
+}
+
+.wx-cookie-banner-panel {
+    position: fixed;
+    inset: auto 1rem 1rem;
+    z-index: 1040;
+    max-width: 60rem;
+    margin-inline: auto;
+}
+
+.wx-cookie-banner h2 {
+    font-size: 1.25rem;
+    margin: 0 0 .75rem;
+}
+
+.wx-cookie-banner-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .75rem;
+    margin-top: 1rem;
+}
+
+.wx-cookie-banner-opener {
+    margin-block: .5rem;
+}
+
+.wx-cookie-banner-dialog {
+    width: min(36rem, calc(100% - 2rem));
+    margin: auto;
+}
+
+.wx-cookie-banner-dialog::backdrop {
+    background: #0008;
+}
+
+.wx-cookie-banner-category {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: .5rem;
+    margin-block: 1rem;
+}
+
+.wx-cookie-banner-category small {
+    grid-column: 2;
+    white-space: pre-wrap;
+}
+
+.wx-cookie-banner :focus-visible {
+    outline: 2px solid currentColor;
+    outline-offset: 3px;
+}
+
+@media (max-width: 36rem) {
+    .wx-cookie-banner-panel { inset-inline: .5rem; bottom: .5rem; }
+    .wx-cookie-banner-actions > button { flex: 1 1 100%; }
+}
