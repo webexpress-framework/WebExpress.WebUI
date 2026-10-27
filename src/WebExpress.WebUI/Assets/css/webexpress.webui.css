@@ -2604,6 +2604,13 @@ legend {
     text-decoration: none;
 }
 
+/* a light chip on a light page, or a dark one under a dark theme, has the color of its
+   background, so an edge keeps it readable as a chip in both schemes */
+.badge.text-bg-light,
+.badge.text-bg-dark {
+    box-shadow: inset 0 0 0 1px var(--wx-border-color);
+}
+
 .h1 {
     font-size: 2.5rem;
     font-weight: 500;
