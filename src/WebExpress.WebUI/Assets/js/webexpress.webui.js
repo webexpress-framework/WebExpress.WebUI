@@ -1136,6 +1136,11 @@ webexpress.webui.DarkMode = new class {
      * @returns {"light"|"dark"} The initial mode.
      */
     _resolveInitialMode() {
+        // a page whose server keeps the choice renders it; a browser copy would contradict
+        // the choice made on another device or on the settings page
+        if (this._serverOwned()) {
+            return document.documentElement.getAttribute("data-wx-theme") === "dark" ? "dark" : "light";
+        }
         const fromStorage = this._readState();
         if (fromStorage === "dark" || fromStorage === "light") {
             return fromStorage;
@@ -1168,7 +1173,19 @@ webexpress.webui.DarkMode = new class {
      * @param {"light"|"dark"} mode - The selected scheme.
      */
     _persistState(mode) {
-        webexpress.webui.LocalStorage.setItem(this._storageKey, mode);
+        // the server stores it instead, triggered by the change event this switch dispatches
+        if (!this._serverOwned()) {
+            webexpress.webui.LocalStorage.setItem(this._storageKey, mode);
+        }
+    }
+
+    /**
+     * Tells whether the server keeps the scheme, which it announces with the address of the
+     * service that stores it.
+     * @returns {boolean} True when the root carries data-wx-theme-service.
+     */
+    _serverOwned() {
+        return document.documentElement.hasAttribute("data-wx-theme-service");
     }
 
     /**

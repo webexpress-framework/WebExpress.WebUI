@@ -35,6 +35,21 @@ test("dark mode survives a fresh runtime without writing cookies", () => {
     assert.equal(next.document.documentElement.getAttribute("data-wx-theme"), "dark");
 });
 
+test("a scheme the server keeps outranks the browser copy and is not written back to it", () => {
+    const stored = runtime();
+    stored.wx.DarkMode.current = "dark";
+    const rt = loadWebUi({
+        browser: true,
+        globals: { localStorage: stored.sandbox.localStorage },
+        rootAttributes: { "data-wx-theme": "light", "data-wx-theme-service": "/app/api/colorscheme" }
+    });
+
+    assert.equal(rt.wx.DarkMode.current, "light", "the server choice wins over the stale browser copy");
+    assert.equal(rt.document.documentElement.getAttribute("data-wx-theme"), "light");
+    rt.wx.DarkMode.toggle();
+    assert.equal(rt.sandbox.localStorage.getItem("wx_darkmode"), "dark", "the browser copy is left as it was");
+});
+
 test("unavailable and full storage leave UI interactions usable", () => {
     const unavailable = { getItem() { throw new Error("SecurityError"); }, setItem() { throw new Error("QuotaExceededError"); } };
     const rt = runtime([], unavailable);

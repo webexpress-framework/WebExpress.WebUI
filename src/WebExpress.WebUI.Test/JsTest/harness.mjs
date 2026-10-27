@@ -186,14 +186,18 @@ function createBrowserGlobals(document) {
 
 /**
  * Loads a fresh, isolated WebUI runtime.
- * @param {object} [options] - Optional overrides: fetch, extraFiles, browser, globals, and
- *     readyState ("loading" to load the runtime while the page is still being parsed).
+ * @param {object} [options] - Optional overrides: fetch, extraFiles, browser, globals,
+ *     readyState ("loading" to load the runtime while the page is still being parsed) and
+ *     rootAttributes (markers the server renders on the html element before any script runs).
  * @returns {object} An object with the webui namespace, the document and helpers.
  */
 export function loadWebUi(options = {}) {
     const document = createDocument();
     if (options.readyState) {
         document.readyState = options.readyState;
+    }
+    for (const [name, value] of Object.entries(options.rootAttributes || {})) {
+        document.documentElement.setAttribute(name, value);
     }
 
     const sandbox = {
