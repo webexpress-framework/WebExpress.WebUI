@@ -83,6 +83,25 @@ test("wx-webui-table keeps a cell panel as markup and a plain cell as text", () 
     assert.equal(cells[1].content, "1.0.0");
 });
 
+test("wx-webui-table keeps the panel element, so a stacked panel still lays out its lines", () => {
+    const rt = loadTable();
+    const element = host(rt, (row) => {
+        const panel = cell(rt, "Autumn", true);
+        panel.classList.add("wx-table-cell-stack");
+        panel.setAttribute("style", "gap: 1em");
+        // the stub does not serialize markup, so only this element answers with its own
+        const markup = `<div class="wx-table-cell-panel wx-table-cell-stack" style="gap: 1em"><b>Autumn</b><div>Warm</div></div>`;
+        Object.defineProperty(panel, "outerHTML", { get: () => markup });
+        row.appendChild(panel);
+    });
+
+    const parsed = new rt.wx.TableCtrl(element)._rows[0].cells[0];
+
+    assert.match(parsed.content, /^<div class="wx-table-cell-panel wx-table-cell-stack"/, "the stack class reaches the rendered cell");
+    assert.equal(parsed.class, null, "the grid cell does not repeat the panel classes");
+    assert.equal(parsed.style, null, "nor the panel style");
+});
+
 test("wx-webui-table keeps a markup cell as markup, sorts it by its text and keeps its own classes", () => {
     const rt = loadTable();
     const element = rt.document.createElement("div");

@@ -1619,14 +1619,16 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
                     const rich = panel || child.classList.contains("wx-table-cell-markup");
                     const text = child.textContent.trim();
                     row.cells.push({
-                        content: rich ? child.innerHTML : text,
+                        // a panel travels with its own element, because its classes choose the
+                        // layout (a stacked name and description, for example)
+                        content: panel ? child.outerHTML : rich ? child.innerHTML : text,
                         text: text,
                         html: rich,
                         id: child.id,
-                        // a panel keeps its classes on the panel element inside the markup;
-                        // copying them onto the grid cell too would apply the panel layout twice
+                        // copying the panel's classes or style onto the grid cell too would apply
+                        // the panel layout twice
                         class: panel ? null : child.className,
-                        style: child.getAttribute("style"),
+                        style: panel ? null : child.getAttribute("style"),
                         color: child.dataset.color,
                         icon: child.dataset.icon,
                         image: child.dataset.image,
