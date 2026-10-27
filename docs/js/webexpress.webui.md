@@ -813,7 +813,9 @@ this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: selectedItem });
 `webexpress.webui.LocalStorage` provides `getItem(key)`, `setItem(key, value)`,
 `getJson(key)` and `setJson(key, value)` for optional UI preferences. Reads return
 `null` when storage is blocked, absent or (for JSON) malformed. Failed writes
-leave the UI usable. A null or empty key disables persistence. Structured state
+leave the UI usable; `setItem` and `setJson` return `false` then, so a caller
+whose previous value must not outlive the failed write can remove it. A null or
+empty key disables persistence. Structured state
 is plain JSON, without URI encoding. Controls validate the values they restore.
 
 Preferences remain on the current origin across browser sessions until the user

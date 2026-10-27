@@ -645,13 +645,17 @@ webexpress.webui.LocalStorage = class {
      * Remembers a preference without interrupting an interaction when storage is unavailable.
      * @param {string|null} key - A stable preference key, or null to disable persistence.
      * @param {string} value - The preference to retain across visits.
+     * @returns {boolean} Whether the value was stored, so callers whose earlier value must not
+     * outlive a failed write can remove it.
      */
     static setItem(key, value) {
-        if (!key) return;
+        if (!key) return false;
         try {
             localStorage.setItem(key, value);
+            return true;
         } catch {
             // storage is optional; the control still keeps its current state
+            return false;
         }
     }
 
@@ -686,9 +690,10 @@ webexpress.webui.LocalStorage = class {
      * Retains structured UI state as JSON for subsequent visits.
      * @param {string|null} key - A stable preference key.
      * @param {*} value - JSON-serializable UI state.
+     * @returns {boolean} Whether the value was stored.
      */
     static setJson(key, value) {
-        this.setItem(key, JSON.stringify(value));
+        return this.setItem(key, JSON.stringify(value));
     }
 };
 

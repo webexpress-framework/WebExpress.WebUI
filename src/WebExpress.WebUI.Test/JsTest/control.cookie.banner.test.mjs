@@ -125,6 +125,34 @@ test("denied storage keeps the current page usable", () => {
     ctrl.destroy();
 });
 
+test("a rejection that cannot be stored does not let the earlier grant return on reload", () => {
+    const { rt, ctrl } = setup({ cookieName: "wx-consent-test", serverPolicy: "policy1" });
+    ctrl.acceptAll();
+    rt.sandbox.localStorage.setItem = () => { throw new Error("QuotaExceededError"); };
+    ctrl.rejectOptional();
+    assert.equal(ctrl.isAllowed("stats"), false);
+    const reloaded = new rt.wx.CookieBannerCtrl(host(rt, configuration({ cookieName: "wx-consent-test", serverPolicy: "policy1" })));
+    assert.equal(reloaded.isAllowed("stats"), false);
+    assert.match(rt.document.cookie, /wx-consent-test=;.*Max-Age=0/);
+    ctrl.destroy(); reloaded.destroy();
+});
+
+test("a tab of an older policy revokes locally but keeps the newer policy's server cookie", () => {
+    const server = policy => ({ cookieName: "wx-consent-test", serverPolicy: policy });
+    const { rt, ctrl } = setup(server("policy1"));
+    ctrl.acceptAll();
+    const newer = new rt.wx.CookieBannerCtrl(host(rt, configuration({ version: "2", ...server("policy2") })));
+    newer.acceptAll();
+    ctrl._storageHandler({ key: "application:consent" });
+    assert.equal(ctrl.isAllowed("stats"), false);
+    assert.equal(ctrl._panel.hidden, false);
+    assert.equal(newer.isAllowed("stats"), true);
+    const payload = JSON.parse(decodeURIComponent(rt.document.cookie.split(";")[0].split("=")[1]));
+    assert.equal(payload.policy, "policy2");
+    assert.equal(payload.categories.stats, true);
+    ctrl.destroy(); newer.destroy();
+});
+
 test("expiry revokes active permissions and notifies subscribers", () => {
     const { ctrl } = setup();
     ctrl.acceptAll();

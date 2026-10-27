@@ -45,13 +45,16 @@ webexpress.webui.CookieBannerCtrl = class extends webexpress.webui.Ctrl {
             this._categories.map(c => [c.id, c.necessary]).sort((a, b) => a[0].localeCompare(b[0]))]);
         this._listeners = [];
         this._subscriptions = new Set();
-        this._decision = this._read();
+        this._decision = this._read(webexpress.webui.LocalStorage.getJson(config.storageKey));
         this._syncCookie();
         this._build();
         this._storageHandler = event => {
             if (event.key === null || event.key === config.storageKey) {
-                this._decision = this._read();
-                this._publish("storage");
+                const stored = webexpress.webui.LocalStorage.getJson(config.storageKey);
+                this._decision = this._read(stored);
+                // a tab rendered for another policy owns that decision and the shared server cookie
+                const foreign = typeof stored?.signature === "string" && stored.signature !== this._signature;
+                this._publish("storage", !foreign);
             }
         };
         this._visibilityHandler = () => this._expire();
@@ -149,7 +152,10 @@ webexpress.webui.CookieBannerCtrl = class extends webexpress.webui.Ctrl {
             expiresAt: now + this._config.lifetime,
             categories: Object.fromEntries(this._categories.map(c => [c.id, c.necessary || ids.includes(c.id)]))
         };
-        webexpress.webui.LocalStorage.setJson(this._config.storageKey, this._decision);
+        if (!webexpress.webui.LocalStorage.setJson(this._config.storageKey, this._decision)) {
+            // an earlier grant left behind would be restored and sent to the server on the next visit
+            webexpress.webui.LocalStorage.removeItem(this._config.storageKey);
+        }
         this._close();
         this._publish("selection");
         this._restoreFocus();
@@ -167,10 +173,10 @@ webexpress.webui.CookieBannerCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Rejects expired, incompatible or malformed browser data as a whole.
+     * @param {*} value - The parsed storage entry.
      * @returns {object|null} A validated decision or no decision.
      */
-    _read() {
-        const value = webexpress.webui.LocalStorage.getJson(this._config.storageKey);
+    _read(value) {
         const now = Date.now();
         if (!value || value.signature !== this._signature ||
             !Number.isFinite(value.decidedAt) || value.decidedAt > now || value.decidedAt < 0 ||
@@ -211,9 +217,10 @@ webexpress.webui.CookieBannerCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Updates visibility before announcing an already-applied decision.
      * @param {string} reason - The source of the state transition.
+     * @param {boolean} syncCookie - False when the server cookie belongs to another policy.
      */
-    _publish(reason) {
-        this._syncCookie();
+    _publish(reason, syncCookie = true) {
+        if (syncCookie) this._syncCookie();
         this._renderState();
         this._scheduleExpiry();
         this._dispatch(webexpress.webui.Event.COOKIE_CHANGE_EVENT, { state: this.state, reason });
