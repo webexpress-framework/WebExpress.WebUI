@@ -15,14 +15,9 @@
     position: relative;
 }
 
-.wx-color-input .wx-color-preview-box {
-    flex-grow: 1;
-    height: 1.5em;
-    border-radius: 0.2em;
-    border: 1px solid var(--wx-border-color);
-}
-
+/* the height of a text field so the trigger lines up with the other inputs of a form row */
 .wx-color-input .wx-color-trigger {
+    --wx-color-face: calc(1.5em + 0.75rem);
     background-color: var(--wx-body-bg);
     border: 1px solid var(--wx-border-color);
     border-radius: 4px;
@@ -30,15 +25,29 @@
     box-sizing: border-box;
     display: flex;
     align-items: center;
-    padding: 4px;
+    padding: 0;
     cursor: pointer;
-    width: 4em;
-    gap: 0.2em;
+    width: auto;
+    height: calc(var(--wx-color-face) + 2px);
+    overflow: hidden;
+}
+
+/* a square that fills the trigger edge to edge; the arrow beside it keeps the field recognizable as a dropdown */
+.wx-color-input .wx-color-trigger > .wx-color-preview-box {
+    flex: none;
+    align-self: stretch;
+    width: var(--wx-color-face);
+    border-inline-end: 1px solid var(--wx-border-color);
+}
+
+/* margin, not padding: the icon is a mask over its own box */
+.wx-color-input .wx-color-trigger > i {
+    flex: none;
+    margin-inline: 0.4em;
 }
 
 .wx-color-input .wx-color-trigger:hover {
-    border-color: var(--wx-border-color);
-    background-color: var(--wx-secondary-bg);
+    background-color: var(--wx-tertiary-bg);
 }
 
 .wx-color-input button {
@@ -50,11 +59,11 @@
     padding: 0;
 }
 
-.wx-color-input button:hover {
+/* only the swatches lift; the trigger and the clear entry are buttons too */
+.wx-color-palette-grid button:hover {
     z-index: 2;
     box-shadow: 0 2px 5px rgba(0,0,0,0.2);
     position: relative;
-    padding: 0;
 }
 
 .wx-color-input .wx-native-color-picker {
@@ -98,7 +107,7 @@
     box-shadow: 0 6px 12px rgba(0, 0, 0, 0.175);
     z-index: 1000;
     box-sizing: border-box;
-    padding: 0.5rem;
+    padding: 0.5rem 0.75rem;
     min-width: 0;
     width: max-content;
 }
@@ -114,8 +123,9 @@
     position: relative;
 }
 
-.wx-color-dropdown.wx-native-menu {
-    padding: 0.5rem;
+/* [popover] outranks the native dropdown rule that zeroes the inline padding, whatever the stylesheet order */
+.wx-color-dropdown.wx-native-menu[popover] {
+    padding: 0.5rem 0.75rem;
     min-width: 0;
     width: max-content;
 }
@@ -141,10 +151,6 @@
     background-color: transparent;
 }
 
-.wx-color-input .wx-color-clear:hover {
-    padding: 0.25rem 0.5rem;
-}
-
 .wx-color-compact .wx-color-sample {
     display: inline-flex;
     flex-direction: column;
@@ -156,14 +162,19 @@
     width: 1.15em;
     height: 3px;
     box-sizing: content-box;
-    border-radius: 0;
+    border: 1px solid var(--wx-border-color);
 }
 
 .wx-color-input.wx-color-compact .wx-color-trigger {
     width: auto;
     height: auto;
+    align-items: center;
     border: 0;
     background-color: transparent;
     padding: 0.4em;
     color: inherit;
+}
+
+.wx-color-input.wx-color-compact .wx-color-trigger:hover {
+    background-color: var(--wx-tertiary-bg);
 }

@@ -138,8 +138,6 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
         valueText.className = "visually-hidden";
         this._valueText = valueText;
 
-        const expandIcon = document.createElement("i");
-        expandIcon.className = this._iconClass("angle-down");
         if (this._compact) {
             const sample = document.createElement("span");
             sample.className = "wx-color-sample";
@@ -150,7 +148,11 @@ webexpress.webui.InputColorCtrl = class extends webexpress.webui.MenuCtrl {
             dropdown.appendChild(sample);
         } else dropdown.appendChild(colorPreview);
         dropdown.appendChild(valueText);
-        if (!this._compact) dropdown.appendChild(expandIcon);
+        if (!this._compact) {
+            const expandIcon = document.createElement("i");
+            expandIcon.className = this._iconClass("angle-down");
+            dropdown.appendChild(expandIcon);
+        }
 
         this._trigger = dropdown;
 
