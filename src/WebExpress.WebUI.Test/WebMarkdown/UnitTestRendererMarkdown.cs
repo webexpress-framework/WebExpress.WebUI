@@ -374,10 +374,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             // act
             var markdown = MarkdownRendererHtmlToMarkdown.ConvertHtmlToMarkdown(
                 "<table><thead><tr><th>Name</th><th>Note</th></tr></thead>"
-                + "<tbody><tr><td><strong>Guybrush</strong></td><td>a | b</td></tr></tbody></table>");
+                + "<tbody><tr><td><strong>Grace</strong></td><td>a | b</td></tr></tbody></table>");
 
             // validation
-            Assert.Contains("| **Guybrush** | a \\| b |", markdown);
+            Assert.Contains("| **Grace** | a \\| b |", markdown);
         }
 
         /// <summary>

@@ -46,9 +46,9 @@ function table(options = {}) {
     const Ctrl = options.reorderable ? rt.wx.TableReorderableCtrl : rt.wx.TableCtrl;
     const ctrl = new Ctrl(element);
     ctrl.setRows(options.rows || [
-        row("stan", "Stan", "41"),
-        row("guybrush", "Guybrush", "21"),
-        row("elaine", "Elaine", "25")
+        row("steve", "Steve", "41"),
+        row("grace", "Grace", "21"),
+        row("emma", "Emma", "25")
     ]);
     ctrl._store.flush();
     builds.length = 0;
@@ -86,7 +86,7 @@ test("a sort moves the rows and keeps their nodes and what their cell templates 
     ctrl._handleSortClick(null, ctrl._columns[0]);
     ctrl._store.flush();
 
-    assert.deepEqual(ids(ctrl), ["elaine", "guybrush", "stan"]);
+    assert.deepEqual(ids(ctrl), ["emma", "grace", "steve"]);
     for (const r of ctrl._rows) {
         assert.equal(r._anchorTr, nodes.get(r.id), `${r.id} keeps its row node`);
         assert.equal(r._anchorTr.querySelector(".probe"), probes.get(r.id), `${r.id} keeps its cell content`);
@@ -97,15 +97,15 @@ test("a sort moves the rows and keeps their nodes and what their cell templates 
 
 test("a cell is built anew when what it shows changes, and only that cell", () => {
     const { ctrl, builds } = table();
-    const stan = ctrl._rows[0];
+    const steve = ctrl._rows[0];
     const other = ctrl._rows[1]._anchorTr.querySelector(".probe");
 
-    stan.cells[0].content = "Stan S. Stanman";
+    steve.cells[0].content = "Steve S. Stanman";
     ctrl.render();
     ctrl._store.flush();
 
-    assert.deepEqual(builds, ["Stan S. Stanman"]);
-    assert.equal(stan._anchorTr.querySelector(".probe").textContent, "Stan S. Stanman");
+    assert.deepEqual(builds, ["Steve S. Stanman"]);
+    assert.equal(steve._anchorTr.querySelector(".probe").textContent, "Steve S. Stanman");
     assert.equal(ctrl._rows[1]._anchorTr.querySelector(".probe"), other);
 });
 
@@ -116,9 +116,9 @@ test("a selection is rendered before it is announced", () => {
         seen.push([event.detail.rowId, event.detail.row._anchorTr.classList.contains("active")]);
     });
 
-    ctrl.selectRow("elaine");
+    ctrl.selectRow("emma");
 
-    assert.deepEqual(seen, [["elaine", true]]);
+    assert.deepEqual(seen, [["emma", true]]);
     assert.equal(ctrl._rows[0]._anchorTr.classList.contains("active"), false, "the first row gave the selection up");
     assert.equal(ctrl._rows[2]._anchorTr.getAttribute("aria-selected"), "true");
 });
@@ -128,44 +128,44 @@ test("a refresh flashes the changed and the new rows and takes the marks away on
     rt.wx.TableCtrl.FLASH_DURATION = 5;
 
     ctrl._rows[1].cells[1].content = "22";
-    ctrl.insertRow(row("carla", "Carla", "35"));
+    ctrl.insertRow(row("chloe", "Chloe", "35"));
     ctrl._store.flush();
 
-    const guybrush = ctrl._rows[1]._anchorTr;
-    const carla = ctrl._rows[3]._anchorTr;
-    assert.ok(guybrush.classList.contains("wx-change-flash"));
-    assert.ok(carla.classList.contains("wx-new-flash"));
+    const grace = ctrl._rows[1]._anchorTr;
+    const chloe = ctrl._rows[3]._anchorTr;
+    assert.ok(grace.classList.contains("wx-change-flash"));
+    assert.ok(chloe.classList.contains("wx-new-flash"));
     assert.equal(ctrl._rows[0]._anchorTr.classList.contains("wx-change-flash"), false, "an unchanged row stays calm");
 
     await new Promise((resolve) => setTimeout(resolve, 20));
     ctrl._store.flush();
-    assert.equal(guybrush.classList.contains("wx-change-flash"), false);
-    assert.equal(carla.classList.contains("wx-new-flash"), false);
+    assert.equal(grace.classList.contains("wx-change-flash"), false);
+    assert.equal(chloe.classList.contains("wx-new-flash"), false);
 });
 
 test("a row move is state: the moved row, the row under the pointer and the drop line render from it", () => {
     const { rt, element, ctrl } = table({ reorderable: true, host: { movableRow: "true", treeMoveEnabled: "false" } });
-    const [stan, , elaine] = ctrl._rows;
+    const [steve, , emma] = ctrl._rows;
     const nodes = ctrl._rows.map((r) => r._anchorTr);
     const reorders = [];
     element.addEventListener(rt.wx.Event.ROW_REORDER_EVENT, (event) => reorders.push([event.detail.rowId, event.detail.toIndex]));
 
-    ctrl._beginRowMove(stan, stan._anchorTr, 0, 0);
+    ctrl._beginRowMove(steve, steve._anchorTr, 0, 0);
     ctrl._store.flush();
     const ghost = ctrl._rowMoveGhost;
-    assert.ok(stan._anchorTr.classList.contains("wx-dragging"));
-    assert.equal(stan._anchorTr.nextSibling.classList.contains("wx-row-move-placeholder"), true, "the line stands below the moved row");
+    assert.ok(steve._anchorTr.classList.contains("wx-dragging"));
+    assert.equal(steve._anchorTr.nextSibling.classList.contains("wx-row-move-placeholder"), true, "the line stands below the moved row");
 
-    elaine._anchorTr._rect = { top: 0, height: 40 };
-    ctrl._onBodyHoverMove({ target: elaine._anchorTr.children[1], clientY: 35 });
+    emma._anchorTr._rect = { top: 0, height: 40 };
+    ctrl._onBodyHoverMove({ target: emma._anchorTr.children[1], clientY: 35 });
     ctrl._store.flush();
-    assert.ok(elaine._anchorTr.classList.contains("wx-drag-over"));
-    assert.equal(elaine._anchorTr.nextSibling.classList.contains("wx-row-move-placeholder"), true, "the line follows below the hovered row");
+    assert.ok(emma._anchorTr.classList.contains("wx-drag-over"));
+    assert.equal(emma._anchorTr.nextSibling.classList.contains("wx-row-move-placeholder"), true, "the line follows below the hovered row");
 
     ctrl._finalizeRowMove();
     ctrl._store.flush();
-    assert.deepEqual(ids(ctrl), ["guybrush", "elaine", "stan"]);
-    assert.deepEqual(reorders, [["stan", 2]]);
+    assert.deepEqual(ids(ctrl), ["grace", "emma", "steve"]);
+    assert.deepEqual(reorders, [["steve", 2]]);
     assert.equal(ctrl._body.querySelector(".wx-row-move-placeholder"), null);
     assert.equal(ctrl._body.querySelector(".wx-dragging"), null);
     assert.equal(ctrl._body.querySelector(".wx-drag-over"), null);
@@ -175,14 +175,14 @@ test("a row move is state: the moved row, the row under the pointer and the drop
 
 test("the arrow keys on a grip move the row and give its grip the focus back", () => {
     const { ctrl } = table({ reorderable: true, host: { movableRow: "true" } });
-    const guybrush = ctrl._rows[1];
-    const grip = guybrush._anchorTr.querySelector(".wx-table-drag-handle").firstChild;
+    const grace = ctrl._rows[1];
+    const grip = grace._anchorTr.querySelector(".wx-table-drag-handle").firstChild;
     let focused = null;
     grip.focus = () => { focused = grip; };
 
-    ctrl._moveRowByStep(guybrush, -1);
+    ctrl._moveRowByStep(grace, -1);
 
-    assert.deepEqual(ids(ctrl), ["guybrush", "stan", "elaine"]);
+    assert.deepEqual(ids(ctrl), ["grace", "steve", "emma"]);
     assert.equal(focused, grip);
 });
 
@@ -199,15 +199,15 @@ test("a dropped column takes its cells along and the headers keep their nodes", 
     assert.equal(after[1], headers[0]);
     const cells = ctrl._rows[0]._anchorTr.children.filter((el) => el.classList.contains("wx-grid-cell") && !el.classList.contains("wx-table-actions"));
     assert.equal(cells[0].textContent, "41");
-    assert.equal(cells[1].querySelector(".probe").textContent, "Stan");
+    assert.equal(cells[1].querySelector(".probe").textContent, "Steve");
 });
 
 test("a reorderable row writes a multi-word action hyphenated, as the base table does", () => {
-    const actionRow = Object.assign(row("stan", "Stan", "41"), { primaryAction: { action: "modal", modalUri: "/stan" } });
+    const actionRow = Object.assign(row("steve", "Steve", "41"), { primaryAction: { action: "modal", modalUri: "/steve" } });
     const { ctrl } = table({ reorderable: true, rows: [actionRow] });
 
     const tr = ctrl._rows[0]._anchorTr;
-    assert.equal(tr.getAttribute("data-wx-primary-modal-uri"), "/stan");
+    assert.equal(tr.getAttribute("data-wx-primary-modal-uri"), "/steve");
     assert.equal(tr.getAttribute("data-wx-primary-modaluri"), null);
 });
 
@@ -216,7 +216,7 @@ test("a double click on a resizer sizes the column by its own cells, not by the 
     for (const r of ctrl._rows) {
         const [grip, name] = r._anchorTr.children;
         grip._rect = { width: 900 };
-        name._rect = { width: r.id === "guybrush" ? 200 : 120 };
+        name._rect = { width: r.id === "grace" ? 200 : 120 };
     }
 
     ctrl._autoSizeColumn(0);

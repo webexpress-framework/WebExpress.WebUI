@@ -56,9 +56,9 @@ namespace WebExpress.WebUI.Test.WebPdf
             // arrange
             var document = new PdfDocument
             {
-                Author = "Guybrush",
-                Subject = "Pirates",
-                Keywords = "grog",
+                Author = "Grace",
+                Subject = "Reports",
+                Keywords = "draft",
                 Language = "de-DE",
                 CreationDate = new DateTimeOffset(2026, 10, 1, 12, 30, 0, TimeSpan.FromHours(2))
             };
@@ -68,9 +68,9 @@ namespace WebExpress.WebUI.Test.WebPdf
             var info = pdf.Find("/Producer").Single();
 
             // validation
-            Assert.Contains("/Author (Guybrush)", info);
-            Assert.Contains("/Subject (Pirates)", info);
-            Assert.Contains("/Keywords (grog)", info);
+            Assert.Contains("/Author (Grace)", info);
+            Assert.Contains("/Subject (Reports)", info);
+            Assert.Contains("/Keywords (draft)", info);
             Assert.Contains("/CreationDate (D:20261001123000+02'00')", info);
             Assert.Contains("/Lang (de-DE)", pdf.Find("/Type /Catalog").Single());
         }
@@ -316,7 +316,7 @@ namespace WebExpress.WebUI.Test.WebPdf
         /// </summary>
         [Theory]
         [InlineData("https://example.com/a", true)]
-        [InlineData("mailto:guybrush@example.com", true)]
+        [InlineData("mailto:grace@example.com", true)]
         [InlineData("javascript:alert(1)", false)]
         [InlineData("/relative/path", false)]
         [InlineData("file:///etc/passwd", false)]

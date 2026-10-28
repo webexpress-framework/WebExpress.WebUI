@@ -56,8 +56,8 @@ test("markdown and html render an empty value as an empty cell", () => {
 });
 
 test("html renders the trusted value verbatim", () => {
-    const node = render("html", "<b>Guybrush</b> &ndash; <i>pirate</i>");
+    const node = render("html", "<b>Grace</b> &ndash; <i>developer</i>");
 
     assert.equal(node.className, "wx-table-html");
-    assert.equal(node.innerHTML, "<b>Guybrush</b> &ndash; <i>pirate</i>");
+    assert.equal(node.innerHTML, "<b>Grace</b> &ndash; <i>developer</i>");
 });

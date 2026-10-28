@@ -12,13 +12,13 @@ import { createViewer, createEditor, renderedNodes, renderedEdges } from "./grap
 
 const GRAPH = {
     nodes: [
-        { id: "melee", label: "Mêlée", x: 0, y: 0 },
-        { id: "monkey", label: "Monkey", x: 300, y: 0 },
-        { id: "scabb", label: "Scabb", x: 300, y: 200 }
+        { id: "geneva", label: "Genf", x: 0, y: 0 },
+        { id: "zurich", label: "Zürich", x: 300, y: 0 },
+        { id: "bern", label: "Bern", x: 300, y: 200 }
     ],
     edges: [
-        { id: "voyage", from: "melee", to: "monkey" },
-        { id: "rafting", from: "monkey", to: "scabb" }
+        { id: "voyage", from: "geneva", to: "zurich" },
+        { id: "rafting", from: "zurich", to: "bern" }
     ]
 };
 
@@ -51,7 +51,7 @@ test("the canvas is a function of the state and keeps its nodes across a drag", 
     assert.ok(renderedNodes(ctrl).every((g, i) => g === groups[i]), "the node groups are patched, not rebuilt");
     assert.equal(renderedEdges(ctrl)[0], edges[0], "and so is the edge");
     assert.notEqual(edges[0].getAttribute("d"), before, "the edge follows the node");
-    assert.equal(ctrl.state.positions.melee.y, ctrl._nodes[0].y, "the state holds the position the canvas shows");
+    assert.equal(ctrl.state.positions.geneva.y, ctrl._nodes[0].y, "the state holds the position the canvas shows");
 });
 
 test("a gesture renders once per animation frame, however many moves the frame saw", () => {
@@ -74,11 +74,11 @@ test("a discrete action renders at once", () => {
     const { ctrl } = createViewer(GRAPH);
     const renders = countRenders(ctrl);
 
-    ctrl._model.nodes[0].label = "Mêlée Island";
+    ctrl._model.nodes[0].label = "Genève";
     ctrl.render();
 
     assert.equal(renders.count, 1);
-    assert.equal(renderedNodes(ctrl)[0].getAttribute("aria-label"), "Mêlée Island");
+    assert.equal(renderedNodes(ctrl)[0].getAttribute("aria-label"), "Genève");
 });
 
 test("the viewport is state the pointer math reads before the frame paints it", () => {
@@ -131,7 +131,7 @@ test("the editor renders its selection, the waypoints and the handles from the s
     assert.equal(renderedEdges(ctrl)[0].getAttribute("data-selected"), "true");
 
     ctrl._selectedEdgeId = null;
-    ctrl._selectedNodeId = "monkey";
+    ctrl._selectedNodeId = "zurich";
     ctrl.render();
 
     assert.equal(ctrl._waypointLayer.children.length, 0);
@@ -148,7 +148,7 @@ test("a double click on a node opens its properties, whose fields survive a rend
     const dialog = host.querySelector(".wx-graph-modal-backdrop");
     assert.ok(dialog, "the properties dialog is open");
     const input = dialog.querySelector("#inp-label");
-    input.value = "Monkey Island";
+    input.value = "Zürich HB";
 
     ctrl.render();
     assert.equal(dialog.querySelector("#inp-label"), input, "the field the user types in is kept");
@@ -156,7 +156,7 @@ test("a double click on a node opens its properties, whose fields survive a rend
     const apply = dialog.querySelectorAll("button").find((b) => b.textContent === "Apply");
     apply.dispatchEvent({ type: "click" });
 
-    assert.equal(ctrl._model.nodes[1].label, "Monkey Island");
+    assert.equal(ctrl._model.nodes[1].label, "Zürich HB");
     assert.equal(host.querySelector(".wx-graph-modal-backdrop"), null, "applying closes the dialog");
 });
 
@@ -171,9 +171,9 @@ test("the toolbar resolves every icon through the icon set", () => {
 test("drawing an edge previews it on the next frame and marks the target", () => {
     const { rt, ctrl } = createEditor(GRAPH);
     ctrl._toggleAddEdgeMode(true);
-    ctrl._edgeSourceNode = "melee";
+    ctrl._edgeSourceNode = "geneva";
     ctrl.render();
-    const target = ctrl._nodes.find((n) => n.id === "scabb");
+    const target = ctrl._nodes.find((n) => n.id === "bern");
 
     ctrl._svg.dispatchEvent(pointerEvent({ type: "pointermove", clientX: target.x, clientY: target.y }));
     assert.equal(ctrl._previewLayer.children.length, 0, "the preview waits for its frame");

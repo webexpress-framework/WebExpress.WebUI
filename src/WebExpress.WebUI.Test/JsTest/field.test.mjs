@@ -106,32 +106,32 @@ test("a write to a native field is announced like one the user made, and only wh
     const changes = [];
     el.addEventListener("change", () => changes.push(el.value));
 
-    Field.setValue(el, "Guybrush");
-    Field.setValue(el, "Guybrush");
+    Field.setValue(el, "Grace");
+    Field.setValue(el, "Grace");
     Field.setValue(el, ["a", "b"]);
 
-    assert.deepEqual(changes, ["Guybrush", "a;b"], "a list is written in the server's list form");
+    assert.deepEqual(changes, ["Grace", "a;b"], "a list is written in the server's list form");
     assert.equal(Field.getValue(el), "a;b");
 });
 
 test("a control the controller created is pristine; a change makes it dirty and reset brings it back", () => {
     const { rt } = load();
     const Field = rt.wx.Field;
-    const { host, ctrl } = create(rt, { "data-value": "Monkey Island" });
+    const { host, ctrl } = create(rt, { "data-value": "Zürich" });
     const announced = [];
     host.addEventListener(rt.wx.Event.CHANGE_VALUE_EVENT, (e) => announced.push(e.detail.value));
 
     assert.equal(Field.isDirty(ctrl), false);
 
-    ctrl.value = "Melee Island";
+    ctrl.value = "Geneva";
     assert.equal(Field.isDirty(host), true);
 
     Field.reset(ctrl);
-    assert.equal(ctrl.value, "Monkey Island");
+    assert.equal(ctrl.value, "Zürich");
     assert.equal(Field.isDirty(ctrl), false);
-    assert.deepEqual(announced, ["Melee Island", "Monkey Island"], "the reset is a change like any other");
+    assert.deepEqual(announced, ["Geneva", "Zürich"], "the reset is a change like any other");
 
-    ctrl.value = "Scabb Island";
+    ctrl.value = "Bern";
     Field.markPristine(ctrl);
     assert.equal(Field.isDirty(ctrl), false, "a saved value is the new baseline");
 });

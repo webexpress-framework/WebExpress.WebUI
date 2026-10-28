@@ -51,11 +51,11 @@ function render(rt, type, value, opts = {}) {
 
 test("text renders a read-only span with the color class", () => {
     const rt = loadRuntime();
-    const node = render(rt, "text", "Mighty pirate", { colorCss: "text-info" });
+    const node = render(rt, "text", "Senior developer", { colorCss: "text-info" });
 
     const span = node.firstChild;
     assert.equal(span.tagName, "SPAN");
-    assert.equal(span.textContent, "Mighty pirate");
+    assert.equal(span.textContent, "Senior developer");
     assert.ok(span.classList.contains("text-info"), "the colorCss option lands on the span");
 });
 
@@ -64,11 +64,11 @@ test("text renders an input with placeholder and value in edit mode", () => {
     // smartedit swaps the editor for its display view on construction; the
     // renderer output is what is under test here
     rt.wx.SmartEditCtrl = class { };
-    const node = render(rt, "text", "Guybrush", { editable: true, placeholder: "Enter name" });
+    const node = render(rt, "text", "Grace", { editable: true, placeholder: "Enter name" });
 
     const input = node.firstChild;
     assert.equal(input.tagName, "INPUT");
-    assert.equal(input.value, "Guybrush");
+    assert.equal(input.value, "Grace");
     assert.equal(input.placeholder, "Enter name");
 });
 
@@ -92,15 +92,15 @@ test("numeric renders the value read-only and honors the range in edit mode", ()
 test("combo resolves the label from the embedded options JSON read-only", () => {
     const rt = loadRuntime();
     const options = JSON.stringify([
-        { value: "pirate", text: "Pirate" },
-        { value: "ghost", text: "Ghost" }
+        { value: "developer", text: "Developer" },
+        { value: "designer", text: "Designer" }
     ]);
 
-    const matched = render(rt, "combo", "pirate", { options: options });
-    assert.equal(matched.textContent, "Pirate", "a matching item shows its label");
+    const matched = render(rt, "combo", "developer", { options: options });
+    assert.equal(matched.textContent, "Developer", "a matching item shows its label");
 
-    const unmatched = render(rt, "combo", "governor", { options: options });
-    assert.equal(unmatched.textContent, "governor", "an unmatched value falls back to the raw value");
+    const unmatched = render(rt, "combo", "manager", { options: options });
+    assert.equal(unmatched.textContent, "manager", "an unmatched value falls back to the raw value");
 });
 
 test("combo renders a select with the embedded options in edit mode", () => {
@@ -109,17 +109,17 @@ test("combo renders a select with the embedded options in edit mode", () => {
     // stub does not model; the renderer output is what is under test here
     rt.wx.SmartEditCtrl = class { };
     const options = JSON.stringify([
-        { value: "pirate", text: "Pirate" },
-        { value: "ghost", text: "Ghost" }
+        { value: "developer", text: "Developer" },
+        { value: "designer", text: "Designer" }
     ]);
 
-    const node = render(rt, "combo", "ghost", { editable: true, options: options });
+    const node = render(rt, "combo", "designer", { editable: true, options: options });
     const select = node.firstChild;
 
     assert.equal(select.tagName, "SELECT");
     assert.equal(select.childNodes.length, 2);
-    assert.equal(select.childNodes[0].value, "pirate");
-    assert.equal(select.childNodes[1].value, "ghost");
+    assert.equal(select.childNodes[0].value, "developer");
+    assert.equal(select.childNodes[1].value, "designer");
     assert.equal(select.childNodes[1].selected, true, "the current value is preselected");
 });
 

@@ -40,7 +40,7 @@ function table(config = {}) {
 
     const row = rt.document.createElement("div");
     row.classList.add("wx-table-row");
-    for (const text of ["Guybrush", "21"]) {
+    for (const text of ["Grace", "21"]) {
         const cell = rt.document.createElement("div");
         cell.textContent = text;
         row.appendChild(cell);

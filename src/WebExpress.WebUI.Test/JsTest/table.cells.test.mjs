@@ -71,14 +71,14 @@ function cell(rt, text, panel) {
 test("wx-webui-table keeps a cell panel as markup and a plain cell as text", () => {
     const rt = loadTable();
     const element = host(rt, (row) => {
-        row.appendChild(cell(rt, "Guybrush", true));
+        row.appendChild(cell(rt, "Grace", true));
         row.appendChild(cell(rt, "1.0.0", false));
     });
 
     const cells = new rt.wx.TableCtrl(element)._rows[0].cells;
 
     assert.equal(cells[0].html, true, "the panel cell is marked as markup");
-    assert.equal(cells[0].text, "Guybrush", "the flattened text stays available for sorting");
+    assert.equal(cells[0].text, "Grace", "the flattened text stays available for sorting");
     assert.equal(cells[1].html, false, "a plain cell is not marked as markup");
     assert.equal(cells[1].content, "1.0.0");
 });
@@ -113,7 +113,7 @@ test("wx-webui-table keeps a markup cell as markup, sorts it by its text and kee
     columns.appendChild(column);
     element.appendChild(columns);
 
-    for (const name of ["Stan", "Elaine", "Guybrush"]) {
+    for (const name of ["Steve", "Emma", "Grace"]) {
         const row = rt.document.createElement("div");
         row.classList.add("wx-table-row");
         const markup = rt.document.createElement("div");
@@ -132,11 +132,11 @@ test("wx-webui-table keeps a markup cell as markup, sorts it by its text and kee
     const cell = ctrl._rows[0].cells[0];
 
     assert.equal(cell.html, true, "the markup cell is marked as markup");
-    assert.equal(cell.text, "Stan", "the flattened text stays available for sorting");
+    assert.equal(cell.text, "Steve", "the flattened text stays available for sorting");
     assert.ok(String(cell.class).includes("extra"), "unlike a panel, the cell keeps its classes");
 
     ctrl.orderRows(Object.assign(ctrl._columns[0], { sort: "asc" }));
-    assert.deepEqual(ctrl._rows.map((r) => r.cells[0].text), ["Elaine", "Guybrush", "Stan"]);
+    assert.deepEqual(ctrl._rows.map((r) => r.cells[0].text), ["Emma", "Grace", "Steve"]);
 });
 
 test("wx-webui-table sorts a cell panel by its text rather than its markup", () => {
@@ -150,7 +150,7 @@ test("wx-webui-table sorts a cell panel by its text rather than its markup", () 
     columns.appendChild(column);
     element.appendChild(columns);
 
-    for (const name of ["Stan", "Elaine", "Guybrush"]) {
+    for (const name of ["Steve", "Emma", "Grace"]) {
         const row = rt.document.createElement("div");
         row.classList.add("wx-table-row");
         row.appendChild(cell(rt, name, true));
@@ -161,13 +161,13 @@ test("wx-webui-table sorts a cell panel by its text rather than its markup", () 
     const ctrl = new rt.wx.TableCtrl(element);
     ctrl.orderRows(Object.assign(ctrl._columns[0], { sort: "asc" }));
 
-    assert.deepEqual(ctrl._rows.map((r) => r.cells[0].text), ["Elaine", "Guybrush", "Stan"]);
+    assert.deepEqual(ctrl._rows.map((r) => r.cells[0].text), ["Emma", "Grace", "Steve"]);
 });
 
 test("wx-webui-table passes a row option on with its label and full action payload", () => {
     const rt = loadTable();
     const element = host(rt, (row) => {
-        row.appendChild(cell(rt, "Guybrush", false));
+        row.appendChild(cell(rt, "Grace", false));
 
         const options = rt.document.createElement("div");
         options.classList.add("wx-table-options");
@@ -321,7 +321,7 @@ function formattedHeaderHost(rt) {
 
     const row = rt.document.createElement("div");
     row.classList.add("wx-table-row");
-    row.appendChild(cell(rt, "Guybrush", false));
+    row.appendChild(cell(rt, "Grace", false));
     row.appendChild(cell(rt, "3", false));
     element.appendChild(row);
 

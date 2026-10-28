@@ -66,13 +66,13 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlDescriptionListItem()
             {
                 Term = _ => "Name",
-                Description = _ => "Guybrush Threepwood"
+                Description = _ => "Grace Turner"
             };
 
             // act
             var html = control.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-description-list-item""><dt class=""wx-description-list-term"">Name</dt><dd class=""wx-description-list-description"">Guybrush Threepwood</dd></div>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-description-list-item""><dt class=""wx-description-list-term"">Name</dt><dd class=""wx-description-list-description"">Grace Turner</dd></div>", html);
         }
 
         /// <summary>
@@ -88,7 +88,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlDescriptionList
             (
                 null,
-                new ControlDescriptionListItem() { Term = _ => "Name", Description = _ => "Guybrush" }
+                new ControlDescriptionListItem() { Term = _ => "Name", Description = _ => "Grace" }
             );
 
             // act

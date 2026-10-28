@@ -32,8 +32,8 @@ function table(host = {}) {
 
     const ctrl = new rt.wx.TableReorderableCtrl(element);
     ctrl.setRows([
-        { id: "stan", cells: [{ content: "Stan", text: "Stan" }, { content: "41", text: "41" }], children: [] },
-        { id: "elaine", cells: [{ content: "Elaine", text: "Elaine" }, { content: "35", text: "35" }], children: [] }
+        { id: "steve", cells: [{ content: "Steve", text: "Steve" }, { content: "41", text: "41" }], children: [] },
+        { id: "emma", cells: [{ content: "Emma", text: "Emma" }, { content: "35", text: "35" }], children: [] }
     ]);
     ctrl._store.flush();
     return { rt, ctrl };
@@ -53,63 +53,63 @@ function cellOf(row, columnId) {
 
 test("an input in the first data column of a movable row changes exactly that model cell", () => {
     const { rt, ctrl } = table({ movableRow: "true" });
-    const stan = ctrl._rows[0];
+    const steve = ctrl._rows[0];
     const input = rt.document.createElement("input");
-    cellOf(stan, "col_0").appendChild(input);
+    cellOf(steve, "col_0").appendChild(input);
 
     input.value = "Stanley";
     ctrl._onBodyInput({ target: input });
 
-    assert.equal(stan.cells[0].content, "Stanley");
-    assert.equal(stan.cells[0].text, "Stanley", "the sortable text follows the edit");
-    assert.equal(stan.cells[1].content, "41", "the neighbour keeps its value");
-    assert.equal(stan.cells[1].text, "41");
+    assert.equal(steve.cells[0].content, "Stanley");
+    assert.equal(steve.cells[0].text, "Stanley", "the sortable text follows the edit");
+    assert.equal(steve.cells[1].content, "41", "the neighbour keeps its value");
+    assert.equal(steve.cells[1].text, "41");
 });
 
 test("a contenteditable cell is written back with its text", () => {
     const { rt, ctrl } = table({ movableRow: "true" });
-    const elaine = ctrl._rows[1];
+    const emma = ctrl._rows[1];
     const editable = rt.document.createElement("div");
     editable.setAttribute("contenteditable", "true");
-    cellOf(elaine, "col_1").appendChild(editable);
+    cellOf(emma, "col_1").appendChild(editable);
 
     editable.textContent = "36";
     ctrl._onBodyInput({ target: editable });
 
-    assert.equal(elaine.cells[1].content, "36");
-    assert.equal(elaine.cells[1].text, "36");
-    assert.equal(elaine.cells[0].content, "Elaine");
+    assert.equal(emma.cells[1].content, "36");
+    assert.equal(emma.cells[1].text, "36");
+    assert.equal(emma.cells[0].content, "Emma");
 });
 
 test("an edit after a column reorder lands in the column it was made in and sorts by its new text", () => {
     const { rt, ctrl } = table({ movableRow: "true" });
     ctrl._dropColumn("col_1", "col_0", true);
     ctrl._store.flush();
-    const elaine = ctrl._rows[1];
+    const emma = ctrl._rows[1];
     const input = rt.document.createElement("input");
-    cellOf(elaine, "col_0").appendChild(input);
+    cellOf(emma, "col_0").appendChild(input);
 
     input.value = "Zed";
     ctrl._onBodyInput({ target: input });
     ctrl._onHeadClick({ target: ctrl._head.querySelectorAll(".wx-col-header").find((el) => el.dataset.columnId === "col_0") });
     ctrl._store.flush();
 
-    assert.deepEqual(ctrl._rows.map((r) => r.id), ["stan", "elaine"], "the edited name sorts last");
-    assert.equal(elaine.cells[ctrl._colIndexCache.get("col_0")].content, "Zed");
-    assert.equal(elaine.cells[ctrl._colIndexCache.get("col_1")].content, "35");
+    assert.deepEqual(ctrl._rows.map((r) => r.id), ["steve", "emma"], "the edited name sorts last");
+    assert.equal(emma.cells[ctrl._colIndexCache.get("col_0")].content, "Zed");
+    assert.equal(emma.cells[ctrl._colIndexCache.get("col_1")].content, "35");
 });
 
 test("a cell whose template brings an editor of its own is left to that editor", () => {
     const { rt, ctrl } = table();
-    const stan = ctrl._rows[0];
+    const steve = ctrl._rows[0];
     const smartEdit = rt.document.createElement("div");
     smartEdit.classList.add("wx-smart-edit");
     const input = rt.document.createElement("input");
     smartEdit.appendChild(input);
-    cellOf(stan, "col_0").appendChild(smartEdit);
+    cellOf(steve, "col_0").appendChild(smartEdit);
 
     input.value = "Stanley";
     ctrl._onBodyInput({ target: input });
 
-    assert.equal(stan.cells[0].content, "Stan", "the editor reports through its save event instead");
+    assert.equal(steve.cells[0].content, "Steve", "the editor reports through its save event instead");
 });

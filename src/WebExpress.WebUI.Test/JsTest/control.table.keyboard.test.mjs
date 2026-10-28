@@ -28,7 +28,7 @@ function table() {
     rt.document.body.appendChild(element);
 
     const ctrl = new rt.wx.TableReorderableCtrl(element);
-    ctrl.setRows(["stan", "guybrush", "elaine"].map((id) => ({ id, cells: [{ content: id, text: id }], children: [] })));
+    ctrl.setRows(["steve", "grace", "emma"].map((id) => ({ id, cells: [{ content: id, text: id }], children: [] })));
     ctrl._store.flush();
     return { rt, ctrl };
 }
@@ -57,30 +57,30 @@ function fire(target, init) {
 
 test("an arrow key on the grip moves the row and leaves the selection alone", () => {
     const { ctrl } = table();
-    const stan = ctrl._rows[0];
-    assert.equal(ctrl.getSelectedRow(), stan, "the first row is selected on open");
-    const grip = stan._anchorTr.querySelector(".wx-table-drag-handle [role=\"button\"]");
+    const steve = ctrl._rows[0];
+    assert.equal(ctrl.getSelectedRow(), steve, "the first row is selected on open");
+    const grip = steve._anchorTr.querySelector(".wx-table-drag-handle [role=\"button\"]");
 
     fire(grip, { type: "keydown", key: "ArrowDown" });
     ctrl._store.flush();
 
-    assert.deepEqual(ctrl._rows.map((r) => r.id), ["guybrush", "stan", "elaine"]);
-    assert.equal(ctrl.getSelectedRow(), stan, "the selection stays on the moved row");
+    assert.deepEqual(ctrl._rows.map((r) => r.id), ["grace", "steve", "emma"]);
+    assert.equal(ctrl.getSelectedRow(), steve, "the selection stays on the moved row");
 });
 
 test("enter on a button in a row does not trigger the primary action of the selected row", () => {
     const { rt, ctrl } = table();
     const triggered = [];
     ctrl._triggerPrimaryAction = (row) => triggered.push(row.id);
-    const stan = ctrl._rows[0];
+    const steve = ctrl._rows[0];
     const button = rt.document.createElement("button");
-    stan._anchorTr.children[1].appendChild(button);
+    steve._anchorTr.children[1].appendChild(button);
 
     fire(button, { type: "keydown", key: "Enter" });
     assert.deepEqual(triggered, [], "the button answers its own key");
 
-    fire(stan._anchorTr, { type: "keydown", key: "Enter" });
-    assert.deepEqual(triggered, ["stan"], "on the row itself enter still triggers it");
+    fire(steve._anchorTr, { type: "keydown", key: "Enter" });
+    assert.deepEqual(triggered, ["steve"], "on the row itself enter still triggers it");
 });
 
 test("a key a header answered by sorting does not trigger the primary action as well", () => {

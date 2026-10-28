@@ -231,7 +231,7 @@ test("the encoded payload decodes back to the value", () => {
     const { wx } = loadRuntime();
     const qr = wx.BarcodeQR;
 
-    for (const value of ["1", "WebExpress", "https://webexpress-framework.github.io/", "Grüße aus Mêlée Island"]) {
+    for (const value of ["1", "WebExpress", "https://webexpress-framework.github.io/", "Grüße aus Genève"]) {
         for (const level of LEVELS) {
             const bytes = qr._toUtf8(value);
             const version = qr._pickVersion(bytes.length, level);

@@ -288,7 +288,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             control.Add(new ControlQuickfilterItemAvatar("u1")
             {
-                Text = _ => "Guybrush",
+                Text = _ => "Grace",
                 Initials = _ => "GT",
                 Color = _ => "#1d4ed8",
                 PrimaryAction = _ => new ActionFilter() { Group = "assignee" }
@@ -296,7 +296,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"*<button id=""u1"" type=""button"" class=""wx-quickfilter-avatar"" data-name=""Guybrush"" data-initials=""GT"" data-color=""#1d4ed8"" data-wx-primary-action=""filter"" data-wx-primary-group=""assignee"">Guybrush</button>*";
+            var expected = @"*<button id=""u1"" type=""button"" class=""wx-quickfilter-avatar"" data-name=""Grace"" data-initials=""GT"" data-color=""#1d4ed8"" data-wx-primary-action=""filter"" data-wx-primary-group=""assignee"">Grace</button>*";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

@@ -11,14 +11,14 @@ import { loadWebUi } from "./harness.mjs";
 
 // every column orders the rows differently, so a sort by the wrong column shows
 const CREW = [
-    ["stan", "Stan", "41", "Alpha"],
-    ["guybrush", "Guybrush", "21", "Zephyr"],
-    ["elaine", "Elaine", "35", "Mermaid"]
+    ["steve", "Steve", "41", "Alpha"],
+    ["grace", "Grace", "21", "Zephyr"],
+    ["emma", "Emma", "35", "Mermaid"]
 ];
 const FOOTER = { col_0: "names", col_1: "ages", col_2: "ships" };
-const BY_NAME = ["elaine", "guybrush", "stan"];
-const BY_AGE = ["guybrush", "elaine", "stan"];
-const BY_SHIP = ["stan", "elaine", "guybrush"];
+const BY_NAME = ["emma", "grace", "steve"];
+const BY_AGE = ["grace", "emma", "steve"];
+const BY_SHIP = ["steve", "emma", "grace"];
 
 /**
  * Builds a reorderable table with three columns, three rows and a footer from markup,

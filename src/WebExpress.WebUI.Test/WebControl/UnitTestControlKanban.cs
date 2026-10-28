@@ -185,15 +185,15 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             control.Add(new ControlKanbanCard(null)
             {
-                AssigneeId = _ => "guybrush",
-                AssigneeName = _ => "Guybrush Threepwood",
+                AssigneeId = _ => "grace",
+                AssigneeName = _ => "Grace Turner",
                 AssigneeInitials = _ => "GT",
                 AssigneeColor = _ => "#1d4ed8"
             });
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"<div class=""wx-webui-kanban""><div class=""wx-kanban-card"" data-assignee-id=""guybrush"" data-assignee-name=""Guybrush Threepwood"" data-assignee-initials=""GT"" data-assignee-color=""#1d4ed8""></div></div>";
+            var expected = @"<div class=""wx-webui-kanban""><div class=""wx-kanban-card"" data-assignee-id=""grace"" data-assignee-name=""Grace Turner"" data-assignee-initials=""GT"" data-assignee-color=""#1d4ed8""></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
@@ -242,13 +242,13 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             control.Add(new ControlKanbanCard(null)
             {
-                AssigneeName = _ => "Guybrush Threepwood",
-                AssigneeImage = _ => new ImageIcon(new UriEndpoint("/assets/img/guybrush.png"))
+                AssigneeName = _ => "Grace Turner",
+                AssigneeImage = _ => new ImageIcon(new UriEndpoint("/assets/img/grace.png"))
             });
 
             // validation
             var html = control.Render(context, visualTree);
-            var expected = @"<div class=""wx-webui-kanban""><div class=""wx-kanban-card"" data-assignee-name=""Guybrush Threepwood"" data-assignee-image=""/assets/img/guybrush.png""></div></div>";
+            var expected = @"<div class=""wx-webui-kanban""><div class=""wx-kanban-card"" data-assignee-name=""Grace Turner"" data-assignee-image=""/assets/img/grace.png""></div></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }

@@ -175,7 +175,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlScheduleItem()
             {
-                Metadata = _ => new Dictionary<string, string> { ["room"] = "Scumm Bar" }
+                Metadata = _ => new Dictionary<string, string> { ["room"] = "Cafeteria" }
             };
 
             // act
@@ -183,7 +183,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(
-                @"<div class=""wx-schedule-item"" data-meta=""{&quot;room&quot;:&quot;Scumm Bar&quot;}""></div>", html);
+                @"<div class=""wx-schedule-item"" data-meta=""{&quot;room&quot;:&quot;Cafeteria&quot;}""></div>", html);
         }
 
         /// <summary>
@@ -222,7 +222,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlScheduleItem()
             {
-                Title = _ => @"Guybrush's ""quest"""
+                Title = _ => @"Grace's ""quest"""
             };
 
             // act
@@ -230,7 +230,7 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(
-                @"<div class=""wx-schedule-item"" data-title=""Guybrush's &quot;quest&quot;""></div>", html);
+                @"<div class=""wx-schedule-item"" data-title=""Grace's &quot;quest&quot;""></div>", html);
         }
     }
 }

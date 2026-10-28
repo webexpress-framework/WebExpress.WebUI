@@ -34,8 +34,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests that an item without an image shows the derived initials.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<span class=""wx-avatar-group-avatar"" title=""Guybrush Threepwood"">GT</span>")]
-        [InlineData("id", @"<span id=""id"" class=""wx-avatar-group-avatar"" title=""Guybrush Threepwood"">GT</span>")]
+        [InlineData(null, @"<span class=""wx-avatar-group-avatar"" title=""Grace Turner"">GT</span>")]
+        [InlineData("id", @"<span id=""id"" class=""wx-avatar-group-avatar"" title=""Grace Turner"">GT</span>")]
         public void ItemInitials(string id, string expected)
         {
             // arrange
@@ -44,7 +44,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarGroupItem(id)
             {
-                Name = _ => "Guybrush Threepwood"
+                Name = _ => "Grace Turner"
             };
 
             // act
@@ -57,8 +57,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the item color, emitted as a class or an inline style.
         /// </summary>
         [Theory]
-        [InlineData(true, @"<span class=""wx-avatar-group-avatar"" style=""background:#ff8800;color:#000;"" title=""Stan"">S</span>")]
-        [InlineData(false, @"<span class=""wx-avatar-group-avatar bg-primary"" title=""Stan"">S</span>")]
+        [InlineData(true, @"<span class=""wx-avatar-group-avatar"" style=""background:#ff8800;color:#000;"" title=""Steve"">S</span>")]
+        [InlineData(false, @"<span class=""wx-avatar-group-avatar bg-primary"" title=""Steve"">S</span>")]
         public void ItemColor(bool userColor, string expected)
         {
             // arrange
@@ -67,7 +67,7 @@ namespace WebExpress.WebUI.Test.WebControl
             var visualTree = new VisualTreeControl(componentHub, context.PageContext);
             var control = new ControlAvatarGroupItem()
             {
-                Name = _ => "Stan",
+                Name = _ => "Steve",
                 Color = _ => userColor ? new PropertyColorBackground("#ff8800") : new PropertyColorBackground(TypeColorBackground.Primary)
             };
 

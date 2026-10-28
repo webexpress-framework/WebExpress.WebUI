@@ -81,7 +81,7 @@ test("an assigned card renders the initials badge with color and tooltip", () =>
     const runtime = load();
     const { host } = build(runtime, {
         assigneeId: "u1",
-        assigneeName: "Guybrush Threepwood",
+        assigneeName: "Grace Turner",
         assigneeInitials: "GT",
         assigneeColor: "#1d4ed8"
     });
@@ -91,30 +91,30 @@ test("an assigned card renders the initials badge with color and tooltip", () =>
     assert.equal(badge.tagName, "SPAN");
     assert.equal(badge.textContent, "GT");
     assert.equal(badge.style.background, "#1d4ed8");
-    assert.equal(badge.title, "Guybrush Threepwood");
+    assert.equal(badge.title, "Grace Turner");
 });
 
 test("an avatar image replaces the initials badge", () => {
     const runtime = load();
     const { host } = build(runtime, {
         assigneeId: "u1",
-        assigneeName: "Guybrush Threepwood",
+        assigneeName: "Grace Turner",
         assigneeInitials: "GT",
-        assigneeImage: "/img/guybrush.png"
+        assigneeImage: "/img/grace.png"
     });
 
     const avatar = host.querySelector(".card-assignee");
     assert.ok(avatar, "the avatar exists");
     assert.equal(avatar.tagName, "IMG");
-    assert.equal(avatar.src, "/img/guybrush.png");
-    assert.equal(avatar.title, "Guybrush Threepwood");
+    assert.equal(avatar.src, "/img/grace.png");
+    assert.equal(avatar.title, "Grace Turner");
 });
 
 test("initials fall back to the assignee name when omitted", () => {
     const runtime = load();
-    const { host } = build(runtime, { assigneeId: "u1", assigneeName: "elaine" });
+    const { host } = build(runtime, { assigneeId: "u1", assigneeName: "emma" });
 
-    assert.equal(host.querySelector(".card-assignee").textContent, "EL");
+    assert.equal(host.querySelector(".card-assignee").textContent, "EM");
 });
 
 test("an unassigned card renders no avatar", () => {

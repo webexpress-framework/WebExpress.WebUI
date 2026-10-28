@@ -142,9 +142,9 @@ test("a file that has earlier versions is one row with them folded behind it", (
 
     const ctrl = new rt.wx.FileListCtrl(element);
     ctrl.files = [{
-        name: "TreasureMap.pdf",
+        name: "Timetable.pdf",
         version: 3,
-        versions: [{ name: "TreasureMap.pdf", version: 2 }, { name: "TreasureMap.pdf", version: 1 }]
+        versions: [{ name: "Timetable.pdf", version: 2 }, { name: "Timetable.pdf", version: 1 }]
     }];
 
     // a repeated name has to read as one file, not as three
@@ -164,7 +164,7 @@ test("the version toggle counts the file itself among its versions", () => {
     const element = host(rt, []);
 
     const ctrl = new rt.wx.FileListCtrl(element);
-    ctrl.files = [{ name: "TreasureMap.pdf", version: 2, versions: [{ name: "TreasureMap.pdf", version: 1 }] }];
+    ctrl.files = [{ name: "Timetable.pdf", version: 2, versions: [{ name: "Timetable.pdf", version: 1 }] }];
 
     assert.equal(element.querySelector(".wx-file-version-count").textContent, "2",
         "two versions exist, one of which is the row the toggle sits on");
@@ -175,7 +175,7 @@ test("pressing the toggle unfolds the earlier versions and folds them again", ()
     const element = host(rt, []);
 
     const ctrl = new rt.wx.FileListCtrl(element);
-    ctrl.files = [{ name: "TreasureMap.pdf", version: 2, versions: [{ name: "TreasureMap.pdf", version: 1 }] }];
+    ctrl.files = [{ name: "Timetable.pdf", version: 2, versions: [{ name: "Timetable.pdf", version: 1 }] }];
 
     const toggle = element.querySelector(".wx-file-version-toggle");
     const folded = element.querySelector("tr.wx-file-version");
@@ -200,10 +200,10 @@ test("an earlier version is read rather than edited", () => {
         return editor;
     };
     ctrl.files = [{
-        name: "TreasureMap.pdf",
+        name: "Timetable.pdf",
         version: 2,
         description: "current",
-        versions: [{ name: "TreasureMap.pdf", version: 1, description: "what it said before" }]
+        versions: [{ name: "Timetable.pdf", version: 1, description: "what it said before" }]
     }];
 
     // a past version is a record of what was, so offering an editor on it would

@@ -41,10 +41,10 @@ const cases = [
     ["webexpress.webui.tag.js", "wx-webui-tag", "red;green"],
     ["webexpress.webui.traffic.light.js", "wx-webui-traffic-light", "red"],
     // a search surface announces its filter, and its value beside it
-    ["webexpress.webui.search.js", "wx-webui-search", "monkey"],
-    ["webexpress.webui.search.content.js", "wx-webui-search-content", "monkey"],
+    ["webexpress.webui.search.js", "wx-webui-search", "zurich"],
+    ["webexpress.webui.search.content.js", "wx-webui-search-content", "zurich"],
     // the read-only view reads its inner element via firstElementChild
-    ["webexpress.webui.smartview.js", "wx-webui-smart-view", "Guybrush", (rt, host) => host.appendChild(rt.createElement("div"))]
+    ["webexpress.webui.smartview.js", "wx-webui-smart-view", "Grace", (rt, host) => host.appendChild(rt.createElement("div"))]
 ];
 
 for (const [file, selector, next, prepare] of cases) {

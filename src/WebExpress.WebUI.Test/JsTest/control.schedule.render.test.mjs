@@ -337,7 +337,7 @@ test("an all-day move is announced as a bare date", () => {
 test("clicking an item reports it with its metadata", () => {
     const runtime = load();
     const { host } = build(runtime, AUGUST, [
-        { id: "m", title: "Meeting", start: "2026-08-12T10:00:00", end: "2026-08-12T11:00:00", meta: '{"room":"Scumm Bar"}' }
+        { id: "m", title: "Meeting", start: "2026-08-12T10:00:00", end: "2026-08-12T11:00:00", meta: '{"room":"Cafeteria"}' }
     ]);
 
     const clicks = [];
@@ -347,7 +347,7 @@ test("clicking an item reports it with its metadata", () => {
 
     assert.equal(clicks.length, 1);
     assert.equal(clicks[0].id, "m");
-    assert.deepEqual(clicks[0].meta, { room: "Scumm Bar" });
+    assert.deepEqual(clicks[0].meta, { room: "Cafeteria" });
 });
 
 test("the model can be replaced programmatically and drops unplaceable items", () => {
