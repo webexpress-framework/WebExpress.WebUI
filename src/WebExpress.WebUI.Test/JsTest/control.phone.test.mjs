@@ -197,3 +197,27 @@ test("the menu lists the offered countries with their calling code and filters b
     ctrl._applyFilter();
     assert.deepEqual(ctrl._options.filter((o) => !o.item.hidden).map((o) => o.country), ["DE"]);
 });
+
+for (const showFlag of [undefined, "true", "false"]) {
+    test(`phone flag visibility respects ${showFlag ?? "the default"} across value changes`, () => {
+        const rt = load();
+        const attributes = { "data-value": "+4930123456" };
+        if (showFlag !== undefined) {
+            attributes["data-show-flag"] = showFlag;
+        }
+        const element = host(rt, attributes);
+        const ctrl = new rt.wx.PhoneCtrl(element);
+
+        assert.equal(ctrl._box.contains(ctrl._flag), showFlag !== "false");
+        assert.equal(ctrl._link.getAttribute("href"), "tel:+4930123456");
+        assert.equal(element.hasAttribute("data-show-flag"), false);
+
+        ctrl.value = null;
+        ctrl.value = "+14165551234";
+
+        assert.equal(ctrl._box.contains(ctrl._flag), showFlag !== "false");
+        assert.equal(ctrl._link.textContent, "+1 4165551234");
+        assert.equal(ctrl._link.getAttribute("href"), "tel:+14165551234");
+        assert.equal(ctrl._box.hidden, false);
+    });
+}

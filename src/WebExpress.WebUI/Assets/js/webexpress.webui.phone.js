@@ -448,6 +448,9 @@ webexpress.webui.PhoneCtrl = class extends webexpress.webui.Ctrl {
             || "en";
         const value = element.getAttribute("data-value") || element.textContent;
 
+        const showFlag = element.getAttribute("data-show-flag") !== "false";
+
+        element.removeAttribute("data-show-flag");
         element.removeAttribute("data-value");
         element.classList.add("wx-phone");
         element.innerHTML = "";
@@ -455,7 +458,9 @@ webexpress.webui.PhoneCtrl = class extends webexpress.webui.Ctrl {
         this._box = document.createElement("span");
         this._flag = document.createElement("i");
         this._link = document.createElement("a");
-        this._box.appendChild(this._flag);
+        if (showFlag) {
+            this._box.appendChild(this._flag);
+        }
         this._box.appendChild(this._link);
         element.appendChild(this._box);
 

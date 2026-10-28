@@ -23,6 +23,9 @@ webexpress.webui.CountryCtrl = class extends webexpress.webui.Ctrl {
         const code = webexpress.webui.CountryCtrl.normalize(element.getAttribute("data-value"));
         const serverName = element.textContent != null ? element.textContent.trim() : "";
 
+        const showFlag = element.getAttribute("data-show-flag") !== "false";
+
+        element.removeAttribute("data-show-flag");
         element.removeAttribute("data-value");
         element.removeAttribute("data-show-name");
         element.classList.add("wx-country");
@@ -36,7 +39,9 @@ webexpress.webui.CountryCtrl = class extends webexpress.webui.Ctrl {
         if (!this._showName) {
             this._name.className = "visually-hidden";
         }
-        this._box.appendChild(this._flag);
+        if (showFlag) {
+            this._box.appendChild(this._flag);
+        }
         this._box.appendChild(this._name);
         element.appendChild(this._box);
 

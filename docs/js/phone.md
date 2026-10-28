@@ -70,3 +70,9 @@ The `phone` template shows the flag and dials the number of a cell read-only, an
 ```html
 <template data-type="phone" data-editable="true" data-country="DE"></template>
 ```
+
+## Optional Display Flag
+
+For the display control, the country flag is enabled by default. Set `data-show-flag="false"` on the host element to omit it while preserving the text and, for phone numbers, the telephone link. The setting also applies after changing the value from script.
+
+On the server, configure `ControlPhone.ShowFlag` with a render-context function such as `ShowFlag = _ => false`. A missing function retains the enabled default.

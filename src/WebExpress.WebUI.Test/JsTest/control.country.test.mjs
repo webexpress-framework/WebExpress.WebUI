@@ -71,3 +71,25 @@ test("with the name hidden, the flag carries it as a tooltip and for screen read
     assert.equal(ctrl._name.className, "visually-hidden");
     assert.equal(ctrl._name.textContent, "Japan");
 });
+
+for (const showFlag of [undefined, "true", "false"]) {
+    test(`country flag visibility respects ${showFlag ?? "the default"} across value changes`, () => {
+        const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.country.js"] });
+        const attributes = { "data-value": "DE", lang: "en" };
+        if (showFlag !== undefined) {
+            attributes["data-show-flag"] = showFlag;
+        }
+        const { host, ctrl } = createCountry(rt, "Germany", attributes);
+
+        assert.equal(ctrl._box.contains(ctrl._flag), showFlag !== "false");
+        assert.equal(ctrl._name.textContent, "Germany");
+        assert.equal(host.hasAttribute("data-show-flag"), false);
+
+        ctrl.value = null;
+        ctrl.value = "JP";
+
+        assert.equal(ctrl._box.contains(ctrl._flag), showFlag !== "false");
+        assert.equal(ctrl._name.textContent, "Japan");
+        assert.equal(ctrl._box.hidden, false);
+    });
+}

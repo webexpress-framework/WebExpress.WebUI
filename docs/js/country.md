@@ -130,3 +130,9 @@ new RestApiTableColumnTemplateCountry(editable: true, culture: request.Culture);
 ## Licence
 
 The flag drawings are taken from [flag-icons](https://github.com/lipis/flag-icons) by Panayiotis Lipiridis, published under the MIT licence. See `THIRD-PARTY-NOTICES.md` in the repository root.
+
+## Optional Display Flag
+
+For the display control, the country flag is enabled by default. Set `data-show-flag="false"` on the host element to omit it while preserving the text and, for phone numbers, the telephone link. The setting also applies after changing the value from script.
+
+On the server, configure `ControlCountry.ShowFlag` with a render-context function such as `ShowFlag = _ => false`. A missing function retains the enabled default.

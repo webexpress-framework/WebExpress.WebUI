@@ -27,6 +27,11 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> ShowName { get; set; } = _ => true;
 
         /// <summary>
+        /// Gets or sets whether the country flag accompanies the display. The flag is shown by default.
+        /// </summary>
+        public Func<IRenderControlContext, bool> ShowFlag { get; set; } = _ => true;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         /// <param name="id">The id of the control.</param>
@@ -53,6 +58,7 @@ namespace WebExpress.WebUI.WebControl
                 Style = GetStyles(renderContext),
                 Role = Role?.Invoke(renderContext)
             }
+                .AddUserAttribute("data-show-flag", (ShowFlag?.Invoke(renderContext) ?? true) ? null : "false")
                 .AddUserAttribute("data-value", code)
                 .AddUserAttribute("data-show-name", showName ? null : "false");
 

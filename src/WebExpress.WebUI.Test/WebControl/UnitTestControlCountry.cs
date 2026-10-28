@@ -12,6 +12,36 @@ namespace WebExpress.WebUI.Test.WebControl
     public class UnitTestControlCountry
     {
         /// <summary>
+        /// Tests that flag visibility reaches the client without changing the default markup.
+        /// </summary>
+        /// <param name="showFlag">The optional visibility setting.</param>
+        [Theory]
+        [InlineData(true)]
+        [InlineData(false)]
+        [InlineData(null)]
+        public void ShowFlag(bool? showFlag)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlCountry();
+            Assert.True(control.ShowFlag(context));
+            control.ShowFlag = showFlag.HasValue ? _ => showFlag.Value : null;
+
+            // act
+            var html = control.Render(context, visualTree);
+            var flagAttribute = showFlag == false ? @" data-show-flag=""false""" : "";
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders
+            (
+                @"<div class=""wx-webui-country""" + flagAttribute + "></div>",
+                html
+            );
+        }
+
+        /// <summary>
         /// Tests the id property of the country control.
         /// </summary>
         [Theory]
