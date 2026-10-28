@@ -108,11 +108,15 @@ dialog.modal > form { display: contents; }
 .carousel-caption { position: absolute; inset-inline: 15%; bottom: 1.5rem; color: #fff; text-align: center; }
 .carousel-control-prev, .carousel-control-next {
     position: absolute; inset-block: 0; width: 12%; display: grid; place-items: center;
-    border: 0; background: transparent; color: #fff; cursor: pointer;
+    border: 0; background: transparent; color: #fff; cursor: pointer; opacity: 0.75; transition: opacity 0.15s ease;
 }
+.carousel-control-prev:hover, .carousel-control-next:hover,
+.carousel-control-prev:focus-visible, .carousel-control-next:focus-visible { opacity: 1; }
 .carousel-control-prev { inset-inline-start: 0; }
 .carousel-control-next { inset-inline-end: 0; }
-.carousel-control-prev-icon, .carousel-control-next-icon { display: grid; place-items: center; width: 2rem; height: 2rem; }
+.carousel-control-prev-icon, .carousel-control-next-icon { display: grid; place-items: center; width: 2rem; height: 2rem; border-radius: 50%; transition: background-color 0.15s ease; }
+/* a soft disc keeps the white arrow readable on a light slide */
+.carousel-control-prev:hover > .carousel-control-prev-icon, .carousel-control-next:hover > .carousel-control-next-icon { background-color: #0003; }
 .carousel-control-prev-icon::before, .carousel-control-next-icon::before {
     content: ""; display: block; width: 1em; height: 1em; background: currentColor;
     mask: url("../icons/angle-down.svg") center / contain no-repeat;
@@ -121,8 +125,9 @@ dialog.modal > form { display: contents; }
 .carousel-control-next-icon::before { transform: rotate(-90deg); }
 .carousel-indicators { position: absolute; inset-inline: 15%; bottom: 0.5rem; z-index: 1; display: flex; justify-content: center; gap: 0.5rem; }
 /* the bar stays thin, but the padding grows the hit area to the 24px a pointer target needs */
-.carousel-indicators button { box-sizing: content-box; width: 1.5rem; height: 0.25rem; padding: 10px 0; border: 0; background: #ffffff80; background-clip: content-box; cursor: pointer; }
+.carousel-indicators button { box-sizing: content-box; width: 1.5rem; height: 0.25rem; padding: 10px 0; border: 0; background: #ffffff80; background-clip: content-box; cursor: pointer; transition: background-color 0.15s ease; }
 /* the color alone: the shorthand would reset the clip and fill the whole hit area */
+.carousel-indicators button:hover { background-color: #ffffffc0; }
 .carousel-indicators button.active { background-color: #fff; }
 
 .offcanvas { max-height: 100dvb; height: 100dvb; width: min(25rem, 100dvi); margin: 0; padding: 0; border: 0; color: var(--wx-body-color); background: var(--wx-body-bg); }
@@ -139,6 +144,7 @@ dialog.modal > form { display: contents; }
 @media (prefers-reduced-motion: reduce) {
     .wx-native-menu[popover], dialog.modal, dialog.modal::backdrop { transition: none; }
     .carousel-inner { scroll-behavior: auto; }
+    .carousel-control-prev, .carousel-control-next, .carousel-control-prev-icon, .carousel-control-next-icon, .carousel-indicators button { transition: none; }
 }
 
 .wx-selection > .form-control > button,
