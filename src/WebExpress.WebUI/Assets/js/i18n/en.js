@@ -574,8 +574,16 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "widget.list.title": "Info List",
     "widget.bignumber.title": "Big Number",
 
+    "domain.filter": "Search domain",
+    "domain.invalid": "The account is not valid.",
+    "domain.refused": "The domain is not permitted.",
+    "domain.select": "Domain",
     "password.toggle": "Show password",
     "password.hide": "Hide password",
+    "phone.country": "Country calling code",
+    "phone.country.refused": "Phone numbers of this country are not accepted.",
+    "phone.filter": "Search country",
+    "phone.invalid": "The phone number is not valid.",
 
     "login.title": "Login",
     "login.username": "Username",

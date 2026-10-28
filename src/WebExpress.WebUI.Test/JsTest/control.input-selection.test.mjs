@@ -67,3 +67,23 @@ test("choosing the last option of a group removes its header from the menu", () 
     ctrl.value = ["leek"];
     assert.deepEqual(shape(ctrl), ["H", "apple", "pear", "-", "salt"]);
 });
+
+test("a preset value leaves the arrow, not the remove button of its chip, opening the menu", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.input.selection.js"] });
+    const host = rt.createElement("div");
+    const item = rt.createElement("div");
+    item.setAttribute("id", "de");
+    item.classList.add("wx-selection-item");
+    item.dataset.label = "Germany";
+    host.appendChild(item);
+    // the stub keeps dataset apart from the attributes, so the value is handed over through it
+    host.dataset.value = "de";
+    rt.document.body.appendChild(host);
+
+    const ctrl = new rt.wx.InputSelectionCtrl(host);
+
+    const menuId = ctrl._dropdownmenu.id;
+    assert.ok(ctrl._selection.querySelector(".wx-chip-remove"), "the preset value is shown as a removable chip");
+    assert.equal(host.querySelector(".wx-selection-trigger").getAttribute("popovertarget"), menuId);
+    assert.equal(ctrl._selection.querySelector(".wx-chip-remove").getAttribute("popovertarget"), null);
+});

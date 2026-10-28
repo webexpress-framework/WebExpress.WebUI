@@ -36,7 +36,10 @@ const cases = [
     // the display controls take their value from the page; it still changes, and is announced
     ["webexpress.webui.color.js", "wx-webui-color", "#ff0000"],
     ["webexpress.webui.content.js", "wx-webui-content", "Deep in the Caribbean"],
+    ["webexpress.webui.country.js", "wx-webui-country", "FR"],
     ["webexpress.webui.date.js", "wx-webui-date", "2026-10-20"],
+    ["webexpress.webui.email.js", "wx-webui-email", "grace@example.com"],
+    ["webexpress.webui.phone.js", "wx-webui-phone", "+4930123456"],
     ["webexpress.webui.rating.js", "wx-webui-rating", 3],
     ["webexpress.webui.tag.js", "wx-webui-tag", "red;green"],
     ["webexpress.webui.traffic.light.js", "wx-webui-traffic-light", "red"],

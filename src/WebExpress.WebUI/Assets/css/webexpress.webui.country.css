@@ -1,0 +1,290 @@
+/**
+ * Styles for the country display (wx-webui-country) and the flags it shares with the
+ * country input. The flags are drawings by flag-icons (MIT, see THIRD-PARTY-NOTICES.md).
+ */
+.wx-country {
+    display: inline-block;
+}
+
+.wx-country > span {
+    font-weight: bold;
+    color: var(--wx-on-surface, var(--wx-body-color));
+    background-color: var(--wx-secondary-bg);
+    padding: 0.2em 0.5em;
+    border-radius: 0.2em;
+    display: inline-flex;
+    gap: 0.5em;
+    align-items: center;
+}
+
+/* a table cell may hold several countries; they wrap rather than widen the column */
+.wx-country-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25em;
+}
+
+/* a flag keeps its 4:3 ratio at the height of the text beside it; the hairline keeps a mostly
+   white flag such as japan's apart from a light background */
+.wx-flag {
+    display: inline-block;
+    flex: none;
+    width: 1.3333em;
+    height: 1em;
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    border-radius: 2px;
+    box-shadow: 0 0 0 1px var(--wx-border-color);
+    vertical-align: -0.125em;
+}
+
+.wx-flag-ad { background-image: url("../flags/ad.svg"); }
+.wx-flag-ae { background-image: url("../flags/ae.svg"); }
+.wx-flag-af { background-image: url("../flags/af.svg"); }
+.wx-flag-ag { background-image: url("../flags/ag.svg"); }
+.wx-flag-ai { background-image: url("../flags/ai.svg"); }
+.wx-flag-al { background-image: url("../flags/al.svg"); }
+.wx-flag-am { background-image: url("../flags/am.svg"); }
+.wx-flag-ao { background-image: url("../flags/ao.svg"); }
+.wx-flag-aq { background-image: url("../flags/aq.svg"); }
+.wx-flag-ar { background-image: url("../flags/ar.svg"); }
+.wx-flag-as { background-image: url("../flags/as.svg"); }
+.wx-flag-at { background-image: url("../flags/at.svg"); }
+.wx-flag-au { background-image: url("../flags/au.svg"); }
+.wx-flag-aw { background-image: url("../flags/aw.svg"); }
+.wx-flag-ax { background-image: url("../flags/ax.svg"); }
+.wx-flag-az { background-image: url("../flags/az.svg"); }
+.wx-flag-ba { background-image: url("../flags/ba.svg"); }
+.wx-flag-bb { background-image: url("../flags/bb.svg"); }
+.wx-flag-bd { background-image: url("../flags/bd.svg"); }
+.wx-flag-be { background-image: url("../flags/be.svg"); }
+.wx-flag-bf { background-image: url("../flags/bf.svg"); }
+.wx-flag-bg { background-image: url("../flags/bg.svg"); }
+.wx-flag-bh { background-image: url("../flags/bh.svg"); }
+.wx-flag-bi { background-image: url("../flags/bi.svg"); }
+.wx-flag-bj { background-image: url("../flags/bj.svg"); }
+.wx-flag-bl { background-image: url("../flags/bl.svg"); }
+.wx-flag-bm { background-image: url("../flags/bm.svg"); }
+.wx-flag-bn { background-image: url("../flags/bn.svg"); }
+.wx-flag-bo { background-image: url("../flags/bo.svg"); }
+.wx-flag-bq { background-image: url("../flags/bq.svg"); }
+.wx-flag-br { background-image: url("../flags/br.svg"); }
+.wx-flag-bs { background-image: url("../flags/bs.svg"); }
+.wx-flag-bt { background-image: url("../flags/bt.svg"); }
+.wx-flag-bv { background-image: url("../flags/bv.svg"); }
+.wx-flag-bw { background-image: url("../flags/bw.svg"); }
+.wx-flag-by { background-image: url("../flags/by.svg"); }
+.wx-flag-bz { background-image: url("../flags/bz.svg"); }
+.wx-flag-ca { background-image: url("../flags/ca.svg"); }
+.wx-flag-cc { background-image: url("../flags/cc.svg"); }
+.wx-flag-cd { background-image: url("../flags/cd.svg"); }
+.wx-flag-cf { background-image: url("../flags/cf.svg"); }
+.wx-flag-cg { background-image: url("../flags/cg.svg"); }
+.wx-flag-ch { background-image: url("../flags/ch.svg"); }
+.wx-flag-ci { background-image: url("../flags/ci.svg"); }
+.wx-flag-ck { background-image: url("../flags/ck.svg"); }
+.wx-flag-cl { background-image: url("../flags/cl.svg"); }
+.wx-flag-cm { background-image: url("../flags/cm.svg"); }
+.wx-flag-cn { background-image: url("../flags/cn.svg"); }
+.wx-flag-co { background-image: url("../flags/co.svg"); }
+.wx-flag-cr { background-image: url("../flags/cr.svg"); }
+.wx-flag-cu { background-image: url("../flags/cu.svg"); }
+.wx-flag-cv { background-image: url("../flags/cv.svg"); }
+.wx-flag-cw { background-image: url("../flags/cw.svg"); }
+.wx-flag-cx { background-image: url("../flags/cx.svg"); }
+.wx-flag-cy { background-image: url("../flags/cy.svg"); }
+.wx-flag-cz { background-image: url("../flags/cz.svg"); }
+.wx-flag-de { background-image: url("../flags/de.svg"); }
+.wx-flag-dj { background-image: url("../flags/dj.svg"); }
+.wx-flag-dk { background-image: url("../flags/dk.svg"); }
+.wx-flag-dm { background-image: url("../flags/dm.svg"); }
+.wx-flag-do { background-image: url("../flags/do.svg"); }
+.wx-flag-dz { background-image: url("../flags/dz.svg"); }
+.wx-flag-ec { background-image: url("../flags/ec.svg"); }
+.wx-flag-ee { background-image: url("../flags/ee.svg"); }
+.wx-flag-eg { background-image: url("../flags/eg.svg"); }
+.wx-flag-eh { background-image: url("../flags/eh.svg"); }
+.wx-flag-er { background-image: url("../flags/er.svg"); }
+.wx-flag-es { background-image: url("../flags/es.svg"); }
+.wx-flag-et { background-image: url("../flags/et.svg"); }
+.wx-flag-fi { background-image: url("../flags/fi.svg"); }
+.wx-flag-fj { background-image: url("../flags/fj.svg"); }
+.wx-flag-fk { background-image: url("../flags/fk.svg"); }
+.wx-flag-fm { background-image: url("../flags/fm.svg"); }
+.wx-flag-fo { background-image: url("../flags/fo.svg"); }
+.wx-flag-fr { background-image: url("../flags/fr.svg"); }
+.wx-flag-ga { background-image: url("../flags/ga.svg"); }
+.wx-flag-gb { background-image: url("../flags/gb.svg"); }
+.wx-flag-gd { background-image: url("../flags/gd.svg"); }
+.wx-flag-ge { background-image: url("../flags/ge.svg"); }
+.wx-flag-gf { background-image: url("../flags/gf.svg"); }
+.wx-flag-gg { background-image: url("../flags/gg.svg"); }
+.wx-flag-gh { background-image: url("../flags/gh.svg"); }
+.wx-flag-gi { background-image: url("../flags/gi.svg"); }
+.wx-flag-gl { background-image: url("../flags/gl.svg"); }
+.wx-flag-gm { background-image: url("../flags/gm.svg"); }
+.wx-flag-gn { background-image: url("../flags/gn.svg"); }
+.wx-flag-gp { background-image: url("../flags/gp.svg"); }
+.wx-flag-gq { background-image: url("../flags/gq.svg"); }
+.wx-flag-gr { background-image: url("../flags/gr.svg"); }
+.wx-flag-gs { background-image: url("../flags/gs.svg"); }
+.wx-flag-gt { background-image: url("../flags/gt.svg"); }
+.wx-flag-gu { background-image: url("../flags/gu.svg"); }
+.wx-flag-gw { background-image: url("../flags/gw.svg"); }
+.wx-flag-gy { background-image: url("../flags/gy.svg"); }
+.wx-flag-hk { background-image: url("../flags/hk.svg"); }
+.wx-flag-hm { background-image: url("../flags/hm.svg"); }
+.wx-flag-hn { background-image: url("../flags/hn.svg"); }
+.wx-flag-hr { background-image: url("../flags/hr.svg"); }
+.wx-flag-ht { background-image: url("../flags/ht.svg"); }
+.wx-flag-hu { background-image: url("../flags/hu.svg"); }
+.wx-flag-id { background-image: url("../flags/id.svg"); }
+.wx-flag-ie { background-image: url("../flags/ie.svg"); }
+.wx-flag-il { background-image: url("../flags/il.svg"); }
+.wx-flag-im { background-image: url("../flags/im.svg"); }
+.wx-flag-in { background-image: url("../flags/in.svg"); }
+.wx-flag-io { background-image: url("../flags/io.svg"); }
+.wx-flag-iq { background-image: url("../flags/iq.svg"); }
+.wx-flag-ir { background-image: url("../flags/ir.svg"); }
+.wx-flag-is { background-image: url("../flags/is.svg"); }
+.wx-flag-it { background-image: url("../flags/it.svg"); }
+.wx-flag-je { background-image: url("../flags/je.svg"); }
+.wx-flag-jm { background-image: url("../flags/jm.svg"); }
+.wx-flag-jo { background-image: url("../flags/jo.svg"); }
+.wx-flag-jp { background-image: url("../flags/jp.svg"); }
+.wx-flag-ke { background-image: url("../flags/ke.svg"); }
+.wx-flag-kg { background-image: url("../flags/kg.svg"); }
+.wx-flag-kh { background-image: url("../flags/kh.svg"); }
+.wx-flag-ki { background-image: url("../flags/ki.svg"); }
+.wx-flag-km { background-image: url("../flags/km.svg"); }
+.wx-flag-kn { background-image: url("../flags/kn.svg"); }
+.wx-flag-kp { background-image: url("../flags/kp.svg"); }
+.wx-flag-kr { background-image: url("../flags/kr.svg"); }
+.wx-flag-kw { background-image: url("../flags/kw.svg"); }
+.wx-flag-ky { background-image: url("../flags/ky.svg"); }
+.wx-flag-kz { background-image: url("../flags/kz.svg"); }
+.wx-flag-la { background-image: url("../flags/la.svg"); }
+.wx-flag-lb { background-image: url("../flags/lb.svg"); }
+.wx-flag-lc { background-image: url("../flags/lc.svg"); }
+.wx-flag-li { background-image: url("../flags/li.svg"); }
+.wx-flag-lk { background-image: url("../flags/lk.svg"); }
+.wx-flag-lr { background-image: url("../flags/lr.svg"); }
+.wx-flag-ls { background-image: url("../flags/ls.svg"); }
+.wx-flag-lt { background-image: url("../flags/lt.svg"); }
+.wx-flag-lu { background-image: url("../flags/lu.svg"); }
+.wx-flag-lv { background-image: url("../flags/lv.svg"); }
+.wx-flag-ly { background-image: url("../flags/ly.svg"); }
+.wx-flag-ma { background-image: url("../flags/ma.svg"); }
+.wx-flag-mc { background-image: url("../flags/mc.svg"); }
+.wx-flag-md { background-image: url("../flags/md.svg"); }
+.wx-flag-me { background-image: url("../flags/me.svg"); }
+.wx-flag-mf { background-image: url("../flags/mf.svg"); }
+.wx-flag-mg { background-image: url("../flags/mg.svg"); }
+.wx-flag-mh { background-image: url("../flags/mh.svg"); }
+.wx-flag-mk { background-image: url("../flags/mk.svg"); }
+.wx-flag-ml { background-image: url("../flags/ml.svg"); }
+.wx-flag-mm { background-image: url("../flags/mm.svg"); }
+.wx-flag-mn { background-image: url("../flags/mn.svg"); }
+.wx-flag-mo { background-image: url("../flags/mo.svg"); }
+.wx-flag-mp { background-image: url("../flags/mp.svg"); }
+.wx-flag-mq { background-image: url("../flags/mq.svg"); }
+.wx-flag-mr { background-image: url("../flags/mr.svg"); }
+.wx-flag-ms { background-image: url("../flags/ms.svg"); }
+.wx-flag-mt { background-image: url("../flags/mt.svg"); }
+.wx-flag-mu { background-image: url("../flags/mu.svg"); }
+.wx-flag-mv { background-image: url("../flags/mv.svg"); }
+.wx-flag-mw { background-image: url("../flags/mw.svg"); }
+.wx-flag-mx { background-image: url("../flags/mx.svg"); }
+.wx-flag-my { background-image: url("../flags/my.svg"); }
+.wx-flag-mz { background-image: url("../flags/mz.svg"); }
+.wx-flag-na { background-image: url("../flags/na.svg"); }
+.wx-flag-nc { background-image: url("../flags/nc.svg"); }
+.wx-flag-ne { background-image: url("../flags/ne.svg"); }
+.wx-flag-nf { background-image: url("../flags/nf.svg"); }
+.wx-flag-ng { background-image: url("../flags/ng.svg"); }
+.wx-flag-ni { background-image: url("../flags/ni.svg"); }
+.wx-flag-nl { background-image: url("../flags/nl.svg"); }
+.wx-flag-no { background-image: url("../flags/no.svg"); }
+.wx-flag-np { background-image: url("../flags/np.svg"); }
+.wx-flag-nr { background-image: url("../flags/nr.svg"); }
+.wx-flag-nu { background-image: url("../flags/nu.svg"); }
+.wx-flag-nz { background-image: url("../flags/nz.svg"); }
+.wx-flag-om { background-image: url("../flags/om.svg"); }
+.wx-flag-pa { background-image: url("../flags/pa.svg"); }
+.wx-flag-pe { background-image: url("../flags/pe.svg"); }
+.wx-flag-pf { background-image: url("../flags/pf.svg"); }
+.wx-flag-pg { background-image: url("../flags/pg.svg"); }
+.wx-flag-ph { background-image: url("../flags/ph.svg"); }
+.wx-flag-pk { background-image: url("../flags/pk.svg"); }
+.wx-flag-pl { background-image: url("../flags/pl.svg"); }
+.wx-flag-pm { background-image: url("../flags/pm.svg"); }
+.wx-flag-pn { background-image: url("../flags/pn.svg"); }
+.wx-flag-pr { background-image: url("../flags/pr.svg"); }
+.wx-flag-ps { background-image: url("../flags/ps.svg"); }
+.wx-flag-pt { background-image: url("../flags/pt.svg"); }
+.wx-flag-pw { background-image: url("../flags/pw.svg"); }
+.wx-flag-py { background-image: url("../flags/py.svg"); }
+.wx-flag-qa { background-image: url("../flags/qa.svg"); }
+.wx-flag-re { background-image: url("../flags/re.svg"); }
+.wx-flag-ro { background-image: url("../flags/ro.svg"); }
+.wx-flag-rs { background-image: url("../flags/rs.svg"); }
+.wx-flag-ru { background-image: url("../flags/ru.svg"); }
+.wx-flag-rw { background-image: url("../flags/rw.svg"); }
+.wx-flag-sa { background-image: url("../flags/sa.svg"); }
+.wx-flag-sb { background-image: url("../flags/sb.svg"); }
+.wx-flag-sc { background-image: url("../flags/sc.svg"); }
+.wx-flag-sd { background-image: url("../flags/sd.svg"); }
+.wx-flag-se { background-image: url("../flags/se.svg"); }
+.wx-flag-sg { background-image: url("../flags/sg.svg"); }
+.wx-flag-sh { background-image: url("../flags/sh.svg"); }
+.wx-flag-si { background-image: url("../flags/si.svg"); }
+.wx-flag-sj { background-image: url("../flags/sj.svg"); }
+.wx-flag-sk { background-image: url("../flags/sk.svg"); }
+.wx-flag-sl { background-image: url("../flags/sl.svg"); }
+.wx-flag-sm { background-image: url("../flags/sm.svg"); }
+.wx-flag-sn { background-image: url("../flags/sn.svg"); }
+.wx-flag-so { background-image: url("../flags/so.svg"); }
+.wx-flag-sr { background-image: url("../flags/sr.svg"); }
+.wx-flag-ss { background-image: url("../flags/ss.svg"); }
+.wx-flag-st { background-image: url("../flags/st.svg"); }
+.wx-flag-sv { background-image: url("../flags/sv.svg"); }
+.wx-flag-sx { background-image: url("../flags/sx.svg"); }
+.wx-flag-sy { background-image: url("../flags/sy.svg"); }
+.wx-flag-sz { background-image: url("../flags/sz.svg"); }
+.wx-flag-tc { background-image: url("../flags/tc.svg"); }
+.wx-flag-td { background-image: url("../flags/td.svg"); }
+.wx-flag-tf { background-image: url("../flags/tf.svg"); }
+.wx-flag-tg { background-image: url("../flags/tg.svg"); }
+.wx-flag-th { background-image: url("../flags/th.svg"); }
+.wx-flag-tj { background-image: url("../flags/tj.svg"); }
+.wx-flag-tk { background-image: url("../flags/tk.svg"); }
+.wx-flag-tl { background-image: url("../flags/tl.svg"); }
+.wx-flag-tm { background-image: url("../flags/tm.svg"); }
+.wx-flag-tn { background-image: url("../flags/tn.svg"); }
+.wx-flag-to { background-image: url("../flags/to.svg"); }
+.wx-flag-tr { background-image: url("../flags/tr.svg"); }
+.wx-flag-tt { background-image: url("../flags/tt.svg"); }
+.wx-flag-tv { background-image: url("../flags/tv.svg"); }
+.wx-flag-tw { background-image: url("../flags/tw.svg"); }
+.wx-flag-tz { background-image: url("../flags/tz.svg"); }
+.wx-flag-ua { background-image: url("../flags/ua.svg"); }
+.wx-flag-ug { background-image: url("../flags/ug.svg"); }
+.wx-flag-um { background-image: url("../flags/um.svg"); }
+.wx-flag-us { background-image: url("../flags/us.svg"); }
+.wx-flag-uy { background-image: url("../flags/uy.svg"); }
+.wx-flag-uz { background-image: url("../flags/uz.svg"); }
+.wx-flag-va { background-image: url("../flags/va.svg"); }
+.wx-flag-vc { background-image: url("../flags/vc.svg"); }
+.wx-flag-ve { background-image: url("../flags/ve.svg"); }
+.wx-flag-vg { background-image: url("../flags/vg.svg"); }
+.wx-flag-vi { background-image: url("../flags/vi.svg"); }
+.wx-flag-vn { background-image: url("../flags/vn.svg"); }
+.wx-flag-vu { background-image: url("../flags/vu.svg"); }
+.wx-flag-wf { background-image: url("../flags/wf.svg"); }
+.wx-flag-ws { background-image: url("../flags/ws.svg"); }
+.wx-flag-ye { background-image: url("../flags/ye.svg"); }
+.wx-flag-yt { background-image: url("../flags/yt.svg"); }
+.wx-flag-za { background-image: url("../flags/za.svg"); }
+.wx-flag-zm { background-image: url("../flags/zm.svg"); }
+.wx-flag-zw { background-image: url("../flags/zw.svg"); }

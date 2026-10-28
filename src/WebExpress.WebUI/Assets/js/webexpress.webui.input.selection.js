@@ -76,7 +76,8 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
         element.appendChild(dropdownMenu);
 
         // attach native popover behavior for the dropdown menu
-        const trigger = dropdown.querySelector("button");
+        // by class: a preset value has already put the chips with their remove buttons in front of it
+        const trigger = dropdown.querySelector(".wx-selection-trigger");
         this._initializeMenu(dropdown, dropdownMenu, trigger);
         dropdownMenu.addEventListener("toggle", (event) => {
             if (event.newState === "open") { this._filterInput.focus({ preventScroll: true }); }

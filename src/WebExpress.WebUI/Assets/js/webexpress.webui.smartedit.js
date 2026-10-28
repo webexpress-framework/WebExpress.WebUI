@@ -666,6 +666,17 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             const light = new webexpress.webui.TrafficLightCtrl(container);
             light.value = value;
             return container;
+        } else if (value && this._isCtrl(ctrl, "InputPhoneCtrl") && webexpress.webui.PhoneCtrl) {
+            // the raw value is the bare e.164 form; the read view shows the country and dials it
+            const container = document.createElement("div");
+            const phone = new webexpress.webui.PhoneCtrl(container);
+            phone.value = value;
+            return container;
+        } else if (value && this._editor.tagName === "INPUT" && this._editor.type === "email" && webexpress.webui.EmailCtrl) {
+            const container = document.createElement("div");
+            const email = new webexpress.webui.EmailCtrl(container);
+            email.value = value;
+            return container;
         } else if (this._isCtrl(ctrl, "EditorCtrl")) {
             // the editor stores its working surface - add-on frames, table column
             // resizers, the guard paragraphs around non-editables - so the raw value

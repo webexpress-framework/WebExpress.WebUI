@@ -28,16 +28,24 @@
   href: color.md
 - name: Content
   href: content.md
+- name: Country
+  href: country.md
 - name: Date
   href: date.md
 - name: Disjunctive Normal Form
   href: dnf.md
+- name: Domain
+  href: domain.md
 - name: Dropdown
   href: dropdown.md
 - name: Editor
   href: editor.md
+- name: E-mail
+  href: email.md
 - name: Estimate
   href: estimate.md
+- name: Formatted Inputs
+  href: formatted-input.md
 - name: Expandable
   href: expandable.md
 - name: FileList
@@ -76,6 +84,8 @@
   href: panel.dismissible.md
 - name: Password
   href: password.md
+- name: Phone
+  href: phone.md
 - name: Quickfilter
   href: quickfilter.md
 - name: Rating

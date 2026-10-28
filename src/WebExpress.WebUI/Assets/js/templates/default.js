@@ -703,6 +703,155 @@ webexpress.webui.TableTemplates.register("color", (val, table, row, cell, name, 
     return container;
 });
 
+// Country renderer - the flag and name of each code read-only, a country picker in edit mode
+webexpress.webui.TableTemplates.register("country", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
+    const editable = opts.editable === true || opts.editable === "true";
+    if ((val === null || val === undefined || val === "") && !editable) {
+        return "";
+    }
+
+    // a server template nests the countries named in the request language; a rest descriptor
+    // embeds them as json, where an entry without a label is named by the browser
+    let options = [];
+    if (opts.children && opts.children.length > 0) {
+        options = opts.children.map((child) => ({
+            id: child.getAttribute("id"),
+            label: child.dataset.label || child.getAttribute("data-label") || ""
+        }));
+    } else if (opts.options) {
+        try {
+            options = JSON.parse(opts.options);
+        } catch (e) {
+            // an unreadable list leaves the picker empty and the read view to the browser's names
+        }
+    }
+    options = options
+        .map((option) => ({ id: webexpress.webui.CountryCtrl.normalize(option.id), label: option.label || "" }))
+        .filter((option) => option.id);
+
+    const container = document.createElement("div");
+
+    if (editable) {
+        const locale = document.documentElement.getAttribute("lang") || navigator.language || "en";
+        const names = new Intl.DisplayNames([locale], { type: "region" });
+        const items = options
+            .map((option) => {
+                const label = option.label || names.of(option.id) || option.id;
+                // the selection writes the content as markup, the name is plain text
+                const content = label.replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" }[c]));
+                return { id: option.id, label: label, content: content, icon: "wx-flag wx-flag-" + option.id.toLowerCase() };
+            })
+            .sort((a, b) => a.label.localeCompare(b.label, locale));
+
+        const editor = document.createElement("div");
+        editor.id = "wx_" + Math.random().toString(36).slice(2, 7);
+        if (name) {
+            editor.setAttribute("name", name);
+        }
+        if (opts.placeholder) {
+            editor.setAttribute("placeholder", opts.placeholder);
+        }
+        const inputCtrl = new webexpress.webui.InputSelectionCtrl(editor);
+        inputCtrl.options = items;
+        inputCtrl.multiSelect = opts.multiselection === true || opts.multiselection === "true";
+        inputCtrl.value = val;
+        editor._wx_controller = inputCtrl;
+        container.appendChild(editor);
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
+        new webexpress.webui.SmartEditCtrl(container);
+    } else {
+        const labels = new Map(options.map((option) => [option.id, option.label]));
+        container.className = "wx-country-list";
+        for (const code of String(val).split(";")) {
+            const normalized = webexpress.webui.CountryCtrl.normalize(code);
+            if (!normalized) {
+                continue;
+            }
+            const host = document.createElement("div");
+            host.setAttribute("data-value", normalized);
+            if (opts.showName === false || opts.showName === "false") {
+                host.setAttribute("data-show-name", "false");
+            }
+            host.textContent = labels.get(normalized) || "";
+            container.appendChild(host);
+            new webexpress.webui.CountryCtrl(host);
+        }
+    }
+
+    return container;
+});
+
+// E-mail renderer - a link that writes to the address read-only, an e-mail field in edit mode
+webexpress.webui.TableTemplates.register("email", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
+    const editable = opts.editable === true || opts.editable === "true";
+    if ((val === null || val === undefined || val === "") && !editable) {
+        return "";
+    }
+
+    const container = document.createElement("div");
+
+    if (editable) {
+        const input = document.createElement("input");
+        input.type = "email";
+        input.className = "form-control";
+        input.id = "wx_" + Math.random().toString(36).slice(2, 7);
+        input.setAttribute("autocomplete", "email");
+        input.value = val !== null && val !== undefined ? String(val) : "";
+        if (opts.placeholder) {
+            input.placeholder = opts.placeholder;
+        }
+        container.appendChild(input);
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
+        new webexpress.webui.SmartEditCtrl(container);
+    } else {
+        container.setAttribute("data-value", String(val));
+        new webexpress.webui.EmailCtrl(container);
+    }
+
+    return container;
+});
+
+// Phone renderer - the flag and a link that dials the number read-only, the phone field in edit mode
+webexpress.webui.TableTemplates.register("phone", (val, table, row, cell, name, opts) => {
+    opts = opts || {};
+
+    const editable = opts.editable === true || opts.editable === "true";
+    if ((val === null || val === undefined || val === "") && !editable) {
+        return "";
+    }
+
+    const container = document.createElement("div");
+
+    if (editable) {
+        const editor = document.createElement("div");
+        editor.id = "wx_" + Math.random().toString(36).slice(2, 7);
+        if (name) {
+            editor.setAttribute("name", name);
+        }
+        if (opts.country) {
+            editor.setAttribute("data-country", opts.country);
+        }
+        if (opts.placeholder) {
+            editor.setAttribute("placeholder", opts.placeholder);
+        }
+        editor.setAttribute("data-value", val !== null && val !== undefined ? String(val) : "");
+        const inputCtrl = new webexpress.webui.InputPhoneCtrl(editor);
+        editor._wx_controller = inputCtrl;
+        container.appendChild(editor);
+        webexpress.webui.TableTemplates.bindInlineEdit(container, row, name);
+        new webexpress.webui.SmartEditCtrl(container);
+    } else {
+        container.setAttribute("data-value", String(val));
+        new webexpress.webui.PhoneCtrl(container);
+    }
+
+    return container;
+});
+
 // Markdown renderer - renders a markdown subset (headings, emphasis, code,
 // links and lists) as rich text. The raw value is escaped before the markup
 // is rewritten, so markdown data cannot inject HTML. Read-only.

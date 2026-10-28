@@ -1,0 +1,89 @@
+/**
+ * Styles shared by the fields that pair a picker with a text field: the phone field (country
+ * and number) and the domain field (domain and user name).
+ */
+/* the field is one box: the picker button on the left, the text filling the rest */
+.wx-prefix-field {
+    display: flex;
+    align-items: stretch;
+    padding: 0;
+    overflow: hidden;
+}
+
+.wx-prefix-field:focus-within {
+    outline: none;
+    box-shadow: 0 0 0 0.15rem var(--wx-primary-bg-subtle, rgba(13, 110, 253, .25));
+    border-color: var(--wx-primary, #0d6efd);
+}
+
+.wx-prefix-button {
+    flex: none;
+    display: inline-flex;
+    gap: 0.4em;
+    align-items: center;
+    padding: 0 0.6em;
+    border: 0;
+    border-inline-end: 1px solid var(--wx-border-color);
+    background-color: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+}
+
+.wx-prefix-button:hover {
+    background-color: var(--wx-tertiary-bg);
+}
+
+.wx-prefix-button:focus-visible {
+    outline: 2px solid var(--wx-primary);
+    outline-offset: -2px;
+}
+
+.wx-prefix-text {
+    flex: 1;
+    min-width: 0;
+    padding: 0.375rem 0.75rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    outline: none;
+}
+
+.wx-prefix-button:disabled,
+.wx-prefix-text:disabled {
+    cursor: default;
+    opacity: 0.65;
+}
+
+.wx-prefix-menu {
+    padding: 0.5rem;
+    min-width: 18rem;
+}
+
+.wx-prefix-menu > ul {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    max-height: 18rem;
+    overflow-y: auto;
+}
+
+/* a short list has no filter above it, and no gap where the filter would be */
+.wx-prefix-menu > ul:first-child {
+    margin-top: 0;
+}
+
+.wx-prefix-menu .dropdown-item {
+    display: flex;
+    gap: 0.5em;
+    align-items: center;
+    width: 100%;
+}
+
+/* a detail such as the calling code lines up at the right edge, where the eye looks for it */
+.wx-prefix-menu .wx-prefix-detail {
+    margin-inline-start: auto;
+    color: var(--wx-secondary-color);
+    font-variant-numeric: tabular-nums;
+}

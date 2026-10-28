@@ -1,0 +1,12 @@
+/**
+ * Styles for the e-mail display (wx-webui-email).
+ */
+.wx-email > span {
+    display: inline-flex;
+    gap: 0.5em;
+    align-items: center;
+}
+
+.wx-email > span > i {
+    color: var(--wx-secondary-color);
+}

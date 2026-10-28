@@ -574,8 +574,16 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "widget.list.title": "Infoliste",
     "widget.bignumber.title": "Große Zahl",
 
+    "domain.filter": "Domäne suchen",
+    "domain.invalid": "Das Konto ist ungültig.",
+    "domain.refused": "Die Domäne ist nicht zugelassen.",
+    "domain.select": "Domäne",
     "password.toggle": "Passwort anzeigen",
     "password.hide": "Passwort verbergen",
+    "phone.country": "Ländervorwahl",
+    "phone.country.refused": "Telefonnummern aus diesem Land werden nicht angenommen.",
+    "phone.filter": "Land suchen",
+    "phone.invalid": "Die Telefonnummer ist ungültig.",
 
     "login.title": "Anmelden",
     "login.username": "Benutzername",

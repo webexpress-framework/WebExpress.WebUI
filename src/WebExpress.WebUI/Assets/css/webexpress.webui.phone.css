@@ -1,0 +1,13 @@
+/**
+ * Styles for the phone display (wx-webui-phone); the phone field shares webexpress.webui.prefix.css.
+ * The flags come from webexpress.webui.country.css.
+ */
+.wx-phone {
+    display: inline-block;
+}
+
+.wx-phone > span {
+    display: inline-flex;
+    gap: 0.5em;
+    align-items: center;
+}
