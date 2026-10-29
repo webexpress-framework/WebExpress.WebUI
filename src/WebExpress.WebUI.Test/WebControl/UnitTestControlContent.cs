@@ -11,7 +11,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the content control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlContent
     {
         /// <summary>

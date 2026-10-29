@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the BindHide binding class.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestBindHide
     {
         /// <summary>

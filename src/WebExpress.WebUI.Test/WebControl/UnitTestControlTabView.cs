@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the tab view control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTabView
     {
         /// <summary>

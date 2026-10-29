@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebPdf
     /// Tests converting HTML into the PDF model (PdfRendererHtml), the way a stored value of
     /// the editor is converted once its scaffolding is gone.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestPdfRendererHtml
     {
         /// <summary>

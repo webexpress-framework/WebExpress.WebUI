@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the button control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlButton
     {
         /// <summary>

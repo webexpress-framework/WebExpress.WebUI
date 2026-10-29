@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form item input combobox control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputCombo
     {
         /// <summary>

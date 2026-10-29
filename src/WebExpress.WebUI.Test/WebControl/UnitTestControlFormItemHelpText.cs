@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form item help text control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemHelpText
     {
         /// <summary>

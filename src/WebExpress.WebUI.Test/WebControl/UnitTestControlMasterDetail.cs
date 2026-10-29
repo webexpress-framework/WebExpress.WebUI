@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the master-detail control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlMasterDetail
     {
         /// <summary>

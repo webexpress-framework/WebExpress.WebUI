@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form rating control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputRating
     {
         /// <summary>

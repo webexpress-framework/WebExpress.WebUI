@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the timeline control and its entries.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTimeline
     {
         /// <summary>

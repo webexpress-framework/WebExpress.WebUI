@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the table control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTableReorderable
     {
         /// <summary>

@@ -6,7 +6,6 @@ namespace WebExpress.WebUI.Test.WebMarkdown
     /// <summary>
     /// Unit tests for inline elements in Markdown.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestInlineElement
     {
         /// <summary>

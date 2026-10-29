@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the toolbar control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlToolbar
     {
         /// <summary>

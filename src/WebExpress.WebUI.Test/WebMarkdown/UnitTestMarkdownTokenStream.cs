@@ -6,7 +6,6 @@ namespace WebExpress.WebUI.Test.WebMarkdown
     /// Contains unit tests for the MarkdownTokenStream class to verify correct stream behavior for peeking, consuming, skipping,
     /// and resetting token positions, as well as end-of-stream detection. Uses xUnit for test structure and assertions.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestMarkdownTokenStream
     {
         /// <summary>

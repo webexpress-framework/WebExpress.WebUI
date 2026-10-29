@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form traffic light input control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputTrafficLight
     {
         /// <summary>

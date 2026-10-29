@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the search control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSearch
     {
         /// <summary>

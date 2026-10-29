@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the tile control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTile
     {
         /// <summary>

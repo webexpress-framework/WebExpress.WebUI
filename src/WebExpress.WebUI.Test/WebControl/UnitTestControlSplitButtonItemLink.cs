@@ -11,7 +11,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the split button item link control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSplitButtonItemLink
     {
         /// <summary>

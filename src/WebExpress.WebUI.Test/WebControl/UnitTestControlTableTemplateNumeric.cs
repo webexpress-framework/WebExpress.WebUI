@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the numeric template control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTableTemplateNumeric
     {
         /// <summary>

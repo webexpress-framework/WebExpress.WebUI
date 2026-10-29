@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form item group mix control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemGroupMix
     {
         /// <summary>

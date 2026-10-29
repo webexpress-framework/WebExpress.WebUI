@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the skeleton control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSkeleton
     {
         /// <summary>

@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the <see cref="BindPaging"/> binding class, which declares on a data control that
     /// it follows a pager.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestBindPaging
     {
         /// <summary>

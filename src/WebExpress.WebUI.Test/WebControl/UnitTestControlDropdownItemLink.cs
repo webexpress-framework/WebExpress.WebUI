@@ -12,7 +12,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the dropdown item link control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlDropdownItemLink
     {
         /// <summary>

@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the <see cref="BindUpload"/> binding class, which declares on a data control that
     /// it shows what an upload control uploaded.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestBindUpload
     {
         /// <summary>

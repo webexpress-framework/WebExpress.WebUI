@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the alert control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlAlert
     {
         /// <summary>

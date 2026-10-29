@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the country control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlCountry
     {
         /// <summary>

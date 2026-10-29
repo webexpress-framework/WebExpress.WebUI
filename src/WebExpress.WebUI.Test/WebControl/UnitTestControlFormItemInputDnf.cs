@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form disjunctive normal form control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputDnf
     {
         /// <summary>

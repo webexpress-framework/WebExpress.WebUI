@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the panel split control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSplit
     {
         /// <summary>

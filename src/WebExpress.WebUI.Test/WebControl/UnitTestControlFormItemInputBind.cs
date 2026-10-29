@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Verifies that binding attributes are applied to the enclosing
     /// fieldset.wx-form-group element rendered by the group layout controls.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputBind
     {
         /// <summary>

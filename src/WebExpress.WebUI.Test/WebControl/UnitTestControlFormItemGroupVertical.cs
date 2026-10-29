@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form item group vertical control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemGroupVertical
     {
         /// <summary>

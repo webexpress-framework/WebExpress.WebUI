@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the sidebar item icon control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSidebarItemIcon
     {
         /// <summary>

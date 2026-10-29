@@ -10,7 +10,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form cascading control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputCascading
     {
         /// <summary>

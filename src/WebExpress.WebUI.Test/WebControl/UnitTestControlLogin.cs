@@ -13,7 +13,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the login control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlLogin
     {
         /// <summary>

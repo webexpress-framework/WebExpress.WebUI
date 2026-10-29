@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the smart edit control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSmartEdit
     {
         /// <summary>

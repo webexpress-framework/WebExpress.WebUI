@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the quickfilter control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlQuickfilter
     {
         /// <summary>

@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the domain input: the picker of the offered domains beside the user name, and the
     /// plain text field it falls back to without domains.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputDomain
     {
         /// <summary>

@@ -5,7 +5,6 @@ namespace WebExpress.WebUI.Test.WebPdf
     /// <summary>
     /// Tests reading the css colors a stored editor value carries.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestPdfColor
     {
         /// <summary>

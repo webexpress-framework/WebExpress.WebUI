@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the <see cref="BindFilter"/> binding class, which marks a data control as driven by
     /// the quickfilter registry.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestBindFilter
     {
         /// <summary>

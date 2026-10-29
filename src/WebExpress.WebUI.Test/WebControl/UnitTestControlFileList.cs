@@ -10,7 +10,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the file list control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFileList
     {
         /// <summary>

@@ -11,7 +11,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the toolbar item button control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlToolbarItemButton
     {
         /// <summary>

@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the overflow panel control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlOverflow
     {
         /// <summary>

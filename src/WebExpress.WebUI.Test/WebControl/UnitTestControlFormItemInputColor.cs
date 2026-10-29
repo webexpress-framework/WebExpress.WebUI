@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form item input color control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputColor
     {
         /// <summary>

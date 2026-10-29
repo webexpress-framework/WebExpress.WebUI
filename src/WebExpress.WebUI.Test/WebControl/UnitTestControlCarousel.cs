@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the carousel control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlCarousel
     {
         /// <summary>

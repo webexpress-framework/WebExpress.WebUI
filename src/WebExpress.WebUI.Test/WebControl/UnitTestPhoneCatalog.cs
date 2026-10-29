@@ -5,7 +5,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the numbering plans of the phone catalog.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestPhoneCatalog
     {
         /// <summary>

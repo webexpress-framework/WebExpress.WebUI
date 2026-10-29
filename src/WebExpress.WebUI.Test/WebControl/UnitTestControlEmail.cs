@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the e-mail display, its form input and its table template.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlEmail
     {
         /// <summary>

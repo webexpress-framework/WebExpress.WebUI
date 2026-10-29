@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the read-only heat map control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlHeatMap
     {
         /// <summary>

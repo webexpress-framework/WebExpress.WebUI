@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the graph edge item.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlGraphItemEdge
     {
         /// <summary>

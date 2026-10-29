@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the card counter control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlCardCounter
     {
         /// <summary>

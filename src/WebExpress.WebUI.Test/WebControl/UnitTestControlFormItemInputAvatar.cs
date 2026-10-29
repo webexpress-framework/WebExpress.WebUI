@@ -13,7 +13,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form avatar control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputAvatar
     {
         /// <summary>

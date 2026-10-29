@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the image control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlImage
     {
         /// <summary>

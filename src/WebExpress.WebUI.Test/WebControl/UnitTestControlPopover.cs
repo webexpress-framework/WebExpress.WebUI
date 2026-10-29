@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the popover control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlPopover
     {
         /// <summary>

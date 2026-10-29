@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the phone display, its form input and its table template.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlPhone
     {
         /// <summary>

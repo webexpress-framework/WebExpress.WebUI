@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form item input range control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputRange
     {
         /// <summary>

@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the breadcrumb control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlBreadcrumb
     {
         /// <summary>

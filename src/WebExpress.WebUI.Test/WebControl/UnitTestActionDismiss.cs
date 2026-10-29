@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the <see cref="ActionDismiss"/> action, which leaves the fullscreen mode of a
     /// target element.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestActionDismiss
     {
         /// <summary>

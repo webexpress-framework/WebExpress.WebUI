@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form label control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemLabel
     {
         /// <summary>

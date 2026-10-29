@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form file input control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputFile
     {
         /// <summary>

@@ -6,7 +6,6 @@ namespace WebExpress.WebUI.Test.WebPdf
     /// Tests the metrics and the encoding of the standard fonts, which the line breaking
     /// depends on.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestPdfFont
     {
         /// <summary>

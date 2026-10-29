@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form tag control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputTag
     {
         /// <summary>

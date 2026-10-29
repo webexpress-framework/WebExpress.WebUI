@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the dashboard widget control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlDashboardWidgetContent
     {
         /// <summary>

@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebPdf
     /// Tests writing a <see cref="PdfDocument"/> as a file: the structure a reader relies on,
     /// the metadata, the encoding of text and the breaking of lines and pages.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestPdfDocument
     {
         /// <summary>

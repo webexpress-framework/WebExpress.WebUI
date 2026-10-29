@@ -12,7 +12,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// / card-footer structure is built at runtime by
     /// <c>webexpress.webui.PanelCardCtrl</c>.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlCard
     {
         /// <summary>

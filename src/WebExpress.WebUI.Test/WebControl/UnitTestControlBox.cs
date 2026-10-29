@@ -12,7 +12,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <c>webexpress.webui.BoxCtrl</c> (covered by <c>JsTest/control.box.test.mjs</c>). The
     /// composition from fragments is covered by the fragment manager tests.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlBox
     {
         /// <summary>

@@ -12,7 +12,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Verifies the server boundary for application-owned consent configuration.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlCookieBanner
     {
         /// <summary>

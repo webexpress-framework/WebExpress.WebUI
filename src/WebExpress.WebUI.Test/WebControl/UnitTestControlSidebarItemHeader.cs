@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the sidebar item label control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSidebarItemHeader
     {
         /// <summary>

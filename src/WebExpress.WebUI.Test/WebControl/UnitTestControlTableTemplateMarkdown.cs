@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the markdown template control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTableTemplateMarkdown
     {
         /// <summary>

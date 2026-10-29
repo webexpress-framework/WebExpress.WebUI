@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the modal control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlModalForm
     {
         /// <summary>

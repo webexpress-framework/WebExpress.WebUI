@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form datepicker control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputDate
     {
         /// <summary>

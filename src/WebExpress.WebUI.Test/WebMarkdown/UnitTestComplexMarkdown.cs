@@ -6,7 +6,6 @@ namespace WebExpress.WebUI.Test.WebMarkdown
     /// <summary>
     /// Tests a complex Markdown document loaded from an embedded resource.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestComplexMarkdown
     {
         /// <summary>

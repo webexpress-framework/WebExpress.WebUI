@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the grid control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlGrid
     {
         /// <summary>

@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebNotification
     /// <summary>
     /// Test the notification manager.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestNotificationManager
     {
         /// <summary>

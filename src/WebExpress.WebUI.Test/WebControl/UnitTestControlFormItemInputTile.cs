@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form tile picker input control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputTile
     {
         /// <summary>

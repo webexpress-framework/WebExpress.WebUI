@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form reset button control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemButtonReset
     {
         /// <summary>

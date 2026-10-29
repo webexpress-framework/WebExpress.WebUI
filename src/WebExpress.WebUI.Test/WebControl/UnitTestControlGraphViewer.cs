@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the graph view control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlGraphViewer
     {
         /// <summary>

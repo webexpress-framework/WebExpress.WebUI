@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the date control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlDate
     {
         /// <summary>

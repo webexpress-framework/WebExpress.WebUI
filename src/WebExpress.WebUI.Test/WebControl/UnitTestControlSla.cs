@@ -12,7 +12,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// status, the meter, the countdown and the cycle counter - is asserted on
     /// as a value rather than as whatever the clock happened to say.
     /// </remarks>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSla
     {
         /// <summary>

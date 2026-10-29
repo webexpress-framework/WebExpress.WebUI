@@ -5,7 +5,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the IP address rules.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestIpAddress
     {
         /// <summary>

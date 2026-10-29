@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the upload control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlUpload
     {
         /// <summary>

@@ -70,11 +70,18 @@ namespace WebExpress.WebUI.Test.Fixture
 
             var componentHub = (ComponentHub)ctorComponentHub.Invoke([CreateHttpServerContextMock()]);
 
-            // set static field in the webex class
+            // bound to the calling test's flow so tests running side by side keep their own hub;
             var type = typeof(WebEx);
-            var field = type.GetField("_componentHub", BindingFlags.Static | BindingFlags.NonPublic);
+            var scoped = type.GetField("_scopedComponentHub", BindingFlags.Static | BindingFlags.NonPublic);
 
-            field.SetValue(null, componentHub);
+            if (scoped?.GetValue(null) is AsyncLocal<IComponentHub> scopedComponentHub)
+            {
+                scopedComponentHub.Value = componentHub;
+            }
+            else
+            {
+                type.GetField("_componentHub", BindingFlags.Static | BindingFlags.NonPublic).SetValue(null, componentHub);
+            }
 
             return componentHub;
         }

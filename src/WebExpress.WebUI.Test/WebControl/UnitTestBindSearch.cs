@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the <see cref="BindSearch"/> binding class, which declares on a data control that
     /// it follows a search box.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestBindSearch
     {
         /// <summary>

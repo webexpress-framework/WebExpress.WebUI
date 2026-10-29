@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebMarkdown
     /// <summary>
     /// Unit tests for block-level elements in Markdown.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestBlockElement
     {
         /// <summary>

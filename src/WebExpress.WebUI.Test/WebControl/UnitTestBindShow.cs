@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the <see cref="BindShow"/> binding class.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestBindShow
     {
         /// <summary>

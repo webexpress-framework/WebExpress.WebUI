@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the avatar group control and its items.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlAvatarGroup
     {
         /// <summary>

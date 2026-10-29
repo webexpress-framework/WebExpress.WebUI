@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebFragment
     /// <summary>
     /// Test the fragment manager.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestFragmentManager
     {
         /// <summary>

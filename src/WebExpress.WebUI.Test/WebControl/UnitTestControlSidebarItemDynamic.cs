@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the sidebar item panel control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSidebarItemDynamic
     {
         /// <summary>

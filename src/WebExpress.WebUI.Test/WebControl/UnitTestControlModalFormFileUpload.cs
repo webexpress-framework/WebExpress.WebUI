@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the modal file upload form: the upload event reached through its interface, and
     /// the validation that refuses a submission without a file.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlModalFormFileUpload
     {
         /// <summary>

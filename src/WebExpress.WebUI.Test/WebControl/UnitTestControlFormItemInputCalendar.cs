@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form calendar control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputCalendar
     {
         /// <summary>

@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the accordion control and its sections.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlAccordion
     {
         /// <summary>

@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the description list control and its items.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlDescriptionList
     {
         /// <summary>

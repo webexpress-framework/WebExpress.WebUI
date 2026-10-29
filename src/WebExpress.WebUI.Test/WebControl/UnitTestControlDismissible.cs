@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the <see cref="ControlDismissible"/> control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlDismissible
     {
         /// <summary>

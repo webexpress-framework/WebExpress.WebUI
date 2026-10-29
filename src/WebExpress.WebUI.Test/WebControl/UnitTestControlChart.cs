@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the chart control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlChart
     {
         /// <summary>

@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the frame control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFrame
     {
         /// <summary>

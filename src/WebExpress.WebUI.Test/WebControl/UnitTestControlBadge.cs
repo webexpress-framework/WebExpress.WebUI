@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the badge control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlBadge
     {
         /// <summary>

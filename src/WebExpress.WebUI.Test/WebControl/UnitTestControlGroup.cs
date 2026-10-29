@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the group control - items laid out as fields of one surface.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlGroup
     {
         /// <summary>

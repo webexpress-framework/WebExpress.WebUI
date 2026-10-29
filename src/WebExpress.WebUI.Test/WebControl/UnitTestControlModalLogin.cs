@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// login control; the dialog itself is assembled by the JS controller
     /// <c>webexpress.webui.ModalLoginCtrl</c>.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlModalLogin
     {
         /// <summary>

@@ -6,7 +6,6 @@ namespace WebExpress.WebUI.Test.WebMarkdown
     /// <summary>
     /// Unit tests for converting Markdown AST back to Markdown text (MarkdownRendererMarkdown).
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestRendererMarkdown
     {
         /// <summary>

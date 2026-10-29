@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the video control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlVideo
     {
         private const string Fallback = @"<div class=""wx-webui-video-fallback""><p>The video cannot be played here.</p></div>";

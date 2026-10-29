@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebNotification
     /// <summary>
     /// Tests that notifications reach the user whichever instance of a cluster renders the page.
     /// </summary>
-    [Collection("NonParallelTests")]
     public sealed class UnitTestNotificationManagerCluster : IDisposable
     {
         private readonly string _directory = Path.Combine(Path.GetTempPath(), "wx-cluster-" + Guid.NewGuid().ToString("N"));

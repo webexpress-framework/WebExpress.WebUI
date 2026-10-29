@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Protects the server-to-browser wiring of independently rendered native menus.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestNativeFrontend
     {
         /// <summary>

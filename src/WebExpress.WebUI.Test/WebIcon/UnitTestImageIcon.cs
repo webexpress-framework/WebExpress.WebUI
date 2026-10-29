@@ -10,7 +10,6 @@ namespace WebExpress.WebUI.Test.WebIcon
     /// <summary>
     /// Tests the web image icon.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestImageIcon
     {
         /// <summary>

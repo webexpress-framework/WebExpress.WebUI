@@ -10,7 +10,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the attribute control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlAttribute
     {
         /// <summary>

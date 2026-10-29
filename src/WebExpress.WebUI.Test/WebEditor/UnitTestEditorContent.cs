@@ -18,7 +18,6 @@ namespace WebExpress.WebUI.Test.WebEditor
     /// a rule added on one side and forgotten on the other fails on the other side.
     /// </para>
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestEditorContent
     {
         /// <summary>

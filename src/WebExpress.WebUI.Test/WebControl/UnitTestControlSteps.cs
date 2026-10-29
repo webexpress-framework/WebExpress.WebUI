@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the steps control and its items.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSteps
     {
         /// <summary>

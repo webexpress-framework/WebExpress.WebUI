@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form submit button control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemButtonSubmit
     {
         /// <summary>

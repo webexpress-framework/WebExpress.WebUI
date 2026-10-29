@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the pdf viewer control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlPdfViewer
     {
         private const string Fallback = @"<div class=""wx-webui-pdf-viewer-fallback""><p>The PDF document cannot be displayed here.</p></div>";

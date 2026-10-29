@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the view footer control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlViewFooter
     {
         /// <summary>

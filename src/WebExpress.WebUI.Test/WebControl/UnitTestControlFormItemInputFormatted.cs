@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the inputs of fixed notation that have no display of their own: the fully qualified
     /// domain name and the IP address.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputFormatted
     {
         /// <summary>

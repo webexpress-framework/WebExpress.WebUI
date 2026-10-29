@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the schedule control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSchedule
     {
         /// <summary>

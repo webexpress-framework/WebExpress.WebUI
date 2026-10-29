@@ -5,7 +5,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the domain account rules.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestDomainLogon
     {
         /// <summary>

@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the panel flexbox control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFlex
     {
         /// <summary>

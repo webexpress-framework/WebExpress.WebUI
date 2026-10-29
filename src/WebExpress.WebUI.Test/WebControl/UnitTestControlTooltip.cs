@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the tooltip control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTooltip
     {
         /// <summary>

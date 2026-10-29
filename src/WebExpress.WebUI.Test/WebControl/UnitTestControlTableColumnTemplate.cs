@@ -10,7 +10,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the tabele column template control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTableColumnTemplate
     {
         /// <summary>

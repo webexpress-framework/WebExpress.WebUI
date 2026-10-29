@@ -5,7 +5,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the e-mail address rules.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestEmailAddress
     {
         /// <summary>

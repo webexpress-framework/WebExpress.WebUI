@@ -11,7 +11,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the sidebar item link control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSidebarItemLink
     {
         /// <summary>

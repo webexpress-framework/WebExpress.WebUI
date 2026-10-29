@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the stat (metric) control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlStat
     {
         /// <summary>

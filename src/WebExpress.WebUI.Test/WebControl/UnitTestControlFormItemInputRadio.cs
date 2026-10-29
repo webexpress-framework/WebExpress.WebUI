@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form radio control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputRadio
     {
         /// <summary>

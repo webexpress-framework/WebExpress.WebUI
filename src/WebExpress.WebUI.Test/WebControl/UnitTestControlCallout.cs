@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the panel callout control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlCallout
     {
         /// <summary>

@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the toolbar item combo control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlToolbarItemCombo
     {
         /// <summary>

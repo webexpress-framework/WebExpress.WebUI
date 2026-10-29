@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the kanban control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlKanban
     {
         /// <summary>

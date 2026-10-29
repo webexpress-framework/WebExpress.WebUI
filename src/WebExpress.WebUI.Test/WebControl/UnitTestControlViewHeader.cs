@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the view header control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlViewHeader
     {
         /// <summary>

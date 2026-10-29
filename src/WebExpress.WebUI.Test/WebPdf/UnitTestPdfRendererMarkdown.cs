@@ -10,7 +10,6 @@ namespace WebExpress.WebUI.Test.WebPdf
     /// Tests converting markdown into the PDF model (PdfRendererMarkdown), the counterpart of
     /// the HTML renderer of the same AST.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestPdfRendererMarkdown
     {
         /// <summary>

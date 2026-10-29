@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the table cell with formatted content.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTableCellMarkup
     {
         /// <summary>

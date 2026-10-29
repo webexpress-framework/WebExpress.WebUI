@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form item prepend control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemPrepend
     {
         /// <summary>

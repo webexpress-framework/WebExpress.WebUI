@@ -11,7 +11,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the spreadsheet control and its form input.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSpreadsheet
     {
         /// <summary>

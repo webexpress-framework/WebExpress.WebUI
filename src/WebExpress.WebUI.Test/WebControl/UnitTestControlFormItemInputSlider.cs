@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the dual-handle slider form input control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputSlider
     {
         /// <summary>

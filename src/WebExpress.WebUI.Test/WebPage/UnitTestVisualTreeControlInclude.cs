@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebPage
     /// route the asset manager actually mounts the files on. A link that does not is a 404
     /// the browser accepts as an empty stylesheet, so nothing about the page reports it.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestVisualTreeControlInclude
     {
         /// <summary>

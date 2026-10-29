@@ -14,7 +14,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// so the data-required mark on its host is the only way the client side of the control
     /// contract learns of the requirement.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputRequired
     {
         /// <summary>

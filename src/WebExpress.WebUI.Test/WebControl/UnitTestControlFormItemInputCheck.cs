@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form item input checkbox control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputCheck
     {
         /// <summary>

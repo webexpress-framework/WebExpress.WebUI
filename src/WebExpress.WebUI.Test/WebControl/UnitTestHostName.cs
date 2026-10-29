@@ -5,7 +5,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the rules of fully qualified domain names.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestHostName
     {
         /// <summary>

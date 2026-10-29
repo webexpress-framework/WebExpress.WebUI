@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the media control panel.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlMedia
     {
         /// <summary>

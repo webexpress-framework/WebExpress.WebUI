@@ -11,7 +11,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// runtime by <c>webexpress.webui.SectionCtrl</c> (covered by
     /// <c>JsTest/control.section.test.mjs</c>).
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSection
     {
         /// <summary>

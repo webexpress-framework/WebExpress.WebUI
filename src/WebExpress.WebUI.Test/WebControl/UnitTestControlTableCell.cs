@@ -11,7 +11,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the table row control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTableCell
     {
         /// <summary>

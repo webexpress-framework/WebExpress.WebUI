@@ -6,7 +6,6 @@ namespace WebExpress.WebUI.Test.WebMarkdown
     /// <summary>
     /// Unit tests for inline and block plugin parsing in Markdown.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestPlugin
     {
         /// <summary>

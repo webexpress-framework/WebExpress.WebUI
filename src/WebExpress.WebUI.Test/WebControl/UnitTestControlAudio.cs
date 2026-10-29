@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// Tests the audio control. The rendering it shares with the video control is covered
     /// there; these tests pin what an audio player does differently.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlAudio
     {
         private const string Fallback = @"<div class=""wx-webui-audio-fallback""><p>The audio cannot be played here.</p></div>";

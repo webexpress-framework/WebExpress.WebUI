@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebMarkdown
     /// Contains unit tests for the MarkdownTokenizer class. 
     /// Tests cover detection and tokenization of various Markdown constructs such as code markers, special characters, text runs, and line endings.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestMarkdownTokenizer
     {
         /// <summary>
