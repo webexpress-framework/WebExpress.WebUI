@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using WebExpress.WebCore.WebScope;
 
 namespace WebExpress.WebUI.WebNotification
 {
@@ -49,7 +47,7 @@ namespace WebExpress.WebUI.WebNotification
         string Link { get; set; }
 
         /// <summary>
-        /// Returns the creation time.
+        /// Returns the creation time in utc.
         /// </summary>
         [JsonPropertyName("created")]
         DateTime Created { get; }
@@ -67,9 +65,16 @@ namespace WebExpress.WebUI.WebNotification
         TypeNotification Type { get; set; }
 
         /// <summary>
-        /// Gets or sets the scopes associated with the notification.
+        /// Determines whether the notification has outlived its durability. The creation time
+        /// is compared in utc, since a notification created on one instance of a cluster may
+        /// be read on another one in a different time zone, and a local clock jumps at the
+        /// daylight saving change.
         /// </summary>
-        [JsonIgnore]
-        IEnumerable<IScope> Scops { get; }
+        /// <param name="utcNow">The current time in utc.</param>
+        /// <returns>True if the notification has a durability and it has passed.</returns>
+        bool IsExpired(DateTime utcNow)
+        {
+            return Durability >= 0 && Created.ToUniversalTime().AddMilliseconds(Durability) < utcNow;
+        }
     }
 }

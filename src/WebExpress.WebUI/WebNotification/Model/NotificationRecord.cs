@@ -110,8 +110,7 @@ namespace WebExpress.WebUI.WebNotification.Model
                 Icon = Icon,
                 Link = Link,
                 Progress = Progress,
-                Type = Type,
-                Scops = []
+                Type = Type
             };
         }
     }

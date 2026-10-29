@@ -86,5 +86,57 @@ namespace WebExpress.WebUI.Test.WebNotification
             Assert.Equal(TypeNotification.Success, seen.Type);
             Assert.Equal(5000, seen.Durability);
         }
+
+        /// <summary>
+        /// Tests that a notification of the session dismissed on one instance stays dismissed
+        /// on the others. The dismissal arrives over the message queue socket, which no end of
+        /// a request writes back, so the removal has to reach the store by itself.
+        /// </summary>
+        [Fact]
+        public void DismissedSessionNotificationStaysDismissed()
+        {
+            var a = CreateInstance();
+            var applicationA = a.ApplicationManager.GetApplications(typeof(TestApplication)).First();
+            var requestA = (Request)UnitTestControlFixture.CreateRequestMock("GET / HTTP/1.1\r\nCookie: session=\r\n\r\n");
+            var created = a.GetComponentManager<NotificationManager>().AddNotification(applicationA, requestA, "saved");
+            a.SessionManager.Commit(requestA.Session);
+
+            var b = CreateInstance();
+            var requestB = (Request)UnitTestControlFixture.CreateRequestMock($"GET / HTTP/1.1\r\nCookie: session={requestA.Session.Id}\r\n\r\n");
+            b.GetComponentManager<NotificationManager>().RemoveNotifications(created.Id, requestB.Session);
+
+            var c = CreateInstance();
+            var applicationC = c.ApplicationManager.GetApplications(typeof(TestApplication)).First();
+            var requestC = (Request)UnitTestControlFixture.CreateRequestMock($"GET / HTTP/1.1\r\nCookie: session={requestA.Session.Id}\r\n\r\n");
+
+            Assert.Empty(c.GetComponentManager<NotificationManager>().GetNotifications(applicationC, requestC));
+        }
+
+        /// <summary>
+        /// Tests that a global notification dismissed on two instances is reported destroyed
+        /// only by the one that removed it.
+        /// </summary>
+        [Fact]
+        public void GlobalDismissalIsReportedOnce()
+        {
+            var a = CreateInstance();
+            var applicationA = a.ApplicationManager.GetApplications(typeof(TestApplication)).First();
+            var managerA = a.GetComponentManager<NotificationManager>();
+            var created = managerA.AddNotification(applicationA, "maintenance");
+            var destroyedA = new List<INotification>();
+            managerA.DestroyNotification += (_, x) => destroyedA.Add(x);
+
+            var b = CreateInstance();
+            var managerB = b.GetComponentManager<NotificationManager>();
+            var destroyedB = new List<INotification>();
+            managerB.DestroyNotification += (_, x) => destroyedB.Add(x);
+
+            managerB.RemoveNotifications(created.Id);
+            managerA.RemoveNotifications(created.Id);
+
+            Assert.Equal(created.Id, Assert.Single(destroyedB).Id);
+            Assert.Equal("maintenance", destroyedB[0].Message);
+            Assert.Empty(destroyedA);
+        }
     }
 }

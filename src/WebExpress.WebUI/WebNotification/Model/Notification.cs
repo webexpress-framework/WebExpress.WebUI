@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
-using WebExpress.WebCore.WebScope;
 
 namespace WebExpress.WebUI.WebNotification.Model
 {
@@ -46,10 +44,10 @@ namespace WebExpress.WebUI.WebNotification.Model
         public string Link { get; set; }
 
         /// <summary>
-        /// Returns the creation time.
+        /// Returns the creation time in utc.
         /// </summary>
         [JsonPropertyName("created")]
-        public DateTime Created { get; internal set; } = DateTime.Now;
+        public DateTime Created { get; internal set; } = DateTime.UtcNow;
 
         /// <summary>
         /// Progress as a percentage: 0–100%. Values less than 0 indicate no progress.
@@ -62,12 +60,6 @@ namespace WebExpress.WebUI.WebNotification.Model
         /// </summary>
         [JsonPropertyName("type"), JsonConverter(typeof(TypeNotificationConverter))]
         public TypeNotification Type { get; set; }
-
-        /// <summary>
-        /// Gets or sets the scopes associated with the notification.
-        /// </summary>
-        [JsonIgnore]
-        public IEnumerable<IScope> Scops { get; set; }
 
         /// <summary>
         /// Constructor
