@@ -95,6 +95,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "table.columns.toggle": "Show/Hide columns",
     "table.handle.title": "Drag the column to change its order",
     "table.search.placeholder": "Search...",
+    "table.search.empty": "No matches",
     "table.filter.columns.label": "Filter table columns",
 
     "avatar.zoom.label": "Zoom",

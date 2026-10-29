@@ -59,6 +59,12 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> Selectable { get; set; } = _ => false;
 
         /// <summary>
+        /// Gets or sets the binding of the table to other controls, for example a
+        /// <see cref="BindSearch"/> that narrows the rows to the term of a search box.
+        /// </summary>
+        public Func<IRenderControlContext, IBinding> Bind { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether columns should be hidden.
         /// </summary>
         public Func<IRenderControlContext, bool> SuppressHeaders { get; set; } = _ => false;
@@ -251,6 +257,8 @@ namespace WebExpress.WebUI.WebControl
             html.AddUserAttribute("data-striped", striped.ToClass());
             html.AddUserAttribute("data-border", tableBorder.ToClass());
             html.AddUserAttribute("data-selectable", selectable ? "true" : null);
+
+            Bind?.Invoke(renderContext)?.ApplyUserAttributes(html);
 
             return html;
         }

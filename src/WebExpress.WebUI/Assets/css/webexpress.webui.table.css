@@ -103,6 +103,13 @@
     width: 100%;
 }
 
+/* stands in for the rows a search hid all of */
+.wx-table-search-empty {
+    padding: 0.625rem 1rem;
+    font-size: 13px;
+    color: var(--wx-secondary-color);
+}
+
 .wx-table-footer-group {
     border-top: 2px solid var(--wx-table-border-color, var(--wx-border-color));
     background-color: var(--wx-body-bg);

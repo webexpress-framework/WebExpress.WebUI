@@ -32,6 +32,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
     _selectable = false;
     _headColor = null;
 
+    // the lower-cased term the rows are narrowed to; empty shows every row
+    _searchTerm = "";
+
     // interaction state
     _isResizing = false;
     _initialized = false;
@@ -649,6 +652,48 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
     }
 
     /**
+     * Shows only the rows that contain a term in one of their cells, ignoring case. The search
+     * bind calls it with the term of a search box; the rows stay loaded, so clearing the term
+     * shows them again without a round trip.
+     * @param {string} term - The search term; empty shows every row.
+     */
+    search(term) {
+        const normalized = String(term ?? "").trim().toLowerCase();
+
+        if (normalized === this._searchTerm) {
+            return;
+        }
+
+        this._searchTerm = normalized;
+
+        // a row the search hides cannot stay selected without the keyboard leaving it
+        if (this.state.selected && !this._matchesSearch(this.state.selected)) {
+            this.setState({ selected: null });
+        }
+
+        this.render();
+    }
+
+    /**
+     * Checks whether a row is shown under the current search term. A tree row stays when one
+     * of its descendants matches, so a match keeps its place in the hierarchy.
+     * @param {Object} row - The row.
+     * @returns {boolean} True when the row is shown.
+     */
+    _matchesSearch(row) {
+        if (!this._searchTerm) {
+            return true;
+        }
+
+        const matches = (row.cells || []).some((cell) => {
+            const text = cell?.text ?? (typeof cell?.content === "string" ? cell.content : "");
+            return String(text).toLowerCase().includes(this._searchTerm);
+        });
+
+        return matches || (row.children || []).some((child) => this._matchesSearch(child));
+    }
+
+    /**
      * Returns all visible rows in display order, expanding only opened tree nodes.
      * @returns {Array<Object>}
      */
@@ -656,6 +701,10 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
         const out = [];
         const walk = (rows) => {
             for (const r of rows) {
+                // keyboard navigation must not land on a row the search hides
+                if (!this._matchesSearch(r)) {
+                    continue;
+                }
                 out.push(r);
                 // keyboard navigation must match the rendered rows, so the
                 // tree gate of the reorderable subclass applies here as well
@@ -1023,6 +1072,9 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
         const nodes = [];
         const walk = (rows, depth) => {
             for (const row of rows) {
+                if (!this._matchesSearch(row)) {
+                    continue;
+                }
                 nodes.push(this._renderRow(state, row, depth, tree));
                 // _treeEnabled is owned by the reorderable subclass; undefined means enabled
                 if (this._treeEnabled !== false && row.children?.length && row.expanded) {
@@ -1031,6 +1083,13 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
             }
         };
         walk(state.rows, 0);
+
+        // an empty body under a term reads as a broken table rather than as no match
+        if (this._searchTerm && nodes.length === 0 && state.rows.length > 0) {
+            nodes.push(webexpress.webui.h("div", { key: "__search-empty", class: "wx-table-search-empty", role: "row" },
+                webexpress.webui.h("span", { role: "cell" }, this._i18n("webexpress.webui:table.search.empty", "No matches"))));
+        }
+
         return nodes;
     }
 

@@ -95,6 +95,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "table.columns.toggle": "Spalten ein-/ausblenden",
     "table.handle.title": "Spalte ziehen um Reihenfolge zu ändern",
     "table.search.placeholder": "Suche...",
+    "table.search.empty": "Keine Treffer",
     "table.filter.columns.label": "Spalten filtern",
 
     "avatar.zoom.label": "Zoom",
