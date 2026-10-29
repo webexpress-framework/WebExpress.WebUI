@@ -23,7 +23,9 @@ import { fileURLToPath } from "node:url";
 import { createEditorDocument, serializeNode } from "./dom-stub.editor.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const contentJs = path.resolve(here, "..", "..", "WebExpress.WebUI", "Assets", "js", "webexpress.webui.content.js");
+// the model and view supply the cleaning policy raw markup passes through
+const sources = ["webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js", "webexpress.webui.content.js"]
+    .map((file) => path.resolve(here, "..", "..", "WebExpress.WebUI", "Assets", "js", file));
 
 /**
  * Loads the content sources into a fresh vm context backed by the rich DOM
@@ -66,7 +68,9 @@ function loadContent(options = {}) {
         }
     };
     vm.createContext(sandbox);
-    vm.runInContext(fs.readFileSync(contentJs, "utf8"), sandbox, { filename: contentJs });
+    for (const source of sources) {
+        vm.runInContext(fs.readFileSync(source, "utf8"), sandbox, { filename: source });
+    }
 
     const wx = sandbox.webexpress.webui;
 
@@ -207,6 +211,18 @@ test("markup that reached the value from outside loses its inline handlers", () 
     assert.ok(!html.includes("onclick"), "the click handler is gone");
     assert.ok(!html.includes("onerror"), "the error handler is gone");
     assert.ok(html.includes("<img src=\"x.png\">"), "the image itself is kept");
+});
+
+test("markup that reached the value from outside cannot embed documents or run script through an address", () => {
+    const rt = loadContent();
+
+    const html = rt.convert(`<p>kept</p><iframe srcdoc="<script>steal()</script>"></iframe><script>steal()</script>`
+        + `<object data="x.swf"></object><p><a href="javascript:steal()">bait</a><a href="/page">fine</a></p>`);
+
+    assert.ok(!html.includes("iframe") && !html.includes("srcdoc"), "the framed document is gone");
+    assert.ok(!html.includes("script"), "neither the script element nor the script address survives");
+    assert.ok(!html.includes("object"), "the plug-in is gone");
+    assert.ok(html.includes("bait") && html.includes("<a href=\"/page\">fine</a>"), "the text stays, and a harmless link keeps its address");
 });
 
 test("a link that opens a new tab gets the opener protection", () => {

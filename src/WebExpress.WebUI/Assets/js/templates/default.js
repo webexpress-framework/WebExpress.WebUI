@@ -869,7 +869,10 @@ webexpress.webui.TableTemplates.register("markdown", (val, table, row, cell, nam
         .replace(/\*([^*]+)\*/g, "<em>$1</em>")
         .replace(/_([^_]+)_/g, "<em>$1</em>")
         .replace(/~~([^~]+)~~/g, "<del>$1</del>")
-        .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, "<a href=\"$2\" target=\"_blank\" rel=\"noopener\">$1</a>");
+        // escaping keeps the address inside its attribute but says nothing about its scheme
+        .replace(/\[([^\]]+)\]\(([^)\s]+)\)/g, (match, text, href) => webexpress.webui.EditorModel.url(href)
+            ? "<a href=\"" + href + "\" target=\"_blank\" rel=\"noopener\">" + text + "</a>"
+            : text);
 
     const out = [];
     // null while outside a list, otherwise the pending closing tag

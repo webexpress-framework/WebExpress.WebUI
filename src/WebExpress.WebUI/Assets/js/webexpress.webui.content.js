@@ -38,7 +38,16 @@ webexpress.webui.ContentFormat = class {
         if (typeof html === "object" && html !== null || typeof html === "string" && html.trim().startsWith("{")) {
             const state = webexpress.webui.EditorModel.validate(typeof html === "string" ? JSON.parse(html) : html);
             (options?.view || new webexpress.webui.EditorView(null)).render(state, source, true);
-        } else source.innerHTML = html || "";
+        } else {
+            // a raw value is legacy or server-rendered markdown, and a stored value need not have
+            // passed the editor at all; it is parsed inert so nothing runs before it is cleaned
+            const template = document.createElement("template");
+            template.innerHTML = html || "";
+            const parsed = webexpress.webui.EditorHtml.clean(template.content || template);
+            while (parsed.firstChild) {
+                source.appendChild(parsed.firstChild);
+            }
+        }
 
         this._removeChrome(source, keepInstruction);
         this._unwrapBlockAddons(source);

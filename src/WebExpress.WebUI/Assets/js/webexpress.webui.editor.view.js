@@ -8,7 +8,19 @@ webexpress.webui.EditorHtml = class {
         for (const [key, value] of Object.entries(data)) safe[key] = String(value).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
         const template = document.createElement("template");
         template.innerHTML = typeof def.renderer === "function" ? def.renderer(safe) : def.content || "";
-        const fragment = template.content || template;
+        const fragment = this.clean(template.content || template);
+        const result = document.createDocumentFragment();
+        while (fragment.firstChild) result.appendChild(fragment.firstChild);
+        return result;
+    }
+    /**
+     * Removes executable markup from parsed, still inert HTML. Markup that is shown as it stands
+     * rather than read into the model - add-on renderers, stored raw HTML, server-rendered
+     * markdown - shares this one policy, so it must run before the nodes join the live document.
+     * @param {DocumentFragment|HTMLElement} fragment - The inert parse result.
+     * @returns {DocumentFragment|HTMLElement} The same node, cleaned.
+     */
+    static clean(fragment) {
         fragment.querySelectorAll("script,iframe,object,embed,svg,math,style,link,meta,base,form").forEach(el => el.remove());
         fragment.querySelectorAll("*").forEach(el => {
             for (const attr of Array.from(el.attributes)) {
@@ -18,9 +30,7 @@ webexpress.webui.EditorHtml = class {
                 if (name === "style" && /url\s*\(|expression|@import|\\/i.test(attr.value)) el.removeAttribute(attr.name);
             }
         });
-        const result = document.createDocumentFragment();
-        while (fragment.firstChild) result.appendChild(fragment.firstChild);
-        return result;
+        return fragment;
     }
     /**
      * Parses inert HTML so only supported document data reaches transactions.

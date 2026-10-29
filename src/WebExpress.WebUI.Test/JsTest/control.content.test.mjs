@@ -11,6 +11,7 @@ import { contract } from "./controls.contract.mjs";
 
 contract({
     file: "webexpress.webui.content.js",
+    deps: ["webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js"],
     selector: "wx-webui-content",
     ctrl: "ContentCtrl"
 });

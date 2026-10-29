@@ -21,7 +21,9 @@ import { fileURLToPath } from "node:url";
 import { createEditorDocument } from "./dom-stub.editor.mjs";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const contentJs = path.resolve(here, "..", "..", "WebExpress.WebUI", "Assets", "js", "webexpress.webui.content.js");
+// the model and view supply the cleaning policy raw markup passes through
+const sources = ["webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js", "webexpress.webui.content.js"]
+    .map((file) => path.resolve(here, "..", "..", "WebExpress.WebUI", "Assets", "js", file));
 const fixture = path.resolve(here, "..", "Data", "editor-content.fixture.json");
 
 /**
@@ -44,7 +46,9 @@ function loadContent() {
         }
     };
     vm.createContext(sandbox);
-    vm.runInContext(fs.readFileSync(contentJs, "utf8"), sandbox, { filename: contentJs });
+    for (const source of sources) {
+        vm.runInContext(fs.readFileSync(source, "utf8"), sandbox, { filename: source });
+    }
 
     return { wx: sandbox.webexpress.webui, document };
 }

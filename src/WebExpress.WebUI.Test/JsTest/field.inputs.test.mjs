@@ -10,13 +10,13 @@ import { loadWebUi } from "./harness.mjs";
 
 /**
  * Creates an input through the controller on an empty host and records what it announces.
- * @param {string} file - The source file of the input.
+ * @param {string|string[]} file - The source file of the input, after the files it depends on.
  * @param {string} selector - The marker class.
  * @param {Function} [prepare] - Gives the host the structure the control reads.
  * @returns {object} The runtime, the control and the recorded announcements.
  */
 function create(file, selector, prepare) {
-    const rt = loadWebUi({ browser: true, extraFiles: [file] });
+    const rt = loadWebUi({ browser: true, extraFiles: [].concat(file) });
     const host = rt.createElement("div");
     host.classList.add(selector);
     host.setAttribute("name", "field");
@@ -35,7 +35,7 @@ const cases = [
     ["webexpress.webui.input.tag.js", "wx-webui-input-tag", "red;green"],
     // the display controls take their value from the page; it still changes, and is announced
     ["webexpress.webui.color.js", "wx-webui-color", "#ff0000"],
-    ["webexpress.webui.content.js", "wx-webui-content", "Deep in the Caribbean"],
+    [["webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js", "webexpress.webui.content.js"], "wx-webui-content", "Deep in the Caribbean"],
     ["webexpress.webui.country.js", "wx-webui-country", "FR"],
     ["webexpress.webui.date.js", "wx-webui-date", "2026-10-20"],
     ["webexpress.webui.email.js", "wx-webui-email", "grace@example.com"],

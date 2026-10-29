@@ -18,7 +18,7 @@ import { loadWebUi } from "./harness.mjs";
  * @returns {object} The rendered node (or empty string).
  */
 function render(type, value) {
-    const rt = loadWebUi({ browser: true, extraFiles: ["templates/default.js"] });
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.editor.model.js", "templates/default.js"] });
     const tmpl = rt.wx.TableTemplates.get(type);
     assert.ok(tmpl, `the "${type}" template is registered`);
     return tmpl.fn(value, null, {}, {}, "col", {});
@@ -48,6 +48,20 @@ test("markdown escapes raw HTML in the value", () => {
     assert.ok(node.innerHTML.includes("&lt;script&gt;"), "markup in the value is escaped");
     assert.ok(!node.innerHTML.includes("<script>"), "no element is injected");
     assert.ok(node.innerHTML.includes("<em>text</em>"), "markdown still renders after escaping");
+});
+
+test("markdown keeps the text of a link whose scheme could run script, but not the link", () => {
+    for (const href of ["javascript:alert%28document.domain%29", "JaVaScRiPt:alert(1", "data:text/html;base64,PHNjcmlwdD4=", "vbscript:msgbox"]) {
+        const node = render("markdown", `[Details](${href})`);
+
+        assert.ok(!node.innerHTML.includes("<a "), `no link is made of ${href}`);
+        assert.ok(node.innerHTML.includes("Details"), `the text of ${href} stays readable`);
+    }
+});
+
+test("markdown keeps relative and mail links", () => {
+    assert.ok(render("markdown", "[Ticket](/tickets/4711)").innerHTML.includes("<a href=\"/tickets/4711\""), "a relative address is a link");
+    assert.ok(render("markdown", "[Mail](mailto:team@example.com)").innerHTML.includes("<a href=\"mailto:team@example.com\""), "a mail address is a link");
 });
 
 test("markdown and html render an empty value as an empty cell", () => {
