@@ -272,7 +272,6 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
         const el = document.createElement("dialog");
         el.id = id;
         el.setAttribute("aria-labelledby", `${id}-label`);
-        el.setAttribute("aria-hidden", "true");
         el.dataset.key = "table-columns";
         el.dataset.submitId = "apply-columns";
         el.dataset.validateActiveOnly = "true";

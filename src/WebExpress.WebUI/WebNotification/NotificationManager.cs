@@ -368,6 +368,12 @@ namespace WebExpress.WebUI.WebNotification
         /// <returns>The removed notification, or null if the session does not hold it.</returns>
         private INotification RemoveFromSession(Guid id, Session session)
         {
+            // a socket keeps its handshake snapshot while later requests add notifications
+            if (session is not null && SharedStore is not null)
+            {
+                session = _componentHub.SessionManager.FindSession(session.Id);
+            }
+
             if (session?.GetProperty<SessionPropertyNotification>() is not { } notificationProperty)
             {
                 return null;

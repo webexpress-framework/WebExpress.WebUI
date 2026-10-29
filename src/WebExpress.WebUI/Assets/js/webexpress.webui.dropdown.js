@@ -221,7 +221,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         const button = document.createElement("button");
         button.className = "btn";
         button.type = "button";
-        if (this._buttonCss) button.classList.add(...this._buttonCss.split(" "));
+        if (this._buttonCss) button.classList.add(...this._buttonCss.split(/\s+/).filter(Boolean));
         if (this._buttonColor) button.classList.add(this._buttonColor);
         if (this._active) button.setAttribute("active", "true");
         if (this._disabled) button.disabled = true;
@@ -256,7 +256,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
         const ul = document.createElement("ul");
         ul.className = "dropdown-menu";
         ul.setAttribute("role", "menu");
-        if (this._menuCss) ul.classList.add(...this._menuCss.split(" "));
+        if (this._menuCss) ul.classList.add(...this._menuCss.split(/\s+/).filter(Boolean));
 
         // add all menu items
         this._items.forEach(item => {

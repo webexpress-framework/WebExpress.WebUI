@@ -113,6 +113,34 @@ namespace WebExpress.WebUI.Test.WebNotification
         }
 
         /// <summary>
+        /// A socket opened before an HTTP request creates a notification removes its stored
+        /// copy without dropping a second notification created by that request.
+        /// </summary>
+        [Fact]
+        public void DismissUsesCurrentSessionAfterSocketHandshake()
+        {
+            // arrange
+            var hub = CreateInstance();
+            var application = hub.ApplicationManager.GetApplications(typeof(TestApplication)).First();
+            var manager = hub.GetComponentManager<NotificationManager>();
+            var handshake = (Request)UnitTestControlFixture.CreateRequestMock("GET / HTTP/1.1\r\nCookie: session=\r\n\r\n");
+            var socketSession = handshake.Session;
+            hub.SessionManager.Commit(socketSession);
+            var cookie = $"GET / HTTP/1.1\r\nCookie: session={socketSession.Id}\r\n\r\n";
+            var request = (Request)UnitTestControlFixture.CreateRequestMock(cookie);
+            var dismissed = manager.AddNotification(application, request, "dismiss");
+            var retained = manager.AddNotification(application, request, "keep");
+            hub.SessionManager.Commit(request.Session);
+
+            // act
+            manager.RemoveNotifications(dismissed.Id, socketSession);
+
+            // validation
+            var next = (Request)UnitTestControlFixture.CreateRequestMock(cookie);
+            Assert.Equal(retained.Id, Assert.Single(manager.GetNotifications(application, next)).Id);
+        }
+
+        /// <summary>
         /// Tests that a global notification dismissed on two instances is reported destroyed
         /// only by the one that removed it.
         /// </summary>

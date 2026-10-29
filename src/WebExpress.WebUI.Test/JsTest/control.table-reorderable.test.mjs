@@ -79,3 +79,25 @@ test("hiding a column in the manager is offered only where columns may be remove
     table({ host: { allowColumnRemove: "true" } }).ctrl._bindModalActions(removable);
     assert.equal(typeof removable.applyVisibility, "function");
 });
+
+test("the column manager remains accessible when its native dialog opens", () => {
+    // arrange
+    const { rt, ctrl } = table();
+    rt.wx.ModalSidebarPanelCtrl = class {
+        /**
+         * Accepts the dialog while keeping this test focused on its generated markup.
+         * @param {HTMLElement} element - The generated dialog.
+         */
+        constructor(element) {
+            this.element = element;
+        }
+    };
+
+    // act
+    ctrl._createColumnsModal();
+    ctrl._columnsModalEl.showModal();
+
+    // validation
+    assert.equal(ctrl._columnsModalEl.open, true);
+    assert.notEqual(ctrl._columnsModalEl.getAttribute("aria-hidden"), "true");
+});
