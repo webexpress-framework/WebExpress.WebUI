@@ -222,16 +222,22 @@ namespace WebExpress.WebUI.Test.WebSpreadsheet
         [Fact]
         public void EmptyAndDuplicateSheetsAreRepaired()
         {
+            // arrange
+            var input = """{"sheets":[{"name":"A"},{"name":"a"},{"name":"x/y"},{"data":[[1,"=A1"]]}]}""";
+
+            // act
             var empty = SpreadsheetWorkbook.Parse("");
+            var arbitraryObject = SpreadsheetWorkbook.TryParse("{}", out var none);
+            var duplicates = SpreadsheetWorkbook.Parse(input);
+
+            // validation
             Assert.Single(empty.Sheets);
             Assert.True(empty.IsEmpty);
-            Assert.True(SpreadsheetWorkbook.TryParse("{}", out var none));
-            Assert.Equal("Sheet1", none.Sheets[0].Name);
-
-            var duplicates = SpreadsheetWorkbook.Parse("""{"sheets":[{"name":"A"},{"name":"a"},{"name":"x/y"},{"data":[[1,"=A1"]]}]}""");
+            Assert.False(arbitraryObject);
+            Assert.Null(none);
             Assert.Equal(["A", "Sheet2", "Sheet3", "Sheet4"], duplicates.Sheets.Select(s => s.Name));
             Assert.Equal("=A1", duplicates.Sheets[3]["B1"].Formula);
-            Assert.True(SpreadsheetWorkbook.IsWorkbook(" {\"x\":1}"));
+            Assert.False(SpreadsheetWorkbook.IsWorkbook(" {\"x\":1}"));
             Assert.False(SpreadsheetWorkbook.IsWorkbook("<p>"));
         }
 

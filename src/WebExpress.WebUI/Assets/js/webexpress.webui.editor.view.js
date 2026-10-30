@@ -316,6 +316,10 @@ webexpress.webui.EditorView = class {
         const body = document.createElement(node.attrs.inline ? "span" : "div");
         body.className = "card-body p-2 " + (node.attrs.container ? "wx-addon-body-container" : "wx-addon-body-widget");
         if (def?.bodyClass) body.classList.add(...def.bodyClass.split(/\s+/).filter(Boolean));
+        if (node.attrs.name === "callout") {
+            body.setAttribute("data-tone", node.attrs.data.tone || "info");
+            body.setAttribute("data-title", node.attrs.data.title || "");
+        }
         if (node.attrs.name === "box" && /^#[\da-f]{6}$/i.test(node.attrs.data.borderColor || "")) body.style.setProperty("--wx-box-line-color", node.attrs.data.borderColor);
         if (node.attrs.container) {
             if (node.attrs.name === "code") body.setAttribute("spellcheck", "false");

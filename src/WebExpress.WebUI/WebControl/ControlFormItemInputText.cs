@@ -270,7 +270,7 @@ namespace WebExpress.WebUI.WebControl
                 return validationResults;
             }
 
-            if ((Format?.Invoke(renderContext) ?? TypeEditTextFormat.Default) == TypeEditTextFormat.Wysiwyg && EditorState.IsState(value))
+            if ((Format?.Invoke(renderContext) ?? TypeEditTextFormat.Default) == TypeEditTextFormat.Wysiwyg && value?.TrimStart().StartsWith('{') == true)
             {
                 try
                 {

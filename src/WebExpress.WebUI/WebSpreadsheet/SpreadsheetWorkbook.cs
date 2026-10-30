@@ -150,8 +150,40 @@ namespace WebExpress.WebUI.WebSpreadsheet
         /// Determines whether a text looks like a workbook rather than anything else.
         /// </summary>
         /// <param name="value">The text.</param>
-        /// <returns>True if it starts like a JSON object.</returns>
-        public static bool IsWorkbook(string value) => value?.TrimStart().StartsWith('{') == true;
+        /// <returns>True only for a supported workbook document.</returns>
+        public static bool IsWorkbook(string value) => !string.IsNullOrWhiteSpace(value) && TryParse(value, out _);
+
+        /// <summary>
+        /// Extracts cell captions and effective values in sheet and row order.
+        /// </summary>
+        /// <returns>Plain text, or an empty string for an empty workbook.</returns>
+        public string ToPlainText()
+        {
+            return string.Join(" ", Sheets.SelectMany(sheet => sheet.EnumerateCells())
+                .Select(cell => PlainValue(cell.Cell.EffectiveValue))
+                .Where(text => !string.IsNullOrWhiteSpace(text)).Select(text => text.Trim()));
+        }
+
+        /// <summary>
+        /// Extracts text only after validating the serialized workbook.
+        /// </summary>
+        /// <param name="value">The serialized workbook. Blank input creates an empty workbook.</param>
+        /// <returns>The cell text.</returns>
+        /// <exception cref="JsonException">The value is not a workbook.</exception>
+        public static string ToPlainText(string value) => Parse(value).ToPlainText();
+
+        /// <summary>
+        /// Uses captions for structured cells and invariant formatting for scalar values.
+        /// </summary>
+        /// <param name="value">The effective cell value.</param>
+        /// <returns>The readable cell text.</returns>
+        private static string PlainValue(object value) => value switch
+        {
+            null => null,
+            JsonObject node => node["text"] is JsonValue caption && caption.TryGetValue<string>(out var text) ? text : null,
+            IFormattable number => number.ToString(null, System.Globalization.CultureInfo.InvariantCulture),
+            _ => value.ToString()
+        };
 
         /// <summary>
         /// Writes the workbook as the JSON object the control reads.
@@ -229,7 +261,8 @@ namespace WebExpress.WebUI.WebSpreadsheet
             var root = JsonNode.Parse(json, documentOptions: new JsonDocumentOptions { MaxDepth = 64 }) as JsonObject
                 ?? throw new JsonException("A workbook must be a JSON object.");
 
-            if (root["version"] is JsonValue v && (!v.TryGetValue<double>(out var version) || version > Version))
+            if (root.ContainsKey("doc") || root["sheets"] is not JsonArray ||
+                (root.ContainsKey("version") && (root["version"] is not JsonValue v || !v.TryGetValue<int>(out var version) || version != Version)))
             {
                 throw new JsonException("Unsupported workbook version.");
             }

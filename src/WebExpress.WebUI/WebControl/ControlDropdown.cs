@@ -253,7 +253,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("data-menuCss", menuCss)
                 .AddUserAttribute(active == TypeActive.Active ? "active" : null)
                 .AddUserAttribute(active == TypeActive.Disabled ? "disabled" : null)
-                .Add(_items.Select(x => x?.Render(renderContext, visualTree)));
+                .Add(items.Select(x => x?.Render(renderContext, visualTree)));
 
             return html;
         }

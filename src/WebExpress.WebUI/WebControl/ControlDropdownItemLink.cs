@@ -16,6 +16,11 @@ namespace WebExpress.WebUI.WebControl
         private readonly string _id;
 
         /// <summary>
+        /// Gets or sets a request-local visibility decision. This does not authorize server operations.
+        /// </summary>
+        public Func<IRenderControlContext, bool> Visible { get; set; }
+
+        /// <summary>
         /// Returns the unique identifier for the entity.
         /// </summary>
         public string Id => _id;
@@ -94,6 +99,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            if (Visible?.Invoke(renderContext) == false) return null;
             var text = Text?.Invoke(renderContext);
             var icon = Icon?.Invoke(renderContext);
             var image = Image?.Invoke(renderContext);

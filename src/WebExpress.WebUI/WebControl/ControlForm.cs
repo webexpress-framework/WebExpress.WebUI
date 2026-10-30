@@ -48,6 +48,12 @@ namespace WebExpress.WebUI.WebControl
         public IEnumerable<IControlFormItem> Items => _items;
 
         /// <summary>
+        /// Gets or sets a factory creating an editable title for each render request.
+        /// The returned item participates in initialization, validation and submission.
+        /// </summary>
+        public Func<IRenderControlFormContext, ControlFormItem> TitleInputFactory { get; set; }
+
+        /// <summary>
         /// Gets or sets the name of the form.
         /// </summary>
         public Func<IRenderControlFormContext, string> Name { get; set; }
@@ -252,6 +258,11 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The control as html.</returns>
         public virtual IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFormItem> items)
         {
+            var titleInput = TitleInputFactory?.Invoke(renderContext);
+            if (titleInput is not null)
+            {
+                items = items.Append(titleInput).ToArray();
+            }
             var validationResults = new List<ValidationResult>();
             var name = Name?.Invoke(renderContext);
             var stateParameterName = $"controlform_{(string.IsNullOrWhiteSpace(name) ? Id ?? "" : name).Replace('.', '-')}_state";
@@ -373,6 +384,15 @@ namespace WebExpress.WebUI.WebControl
             });
 
             var header = new HtmlElementSectionHeader();
+            if (titleInput is not null)
+            {
+                var title = titleInput.Render(renderContext, visualTree);
+                if (title is IHtmlElement titleElement)
+                {
+                    titleElement.Class = Css.Concatenate(titleElement.Class, "wx-modal-title-input");
+                }
+                header.Add(title);
+            }
 
             var headerPreferences = WebEx.ComponentHub.FragmentManager.GetFragments<IFragmentControl, SectionFormHeaderPreferences>
             (
@@ -434,7 +454,7 @@ namespace WebExpress.WebUI.WebControl
                 _ => new ControlFormItemGroupVertical(),
             };
 
-            foreach (var item in items.Where(x => x is not ControlFormItemInputHidden))
+            foreach (var item in items.Where(x => x is not ControlFormItemInputHidden && x != titleInput))
             {
                 group.Items.Add(item);
             }

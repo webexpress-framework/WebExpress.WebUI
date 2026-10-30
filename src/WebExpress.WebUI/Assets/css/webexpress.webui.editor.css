@@ -1187,3 +1187,13 @@
     outline: 2px solid var(--wx-primary, #0d6efd);
     outline-offset: 2px;
 }
+
+/* shared editor and reading presentation */
+.wx-editor-callout { padding: 1rem; margin: .5rem 0; border-left: .3rem solid var(--bs-info, #0dcaf0); background: var(--bs-tertiary-bg, #f8f9fa); }
+.wx-editor-callout::before { content: attr(data-title); display: block; font-weight: bold; }
+.wx-editor-callout[data-tone="success"] { border-color: var(--bs-success, #198754); }
+.wx-editor-callout[data-tone="warning"] { border-color: var(--bs-warning, #ffc107); }
+.wx-editor-callout[data-tone="danger"] { border-color: var(--bs-danger, #dc3545); }
+.wx-editor-callout[data-tone="secondary"] { border-color: var(--bs-secondary, #6c757d); }
+.wx-editor-callout[data-tone="primary"] { border-color: var(--bs-primary, #0d6efd); }
+.wx-document-toc { padding: 1rem; border: 1px solid var(--bs-border-color, #dee2e6); }
