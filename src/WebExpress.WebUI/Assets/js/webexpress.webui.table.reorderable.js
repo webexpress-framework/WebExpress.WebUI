@@ -184,7 +184,8 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
     }
 
     /**
-     * Marks the moved row and the row under the pointer.
+     * Marks the moved row and, when the row would land inside it as a child, the row under
+     * the pointer; a drop before or after a row is shown by the line alone.
      * @param {object} state - The current state.
      * @param {Object} row - Row data object.
      * @returns {Array<string>|null} The classes.
@@ -195,7 +196,7 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
             return null;
         }
         const key = this._getRowKey(row);
-        return [key === move.key && "wx-dragging", key === move.over && "wx-drag-over"];
+        return [key === move.key && "wx-dragging", key === move.over && move.child && "wx-drag-over"];
     }
 
     /**
@@ -220,11 +221,8 @@ webexpress.webui.TableReorderableCtrl = class extends webexpress.webui.TableCtrl
         const line = h("div", {
             key: "__placeholder",
             class: "wx-row-move-placeholder wx-grid-row",
-            style: state.move.child ? "height: 4px; display: none" : "height: 4px"
-        }, h("div", {
-            class: "wx-grid-cell",
-            style: "grid-column: 1 / -1; background: var(--wx-primary, #0d6efd); opacity: 0.35; height: 100%"
-        }));
+            style: state.move.child ? "display: none" : ""
+        }, h("div", { class: "wx-grid-cell" }));
 
         nodes.splice(at.mode === "before" ? index : index + 1, 0, line);
         return nodes;

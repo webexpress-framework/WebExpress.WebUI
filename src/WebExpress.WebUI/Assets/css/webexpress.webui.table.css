@@ -407,16 +407,30 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--wx-link-hover
 }
 .wx-table-drag-handle:active { cursor: grabbing; }
 
-.wx-table .wx-drag-over {
-    border-top: 2px solid var(--wx-primary);
+/* a row the moved row would become a child of; the extra classes outrank the hover color */
+.wx-table .wx-grid-row.wx-drag-over {
+    background-color: var(--wx-drop-bg);
+}
+
+/* the line a moved row lands on, between two rows */
+.wx-row-move-placeholder {
+    min-height: 0;
+    height: var(--wx-drop-line-width);
+}
+
+.wx-row-move-placeholder > .wx-grid-cell {
+    grid-column: 1 / -1;
+    height: 100%;
+    padding: 0;
+    background-color: var(--wx-drop-line-color);
 }
 
 /* --- Column Drag & Drop --- */
 /* the insertion line is placed in viewport coordinates of the header it stands at */
 .wx-table-drag-indicator {
     position: fixed;
-    width: 2px;
-    background-color: var(--wx-primary);
+    width: var(--wx-drop-line-width);
+    background-color: var(--wx-drop-line-color);
     pointer-events: none;
     z-index: 1040;
 }

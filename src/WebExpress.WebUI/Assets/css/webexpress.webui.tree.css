@@ -104,8 +104,9 @@
 /* Drag indicator style */
 .wx-tree-drag-indicator {
     position: absolute;
-    height: 2px;
-    border-bottom: 2px dashed var(--wx-success);
+    height: var(--wx-drop-line-width);
+    border-radius: 2px;
+    background-color: var(--wx-drop-line-color);
     z-index: 1000;
     pointer-events: none; /* prevent interaction with the indicator */
 }

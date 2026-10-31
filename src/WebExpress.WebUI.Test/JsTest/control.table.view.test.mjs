@@ -159,7 +159,7 @@ test("a row move is state: the moved row, the row under the pointer and the drop
     emma._anchorTr._rect = { top: 0, height: 40 };
     ctrl._onBodyHoverMove({ target: emma._anchorTr.children[1], clientY: 35 });
     ctrl._store.flush();
-    assert.ok(emma._anchorTr.classList.contains("wx-drag-over"));
+    assert.equal(emma._anchorTr.classList.contains("wx-drag-over"), false, "a drop between rows is shown by the line alone");
     assert.equal(emma._anchorTr.nextSibling.classList.contains("wx-row-move-placeholder"), true, "the line follows below the hovered row");
 
     ctrl._finalizeRowMove();
@@ -171,6 +171,20 @@ test("a row move is state: the moved row, the row under the pointer and the drop
     assert.equal(ctrl._body.querySelector(".wx-drag-over"), null);
     assert.equal(ghost.parentNode, null, "the ghost is gone");
     assert.ok(ctrl._rows.every((r) => nodes.includes(r._anchorTr)), "the rows moved, they were not rebuilt");
+});
+
+test("a row dropped into another is shown as a drop area on that row instead of a line", () => {
+    const { ctrl } = table({ reorderable: true, host: { movableRow: "true" } });
+    const [steve, , emma] = ctrl._rows;
+
+    ctrl._beginRowMove(steve, steve._anchorTr, 0, 0);
+    emma._anchorTr._rect = { top: 0, height: 40 };
+    ctrl._onBodyHoverMove({ target: emma._anchorTr.children[1], clientY: 20 });
+    ctrl._store.flush();
+    assert.ok(emma._anchorTr.classList.contains("wx-drag-over"));
+    const line = ctrl._body.querySelector(".wx-row-move-placeholder");
+    assert.match(line.getAttribute("style") ?? line.style.cssText ?? "", /display:\s*none/, "no line competes with the area");
+    ctrl._finalizeRowMove();
 });
 
 test("the arrow keys on a grip move the row and give its grip the focus back", () => {

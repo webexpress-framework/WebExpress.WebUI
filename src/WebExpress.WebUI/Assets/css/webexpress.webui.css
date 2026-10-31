@@ -2806,6 +2806,16 @@ legend {
     /* unified dropdown shadow: subtle elevation against light surfaces */
     --wx-dropdown-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 
+    /* drag and drop: one look for every control - a line where an item lands between
+       others, a tinted dashed area where it lands inside, the same area in red where the
+       drop is refused */
+    --wx-drop-line-color: var(--wx-primary);
+    --wx-drop-line-width: 3px;
+    --wx-drop-bg: rgba(var(--wx-primary-rgb), 0.06);
+    --wx-drop-border-color: rgba(var(--wx-primary-rgb), 0.5);
+    --wx-drop-blocked-bg: rgba(var(--wx-danger-rgb), 0.08);
+    --wx-drop-blocked-border-color: rgba(var(--wx-danger-rgb), 0.6);
+
 }
 
 
@@ -2859,6 +2869,14 @@ legend {
     /* open/close motion shared by every .show-toggled dropdown menu */
     --wx-dropdown-motion-duration: 0.18s;
     --wx-dropdown-motion-ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+    /* drag and drop: the primary blue is too dark for a line or a dashed edge on a dark
+       surface, so the dark theme draws them in the emphasis tints */
+    --wx-drop-line-color: var(--wx-primary-text-emphasis);
+    --wx-drop-bg: rgba(var(--wx-primary-rgb), 0.16);
+    --wx-drop-border-color: var(--wx-primary-text-emphasis);
+    --wx-drop-blocked-bg: rgba(var(--wx-danger-rgb), 0.2);
+    --wx-drop-blocked-border-color: var(--wx-danger-text-emphasis);
 }
 
 /* Global dropdown menu shadow for consistent elevation across all dropdown variants */
@@ -3178,17 +3196,19 @@ img.wx-icon-large {
     opacity: 0.5;
 }
 
+/* an area an item can be dropped into; see the --wx-drop-* tokens */
 .wx-drag-over {
-    background: repeating-linear-gradient(
-        45deg,
-        var(--wx-secondary-bg),
-        var(--wx-secondary-bg) 6px,
-        var(--wx-tertiary-bg) 6px,
-        var(--wx-tertiary-bg) 12px
-    );
-    outline: 2px dashed var(--wx-success); /* Adds a dashed border for visual emphasis */
-    border-radius: 0.5rem;
-    z-index: 1000;
+    background: var(--wx-drop-bg);
+    outline: 2px dashed var(--wx-drop-border-color);
+    outline-offset: -2px;
+    border-radius: var(--wx-border-radius);
+}
+
+.wx-drag-blocked {
+    background: var(--wx-drop-blocked-bg);
+    outline: 2px dashed var(--wx-drop-blocked-border-color);
+    outline-offset: -2px;
+    border-radius: var(--wx-border-radius);
 }
 
 /* Resizable container that activates only on direct hover */
@@ -3200,12 +3220,6 @@ img.wx-icon-large {
 .wx-resizable:hover:not(:has(:hover)) {
     overflow: auto;
     resize: both;
-}
-
-@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
-:scope .wx-drag-over {
-    background: repeating-linear-gradient( 45deg, var(--wx-secondary-bg), var(--wx-secondary-bg) 6px, var(--wx-secondary) 6px, var(--wx-secondary) 12px );
-}
 }
 
 .list-group-item.active a {

@@ -244,11 +244,11 @@
 /* column drag: dim the dragged header and mark the side the column would land
    on, mirroring the tab reorder affordance */
 .wx-board-col-header.wx-board-col-drop-before {
-    box-shadow: inset 3px 0 0 0 var(--wx-primary, #0d6efd);
+    box-shadow: inset var(--wx-drop-line-width) 0 0 0 var(--wx-drop-line-color);
 }
 
 .wx-board-col-header.wx-board-col-drop-after {
-    box-shadow: inset -3px 0 0 0 var(--wx-primary, #0d6efd);
+    box-shadow: inset calc(-1 * var(--wx-drop-line-width)) 0 0 0 var(--wx-drop-line-color);
 }
 
 /* short landing flash after a column reorder so the user sees where it went,
@@ -303,9 +303,9 @@
 }
 
 /* visual feedback for completely empty lanes */
-.wx-dashboard-lane.wx-drag-over-empty {
-    background-color: rgba(13, 110, 253, 0.05);
-    border-color: rgba(13, 110, 253, 0.4);
+.wx-dashboard .wx-dashboard-lane.wx-drag-over-empty {
+    background-color: var(--wx-drop-bg);
+    border-color: var(--wx-drop-border-color);
 }
 
 .wx-dashboard-widget-card {
@@ -328,14 +328,14 @@
     align-items: center;
 }
 
-/* visual drop indicator (blue line) */
+/* visual drop indicator (line for insert) */
 .wx-dashboard-widget-card::before {
     content: '';
     position: absolute;
     left: 0;
     right: 0;
-    height: 4px;
-    background-color: #0d6efd; /* primary color */
+    height: var(--wx-drop-line-width);
+    background-color: var(--wx-drop-line-color);
     border-radius: 2px;
     opacity: 0;
     pointer-events: none;

@@ -46,10 +46,13 @@
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-.wx-upload-dropzone.hover {
-    background-color: var(--wx-primary-bg-subtle);
-    color: var(--wx-primary);
-    border-color: var(--wx-primary);
+/* the extra class outranks the scoped dark dropzone color */
+.wx-upload .wx-upload-dropzone.hover {
+    background-color: var(--wx-drop-bg);
+    outline: 2px dashed var(--wx-drop-border-color);
+    outline-offset: -2px;
+    border-radius: var(--wx-border-radius);
+    color: var(--wx-primary-text-emphasis);
 }
 
 /* Progress Bar Container */
@@ -99,12 +102,6 @@
 }
 }
 
-@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
-:scope .wx-upload-dropzone.hover {
-    background-color: var(--wx-primary-bg-subtle);
-    color: var(--wx-primary);
-}
-}
 
 @scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
 :scope .wx-upload-progress .bar {

@@ -157,16 +157,11 @@
     user-select: none;
 }
 .wx-upload-avatar .wx-upload-avatar-dropzone.hover {
-    outline: 2px dashed var(--wx-success, #198754);
-    border-radius: 0.5rem;
-    background: repeating-linear-gradient(
-        45deg,
-        #eee,
-        #eee 6px,
-        #f8f8f8 6px,
-        #f8f8f8 12px
-    );
-    color: #2b5db6;
+    outline: 2px dashed var(--wx-drop-border-color);
+    outline-offset: -2px;
+    border-radius: var(--wx-border-radius);
+    background: var(--wx-drop-bg);
+    color: var(--wx-primary-text-emphasis);
 }
 
 .wx-upload-avatar .wx-upload-avatar-canvas-wrap {

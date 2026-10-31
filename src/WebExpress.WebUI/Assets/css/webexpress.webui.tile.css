@@ -257,54 +257,31 @@
     cursor: grabbing;
 }
 
-.wx-tile-card.wx-drop-target {
-    border-style: solid;
-}
-
-/* Horizontal half insertion (left/right) */
+/* insertion line in the gap on the side the dragged tile lands (the grid gap is 1rem) */
 .wx-tile-card.wx-drop-before,
 .wx-tile-card.wx-drop-after {
     position: relative;
 }
 
-.wx-tile-card.wx-drop-before::before,
-.wx-tile-card.wx-drop-after::before,
 .wx-tile-card.wx-drop-before::after,
 .wx-tile-card.wx-drop-after::after {
     content: "";
     position: absolute;
+    top: 0;
+    bottom: 0;
+    width: var(--wx-drop-line-width);
+    border-radius: 2px;
+    background: var(--wx-drop-line-color);
     pointer-events: none;
     z-index: 3;
 }
 
 .wx-tile-card.wx-drop-before::after {
-    top: 0;
-    left: 0;
-    width: 50%;
-    height: 100%;
-    opacity: 50%;
-    background: repeating-linear-gradient(
-        45deg,
-        var(--wx-secondary-bg),
-        var(--wx-secondary-bg) 6px,
-        var(--wx-tertiary-bg) 6px,
-        var(--wx-tertiary-bg) 12px
-    );
+    left: calc(-0.5rem - var(--wx-drop-line-width) / 2 - 1px);
 }
 
 .wx-tile-card.wx-drop-after::after {
-    top: 0;
-    right: 0;
-    width: 50%;
-    height: 100%;
-    opacity: 50%;
-    background: repeating-linear-gradient(
-        45deg,
-        var(--wx-secondary-bg),
-        var(--wx-secondary-bg) 6px,
-        var(--wx-tertiary-bg) 6px,
-        var(--wx-tertiary-bg) 12px
-    );
+    right: calc(-0.5rem - var(--wx-drop-line-width) / 2 - 1px);
 }
 
 .wx-tile-icon-large {
@@ -321,11 +298,6 @@
     vertical-align: middle;
 }
 
-/* start/end drop zones */
-.wx-drop-target {
-    outline: 2px dashed var(--wx-success);
-}
-
 /* Focus accessibility */
 .wx-tile-card:focus-visible {
     outline: 2px solid var(--wx-primary);
@@ -333,10 +305,6 @@
     z-index: 4;
 }
 
-.wx-tile-card.wx-drop-before:focus-visible::before,
-.wx-tile-card.wx-drop-after:focus-visible::before {
-    box-shadow: 0 0 0 1px rgba(0,0,0,.15);
-}
 
 /* Flash highlight */
 .wx-tile-card.wx-tile-flash {
@@ -464,19 +432,9 @@
         color: CanvasText;
         box-shadow: none;
     }
-    .wx-tile-card.wx-drop-before::before,
-    .wx-tile-card.wx-drop-after::before {
-        background: Highlight;
-        box-shadow: none;
-    }
     .wx-tile-card.wx-drop-before::after,
     .wx-tile-card.wx-drop-after::after {
-        background: transparent;
-        outline: 1px dashed Highlight;
-    }
-    .wx-tile-dropzone.wx-drop-target::before {
-        outline-color: Highlight;
-        background: transparent;
+        background: Highlight;
     }
     .wx-tile-card:focus-visible {
         outline: 2px solid Highlight;

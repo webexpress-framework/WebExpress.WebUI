@@ -350,17 +350,18 @@
 }
 }
 
-/* Visual feedback when hovering over an empty dropzone */
-.wx-kanban-cell.wx-drag-over-empty {
-    background-color: rgba(13, 110, 253, 0.05);
-    border-color: rgba(13, 110, 253, 0.4);
+/* the cell draws the drop area with its own dashed border instead of the shared outline;
+   the extra class outranks the scoped dark cell background */
+.wx-kanban .wx-kanban-cell.wx-drag-over-empty {
+    background-color: var(--wx-drop-bg);
+    border-color: var(--wx-drop-border-color);
 }
 
-@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
-:scope .wx-kanban-cell.wx-drag-over-empty {
-    background-color: rgba(13, 110, 253, 0.12);
-    border-color: rgba(90, 170, 255, 0.30);
-}
+/* a cell the dragged card cannot enter, e.g. no status of the column is open to it */
+.wx-kanban .wx-kanban-cell.wx-drag-blocked {
+    background-color: var(--wx-drop-blocked-bg);
+    border-color: var(--wx-drop-blocked-border-color);
+    outline: none;
 }
 
 /* Kanban Cards */
@@ -532,14 +533,14 @@
     height: 0.9em;
 }
 
-/* Visual Drop Indicator (blue line for insert) */
+/* Visual Drop Indicator (line for insert) */
 .wx-kanban-card::before {
     content: '';
     position: absolute;
     left: 0;
     right: 0;
-    height: 4px;
-    background-color: #0d6efd; /* primary color */
+    height: var(--wx-drop-line-width);
+    background-color: var(--wx-drop-line-color);
     border-radius: 2px;
     opacity: 0;
     pointer-events: none;
@@ -613,11 +614,11 @@
 /* insertion indicator while a column is dragged over a header: a primary line
    on the edge where the column would land */
 .wx-board-col-header.wx-board-col-drop-before {
-    box-shadow: inset 3px 0 0 var(--wx-primary, #0d6efd);
+    box-shadow: inset var(--wx-drop-line-width) 0 0 var(--wx-drop-line-color);
 }
 
 .wx-board-col-header.wx-board-col-drop-after {
-    box-shadow: inset -3px 0 0 var(--wx-primary, #0d6efd);
+    box-shadow: inset calc(-1 * var(--wx-drop-line-width)) 0 0 var(--wx-drop-line-color);
 }
 
 /* short landing flash after a column reorder so the user sees where it went */

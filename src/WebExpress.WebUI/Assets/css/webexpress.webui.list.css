@@ -184,8 +184,8 @@
 .wx-list-drag-placeholder {
     list-style: none;
     margin: 0.125rem 0;
-    border: calc(var(--wx-border-width) + 1px) dashed var(--wx-border-color);
-    background-color: rgba(var(--wx-primary-rgb), 0.075);
+    border: 2px dashed var(--wx-drop-border-color);
+    background-color: var(--wx-drop-bg);
     border-radius: var(--wx-border-radius);
     min-height: 2.25rem; /* safety when js height is not set */
     pointer-events: none; /* do not intercept pointer while dragging */
