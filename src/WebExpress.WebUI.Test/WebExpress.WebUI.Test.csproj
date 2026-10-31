@@ -7,7 +7,6 @@
 		<IsPackable>false</IsPackable>
 		<IsTestProject>true</IsTestProject>
 		<OutputType>Exe</OutputType>
-		<TestingPlatformDotnetTestSupport>true</TestingPlatformDotnetTestSupport>
 		<Configurations>Debug;Release;Test;DebugLocal</Configurations>
 		<!-- every test boots a component hub of its own; with the tests running side by side the
 		     workstation collector's pauses stall all of them, the server collector scales -->
