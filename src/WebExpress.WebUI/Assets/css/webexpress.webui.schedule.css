@@ -304,12 +304,19 @@
     overflow: hidden;
 }
 
-/* the colors sit at zero specificity: a color class the item carries (bg-warning and the
-   like) then wins together with the text color that reads on it, instead of leaving white
-   text on a light ground */
+/* the default fill sits at zero specificity: a color class the item carries (bg-warning and
+   the like) then wins together with the on-surface color it publishes, instead of leaving
+   white text on a light ground. the text color itself must not sit at zero specificity: an
+   entry with an address is an <a>, and the global link color (specificity 0,0,1) would beat
+   it - link blue on the primary fill, the title invisible. it therefore reads the on-surface
+   color at class specificity, which the default fill and every bg-* class set */
 :where(.wx-schedule-entry) {
     background: var(--wx-primary);
-    color: var(--wx-primary-contrast, #fff);
+    --wx-on-surface: var(--wx-primary-contrast, #fff);
+}
+
+.wx-schedule-entry {
+    color: var(--wx-on-surface);
 }
 
 .wx-schedule-entry:hover {
