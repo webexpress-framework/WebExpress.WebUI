@@ -90,19 +90,18 @@ webexpress.webui.UploadCtrl = class extends webexpress.webui.Ctrl {
     _bindEvents() {
         const dropTarget = this._fullscreenDropzone ? document.body : this._element;
 
-        // add hover effect on drag
+        // the whole frame takes the drop, so the frame and not the inner zone shows the area
         ["dragenter", "dragover"].forEach(eventName =>
             dropTarget.addEventListener(eventName, e => {
                 e.preventDefault();
-                this._dropzone.classList.add("hover");
+                this._element.classList.add("wx-drag-over");
             })
         );
 
-        // remove hover effect
         ["dragleave", "drop"].forEach(eventName =>
             dropTarget.addEventListener(eventName, e => {
                 e.preventDefault();
-                this._dropzone.classList.remove("hover");
+                this._element.classList.remove("wx-drag-over");
             })
         );
 

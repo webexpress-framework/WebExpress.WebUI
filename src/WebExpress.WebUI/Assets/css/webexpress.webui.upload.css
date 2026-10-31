@@ -46,12 +46,16 @@
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
-/* the extra class outranks the scoped dark dropzone color */
-.wx-upload .wx-upload-dropzone.hover {
+/* the frame is the drop area and draws its edge with its own dashed border instead of the
+   shared outline; html raises the rules above the scoped dark frame and zone colors */
+html .wx-upload.wx-drag-over {
     background-color: var(--wx-drop-bg);
-    outline: 2px dashed var(--wx-drop-border-color);
-    outline-offset: -2px;
-    border-radius: var(--wx-border-radius);
+    border-color: var(--wx-drop-border-color);
+    outline: none;
+    border-radius: 0.5rem;
+}
+
+html .wx-upload.wx-drag-over .wx-upload-dropzone {
     color: var(--wx-primary-text-emphasis);
 }
 
