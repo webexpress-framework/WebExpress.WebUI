@@ -8,7 +8,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form tile picker input control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputTile
     {
         /// <summary>
@@ -137,8 +136,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form tile picker control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-tile""></div>*")]
-        [InlineData("abc", @"*<div class=""wx-webui-input-tile"" data-value=""abc""></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-tile""></div>*")]
+        [InlineData("abc", @"*<div id=""*"" class=""wx-webui-input-tile"" data-value=""abc""></div>*")]
         public void ValueForm(string value, string expected)
         {
             // arrange
@@ -166,8 +165,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form tile picker control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-tile""></div>*")]
-        [InlineData("abc", @"*<div class=""wx-webui-input-tile"" data-value=""abc""></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-tile""></div>*")]
+        [InlineData("abc", @"*<div id=""*"" class=""wx-webui-input-tile"" data-value=""abc""></div>*")]
         public void ValueItem(string value, string expected)
         {
             // arrange

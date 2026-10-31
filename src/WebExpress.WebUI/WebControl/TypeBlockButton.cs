@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the type of block button.
+    /// Whether a button is shown as a normal inline button or as a full-width block button.
     /// </summary>
     public enum TypeBlockButton
     {

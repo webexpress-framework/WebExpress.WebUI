@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a column group of form items.
+    /// Groups several form items into a single column so they are laid out together.
     /// </summary>
     public class ControlFormItemGroupColumn : ControlFormItemGroup
     {
@@ -58,13 +58,15 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            EnsureInputIds();
+
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-form-group-horizontal", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-form-group-horizontal", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
             };
 
             var body = new HtmlElementTextContentDiv() { };

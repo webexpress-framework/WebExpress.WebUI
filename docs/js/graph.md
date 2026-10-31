@@ -25,8 +25,11 @@ The component is initialized on a host container. Global settings for the graph 
 |Attribute              |Description                                                                                    
 |-----------------------|-----------------------------------------------------------------------------------------------
 |`data-node-style`      |Defines the default layout for nodes. Set to `label-below` to place text under the icon/shape. 
-|`data-edge-style`      |Defines the drawing style of edges. Options are `smooth` (curved bezier lines) or `straight`.
+|`data-edge-style`      |Defines the drawing style of edges: `rounded` (default, straight segments with rounded corners), `straight` (sharp corners) or `smooth` / `curve` (bezier).
 |`data-physics-enabled` |Controls the built-in physics engine. If `true`, nodes without fixed positions will be auto-arranged. Set to `false` to disable physics.
+|`data-label`           |The accessible name announced for the canvas. Defaults to a generic "Graph canvas".
+|`data-grid`            |Optional background grid. `true` uses the default cell size (20), a number sets the cell size, and anything else (or omitting it) leaves the grid off.
+|`data-grid-snap`       |Set to `true` to snap dragged nodes and waypoints to the grid. Requires `data-grid`.
 
 ## Defining the Graph Structure
 
@@ -43,7 +46,7 @@ Nodes are defined by elements with the class `.wx-graph-node`.
 |`data-uri`             |URL or path associated with the node.
 |`data-x` / `data-y`    |Explicit coordinates. If omitted, the node will be positioned by the physics engine.
 |`data-shape`           |The shape of the node background. Options: `rect` (default), `circle`.
-|`data-icon`            |A CSS class string for a font icon (e.g., `fas fa-server`).
+|`data-icon`            |A CSS class string for a font icon (e.g., `server`).
 |`data-image`           |URL to an image to display inside the node.
 |`data-background-color`|Hex color or standard color name for the node background fill.
 |`data-background-css`  |CSS class to append to the node shape for styling via stylesheets.
@@ -62,12 +65,89 @@ Edges are defined by elements with the class `.wx-graph-edge`.
 |`data-dasharray` |SVG stroke-dasharray pattern (e.g., `5,5` for dashed lines).
 |`data-waypoints` |A JSON string array of coordinates `[{"x":10,"y":20}, ...]` for routing the edge manually.
 
+> **Icons and images are not interchangeable.** `data-icon` is a CSS class rendered as
+> `<i class="…">` inside a `foreignObject`; `data-image` is a URL rendered as an SVG
+> `<image href="…">`. Putting a URL into `data-icon` sets it as a class name on an empty
+> element and renders nothing.
+
+### Colour precedence
+
+An explicit `data-foreground-color` / `data-background-color` / `data-color` beats a
+`…-css` class, which beats the theme default. The explicit colour is applied as an inline
+style rather than as a `fill` / `stroke` presentation attribute — a presentation attribute
+loses against every stylesheet rule, so the theme defaults for labels and edges would
+otherwise silently overrule the colour that was chosen.
+
+### Coordinate space
+
+`data-x` / `data-y` address the **top left corner** of a node. The simulation works with
+node centres internally and converts on both boundaries, so a position written to the
+model and read back from it is unchanged. Code that writes positions back into the model
+by hand must convert as well, or every round trip through the model (an undo, a save and
+reload) shifts the node by half its size.
+
 ## Functionality
 
 - **Pan & Zoom:** Users can pan the canvas by dragging the background and zoom using the mouse wheel.
 - **Interactive Nodes:** Nodes can be dragged to new positions. If physics is enabled, the graph will react elastically.
-- **Fit to View:** A built-in button (bottom-right) automatically scales and pans the graph to fit all nodes within the viewport.
+- **View controls:** A cluster in the **lower left** corner of the canvas offers fit, centre, zoom in and zoom out. They act on the view only - nothing they do is saved or undone - which is why they sit on the canvas rather than in the editor toolbar, and why the read-only viewer has them too.
 - **SVG Rendering:** The graph is rendered as scalable vector graphics, ensuring sharpness at any zoom level.
+
+### Edge routing
+
+The default routing draws straight segments and rounds the corner at each waypoint. That
+keeps a waypoint readable as the deliberate routing decision it is: a bezier bends the
+whole run and no longer passes through the point the user placed. `data-edge-style` selects
+`straight` (sharp corners) or `smooth` when a curve is wanted anyway.
+
+The arrowhead is drawn in the edge's own colour. An edge with an explicit `color` gets a
+marker of that colour; an edge without one uses a marker filled with `context-stroke`, so
+its head follows a css colour, the hover and the selection like the line does. The head is
+anchored at its base: the line stops `ARROW_LENGTH` short of the end point and the head
+reaches on to it, so neither the round line cap nor a stroke pattern runs into the tip, and
+the tip ends just off the border of the target node.
+
+## Rendering and State
+
+The canvas is a function of the state: the model, the measured nodes, their positions, the viewport (`scale`, pan) and the canvas size. The state is a `webexpress.webui.FrameState`, so a simulation step, a drag, a pan or a wheel zoom renders once per animation frame however many changes the frame saw, while a discrete change - `render()`, a replaced `model`, a click or a key in the editor - renders at once. Node groups and edges are keyed by their id, so a frame patches their geometry instead of rebuilding them.
+
+The node records of the simulation are its working memory: an integration step or a gesture moves them and then publishes their positions into the state, from which the canvas renders. The pointer math reads the viewport from the state, so it is right before the frame that paints a new viewport. The canvas size, which only the layout knows, is measured by a `ResizeObserver` and enters the state like any other change; the grid covers the visible area from it. Until the user pans or zooms, a change of the canvas size also fits the graph again, because the first fit often sees a canvas the page has not finished laying out (a scrollbar, a sidebar, a hidden tab, a folded pane). Fitting by hand - the fit button or `0` - hands the view back to the canvas.
+
+Measured in Chrome with the simulation running, a frame - integration, render and layout - costs about the same as with the viewer that updated its DOM by hand on a graph of 100 nodes (2.5 to 3.8 against 2.6 to 2.8 ms), and less on larger ones: 7.8 against 9.2 to 9.8 ms for 300 nodes and 15.9 against 21.0 to 21.4 ms for 600. The integration step looks up the ends of an edge by id rather than by search, which pays for most of the reconciliation.
+
+## Simulation Lifecycle
+
+The physics engine runs on `requestAnimationFrame`, but only while there is something to
+compute. The loop starts when nodes arrive without a position or when a node is grabbed,
+and it **stops itself** as soon as no free node moves faster than `SETTLE_VELOCITY`
+(0.05 units per frame). An idle graph therefore costs nothing. A configuration that
+cannot reach equilibrium is bounded by `MAX_SIMULATION_FRAMES` (1800 frames, about 30
+seconds) so it always hands the frame loop back.
+
+Grabbing a node wakes a settled simulation again; releasing it lets the neighbourhood
+settle and the loop ends once more.
+
+## Teardown
+
+`destroy()` releases everything the control installed outside its own subtree:
+
+- the animation frame loop,
+- the pan and drag handlers on `window`, **including the transient ones of a gesture that
+  was still in progress**,
+- the pointer, wheel and context-menu handlers on the SVG root,
+- the SVG canvas, the fit button and the live region, together with the listeners the view
+  attached to them.
+
+The controller calls `destroy()` when the host leaves the document. A control that is torn
+down mid-drag leaves nothing behind.
+
+## Accessibility
+
+The canvas is a single tab stop (`tabindex="0"`, `role="application"`) with an accessible
+name from `data-label`. Pointer interaction moves the focus onto it, so mouse and keyboard
+operate on the same element. Each node group carries `role="img"` and an `aria-label` with
+its label, and an off-screen live region next to the canvas announces selection and
+structural changes, which are otherwise invisible because they only manifest as geometry.
 
 ## Programmatic Control
 
@@ -86,8 +166,8 @@ if (graphCtrl) {
     // update the graph model completely
     graphCtrl.model = {
         nodes: [
-            { id: 'n1', label: 'Server', icon: 'fas fa-server', x: 100, y: 100 },
-            { id: 'n2', label: 'Client', icon: 'fas fa-laptop', x: 300, y: 100 }
+            { id: 'n1', label: 'Server', icon: 'server', x: 100, y: 100 },
+            { id: 'n2', label: 'Client', icon: 'laptop', x: 300, y: 100 }
         ],
         edges: [
             { from: 'n1', to: 'n2', label: 'Connection', color: 'blue' }
@@ -110,8 +190,8 @@ const graphCtrl = new webexpress.webui.GraphViewerCtrl(container);
 // set the graph data directly
 graphCtrl.model = {
     nodes: [
-        { id: 'node-1', label: 'First Node', icon: 'fas fa-circle', x: 120, y: 180, backgroundColor: '#e3f2fd' },
-        { id: 'node-2', label: 'Second Node', icon: 'fas fa-square', x: 270, y: 200 }
+        { id: 'node-1', label: 'First Node', icon: 'circle', x: 120, y: 180, backgroundColor: '#e3f2fd' },
+        { id: 'node-2', label: 'Second Node', icon: 'card', x: 270, y: 200 }
     ],
     edges: [
         { from: 'node-1', to: 'node-2', label: 'Link', color: '#607d8b' }
@@ -149,7 +229,7 @@ The following example creates a simple network diagram with three nodes. "Server
     <div id="srv-01" 
          class="wx-graph-node" 
          data-label="Main Server" 
-         data-icon="fas fa-server"
+         data-icon="server"
          data-x="100" data-y="150"
          data-background-color="#e0f7fa"></div>
 
@@ -157,14 +237,14 @@ The following example creates a simple network diagram with three nodes. "Server
          class="wx-graph-node" 
          data-label="Database" 
          data-shape="circle"
-         data-icon="fas fa-database"
+         data-icon="database"
          data-x="100" data-y="300"
          data-background-color="#fff9c4"></div>
 
     <div id="client-01" 
          class="wx-graph-node" 
          data-label="User Client" 
-         data-icon="fas fa-laptop"></div>
+         data-icon="laptop"></div>
 
     <!-- Edges -->
     <div class="wx-graph-edge" 
@@ -180,3 +260,110 @@ The following example creates a simple network diagram with three nodes. "Server
 
 </div>
 ```
+
+---
+
+# GraphEditorCtrl
+
+The `GraphEditorCtrl` extends `GraphViewerCtrl` with editing: a toolbar, selection,
+undo/redo, node and edge creation, waypoint routing and a properties dialog. It reads the
+same DOM model and is registered under `wx-webui-graph-editor`.
+
+The physics engine is off in the editor - positions are authored, not simulated - so the
+frame loop never runs.
+
+## Toolbar
+
+The toolbar carries undo/redo, add node, add edge, edit, delete and export. Which of them
+appear is decided by `_toolbarActions()`, so a subclass that offers some of these elsewhere
+narrows the list instead of removing buttons afterwards — the workflow editor moves
+creation and editing into its properties panel that way. Separators collapse automatically
+when the actions around them are absent.
+
+The editor renders through the hooks of the viewer, from the same state: the toolbar, the
+selection, source and hover marks of the nodes, the waypoints and endpoint handles of the
+selected edge, the preview of an edge being drawn, the alignment guides of a drag and the
+dialogs. The fields of the properties dialog are built into its body when it opens and
+kept there, so what the user types survives every render until the dialog is applied.
+
+## Editing with the Pointer
+
+- **Click** a node or an edge to select it; clicking the background clears the selection.
+- **Drag** a node to move it, or a waypoint to reshape an edge.
+- **Double-click** the background to add a node, an edge to add a waypoint, a node to open
+  its properties.
+- **Right-click** a waypoint to remove it.
+- **Add edge mode** (toolbar toggle): click the source node, then the target.
+- Dragging an edge endpoint handle reconnects it to another node.
+
+## Keyboard Model
+
+The editor is fully operable from the keyboard once the canvas has the focus. Colour
+fields in the properties dialog use the framework colour control
+(`ControlFormItemInputColor` / `InputColorCtrl`), so they offer the shared palette rather
+than a bare native swatch.
+
+|Key                    |Action
+|-----------------------|-----------------------------------------------------------------------
+|`Arrow`                |Moves the selection to the nearest node in that direction. With an edge selected and a waypoint active, the horizontal arrows walk its waypoints.
+|`Alt` + `Arrow`        |Moves the selected node or waypoint by `NUDGE_STEP` (10 units).
+|`Alt` + `Shift` + `Arrow` |Moves it by a single unit for fine placement.
+|`Enter`                |Opens the properties of the selection, or completes a pending edge.
+|`Ctrl` + `Enter`       |Starts an edge at the selected node; pick the target with the arrows and confirm with `Enter`.
+|`Insert`               |Adds a waypoint to the selected edge, on its longest segment, and selects it.
+|`Delete`               |Removes the selection. With a waypoint selected only the waypoint is removed, not the edge. Removing a node asks for confirmation and takes its edges with it.
+|`Escape`               |Cancels a pending edge and clears the selection; with a dialog open it closes the dialog.
+|`Ctrl` + `Z` / `Ctrl` + `Y` |Undo / redo.
+|`+` / `-` / `0`        |Zoom in, zoom out, fit to view.
+
+The edge properties dialog offers the stroke pattern as drawn samples rather than as a
+`stroke-dasharray` value, and the colour fields use the framework colour control.
+
+### Shortcut ownership
+
+The key handler is registered on `window`, because an SVG canvas is not focused by merely
+pointing at it. It therefore checks whether the event belongs to this editor before acting:
+
+- an event whose target is an `input`, `textarea`, `select` or a `contenteditable` element
+  is left to that element - **including the fields of the editor's own properties panel**,
+  so `Delete` while renaming a state edits the text instead of deleting the state;
+- an event originating outside this editor's host is ignored, so a page can carry several
+  graphs and arbitrary other forms without a shortcut crossing over;
+- while a dialog is open, its buttons and fields keep their keys; only `Escape` is taken,
+  to close it;
+- a torn-down editor ignores keys entirely.
+
+## Alignment
+
+During pointer dragging, nodes align their left, center and right references and their top,
+center and bottom references with surrounding nodes and edge routes. Waypoints align with
+the same references, including other waypoints and segment centers. Dashed guide lines show
+the active horizontal and vertical alignment until the gesture ends. The snap tolerance is
+six screen pixels at every zoom level. Alignment takes priority over the optional grid;
+outside that tolerance the configured grid behavior remains active.
+
+## Undo History
+
+Every structural change pushes a deep snapshot of the model as it was before the change,
+so one undo takes back exactly one change and redo replays it. The model on screen is never
+on the stack, and setting `model` adds no entry: a model a host loads after construction -
+the workflow editor loads its model that way - cannot be undone away. A drag pushes its
+pre-drag snapshot once, on release, and only if the element actually moved. The stack is capped at
+`HISTORY_LIMIT` (50 entries). Undo and redo prune a selection the restored model no longer
+contains, so the properties panel never edits an object that has been undone away.
+
+## Shared Editing
+
+The graph editor implements the collaboration interface (`collaborationKind` `"graph"`, see
+[Operational Transformation](ot.md)) and can be edited by several users at once inside a WebApp
+`ControlCollaborative`. Nodes and edges are atomic items of the shared document with their
+properties as attributes, so moving a node changes only its coordinates and two users moving
+different nodes never conflict. An edge whose node another user deleted is dropped. New node and
+edge ids carry the client tag. While shared, undo and redo invert only the own changes.
+
+## Events
+
+In addition to the viewer events the editor emits
+`webexpress.webui.Event.CHANGE_VALUE_EVENT` after every model mutation, with the current
+model in `detail.model`. Node positions are synchronized into the model before the event
+is dispatched, so a listener always sees current coordinates.

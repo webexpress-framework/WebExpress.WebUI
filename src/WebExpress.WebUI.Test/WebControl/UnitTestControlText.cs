@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the text control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlText
     {
         /// <summary>

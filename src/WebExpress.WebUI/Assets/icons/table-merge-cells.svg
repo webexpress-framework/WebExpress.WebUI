@@ -1,14 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
- <g transform="translate(-1.5,-1.5)" fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
-  <path d="m3 3h18v18h-18z"/>
-  <path d="m3 9h18"/>
-  <path d="m3 15h18"/>
-  <path d="m9 3v6"/>
-  <path d="m15 3v6"/>
-  <path d="m9 15v6"/>
-  <path d="m15 15v6"/>
-  <path d="m10 12-2-2m0 4 2-2"/>
-  <path d="m14 12 2-2m0 4-2-2"/>
+ <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <rect x="2" y="2.5" width="17" height="16" rx="1"/>
+  <path d="M2 7H19M2 14H19M7.5 2.5V7M13.5 2.5V7M7.5 14V18.5M13.5 14V18.5M4.5 10.5H8.5L6.5 8.5M8.5 10.5L6.5 12.5M16.5 10.5H12.5L14.5 8.5M12.5 10.5L14.5 12.5"/>
  </g>
 </svg>

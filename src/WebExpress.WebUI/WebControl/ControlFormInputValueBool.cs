@@ -3,7 +3,7 @@
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form input value of type bool.
+    /// Represents the value of a form input field as a strongly typed boolean (true/false).
     /// </summary>
     public class ControlFormInputValueBool : IControlFormInputValue
     {
@@ -11,6 +11,12 @@ namespace WebExpress.WebUI.WebControl
         /// Gets or sets the boolean value.
         /// </summary>
         public bool Checked { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether the box is unchecked; a required box has to be
+        /// checked, as the browser treats a required checkbox.
+        /// </summary>
+        public bool IsEmpty => !Checked;
 
         /// <summary>
         /// Initializes a new instance of the class.

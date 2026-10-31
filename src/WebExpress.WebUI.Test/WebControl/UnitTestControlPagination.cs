@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the pagination control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlPagination
     {
         /// <summary>

@@ -8,15 +8,13 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a form item input control for selection.
+    /// A form input that lets the user choose from a set of options.
     /// </summary>
     /// <remarks>
     /// This control allows users to select one or more options from a predefined list.
     /// </remarks>
     public class ControlFormItemInputSelection : ControlFormItemInput<ControlFormInputValueString>, IControlFormItemInputSelection
     {
-        public new Func<IRenderControlContext, string> Name { get; set; }
-
         private readonly List<IControlFormItemInputSelectionItem> _options = [];
 
         /// <summary>
@@ -40,6 +38,14 @@ namespace WebExpress.WebUI.WebControl
         /// cleared through the user interface.
         /// </summary>
         public Func<IRenderControlContext, bool> StickySelection { get; set; }
+
+        /// <summary>
+        /// Gets or sets the name of the form field this selection follows. Left unset, the
+        /// selection offers all of its options; named, an option is offered only where
+        /// <see cref="ControlFormItemInputSelectionItem.Requires"/> names the value currently
+        /// chosen in that field.
+        /// </summary>
+        public Func<IRenderControlContext, string> DependsOn { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the class with an automatically assigned ID.
@@ -98,6 +104,17 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Determines whether a label element may point at the field. The client moves the id onto the
+        /// hidden input that posts the value, which is no labelable element, so the caption is a span.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <returns>True if a label element may point at the field.</returns>
+        public override bool IsLabelable(IRenderControlFormContext renderContext)
+        {
+            return false;
+        }
+
+        /// <summary>
         /// Converts the control to an HTML representation.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -120,12 +137,14 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-input-selection", classes),
-                Style = GetStyles()
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("name", name)
-                .AddUserAttribute("placeholder", I18N.Translate(Placeholder?.Invoke(renderContext)))
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
+                .AddUserAttribute("placeholder", I18N.Translate(renderContext, Placeholder?.Invoke(renderContext)))
                 .AddUserAttribute("data-multiselection", MultiSelect?.Invoke(renderContext) == true ? "true" : null)
                 .AddUserAttribute("data-sticky-selection", StickySelection?.Invoke(renderContext) == true ? "true" : null)
+                .AddUserAttribute("data-depends-on", DependsOn?.Invoke(renderContext))
                 .AddUserAttribute("data-value", value)
                 .Add(_options.Select(x => x.Render(renderContext, visualTree)));
 

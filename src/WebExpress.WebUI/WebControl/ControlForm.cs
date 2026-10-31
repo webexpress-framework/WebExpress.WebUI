@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using WebExpress.WebCore;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebFragment;
@@ -27,6 +28,11 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControlFormItem> _primaryControls = [];
         private readonly List<IControlFormItem> _secondaryControls = [];
 
+        // a page may render one form several times in a request - a dark copy, a listing of
+        // its markup - and each render sees the same submission; only the first one processes
+        // it, so its side effects happen once
+        private readonly ConditionalWeakTable<IRequest, object> _processedRequests = new();
+
         /// <summary>
         /// Event is raised when the form's data needs to be determined.
         /// </summary>
@@ -46,6 +52,12 @@ namespace WebExpress.WebUI.WebControl
         /// Returns the form items.
         /// </summary>
         public IEnumerable<IControlFormItem> Items => _items;
+
+        /// <summary>
+        /// Gets or sets a factory creating an editable title for each render request.
+        /// The returned item participates in initialization, validation and submission.
+        /// </summary>
+        public Func<IRenderControlFormContext, ControlFormItem> TitleInputFactory { get; set; }
 
         /// <summary>
         /// Gets or sets the name of the form.
@@ -138,10 +150,10 @@ namespace WebExpress.WebUI.WebControl
         /// <summary>
         /// Gets or sets the horizontal alignment of the items.
         /// </summary>
-        public virtual Func<IRenderControlFormContext, TypeJustifiedFlex> Justify
+        public virtual Func<IRenderControlContext, TypeJustifiedFlex> Justify
         {
             get => (Func<IRenderControlContext, TypeJustifiedFlex>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -252,6 +264,11 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>The control as html.</returns>
         public virtual IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree, IEnumerable<IControlFormItem> items)
         {
+            var titleInput = TitleInputFactory?.Invoke(renderContext);
+            if (titleInput is not null)
+            {
+                items = items.Append(titleInput).ToArray();
+            }
             var validationResults = new List<ValidationResult>();
             var name = Name?.Invoke(renderContext);
             var stateParameterName = $"controlform_{(string.IsNullOrWhiteSpace(name) ? Id ?? "" : name).Replace('.', '-')}_state";
@@ -321,15 +338,18 @@ namespace WebExpress.WebUI.WebControl
                 {
                     state = TypeFormState.Success;
 
-                    foreach (var item in items
-                        .Where(x => x is IControlFormProcess)
-                        .Select(x => x as IControlFormProcess))
+                    if (_processedRequests.TryAdd(renderContext.Request, null))
                     {
-                        item.Process(renderContext);
-                    }
+                        foreach (var item in items
+                            .Where(x => x is IControlFormProcess)
+                            .Select(x => x as IControlFormProcess))
+                        {
+                            item.Process(renderContext);
+                        }
 
-                    // valid form
-                    OnProcess(new ControlFormEventFormProcess() { Context = renderContext });
+                        // valid form
+                        OnProcess(new ControlFormEventFormProcess() { Context = renderContext });
+                    }
 
                     if (redirectUri?.Empty == false)
                     {
@@ -352,9 +372,9 @@ namespace WebExpress.WebUI.WebControl
             {
                 Id = Id,
                 Class = formLayout == TypeLayoutForm.Inline
-                    ? Css.Concatenate("wx-form wx-form-inline", GetClasses())
-                    : Css.Concatenate("wx-form", GetClasses()),
-                Style = GetStyles(),
+                    ? Css.Concatenate("wx-form wx-form-inline", GetClasses(renderContext))
+                    : Css.Concatenate("wx-form", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 Action = uri?.ToString(),
                 Method = (method == RequestMethod.NONE
@@ -373,6 +393,15 @@ namespace WebExpress.WebUI.WebControl
             });
 
             var header = new HtmlElementSectionHeader();
+            if (titleInput is not null)
+            {
+                var title = titleInput.Render(renderContext, visualTree);
+                if (title is IHtmlElement titleElement)
+                {
+                    titleElement.Class = Css.Concatenate(titleElement.Class, "wx-modal-title-input");
+                }
+                header.Add(title);
+            }
 
             var headerPreferences = WebEx.ComponentHub.FragmentManager.GetFragments<IFragmentControl, SectionFormHeaderPreferences>
             (
@@ -422,7 +451,9 @@ namespace WebExpress.WebUI.WebControl
                 form.Add(item.Render(renderContext, visualTree));
             }
 
-            var main = new HtmlElementSectionMain();
+            // the page owns the main landmark; a second one inside the form would nest
+            // landmarks and leave a reader with two "main" regions to choose from
+            var main = new HtmlElementTextContentDiv() { Class = "wx-form-main" };
             var group = default(ControlFormItemGroup);
 
             group = itemLayout switch
@@ -432,7 +463,7 @@ namespace WebExpress.WebUI.WebControl
                 _ => new ControlFormItemGroupVertical(),
             };
 
-            foreach (var item in items.Where(x => x is not ControlFormItemInputHidden))
+            foreach (var item in items.Where(x => x is not ControlFormItemInputHidden && x != titleInput))
             {
                 group.Items.Add(item);
             }

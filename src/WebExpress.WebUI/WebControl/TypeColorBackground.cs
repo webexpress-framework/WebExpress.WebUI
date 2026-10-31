@@ -63,7 +63,14 @@
         /// <summary>
         /// Highlight background color.
         /// </summary>
-        Highlight = 13
+        Highlight = 13,
+
+        /// <summary>
+        /// The recessed surface of the active theme. Unlike <see cref="Light"/>, which is a fixed
+        /// palette color and stays light in dark mode, it follows the theme and carries the theme's
+        /// body text color.
+        /// </summary>
+        Tertiary = 14
     }
 
     /// <summary>
@@ -91,6 +98,7 @@
                 TypeColorBackground.White => "bg-white",
                 TypeColorBackground.Transparent => "bg-transparent",
                 TypeColorBackground.Highlight => "bg-highlight",
+                TypeColorBackground.Tertiary => "bg-body-tertiary",
                 _ => string.Empty,
             };
         }

@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the tile card control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTileCard
     {
         /// <summary>
@@ -97,7 +96,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-tile-card""></div>")]
-        [InlineData(typeof(IconFolder), @"<div class=""wx-tile-card"" data-icon=""fas fa-folder""></div>")]
+        [InlineData(typeof(IconFolder), @"<div class=""wx-tile-card"" data-icon=""wx-icon-light wx-icon-light-folder""></div>")]
         public void Icon(Type iconType, string expected)
         {
             // arrange

@@ -50,6 +50,27 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, float> Maximum { get; }
 
         /// <summary>
+        /// Gets the title of the second value axis, on which the datasets with the
+        /// <see cref="ControlChartDataset.YAxisId"/> "y1" are measured.
+        /// </summary>
+        Func<IRenderControlContext, string> TitleY1 { get; }
+
+        /// <summary>
+        /// Gets the minimum value of the second value axis.
+        /// </summary>
+        Func<IRenderControlContext, float> MinimumY1 { get; }
+
+        /// <summary>
+        /// Gets the maximum value of the second value axis.
+        /// </summary>
+        Func<IRenderControlContext, float> MaximumY1 { get; }
+
+        /// <summary>
+        /// Gets whether the second value axis begins at zero.
+        /// </summary>
+        Func<IRenderControlContext, bool> Y1BeginAtZero { get; }
+
+        /// <summary>
         /// Gets whether the chart is responsive. The setter returns the instance for fluent chaining.
         /// </summary>
         Func<IRenderControlContext, bool> Responsive { get; }

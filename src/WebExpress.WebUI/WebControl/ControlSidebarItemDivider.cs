@@ -5,11 +5,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a sidebar item link control.
+    /// A separator line within a sidebar, used to divide groups of entries. It is not clickable.
     /// </summary>
-    /// <remarks>
-    /// This class is used to create a link within a sidebar.
-    /// </remarks>
     public class ControlSidebarItemDivider : IControlSidebarItem
     {
         private readonly string _id;

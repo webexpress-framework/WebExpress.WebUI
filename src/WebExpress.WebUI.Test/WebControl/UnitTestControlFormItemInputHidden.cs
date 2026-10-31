@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form hidden control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputHidden
     {
         /// <summary>

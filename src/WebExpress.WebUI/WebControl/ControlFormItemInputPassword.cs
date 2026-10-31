@@ -76,8 +76,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-input-password", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-input-password", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
             }
                 .AddUserAttribute("name", name)
@@ -91,6 +91,11 @@ namespace WebExpress.WebUI.WebControl
         }
 
         /// <summary>
+        /// Gets the i18n key of the message the required rule reports.
+        /// </summary>
+        protected override string RequiredMessage => "webexpress.webui:form.inputpassword.validation.required";
+
+        /// <summary>
         /// Validates the input elements within a form for correctness of the data.
         /// </summary>
         /// <param name="renderContext">The context in which the control is rendered.</param>
@@ -100,7 +105,6 @@ namespace WebExpress.WebUI.WebControl
             var validationResults = new List<ValidationResult>(base.Validate(renderContext));
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
             var disabled = Disabled?.Invoke(renderContext) ?? false;
-            var required = Required?.Invoke(renderContext) ?? false;
             var minLength = MinLength?.Invoke(renderContext);
             var maxLength = MaxLength?.Invoke(renderContext);
 
@@ -109,10 +113,9 @@ namespace WebExpress.WebUI.WebControl
                 return [];
             }
 
-            if (required && string.IsNullOrWhiteSpace(value))
+            // the base has reported the missing value already
+            if (IsMissing(renderContext))
             {
-                validationResults.AddRange(new ValidationResult(TypeInputValidity.Error, "webexpress.webui:form.inputpassword.validation.required"));
-
                 return validationResults;
             }
 

@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// JavaScript bind handler (<c>bind/default.js</c>) needs to swap the
     /// label text when the dark mode is toggled.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestBindDarkmode
     {
         [Fact]

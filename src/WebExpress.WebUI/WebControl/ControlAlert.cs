@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -16,7 +17,7 @@ namespace WebExpress.WebUI.WebControl
         public new Func<IRenderControlContext, PropertyColorBackgroundAlert> BackgroundColor
         {
             get => (Func<IRenderControlContext, PropertyColorBackgroundAlert>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -25,7 +26,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeDismissibilityAlert> Dismissibility
         {
             get => (Func<IRenderControlContext, TypeDismissibilityAlert>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -34,7 +35,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeFade> Fade
         {
             get => (Func<IRenderControlContext, TypeFade>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -64,10 +65,9 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
-            var h = Head?.Invoke(renderContext);
-            var text = Text?.Invoke(renderContext);
+            var h = I18N.Translate(renderContext, Head?.Invoke(renderContext));
+            var text = I18N.Translate(renderContext, Text?.Invoke(renderContext));
             var dismissibility = Dismissibility?.Invoke(renderContext);
-            var iconTheme = visualTree?.IconTheme ?? WebCore.WebIcon.TypeIconTheme.Default;
 
             var head = new HtmlElementTextSemanticsStrong
             (
@@ -77,17 +77,18 @@ namespace WebExpress.WebUI.WebControl
 
             var button = new HtmlElementFieldButton()
             {
-                Class = "btn wx-button-close"
+                Class = "btn wx-button-close",
+                Type = "button"
             }
-                .Add(new HtmlElementTextSemanticsI() { Class = new IconXmark(iconTheme).Class })
-                .AddUserAttribute("data-bs-dismiss", "alert")
-                .AddUserAttribute("aria-label", "close");
+                .Add(new HtmlElementTextSemanticsI() { Class = new IconXmark().Class })
+                .AddUserAttribute("data-wx-dismiss", "alert")
+                .AddUserAttribute("aria-label", I18N.Translate(renderContext, "webexpress.webui:modal.close.label"));
 
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("alert", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("alert", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = "alert"
             }
                 .Add(!string.IsNullOrWhiteSpace(h) ? head : null)

@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form item input checkbox control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputCheck
     {
         /// <summary>
@@ -137,9 +136,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form check box control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
-        [InlineData(false, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
-        [InlineData(true, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input"" checked><label class=""form-check-label""></label></div>*")]
+        [InlineData(null, @"*<div class=""form-check""><input id=""*"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>*")]
+        [InlineData(false, @"*<div class=""form-check""><input id=""*"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>*")]
+        [InlineData(true, @"*<div class=""form-check""><input id=""*"" type=""checkbox"" class=""form-check-input"" checked><label class=""form-check-label"" for=""*""></label></div>*")]
         public void ValueForm(bool? value, string expected)
         {
             // arrange
@@ -163,9 +162,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form check box control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
-        [InlineData(false, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
-        [InlineData(true, @"*<div class=""form-check""><input type=""checkbox"" class=""form-check-input"" checked><label class=""form-check-label""></label></div>*")]
+        [InlineData(null, @"*<div class=""form-check""><input id=""*"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>*")]
+        [InlineData(false, @"*<div class=""form-check""><input id=""*"" type=""checkbox"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>*")]
+        [InlineData(true, @"*<div class=""form-check""><input id=""*"" type=""checkbox"" class=""form-check-input"" checked><label class=""form-check-label"" for=""*""></label></div>*")]
         public void ValueItem(bool? value, string expected)
         {
             // arrange

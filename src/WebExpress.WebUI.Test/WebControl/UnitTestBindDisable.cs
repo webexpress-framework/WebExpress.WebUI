@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the BindDisable binding class.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestBindDisable
     {
         /// <summary>

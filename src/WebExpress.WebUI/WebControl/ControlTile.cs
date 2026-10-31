@@ -7,7 +7,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a tile control.
+    /// Renders a tile, a rectangular content block used in tile and grid layouts.
     /// </summary>
     public class ControlTile : Control, IControlTile
     {
@@ -33,6 +33,33 @@ namespace WebExpress.WebUI.WebControl
         /// for the item.
         /// </summary>
         public Func<IRenderControlContext, bool> LargeIcon { get; set; }
+
+        /// <summary>
+        /// Gets or sets the outline level of the card titles. A card title is a fifth-level
+        /// heading by default; a page that places the tiles right under a shallower heading
+        /// sets the level that keeps its outline without a gap.
+        /// </summary>
+        public Func<IRenderControlContext, int?> HeadingLevel { get; set; }
+
+        /// <summary>
+        /// Gets or sets whether the tiles take the height their host offers
+        /// instead of growing with their number.
+        /// </summary>
+        /// <remarks>
+        /// Growing is the right shape for a set of tiles among other blocks on a
+        /// page. Where the tiles *are* the view, it is the wrong one: the page
+        /// scrolls around them, and anything the control keeps below them - the
+        /// pager, the info line - sits at the end of that scroll rather than in
+        /// reach. Filling bounds the control, and the tiles scroll above chrome
+        /// that stays.
+        ///
+        /// A host that is a flex column - which the WebApp content panel becomes
+        /// on its own for a filling control - drives the height. A host that hands
+        /// nothing down falls back to the self-imposed default of the
+        /// <c>--wx-tile-height</c> custom property, never to the content: the
+        /// tiles only scroll while the control is bounded.
+        /// </remarks>
+        public Func<IRenderControlContext, bool> Fill { get; set; } = _ => false;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -93,18 +120,20 @@ namespace WebExpress.WebUI.WebControl
             var movable = Movable?.Invoke(renderContext) ?? false;
             var allowRemove = AllowRemove?.Invoke(renderContext) ?? false;
             var largeIcon = LargeIcon?.Invoke(renderContext) ?? false;
+            var headingLevel = HeadingLevel?.Invoke(renderContext);
             var role = Role?.Invoke(renderContext);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-tile", classes),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-webui-tile", [(Fill?.Invoke(renderContext) ?? false) ? "wx-fill" : null, .. classes]),
+                Style = GetStyles(renderContext),
                 Role = role
             }
                 .AddUserAttribute("data-movable", movable ? "true" : null)
                 .AddUserAttribute("data-allow-remove", allowRemove ? "true" : null)
                 .AddUserAttribute("data-large-icon", largeIcon ? "true" : null)
+                .AddUserAttribute("data-heading-level", headingLevel?.ToString())
                 .Add
                 (
                     _items.Select

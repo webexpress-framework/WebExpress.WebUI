@@ -1,4 +1,5 @@
 ﻿using WebExpress.WebCore.WebMessage;
+using WebExpress.WebCore.WebParameter;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
@@ -9,7 +10,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlForm
     {
         /// <summary>
@@ -262,8 +262,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form text control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form *>*<input type=""text"" class=""form-control"">*</form>")]
-        [InlineData("abc", @"<form *>*<input value=""abc"" type=""text"" class=""form-control"">*</form>")]
+        [InlineData(null, @"<form *>*<input id=""*"" type=""text"" class=""form-control"">*</form>")]
+        [InlineData("abc", @"<form *>*<input id=""*"" value=""abc"" type=""text"" class=""form-control"">*</form>")]
         public void Value(string value, string expected)
         {
             // arrange
@@ -281,6 +281,72 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that an input created without an id is still named by its label: the form gives
+        /// it an id, because a label can only point at an input through one.
+        /// </summary>
+        [Fact]
+        public void LabelNamesInputWithoutId()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var form = new ControlForm().Add(new ControlFormItemInputCheck(null)
+            {
+                Label = _ => "Subscribe"
+            });
+
+            // act
+            var html = form.Render(context, visualTree).ToString();
+            var id = System.Text.RegularExpressions.Regex.Match(html, @"<input id=""(id_[^""]+)""").Groups[1].Value;
+
+            // validation
+            Assert.NotEmpty(id);
+            Assert.Contains($@"for=""{id}"">Subscribe:</label>", html);
+        }
+
+        /// <summary>
+        /// Tests that a form rendered several times in one request - as a tutorial page shows a
+        /// dark copy and the markup of its sample - processes the submission only once, while
+        /// the next request is processed again.
+        /// </summary>
+        [Fact]
+        public void ProcessOncePerRequest()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var itemProcessed = 0;
+            var formProcessed = 0;
+            var form = new ControlForm() { Name = _ => "form" }
+                .Add(new ControlFormItemInputText("text-box")
+                    .Process(x => itemProcessed++))
+                .Process(x => formProcessed++);
+
+            IRenderControlContext Submit()
+            {
+                return UnitTestControlFixture.CreateRenderContextMock
+                (
+                    null,
+                    null,
+                    new Parameter("form", "", ParameterScope.Parameter),
+                    new Parameter("text-box", "abc", ParameterScope.Parameter)
+                );
+            }
+
+            var context = Submit();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+
+            // act
+            form.Render(context, visualTree);
+            form.Render(new RenderControlContext(context), visualTree);
+            form.Render(Submit(), visualTree);
+
+            // validation
+            Assert.Equal(2, itemProcessed);
+            Assert.Equal(2, formProcessed);
         }
     }
 }

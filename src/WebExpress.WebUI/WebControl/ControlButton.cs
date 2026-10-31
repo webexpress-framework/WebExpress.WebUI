@@ -10,7 +10,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a button control.
+    /// Renders a clickable button the user presses to trigger an action or submit a form.
     /// </summary>
     public class ControlButton : Control, IControlButton
     {
@@ -30,7 +30,7 @@ namespace WebExpress.WebUI.WebControl
         public new Func<IRenderControlContext, PropertyColorButton> BackgroundColor
         {
             get => (Func<IRenderControlContext, PropertyColorButton>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(Outline?.Invoke(null) ?? false), () => value?.Invoke(null)?.ToStyle(Outline?.Invoke(null) ?? false));
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(Outline?.Invoke(null) ?? false), (renderContext) => value?.Invoke(renderContext)?.ToStyle(Outline?.Invoke(renderContext) ?? false));
         }
 
         /// <summary>
@@ -39,7 +39,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeSizeButton> Size
         {
             get => (Func<IRenderControlContext, TypeSizeButton>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeBlockButton> Block
         {
             get => (Func<IRenderControlContext, TypeBlockButton>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, TypeActive> Active
         {
             get => (Func<IRenderControlContext, TypeActive>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null).ToClass());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext).ToClass());
         }
 
         /// <summary>
@@ -166,7 +166,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var text = Text?.Invoke(renderContext);
             var value = Value?.Invoke(renderContext);
-            var icon = Icon?.Invoke(renderContext)?.ApplyIconTheme(visualTree?.IconTheme ?? TypeIconTheme.Default);
+            var icon = Icon?.Invoke(renderContext);
             var outline = Outline?.Invoke(renderContext) ?? false;
             var primaryAction = PrimaryAction?.Invoke(renderContext);
             var secondaryAction = SecondaryAction?.Invoke(renderContext);
@@ -178,8 +178,8 @@ namespace WebExpress.WebUI.WebControl
                 Id = Id,
                 Value = value,
                 Type = "button",
-                Class = Css.Concatenate("wx-button btn", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-button btn", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role,
                 Disabled = active == TypeActive.Disabled
             };

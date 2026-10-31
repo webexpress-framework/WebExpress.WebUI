@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a header item in a sidebar.
+    /// A non-clickable heading within a sidebar, used to label a group of entries.
     /// </summary>
     public class ControlSidebarItemHeader : IControlSidebarItem
     {

@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the type of fade effect.
+    /// The fade animation applied when a control appears or disappears.
     /// </summary>
     public enum TypeFade
     {

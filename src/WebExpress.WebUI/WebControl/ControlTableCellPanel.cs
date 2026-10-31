@@ -7,11 +7,9 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a table cell in a control, including its attributes and content.
+    /// Represents a table cell whose content is a set of controls rather than a plain value, for a
+    /// cell that holds buttons, badges or any other rendered control.
     /// </summary>
-    /// <remarks>This class provides properties to define the cell's identifier, CSS class, inline styles, 
-    /// and the content displayed within the cell. It is typically used to represent and manipulate  individual cells in
-    /// a table-like control.</remarks>
     public class ControlTableCellPanel : IControlTableCellPanel
     {
         private readonly List<IControl> _content = [];
@@ -113,10 +111,12 @@ namespace WebExpress.WebUI.WebControl
             var style = Style?.Invoke(renderContext);
             var color = Color?.Invoke(renderContext) ?? TypeColorTable.Default;
 
+            // the marker tells the table control that this cell carries controls rather than
+            // a value, so its markup is kept instead of being flattened into cell text
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = @class,
+                Class = Css.Concatenate("wx-table-cell-panel", @class),
                 Style = style
             }
                 .AddUserAttribute("data-color", color.ToClass())

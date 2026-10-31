@@ -5,12 +5,12 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
     id: "editor-instruction-page",
     parentId: null,
     title: webexpress.webui.I18N.translate("webexpress.webui:editor.instruction.title"),
-    iconClass: "fas fa-info-circle",
+    iconClass: "circle-info",
 
     /**
      * Renders the page ui.
      * @param {HTMLElement} container - Host container for the page.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      */
     render: function (container, modal) {
         const wrapper = document.createElement("div");
@@ -56,7 +56,7 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
     /**
      * Called when the page becomes active.
      * Resets or prefills inputs and attaches the explicit click handler.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      */
     onShow: function (modal) {
         if (!(modal && modal._instruction && modal._instruction.textInput)) {
@@ -99,7 +99,7 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
 
     /**
      * Validates current page data.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      * @returns {true|{valid:false,message:string}}
      */
     validate: function (modal) {
@@ -120,7 +120,7 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
 
     /**
      * Handles submit and inserts the instruction text into the editor.
-     * @param {webexpress.webui.ModalSidebarPanel} modal - Modal instance.
+     * @param {webexpress.webui.ModalSidebarPanelCtrl} modal - Modal instance.
      * @returns {void}
      */
     onSubmit: function (modal) {
@@ -143,16 +143,32 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
         };
 
         const safeText = escapeHtml(textVal);
+        const innerHtml = `<i class="${webexpress.webui.IconSet.resolve("circle-info")}"></i> ${safeText}`;
 
-        // insert as a block wrapper to avoid fragile leading line break behavior
-        const html = [
-            '<div class="wx-editor-instruction-frame" contenteditable="false">',
-            `<span class="wx-editor-instruction"><i class="fas fa-info-circle"></i> ${safeText}</span>`,
-            "</div>"
-        ].join("");
+        const root = typeof editor.getEditorElement === "function" ? editor.getEditorElement() : null;
+        const target = modal._instructionTarget;
+        modal._instructionTarget = null;
 
-        // editor.insertHtmlAtCursor focuses editor and restores saved range internally
-        editor.insertHtmlAtCursor(html);
+        if (target && root && root.contains(target)) {
+            // edit mode: update the existing element in place so its position
+            // is kept and a cancelled dialog can never lose the instruction
+            editor.updateNode(target, { text: textVal });
+            if (typeof editor._syncValue === "function") {
+                editor._syncValue();
+            }
+            if (typeof editor._updateUndoRedoStates === "function") {
+                editor._updateUndoRedoStates();
+            }
+        } else {
+            // insert as an inline, non-editable atomic so the instruction sits in
+            // the running text instead of forcing its own line/block. A trailing
+            // no-break space gives the caret a place to land after the element.
+            const html =
+                `<span class="wx-editor-instruction" contenteditable="false">${innerHtml}</span>&nbsp;`;
+
+            // editor.insertHtmlAtCursor focuses editor and restores saved range internally
+            editor.insertHtmlAtCursor(html);
+        }
 
         if (typeof modal.hide === "function") {
             modal.hide();
@@ -160,11 +176,8 @@ webexpress.webui.DialogPanels.register("editor-instruction", {
             modal.ctrl.hide();
         } else {
             const modalWrapper = textInput.closest(".modal");
-            if (modalWrapper && typeof bootstrap !== "undefined") {
-                const bsModal = bootstrap.Modal.getInstance(modalWrapper);
-                if (bsModal) {
-                    bsModal.hide();
-                }
+            if (modalWrapper?.open) {
+                modalWrapper.close();
             }
         }
     }

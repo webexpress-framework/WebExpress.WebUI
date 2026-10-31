@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="21" height="21" version="1.1" viewBox="0 0 21 21" xmlns="http://www.w3.org/2000/svg">
+ <g fill="none" stroke="#000" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.25">
+  <path d="m1.8 12.4h11.4v4h-11.4z"/>
+  <path d="m15 12.4h1.6v4h-1.6z"/>
+  <path d="m18 12.4h1.2v4h-1.2z"/>
+  <path d="m5.4 12.4v4"/>
+  <path d="m13.4 9.4c1.6-1 2-2.4 0-3.4-1.6-.8-1.4-2.4 0-3.4"/>
+  <path d="m16.6 10.4c1.4-1 1.8-2.4 0-3.4"/>
+ </g>
+</svg>

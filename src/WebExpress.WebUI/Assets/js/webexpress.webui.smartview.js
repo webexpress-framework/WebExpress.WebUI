@@ -3,9 +3,25 @@
  * Provides a read-only rendering wrapper that extracts a value from an inner editor element
  * (or plain markup) and renders a formatted display representation. No inline editing,
  * no event dispatch for edit lifecycle. The value can still be updated programmatically
- * via the public getter/setter.
+ * via the public getter/setter, which announces a change with
+ * webexpress.webui.Event.CHANGE_VALUE_EVENT.
  */
 webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
+    /**
+     * The controls the view forwards a new value to. A control outside this set
+     * keeps what it shows: the view has no way to tell what a value would mean
+     * to it.
+     */
+    static VALUE_CONTROLS = [
+        "DateCtrl",
+        "CalendarCtrl",
+        "SelectionCtrl",
+        "MoveCtrl",
+        "TagCtrl",
+        "EditorCtrl",
+        "ColorCtrl"
+    ];
+
     _value = null;
     _view = null;
     _id = null;
@@ -29,6 +45,23 @@ webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Returns whether the embedded control is an instance of the named control.
+     *
+     * The class is resolved by name at call time on purpose: a page does not
+     * have to ship every control this view knows about, and a plain instanceof
+     * against an undefined class throws - which would take the whole view down
+     * as soon as one of them is missing.
+     *
+     * @param {object} ctrl the embedded control to test
+     * @param {string} name the control name inside the webexpress.webui namespace
+     * @returns {boolean} true when the control is an instance of it
+     */
+    _isCtrl(ctrl, name) {
+        const type = webexpress.webui[name];
+        return typeof type === "function" && ctrl instanceof type;
+    }
+
+    /**
      * Extracts the most relevant value from the editor child or fallback content.
      * @param {HTMLElement} element The host element.
      * @returns {string} The extracted value.
@@ -37,8 +70,8 @@ webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
         // get the control instance
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._view);
 
-        if (ctrl && ctrl instanceof webexpress.webui.EditorCtrl) {
-            return ctrl._viewElement?.innerHTML ?? "";
+        if (this._isCtrl(ctrl, "EditorCtrl")) {
+            return ctrl.value;
         }
 
         // input
@@ -81,22 +114,19 @@ webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Sets the value programmatically and refreshes the display.
+     * Sets the value programmatically and refreshes the display. A value that differs from the
+     * current one is announced; the embedded view lives outside the document, so its own
+     * announcement would reach nobody.
      * @param {string|string[]} value The new raw value.
      */
     set value(value) {
+        const changed = JSON.stringify(value ?? null) !== JSON.stringify(this._value ?? null);
         this._value = value;
 
         // update underlying embedded control if available
         const ctrl = webexpress.webui.Controller.getInstanceByElement(this._view);
         if (ctrl) {
-            if (ctrl instanceof webexpress.webui.DateCtrl ||
-                ctrl instanceof webexpress.webui.CalendarCtrl ||
-                ctrl instanceof webexpress.webui.SelectionCtrl ||
-                ctrl instanceof webexpress.webui.MoveCtrl ||
-                ctrl instanceof webexpress.webui.TagCtrl ||
-                ctrl instanceof webexpress.webui.EditorCtrl ||
-                ctrl instanceof webexpress.webui.ColorCtrl) {
+            if (webexpress.webui.SmartViewCtrl.VALUE_CONTROLS.some((name) => this._isCtrl(ctrl, name))) {
                 ctrl.value = value;
             }
         } else if (this._view?.tagName === "SELECT") {
@@ -113,6 +143,10 @@ webexpress.webui.SmartViewCtrl = class extends webexpress.webui.Ctrl {
         this._element.innerHTML = "";
         if (this._view) {
             this._element.appendChild(this._view.cloneNode(true));
+        }
+
+        if (changed) {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
         }
     }
 };

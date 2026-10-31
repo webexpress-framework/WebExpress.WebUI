@@ -19,7 +19,7 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, PropertyColorText> Color
         {
             get => (Func<IRenderControlContext, PropertyColorText>)GetPropertyObjectValue();
-            set => SetProperty(value, () => value?.Invoke(null)?.ToClass(), () => value?.Invoke(null)?.ToStyle());
+            set => SetProperty(value, (renderContext) => value?.Invoke(renderContext)?.ToClass(), (renderContext) => value?.Invoke(renderContext)?.ToStyle());
         }
 
         /// <summary>
@@ -115,7 +115,7 @@ namespace WebExpress.WebUI.WebControl
             )
             {
                 Id = Id,
-                Class = GetClasses(),
+                Class = GetClasses(renderContext),
                 Style = string.Join("; ", Styles.Where(x => !string.IsNullOrWhiteSpace(x))),
                 Role = role
             };

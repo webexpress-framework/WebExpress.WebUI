@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the list control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlList
     {
         /// <summary>

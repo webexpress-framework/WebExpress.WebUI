@@ -3,7 +3,7 @@
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a control that manages a list of file items.
+    /// Contract for a control that shows and manages a list of files.
     /// </summary>
     public interface IControlFileList : IControl
     {

@@ -17,10 +17,63 @@ namespace WebExpress.WebUI.WebMarkdown
         /// </summary>
         /// <param name="document">The document to convert. Cannot be null.</param>
         /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="headingLevel">
+        /// The outline level the first-level heading of the document is read at, when the
+        /// document sits under headings of the page. A markdown document starts its own
+        /// outline at the first level; embedded under a section it continues that section, so
+        /// its headings are spoken from this level on while they keep their look.
+        /// </param>
         /// <returns>An <see cref="IHtmlNode"/> representing the HTML structure of the markdown content.</returns>
-        public static IHtmlNode ConvertToHtml(this MarkdownDocument document, IRenderControlContext renderContext)
+        public static IHtmlNode ConvertToHtml(this MarkdownDocument document, IRenderControlContext renderContext, int? headingLevel = null)
         {
-            return ConvertElement(document?.Elements ?? [], renderContext);
+            var node = ConvertElement(document?.Elements ?? [], renderContext);
+
+            if (headingLevel is > 1)
+            {
+                Outline(node, headingLevel.Value - 1);
+            }
+
+            return node;
+        }
+
+        /// <summary>
+        /// Speaks the headings of a rendered document at an offset level.
+        /// </summary>
+        /// <param name="node">The node to start at.</param>
+        /// <param name="offset">The number of levels the headings step down.</param>
+        private static void Outline(IHtmlNode node, int offset)
+        {
+            if (node is HtmlElement element)
+            {
+                var level = element switch
+                {
+                    HtmlElementSectionH1 => 1,
+                    HtmlElementSectionH2 => 2,
+                    HtmlElementSectionH3 => 3,
+                    HtmlElementSectionH4 => 4,
+                    HtmlElementSectionH5 => 5,
+                    HtmlElementSectionH6 => 6,
+                    _ => 0
+                };
+
+                if (level > 0)
+                {
+                    element.Role = "heading";
+                    element.AddUserAttribute("aria-level", System.Math.Min(6, level + offset).ToString());
+                }
+
+                foreach (var child in element.Elements)
+                {
+                    Outline(child, offset);
+                }
+            }
+            else if (node is HtmlList list)
+            {
+                foreach (var child in list.Elements)
+                {
+                    Outline(child, offset);
+                }
+            }
         }
 
         /// <summary>
@@ -37,8 +90,9 @@ namespace WebExpress.WebUI.WebMarkdown
         private static IHtmlNode ConvertElement(IEnumerable<IMarkdownElement> elements, IRenderControlContext renderContext)
         {
             var list = new HtmlList();
+            var sequence = elements.ToList();
 
-            foreach (var element in elements)
+            foreach (var (element, index) in sequence.Select((x, i) => (x, i)))
             {
                 if (element is MarkdownBlockElementHeader header)
                 {
@@ -66,7 +120,7 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownBlockElementCode code)
                 {
-                    list.Add(new HtmlElementTextContentPre(new HtmlText(code.Content))
+                    list.Add(new HtmlElementTextContentPre(new HtmlText(EscapeCode(code.Content)))
                     {
                         Class = "wx-webui-code"
                     }
@@ -136,21 +190,30 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownBlockElementList elementList)
                 {
+                    var items = elementList.Items.Select(item =>
+                        new HtmlElementTextContentLi
+                        (
+                            ConvertElement(item.Content, renderContext)
+                        )
+                    ).ToList();
+
+                    // a nested list continues the item before it, so it sits inside that item:
+                    // a list is no valid child of a list, and a reader would lose the nesting
+                    if (elementList.Child is not null && items.Count > 0)
+                    {
+                        items[^1].Add(ConvertElement([elementList.Child], renderContext));
+                    }
+                    else if (elementList.Child is not null)
+                    {
+                        items.Add(new HtmlElementTextContentLi(ConvertElement([elementList.Child], renderContext)));
+                    }
+
                     if (elementList.Ordered)
                     {
                         var orderedType = elementList.Items.FirstOrDefault()?.OrderedType ?? null;
                         var orderedNumber = elementList.Items.FirstOrDefault()?.OrderedNumber ?? null;
 
-                        list.Add(new HtmlElementTextContentOl
-                        (
-                            elementList.Items.Select(item =>
-                                new HtmlElementTextContentLi
-                                (
-                                    ConvertElement(item.Content, renderContext)
-                                )
-                            )
-                        )
-                            .Add(ConvertElement([elementList.Child], renderContext))
+                        list.Add(new HtmlElementTextContentOl(items)
                             .AddUserAttribute
                             (
                                 "type",
@@ -168,23 +231,16 @@ namespace WebExpress.WebUI.WebMarkdown
                     }
                     else
                     {
-                        list.Add(new HtmlElementTextContentUl
-                        (
-                            elementList.Items.Select(item =>
-                                new HtmlElementTextContentLi
-                                (
-                                    ConvertElement(item.Content, renderContext)
-                                )
-                            )
-                        ).Add(ConvertElement([elementList.Child], renderContext)));
+                        list.Add(new HtmlElementTextContentUl(items));
                     }
                 }
                 else if (element is MarkdownBlockElementTable table)
                 {
                     var tab = new ControlTable()
-                        .AddColumns(table.Columns.Select(x => new ControlTableColumn() { Title = _ => x.PlainText }))
+                        .AddColumns(table.Columns.Select(ConvertTableColumn))
                         .AddRows(table.Rows.Select(row => new ControlTableRow()
-                            .Add(row.Select(cell => new ControlTableCell() { Text = _ => cell.PlainText }))));
+                            .Add(row.Select(ConvertTableCell))))
+                        .AddFooter(table.Footers.Select(ConvertTableCell));
 
                     list.Add(tab.Render(renderContext, null));
                 }
@@ -194,52 +250,64 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownInlineElementItalic italic)
                 {
-                    list.Add(new HtmlElementTextSemanticsI(ConvertElement(italic.Content, renderContext)));
+                    list.Add(new HtmlElementTextSemanticsI(ConvertElement(italic.Content, renderContext)) { Inline = true });
                 }
                 else if (element is MarkdownInlineElementBold bold)
                 {
-                    list.Add(new HtmlElementTextSemanticsStrong(ConvertElement(bold.Content, renderContext)));
+                    list.Add(new HtmlElementTextSemanticsStrong(ConvertElement(bold.Content, renderContext)) { Inline = true });
                 }
                 else if (element is MarkdownInlineElementUnderline underline)
                 {
-                    list.Add(new HtmlElementTextSemanticsU(ConvertElement(underline.Content, renderContext)));
+                    list.Add(new HtmlElementTextSemanticsU(ConvertElement(underline.Content, renderContext)) { Inline = true });
                 }
                 else if (element is MarkdownInlineElementStrikethrough strikethrough)
                 {
-                    list.Add(new HtmlElementTextSemanticsS(ConvertElement(strikethrough.Content, renderContext)));
+                    list.Add(new HtmlElementTextSemanticsS(ConvertElement(strikethrough.Content, renderContext)) { Inline = true });
                 }
                 else if (element is MarkdownInlineElementMarked marked)
                 {
-                    list.Add(new HtmlElementTextSemanticsMark(ConvertElement(marked.Content, renderContext)));
+                    list.Add(new HtmlElementTextSemanticsMark(ConvertElement(marked.Content, renderContext)) { Inline = true });
                 }
                 else if (element is MarkdownInlineElementCode inlineCode)
                 {
-                    list.Add(new HtmlElementTextSemanticsCode(new HtmlText(inlineCode.Code)));
+                    list.Add(new HtmlElementTextSemanticsCode(new HtmlText(EscapeCode(inlineCode.Code))) { Inline = true });
                 }
                 else if (element is MarkdownInlineElementUrl url)
                 {
-                    list.Add(new HtmlElementTextSemanticsA(new HtmlText(url.Url)) { Href = url.Url });
+                    list.Add(new HtmlElementTextSemanticsA(new HtmlText(url.Url)) { Href = url.Url, Inline = true });
                 }
                 else if (element is MarkdownInlineElementImage img)
                 {
-                    list.Add(new HtmlElementMultimediaImg() { Src = img.Url, Alt = img.AltText, Style = "max-width: 100%;" });
+                    list.Add(new HtmlElementMultimediaImg() { Src = img.Url, Alt = img.AltText, Style = "max-width: 100%;", Inline = true });
                 }
                 else if (element is MarkdownInlineElementLink link)
                 {
-                    list.Add(new HtmlElementTextSemanticsA(new HtmlText(link.Text)) { Href = link.Url });
+                    list.Add(new HtmlElementTextSemanticsA(new HtmlText(link.Text)) { Href = link.Url, Inline = true });
                 }
                 else if (element is MarkdownInlineElementCheckbox checkbox)
                 {
-                    list.Add(new HtmlElementFieldInput()
+                    // a task marker is a picture of a state, not a control anyone can flip, so it
+                    // is disabled; the text that follows it is what it stands for and names it
+                    var caption = string.Concat(sequence.Skip(index + 1).TakeWhile(x => x is MarkdownInlineElementPlainText).Select(x => x.PlainText)).Trim();
+                    var input = new HtmlElementFieldInput()
                     {
                         Type = "checkbox",
                         Class = "form-check-input",
-                        Checked = checkbox.Value == "true" ? true : false
-                    });
+                        Checked = checkbox.Value == "true" ? true : false,
+                        Disabled = true,
+                        Inline = true
+                    };
+
+                    if (!string.IsNullOrWhiteSpace(caption))
+                    {
+                        input.AddUserAttribute("aria-label", caption);
+                    }
+
+                    list.Add(input);
                 }
                 else if (element is MarkdownInlineElementFootnote footnote)
                 {
-                    list.Add(new HtmlElementTextSemanticsSup(new HtmlText(footnote.Id)));
+                    list.Add(new HtmlElementTextSemanticsSup(new HtmlText(footnote.Id)) { Inline = true });
                 }
                 else if (element is MarkdownInlineElementHtml html)
                 {
@@ -251,6 +319,13 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownInlineElementPlugin inlinePlugin)
                 {
+                    if (MarkdownPluginRegistry.Get(inlinePlugin.Name)?.ConvertInline(inlinePlugin, renderContext) is { } converted)
+                    {
+                        list.Add(converted);
+
+                        continue;
+                    }
+
                     var pluginDiv = new HtmlElementTextContentDiv()
                     {
                         Class = "wx-plugin wx-plugin-inline"
@@ -267,7 +342,16 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownBlockElementPlugin blockPlugin)
                 {
-                    var pluginDiv = new HtmlElementTextContentDiv(ConvertElement(blockPlugin.Content, renderContext))
+                    var content = ConvertElement(blockPlugin.Content, renderContext);
+
+                    if (MarkdownPluginRegistry.Get(blockPlugin.Name)?.ConvertBlock(blockPlugin, content, renderContext) is { } converted)
+                    {
+                        list.Add(converted);
+
+                        continue;
+                    }
+
+                    var pluginDiv = new HtmlElementTextContentDiv(content)
                     {
                         Class = "wx-plugin wx-plugin-block"
                     };
@@ -284,6 +368,80 @@ namespace WebExpress.WebUI.WebMarkdown
             }
 
             return list;
+        }
+
+        /// <summary>
+        /// Converts a table cell. A cell of plain text stays a plain value; a cell with
+        /// formatting keeps its markup, which the table still sorts by its text.
+        /// </summary>
+        /// <param name="cell">The cell to convert.</param>
+        /// <returns>The cell of the table control.</returns>
+        private static IControlTableCell ConvertTableCell(MarkdownBlockElementTableCell cell)
+        {
+            var content = GetTableCellContent(cell);
+
+            if (content.All(x => x is MarkdownInlineElementPlainText))
+            {
+                return new ControlTableCell() { Text = _ => cell.PlainText };
+            }
+
+            return new ControlTableCellMarkup() { Content = renderContext => ConvertElement(content, renderContext) };
+        }
+
+        /// <summary>
+        /// Converts a header cell into a column. A header of plain text is the title of the
+        /// column; a header with formatting is shown as such and leaves the title open, so the
+        /// table names the column by the text of the formatting - a link by its text rather
+        /// than by its address, which is what the plain text of a link holds.
+        /// </summary>
+        /// <param name="cell">The header cell to convert.</param>
+        /// <returns>The column of the table control.</returns>
+        private static ControlTableColumn ConvertTableColumn(MarkdownBlockElementTableCell cell)
+        {
+            var content = GetTableCellContent(cell);
+            var plain = content.All(x => x is MarkdownInlineElementPlainText);
+
+            return new ControlTableColumn()
+            {
+                Title = plain ? _ => cell.PlainText : null,
+                TitleContent = plain ? null : renderContext => ConvertElement(content, renderContext),
+                Align = _ => cell.Align switch
+                {
+                    MarkdownCellAlign.Center => TypeHorizontalAlignmentTable.Center,
+                    MarkdownCellAlign.Right => TypeHorizontalAlignmentTable.Right,
+                    _ => TypeHorizontalAlignmentTable.Default
+                }
+            };
+        }
+
+        /// <summary>
+        /// Returns the inline content of a table cell. The parser wraps it in one paragraph,
+        /// which would break the line of the cell if it were rendered as such.
+        /// </summary>
+        /// <param name="cell">The cell.</param>
+        /// <returns>The inline elements of the cell.</returns>
+        private static List<IMarkdownElement> GetTableCellContent(MarkdownBlockElementTableCell cell)
+        {
+            return cell.Content
+                .SelectMany(x => x is MarkdownBlockElementParagraph paragraph ? paragraph.Content : [x])
+                .ToList();
+        }
+
+        /// <summary>
+        /// Escapes the content of a code span or code block. Code is shown as written, so a
+        /// tag in it must stay text - unescaped, an <c>&lt;object&gt;</c> in backticks becomes a
+        /// live element that swallows the rest of the paragraph. Entities are not decoded
+        /// inside code either, which is why the ampersand is escaped as well. Plain text is
+        /// deliberately left alone: markdown passes inline HTML and entities through there.
+        /// </summary>
+        /// <param name="code">The code as written, may be null.</param>
+        /// <returns>The code as HTML text.</returns>
+        private static string EscapeCode(string code)
+        {
+            return code?
+                .Replace("&", "&amp;")
+                .Replace("<", "&lt;")
+                .Replace(">", "&gt;");
         }
     }
 }

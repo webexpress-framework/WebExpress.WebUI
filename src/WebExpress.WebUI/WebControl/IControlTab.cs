@@ -15,9 +15,16 @@ namespace WebExpress.WebUI.WebControl
         IEnumerable<IControlTabView> Views { get; }
 
         /// <summary>
-        /// Gets or sets the highlight color for the active tab (used in Underline layout).
+        /// Gets or sets the color of the active tab: the text of the underline layout or the
+        /// fill of the pill layout.
         /// </summary>
-        Func<IRenderControlContext, PropertyColorText> HighlightColor { get; set; }
+        Func<IRenderControlContext, PropertyColorText> Color { get; set; }
+
+        /// <summary>
+        /// Gets or sets the color of the line under the active tab in the underline layout.
+        /// When not set, the line takes the text color.
+        /// </summary>
+        Func<IRenderControlContext, PropertyColorBorder> UnderlineColor { get; set; }
 
         /// <summary>
         /// Gets or sets the layout.

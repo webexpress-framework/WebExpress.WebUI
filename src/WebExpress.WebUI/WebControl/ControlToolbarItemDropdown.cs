@@ -12,7 +12,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a toolbar item dropdown control.
+    /// A toolbar entry that opens a dropdown of further actions.
     /// </summary>
     /// <remarks>
     /// This class is used to create a dropdown within a toolbar.

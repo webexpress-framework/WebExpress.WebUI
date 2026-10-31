@@ -124,21 +124,19 @@ namespace WebExpress.WebUI.WebControl
             SubmitButtonIcon = _ => new IconUpload();
             SubmitButtonColor = _ => new PropertyColorButton(TypeColorButton.Primary);
 
-            //File.ValidateItem += OnValidation;
+            File.ValidateItem += OnValidation;
             ProcessForm += OnProcessForm;
         }
 
+        /// <summary>
+        /// The interface's event is the public one: a handler registered through the
+        /// interface must fire alongside one registered on the class, so both accessors go
+        /// to the same delegate.
+        /// </summary>
         event Action<ControlFormEventFormUpload> IControlModalFormFileUpload.UploadForm
         {
-            add
-            {
-                throw new NotImplementedException();
-            }
-
-            remove
-            {
-                throw new NotImplementedException();
-            }
+            add => UploadForm += value;
+            remove => UploadForm -= value;
         }
 
         /// <summary>
@@ -172,14 +170,14 @@ namespace WebExpress.WebUI.WebControl
         {
             var name = File.Name?.Invoke(eventArgs.Context);
 
-            if (eventArgs.Context.Request.GetParameter(name) is not ParameterFile)
-            {
-                //eventArgs.AddResults(new ValidationResult
-                //(
-                //    TypesInputValidity.Error,
-                //    "fileupload.file.validation.error.nofile"
-                //));
-            }
+            // the dialog exists to deliver a file, so a submission without one is the one
+            // error it has to name itself - the input is not marked required, because the
+            // message is the dialog's rather than the field's
+            eventArgs.Add
+            (
+                eventArgs.Context.Request.GetParameter(name) is not ParameterFile,
+                "webexpress.webui:fileupload.file.validation.error.nofile"
+            );
         }
 
         /// <summary>

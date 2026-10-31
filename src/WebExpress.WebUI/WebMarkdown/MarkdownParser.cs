@@ -12,6 +12,7 @@ namespace WebExpress.WebUI.WebMarkdown
     public class MarkdownParser
     {
         private static readonly Regex _pluginParamRegex = new Regex(@"(?<key>[a-zA-Z_][a-zA-Z0-9_]*)=""(?<value>[^""]*)""", RegexOptions.Compiled);
+        private static readonly Regex _tableDelimiterRegex = new Regex(@"^(:-+:?|-+:|-{2,})$", RegexOptions.Compiled);
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -574,9 +575,6 @@ namespace WebExpress.WebUI.WebMarkdown
             var footers = new List<MarkdownTokenStream>();
             var delimiter = new List<MarkdownTokenStream>();
             var buf = new List<MarkdownTokenStream>();
-            var columnCellTokens = new Dictionary<int, MarkdownTokenStream>();
-            var rowCellTokens = new List<Dictionary<int, MarkdownTokenStream>>();
-            var footerCellTokens = new Dictionary<int, MarkdownTokenStream>();
 
             do
             {
@@ -595,23 +593,8 @@ namespace WebExpress.WebUI.WebMarkdown
             // split lines into columns, rows, and footer
             foreach (var line in lines)
             {
-                var preview = line.Preview().Skip(MarkdownTokenType.Space, MarkdownTokenType.Tab);
-
                 // detect header or footer delimiter
-                if (preview.Peek
-                (
-                    MarkdownTokenType.Hyphen,
-                    MarkdownTokenType.DoubleHyphen,
-                    MarkdownTokenType.TripleHyphen,
-                    MarkdownTokenType.MultiHyphen
-                ) is not null && preview.Skip
-                (
-                    MarkdownTokenType.Pipe,
-                    MarkdownTokenType.DoubleHyphen,
-                    MarkdownTokenType.TripleHyphen,
-                    MarkdownTokenType.MultiHyphen,
-                    MarkdownTokenType.Space
-                ).IsAtEnd())
+                if (IsTableDelimiter(line))
                 {
                     if (delimiter.Count == 0)
                     {
@@ -634,107 +617,33 @@ namespace WebExpress.WebUI.WebMarkdown
             rows = delimiter.Count <= 1 ? buf : rows;
             footers = delimiter.Count > 1 ? buf : footers;
 
-            // process columns
-            foreach (var column in columns)
-            {
-                // split the column into cells using the Pipe token as delimiter
-                var columnCells = column.Split(MarkdownTokenType.Pipe);
+            // the delimiter below the header declares the alignment of every column
+            var aligns = delimiter.Count > 0
+                ? SplitTableCells(delimiter[0]).Select(ParseCellAlign).ToList()
+                : [];
+            MarkdownCellAlign Align(int index) => index < aligns.Count ? aligns[index] : MarkdownCellAlign.Left;
 
-                for (int i = 0; i < columnCells.Count; i++)
-                {
-                    if (!columnCellTokens.TryGetValue(i, out MarkdownTokenStream value))
-                    {
-                        value = new MarkdownTokenStream([], column.GetSource());
-                        // initialize the token stream if it doesn't exist
-                        columnCellTokens[i] = value;
-                    }
-
-                    // update the dictionary with the new merged token stream
-                    columnCellTokens[i] = new MarkdownTokenStream([value, columnCells[i]]);
-                }
-            }
-
-            // process rows
-            foreach (var row in rows)
-            {
-                var followLine = row
-                    .Reverse()
-                    .Skip(MarkdownTokenType.Space, MarkdownTokenType.Tab, MarkdownTokenType.EOF)
-                    .Peek(MarkdownTokenType.DoubleGreater) is not null;
-
-                // split the row into cells using the Pipe token as delimiter
-                var rowCells = row.Split(MarkdownTokenType.Pipe);
-
-                // create a dictionary to store the cell tokens for the current row
-                var rowTokenDictionary = new Dictionary<int, MarkdownTokenStream>();
-
-                for (int i = 0; i < rowCells.Count; i++)
-                {
-                    if (!followLine)
-                    {
-                        // update the dictionary with the new merged token stream
-                        rowTokenDictionary[i] = rowCells[i];
-                    }
-                    else
-                    {
-                        if (!rowTokenDictionary.TryGetValue(i, out MarkdownTokenStream value))
-                        {
-                            value = new MarkdownTokenStream([], row.GetSource());
-                            // initialize the token stream for the current cell
-                            rowTokenDictionary[i] = value;
-                        }
-
-                        // update the dictionary with the new merged token stream
-                        columnCellTokens[i] = new MarkdownTokenStream([value, rowCells[i]]);
-                    }
-                }
-
-                // Add the processed row to the list of row dictionaries
-                rowCellTokens.Add(rowTokenDictionary);
-            }
-
-            // Process footer
-            foreach (var footer in footers)
-            {
-                // Split the footer into cells using the Pipe token as delimiter
-                var footerCells = footer.Split(MarkdownTokenType.Pipe);
-
-                for (int i = 0; i < footerCells.Count; i++)
-                {
-                    // check if the token stream for the current footer cell already exists
-                    if (!footerCellTokens.TryGetValue(i, out MarkdownTokenStream existingValue))
-                    {
-                        // initialize the token stream if it doesn't exist
-                        existingValue = new MarkdownTokenStream([], footer.GetSource());
-                        footerCellTokens[i] = existingValue;
-                    }
-
-                    // merge the existing tokens with the new cell tokens
-                    var mergedTokens = new List<MarkdownToken>(existingValue.Tokens);
-                    mergedTokens.AddRange(footerCells[i].Tokens);
-
-                    // update the dictionary with the new merged token stream
-                    footerCellTokens[i] = new MarkdownTokenStream(mergedTokens, footer.GetSource());
-                }
-            }
+            var columnCellTokens = MergeTableLines(columns);
+            var rowCellTokens = GroupContinuedRows(rows).Select(MergeTableLines).ToList();
+            var footerCellTokens = MergeTableLines(footers);
 
             // retrieve the maximum column count across columns, rows, and footers
             var maxColumnCount = Math.Max
             (
-                Math.Max(columnCellTokens.Count, rowCellTokens.Max(row => row.Count)),
+                Math.Max(columnCellTokens.Count, rowCellTokens.Select(row => row.Count).DefaultIfEmpty().Max()),
                 footerCellTokens.Count
             );
 
             // add existing columns to the table
             foreach (var cell in columnCellTokens)
             {
-                table.AddColumn(new MarkdownBlockElementTableCell(Parse(cell.Value)?.Elements));
+                table.AddColumn(new MarkdownBlockElementTableCell(Align(cell.Key), ParseTableCell(cell.Value)));
             }
 
             // fill the table with empty columns if necessary to match the maximum column count
             for (int c = columnCellTokens.Count; c < maxColumnCount; c++)
             {
-                table.AddColumn(new MarkdownBlockElementTableCell());
+                table.AddColumn(new MarkdownBlockElementTableCell(Align(c), []));
             }
 
             // add existing rows to the table
@@ -743,13 +652,13 @@ namespace WebExpress.WebUI.WebMarkdown
                 var cells = new List<MarkdownBlockElementTableCell>();
                 foreach (var cell in row)
                 {
-                    cells.Add(new MarkdownBlockElementTableCell(Parse(cell.Value)?.Elements));
+                    cells.Add(new MarkdownBlockElementTableCell(Align(cell.Key), ParseTableCell(cell.Value)));
                 }
 
                 // fill the row with empty cells if necessary to match the maximum column count
                 for (int c = row.Count; c < maxColumnCount; c++)
                 {
-                    cells.Add(new MarkdownBlockElementTableCell());
+                    cells.Add(new MarkdownBlockElementTableCell(Align(c), []));
                 }
 
                 table.AddRow(cells);
@@ -758,7 +667,7 @@ namespace WebExpress.WebUI.WebMarkdown
             // add existing footer columns to the table
             foreach (var cell in footerCellTokens)
             {
-                table.AddFooter(new MarkdownBlockElementTableCell(Parse(cell.Value)?.Elements));
+                table.AddFooter(new MarkdownBlockElementTableCell(Align(cell.Key), ParseTableCell(cell.Value)));
             }
 
             if (delimiter.Count > 1)
@@ -766,11 +675,213 @@ namespace WebExpress.WebUI.WebMarkdown
                 // fill the table with empty footer columns if necessary to match the maximum column count
                 for (int c = footerCellTokens.Count; c < maxColumnCount; c++)
                 {
-                    table.AddFooter(new MarkdownBlockElementTableCell());
+                    table.AddFooter(new MarkdownBlockElementTableCell(Align(c), []));
                 }
             }
 
             return table;
+        }
+
+        /// <summary>
+        /// Groups the body lines of a table into rows. A line ending in <c>&gt;&gt;</c>
+        /// continues on the next line, which lets a long cell be wrapped in the source
+        /// without starting a new row; a marker on the last line has nothing to continue
+        /// into and closes the row like a line without one.
+        /// </summary>
+        /// <param name="lines">The body lines of the table.</param>
+        /// <returns>The lines of each row, in order.</returns>
+        private static IEnumerable<List<MarkdownTokenStream>> GroupContinuedRows(IEnumerable<MarkdownTokenStream> lines)
+        {
+            var group = new List<MarkdownTokenStream>();
+
+            foreach (var line in lines)
+            {
+                group.Add(line);
+
+                if (!IsContinuedTableLine(line))
+                {
+                    yield return group;
+                    group = [];
+                }
+            }
+
+            if (group.Count > 0)
+            {
+                yield return group;
+            }
+        }
+
+        /// <summary>
+        /// Merges table lines column by column into one set of cells. The lines of a cell
+        /// are joined by a blank, as the lines of a paragraph are, so a wrapped cell reads
+        /// as the sentence it was before it was wrapped.
+        /// </summary>
+        /// <param name="lines">The lines that form one row, the header or the footer.</param>
+        /// <returns>The token stream of each cell, keyed by its column.</returns>
+        private static Dictionary<int, MarkdownTokenStream> MergeTableLines(IEnumerable<MarkdownTokenStream> lines)
+        {
+            var merged = new Dictionary<int, List<MarkdownToken>>();
+            MarkdownTokenStream origin = null;
+
+            foreach (var line in lines)
+            {
+                origin ??= line;
+                var cells = SplitTableCells(StripTableContinuation(line));
+
+                for (int i = 0; i < cells.Count; i++)
+                {
+                    var tokens = TrimCellTokens(cells[i]);
+
+                    if (!merged.TryGetValue(i, out var cell))
+                    {
+                        merged[i] = cell = [];
+                    }
+
+                    if (cell.Count > 0 && tokens.Count > 0)
+                    {
+                        var last = cell[^1];
+                        cell.Add(new MarkdownToken(MarkdownTokenType.Space, " ", last.Position + last.Count, 0));
+                    }
+
+                    cell.AddRange(tokens);
+                }
+            }
+
+            return merged.ToDictionary(x => x.Key, x => origin.Derive(x.Value));
+        }
+
+        /// <summary>
+        /// Determines whether a table line ends in the continuation marker <c>&gt;&gt;</c>.
+        /// </summary>
+        /// <param name="line">The table line.</param>
+        /// <returns>True if the row continues on the next line; otherwise, false.</returns>
+        private static bool IsContinuedTableLine(MarkdownTokenStream line)
+        {
+            return line.Tokens
+                .LastOrDefault(x => x.Type is not (MarkdownTokenType.Space or MarkdownTokenType.Tab or MarkdownTokenType.EOF))?
+                .Type == MarkdownTokenType.DoubleGreater;
+        }
+
+        /// <summary>
+        /// Removes the continuation marker from the end of a table line, so it neither
+        /// shows in the last cell nor, behind a closing pipe, opens a cell of its own.
+        /// </summary>
+        /// <param name="line">The table line.</param>
+        /// <returns>The line without the marker.</returns>
+        private static MarkdownTokenStream StripTableContinuation(MarkdownTokenStream line)
+        {
+            if (!IsContinuedTableLine(line))
+            {
+                return line;
+            }
+
+            var tokens = line.Tokens.Where(x => x.Type != MarkdownTokenType.EOF).ToList();
+            var marker = tokens.FindLastIndex(x => x.Type == MarkdownTokenType.DoubleGreater);
+
+            return line.Derive(tokens.Take(marker));
+        }
+
+        /// <summary>
+        /// Parses the content of a table cell. A cell holds one line of text, so its content
+        /// is read as inline elements only: a cell that starts with <c>#</c>, <c>-</c> or
+        /// <c>1.</c> holds that text and not a heading or a list. The inline elements are
+        /// wrapped in one paragraph, so every renderer finds the content of a cell in the
+        /// same shape; an empty cell has no content.
+        /// </summary>
+        /// <param name="cell">The token stream of the cell.</param>
+        /// <returns>The content of the cell.</returns>
+        private static IEnumerable<IMarkdownElement> ParseTableCell(MarkdownTokenStream cell)
+        {
+            if (cell.IsAtEnd())
+            {
+                return [];
+            }
+
+            return [new MarkdownBlockElementParagraph(ParseInlineElements(cell, tableCell: true))];
+        }
+
+        /// <summary>
+        /// Returns the tokens of a cell without the blanks around its content, which would
+        /// otherwise reach the rendered text of the cell.
+        /// </summary>
+        /// <param name="cell">The token stream of the cell.</param>
+        /// <returns>The tokens of the content.</returns>
+        private static List<MarkdownToken> TrimCellTokens(MarkdownTokenStream cell)
+        {
+            static bool IsBlank(MarkdownToken token) => token.Type is MarkdownTokenType.Space
+                or MarkdownTokenType.Tab
+                or MarkdownTokenType.EOL
+                or MarkdownTokenType.EOF;
+
+            return cell.Tokens
+                .SkipWhile(IsBlank)
+                .Reverse()
+                .SkipWhile(IsBlank)
+                .Reverse()
+                .ToList();
+        }
+
+        /// <summary>
+        /// Splits a table line into its cells. The opening pipe has already been consumed
+        /// by the caller; a closing pipe ends the last cell rather than opening a further
+        /// one, so what follows it - nothing but blanks - is no cell.
+        /// </summary>
+        /// <param name="line">The table line without its opening pipe.</param>
+        /// <returns>The token streams of the cells, in column order.</returns>
+        private static List<MarkdownTokenStream> SplitTableCells(MarkdownTokenStream line)
+        {
+            var cells = line.Split(MarkdownTokenType.Pipe);
+
+            if (cells.Count > 1 && GetCellText(cells[^1]).Length == 0)
+            {
+                cells.RemoveAt(cells.Count - 1);
+            }
+
+            return cells;
+        }
+
+        /// <summary>
+        /// Determines whether a table line is a delimiter row, which separates the header
+        /// (and, a second time, the footer) from the body. A lone hyphen does not qualify
+        /// on its own, because tables commonly use it as the value "not available" and a
+        /// body row of such cells must stay a row; with a colon or two hyphens the intent
+        /// is unambiguous.
+        /// </summary>
+        /// <param name="line">The table line without its opening pipe.</param>
+        /// <returns>True if every cell of the line is a delimiter cell; otherwise, false.</returns>
+        private static bool IsTableDelimiter(MarkdownTokenStream line)
+        {
+            var cells = SplitTableCells(line).Select(GetCellText).ToList();
+
+            return cells.Count > 0 && cells.All(cell => _tableDelimiterRegex.IsMatch(cell));
+        }
+
+        /// <summary>
+        /// Reads the alignment a delimiter cell declares: a colon on the right aligns
+        /// right, colons on both sides center, anything else keeps the default.
+        /// </summary>
+        /// <param name="cell">A cell of the delimiter row.</param>
+        /// <returns>The alignment of the column.</returns>
+        private static MarkdownCellAlign ParseCellAlign(MarkdownTokenStream cell)
+        {
+            var text = GetCellText(cell);
+
+            return (text.StartsWith(':'), text.EndsWith(':')) switch
+            {
+                (true, true) => MarkdownCellAlign.Center,
+                (false, true) => MarkdownCellAlign.Right,
+                _ => MarkdownCellAlign.Left
+            };
+        }
+
+        /// <summary>
+        /// Returns the text of a cell without its surrounding blanks.
+        /// </summary>
+        /// <param name="cell">The token stream of the cell.</param>
+        /// <returns>The trimmed text of the cell.</returns>
+        private static string GetCellText(MarkdownTokenStream cell)
+        {
+            return string.Concat(cell.Tokens.Select(token => token.Value)).Trim();
         }
 
         /// <summary>
@@ -894,8 +1005,12 @@ namespace WebExpress.WebUI.WebMarkdown
         /// Uses recursive parsing for nested inline elements.
         /// </summary>
         /// <param name="tokenStream">The stream of markdown tokens.</param>
+        /// <param name="tableCell">
+        /// Whether the text is the content of a table cell, where a pipe in a code span has
+        /// to be escaped as well and the escape is therefore removed from the code.
+        /// </param>
         /// <returns>A list of <see cref="MarkdownInlineElement"/> representing the parsed inlines.</returns>
-        private static IEnumerable<MarkdownInlineElement> ParseInlineElements(MarkdownTokenStream tokenStream)
+        private static IEnumerable<MarkdownInlineElement> ParseInlineElements(MarkdownTokenStream tokenStream, bool tableCell = false)
         {
             var inlines = new List<MarkdownInlineElement>();
 
@@ -918,7 +1033,7 @@ namespace WebExpress.WebUI.WebMarkdown
                             if (innerTokens?.IsAtEnd() == false)
                             {
                                 tokenStream.Skip(innerTokens.Count()); // skip matched
-                                inlines.Add(new MarkdownInlineElementItalic(ParseInlineElements(innerTokens)));
+                                inlines.Add(new MarkdownInlineElementItalic(ParseInlineElements(innerTokens, tableCell)));
                             }
                             else
                             {
@@ -935,7 +1050,7 @@ namespace WebExpress.WebUI.WebMarkdown
                             {
                                 tokenStream.Skip(innerTokens.Count()); // skip matched
 
-                                inlines.Add(new MarkdownInlineElementBold(ParseInlineElements(innerTokens)));
+                                inlines.Add(new MarkdownInlineElementBold(ParseInlineElements(innerTokens, tableCell)));
                             }
                             else
                             {
@@ -957,7 +1072,7 @@ namespace WebExpress.WebUI.WebMarkdown
                                     new MarkdownInlineElementBold
                                     (
                                         [
-                                            new MarkdownInlineElementItalic(ParseInlineElements(innerTokens))
+                                            new MarkdownInlineElementItalic(ParseInlineElements(innerTokens, tableCell))
                                         ]
                                     )
                                 );
@@ -977,7 +1092,7 @@ namespace WebExpress.WebUI.WebMarkdown
                             {
                                 tokenStream.Skip(innerTokens.Count()); // skip matched
 
-                                inlines.Add(new MarkdownInlineElementUnderline(ParseInlineElements(innerTokens)));
+                                inlines.Add(new MarkdownInlineElementUnderline(ParseInlineElements(innerTokens, tableCell)));
                             }
                             else
                             {
@@ -998,7 +1113,7 @@ namespace WebExpress.WebUI.WebMarkdown
                                 (
                                     new MarkdownInlineElementUnderline
                                     (
-                                        [new MarkdownInlineElementBold(ParseInlineElements(innerTokens))]
+                                        [new MarkdownInlineElementBold(ParseInlineElements(innerTokens, tableCell))]
                                     )
                                 );
                             }
@@ -1024,7 +1139,7 @@ namespace WebExpress.WebUI.WebMarkdown
                                         [
                                             new MarkdownInlineElementBold
                                         (
-                                            [new MarkdownInlineElementItalic(ParseInlineElements(innerTokens))]
+                                            [new MarkdownInlineElementItalic(ParseInlineElements(innerTokens, tableCell))]
                                         )
                                         ]
                                     )
@@ -1045,7 +1160,7 @@ namespace WebExpress.WebUI.WebMarkdown
                             {
                                 tokenStream.Skip(innerTokens.Count()); // skip matched
 
-                                inlines.Add(new MarkdownInlineElementStrikethrough(ParseInlineElements(innerTokens)));
+                                inlines.Add(new MarkdownInlineElementStrikethrough(ParseInlineElements(innerTokens, tableCell)));
                             }
                             else
                             {
@@ -1062,7 +1177,7 @@ namespace WebExpress.WebUI.WebMarkdown
                             {
                                 tokenStream.Skip(innerTokens.Count()); // skip matched
 
-                                inlines.Add(new MarkdownInlineElementStrikethrough(ParseInlineElements(innerTokens)));
+                                inlines.Add(new MarkdownInlineElementStrikethrough(ParseInlineElements(innerTokens, tableCell)));
                             }
                             else
                             {
@@ -1084,7 +1199,7 @@ namespace WebExpress.WebUI.WebMarkdown
                                     new MarkdownInlineElementStrikethrough
                                     (
                                         [
-                                            new MarkdownInlineElementBold(ParseInlineElements(innerTokens))
+                                            new MarkdownInlineElementBold(ParseInlineElements(innerTokens, tableCell))
                                         ]
                                     )
                                 );
@@ -1106,7 +1221,7 @@ namespace WebExpress.WebUI.WebMarkdown
 
                                 inlines.Add
                                 (
-                                    new MarkdownInlineElementMarked(ParseInlineElements(innerTokens))
+                                    new MarkdownInlineElementMarked(ParseInlineElements(innerTokens, tableCell))
                                 );
                             }
                             else
@@ -1124,7 +1239,11 @@ namespace WebExpress.WebUI.WebMarkdown
                             {
                                 tokenStream.Skip(innerTokens.Count()); // skip matched
 
-                                inlines.Add(new MarkdownInlineElementCode(innerTokens.GetSource()));
+                                var code = innerTokens.GetSource();
+
+                                // a code span reads its source verbatim, so the escape that keeps
+                                // a pipe from splitting the cell is still in it
+                                inlines.Add(new MarkdownInlineElementCode(tableCell ? code.Replace("\\|", "|") : code));
                             }
                             else
                             {

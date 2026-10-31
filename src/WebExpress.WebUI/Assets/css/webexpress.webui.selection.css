@@ -27,8 +27,11 @@
     white-space: nowrap;
 }
 
-.wx-selection > ul > span {
-    color: var(--bs-secondary);
+.wx-selection > ul > span,
+.wx-selection > ul > li.wx-selection-placeholder {
+    /* the placeholder is an entry of the list, but drawn as the hint it is */
+    color: var(--wx-secondary-color);
+    padding: 0;
 }
 
 .wx-selection > ul > li > span {
@@ -55,6 +58,7 @@
 .wx-selection > div:nth-child(2) > ul {
     display: inline-flex;
     flex-wrap: wrap;
+    align-items: center;
     gap: 0.2em;
     padding-left: 0.2em;
     margin-right: auto;
@@ -71,8 +75,10 @@
     gap: 0.2em;
 }
 
-.wx-selection > div:nth-child(2) > ul > span {
-    color: var(--bs-secondary);
+.wx-selection > div:nth-child(2) > ul > span,
+.wx-selection > div:nth-child(2) > ul > li.wx-selection-placeholder {
+    color: var(--wx-secondary-color);
+    padding: 0;
 }
 
 .wx-selection > div:nth-child(2) > ul > li > span {
@@ -87,38 +93,47 @@
 .wx-selection > div:nth-child(2) > ul > li > span > img {
 }
 
-.wx-selection > div:nth-child(2) > ul > li > a {
-    margin-right: 0.2em;
+/* the remove button spans the pointer target size the guideline asks for; the negative
+   vertical margin keeps the chip as high as its text */
+.wx-selection > div:nth-child(2) > ul > li > a,
+.wx-selection > div:nth-child(2) > ul > li > .wx-chip-remove {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 24px;
+    min-height: 24px;
+    margin: -0.3em 0 -0.3em 0;
     text-decoration: none;
     font-size: 0.8em;
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
+    background: transparent;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
 }
 
-.wx-selection > div:nth-child(2) > ul > li > a:hover {
-    color: var(--bs-danger);
+.wx-selection > div:nth-child(2) > ul > li > a:hover,
+.wx-selection > div:nth-child(2) > ul > li > .wx-chip-remove:hover {
+    color: var(--wx-danger);
 }
 
-.wx-selection > div:nth-child(2) > a {
+.wx-selection > div:nth-child(2) > button {
     text-decoration: none;
-    color: var(--bs-secondary);
+    color: var(--wx-secondary);
     float: right;
     margin: 0;
     padding-right: 0.3em;
 }
 
 .wx-selection > div:nth-child(2) > a:hover {
-    color: var(--bs-secondary-hover);
+    color: var(--wx-emphasis-color);
 }
 
-.wx-selection div:nth-child(3) {
-    display: none;
+.wx-selection > .dropdown-menu {
     flex-direction: column;
-    position: absolute;
-    top: 100%;
-    left: 0;
-    background-color: var(--bs-body-bg);
-    border: var(--bs-border-width) solid var(--bs-border-color);
-    border-radius: var(--bs-border-radius);
+    background-color: var(--wx-body-bg);
+    border: var(--wx-border-width) solid var(--wx-border-color);
+    border-radius: var(--wx-border-radius);
     box-shadow: var(--wx-dropdown-shadow);
     list-style: none;
     padding: 0;
@@ -127,205 +142,233 @@
     resize: both;
 }
 
-.wx-selection div:nth-child(3) > div:nth-child(1) {
+.wx-selection > .dropdown-menu > div:nth-child(1) {
     flex-direction: row;
     display: flex;
     align-items: center;
     margin: 0.5em;
-    background-color: var(--bs-body-bg);
-    border: var(--bs-border-width) solid var(--bs-border-color);
+    background-color: var(--wx-body-bg);
+    border: var(--wx-border-width) solid var(--wx-border-color);
 }
 
-.wx-selection div:nth-child(3) > div:nth-child(1) > input {
+.wx-selection > .dropdown-menu > div:nth-child(1) > input {
     padding: 0.2em;
     margin-left: 0.1em;
     outline: none;
     flex: 1;
     border: 0px;
-    background-color: var(--bs-body-bg);
-    color: var(--bs-body-color);
+    background-color: var(--wx-body-bg);
+    color: var(--wx-body-color);
 }
 
-[data-bs-theme="dark"] .wx-selection div:nth-child(3) > div:nth-child(1) > input {
-    background-color: black;
-}
 
-.wx-selection div:nth-child(3) > div:nth-child(1) > a {
+
+.wx-selection > .dropdown-menu > div:nth-child(1) > .wx-selection-clear {
     cursor: pointer;
-    color: var(--bs-border-color);
+    color: var(--wx-border-color);
     font-size: 1em;
     text-decoration: none;
     margin-right: 0.2em;
+    min-width: 24px;
+    min-height: 24px;
 }
 
-.wx-selection > div:nth-child(3) > div:nth-child(1) > a:hover {
-    color: var(--bs-secondary);
+.wx-selection > .dropdown-menu > div:nth-child(1) > .wx-selection-clear:hover {
+    color: var(--wx-danger);
 }
 
-.wx-selection div:nth-child(3) > ul {
+.wx-selection > .dropdown-menu > ul {
     overflow-x: hidden;
     overflow-y: scroll;
     flex: 1;
-    height: 15rem;
     margin: 0;
     padding: 0;
-    height: 20em;
+    min-block-size: min(16rem, max(0px, calc(100dvb - 8rem)));
+    block-size: 16rem;
+    flex-shrink: 0;
 }
 
-.wx-selection div:nth-child(3) > ul > li.dropdown-item {
+.wx-selection > .dropdown-menu > ul > li.dropdown-item {
+    min-block-size: 2rem;
     cursor: pointer;
 }
 
-.wx-selection div:nth-child(3) > ul > li > button {
-    background: 0, 0;
+.wx-selection > .dropdown-menu > ul > li > button {
+    background: transparent;
     border: 0;
+    padding: 0;
+    width: 100%;
+    text-align: start;
     display: inline-flex;
     align-items: center;
     gap: 0.5em;
 }
 
-.wx-selection div:nth-child(3) > ul > li > button:not(:disabled) {
-    color: var(--bs-link-color);
+.wx-selection > .dropdown-menu > ul > li > button:not(:disabled) {
+    color: var(--wx-link-color);
 }
 
-.wx-selection div:nth-child(3) > ul > li > button:not(:disabled):hover {
-    color: var(--bs-link-hover-color);
+.wx-selection > .dropdown-menu > ul > li > button:not(:disabled):hover {
+    color: var(--wx-link-hover-color);
 }
 
-.wx-selection div:nth-child(3) > ul > li > button > img {
+.wx-selection > .dropdown-menu > ul > li > button > img {
 }
 
-.wx-selection div:nth-child(3) > ul > li > button > i {
+.wx-selection > .dropdown-menu > ul > li > button > i {
 }
 
-.wx-selection div:nth-child(3) > ul > li > button > span {
+.wx-selection > .dropdown-menu > ul > li > button > span {
 }
 
-.wx-selection div:nth-child(3) > ul > li > div {
+.wx-selection > .dropdown-menu > ul > li > div {
 }
 
-.wx-selection div:nth-child(3) > ul > li > p {
+.wx-selection > .dropdown-menu > ul > li > p {
 }
 
-.wx-selection > div:nth-child(3) > footer {
-    color: var(--bs-gray);
-    background-color: var(--bs-light);
+.wx-selection > .dropdown-menu > footer {
+    color: var(--wx-gray);
+    background-color: var(--wx-light);
     flex-direction: row;
     padding: 0.2em;
 }
 
-[data-bs-theme=dark] .wx-selection > div:nth-child(3) > footer {
-    background-color: var(--bs-secondary-bg);
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-selection > .dropdown-menu > footer {
+    background-color: var(--wx-secondary-bg);
+}
 }
 
+/* the text on a brand fill is the contrast color of that fill, pure white on the dark ones: the
+   off-white of the light tone falls just under 4.5:1 on success, danger and secondary */
 .wx-selection-primary {
-    color: var(--bs-white);
-    background-color: var(--bs-primary);
-    border: 1px solid var(--bs-primary);
+    color: var(--wx-white);
+    background-color: var(--wx-primary);
+    border: 1px solid var(--wx-primary);
 }
 
-.wx-selection-primary > a {
-    color: var(--bs-white)!important;
+.wx-selection-primary > a, .wx-selection-primary > .wx-chip-remove {
+    color: var(--wx-white)!important;
 }
 
-.wx-selection-primary > a:hover {
-    color: var(--bs-danger) !important;
+.wx-selection-primary > a:hover, .wx-selection-primary > .wx-chip-remove:hover {
+    color: var(--wx-danger) !important;
 }
 
 .wx-selection-secondary {
-    color: var(--bs-light);
-    background-color: var(--bs-secondary);
-    border: 1px solid var(--bs-secondary);
+    color: var(--wx-secondary-contrast, var(--wx-white));
+    background-color: var(--wx-secondary);
+    border: 1px solid var(--wx-secondary);
 }
 
-.wx-selection-secondary > a {
-    color: var(--bs-white)!important;
+.wx-selection-secondary > a, .wx-selection-secondary > .wx-chip-remove {
+    color: var(--wx-white)!important;
 }
 
-.wx-selection-secondary > a:hover {
-    color: var(--bs-danger) !important;
+.wx-selection-secondary > a:hover, .wx-selection-secondary > .wx-chip-remove:hover {
+    color: var(--wx-danger) !important;
 }
 
 .wx-selection-success {
-    color: var(--bs-light);
-    background-color: var(--bs-success);
-    border: 1px solid var(--bs-success);
+    color: var(--wx-success-contrast, var(--wx-white));
+    background-color: var(--wx-success);
+    border: 1px solid var(--wx-success);
 }
 
-.wx-selection-success > a {
-    color: var(--bs-white) !important;
+.wx-selection-success > a, .wx-selection-success > .wx-chip-remove {
+    color: var(--wx-white) !important;
 }
 
-.wx-selection-success > a:hover {
-    color: var(--bs-danger) !important;
+.wx-selection-success > a:hover, .wx-selection-success > .wx-chip-remove:hover {
+    color: var(--wx-danger) !important;
 }
 
 .wx-selection-info {
-    color: var(--bs-dark);
-    background-color: var(--bs-info);
-    border: 1px solid var(--bs-info);
+    color: var(--wx-dark);
+    background-color: var(--wx-info);
+    border: 1px solid var(--wx-info);
 }
 
-.wx-selection-info > a {
-    color: var(--bs-dark) !important;
+.wx-selection-info > a, .wx-selection-info > .wx-chip-remove {
+    color: var(--wx-dark) !important;
 }
 
-.wx-selection-info > a:hover {
-    color: var(--bs-danger) !important;
+.wx-selection-info > a:hover, .wx-selection-info > .wx-chip-remove:hover {
+    color: var(--wx-danger) !important;
 }
 
 .wx-selection-warning {
-    color: var(--bs-dark);
-    background-color: var(--bs-warning);
-    border: 1px solid var(--bs-warning);
+    color: var(--wx-dark);
+    background-color: var(--wx-warning);
+    border: 1px solid var(--wx-warning);
 }
 
-.wx-selection-warning > a {
-    color: var(--bs-dark) !important;
+.wx-selection-warning > a, .wx-selection-warning > .wx-chip-remove {
+    color: var(--wx-dark) !important;
 }
 
-.wx-selection-warning > a:hover {
-    color: var(--bs-danger) !important;
+.wx-selection-warning > a:hover, .wx-selection-warning > .wx-chip-remove:hover {
+    color: var(--wx-danger) !important;
 }
 
 .wx-selection-danger {
-    color: var(--bs-light);
-    background-color: var(--bs-danger);
-    border: 1px solid var(--bs-danger);
+    color: var(--wx-danger-contrast, var(--wx-white));
+    background-color: var(--wx-danger);
+    border: 1px solid var(--wx-danger);
 }
 
-.wx-selection-danger > a {
-    color: var(--bs-white) !important;
+.wx-selection-danger > a, .wx-selection-danger > .wx-chip-remove {
+    color: var(--wx-white) !important;
 }
 
-.wx-selection-danger > a:hover {
-    color: var(--bs-dark) !important;
+.wx-selection-danger > a:hover, .wx-selection-danger > .wx-chip-remove:hover {
+    color: var(--wx-dark) !important;
 }
 
 .wx-selection-light {
-    color: var(--bs-dark);
-    background-color: var(--bs-light);
-    border: 1px solid var(--bs-light);
+    color: var(--wx-dark);
+    background-color: var(--wx-light);
+    border: 1px solid var(--wx-light);
 }
 
-.wx-selection-light > a {
-    color: var(--bs-dark) !important;
+.wx-selection-light > a, .wx-selection-light > .wx-chip-remove {
+    color: var(--wx-dark) !important;
 }
 
-.wx-selection-light > a:hover {
-    color: var(--bs-danger) !important;
+.wx-selection-light > a:hover, .wx-selection-light > .wx-chip-remove:hover {
+    color: var(--wx-danger) !important;
 }
 
 .wx-selection-dark {
-    color: var(--bs-light);
-    background-color: var(--bs-dark);
-    border: 1px solid var(--bs-dark);
+    color: var(--wx-dark-contrast, var(--wx-white));
+    background-color: var(--wx-dark);
+    border: 1px solid var(--wx-dark);
 }
 
-.wx-selection-dark > a {
-    color: var(--bs-white) !important;
+.wx-selection-dark > a, .wx-selection-dark > .wx-chip-remove {
+    color: var(--wx-white) !important;
 }
 
-.wx-selection-dark > a:hover {
-    color: var(--bs-danger) !important;
+.wx-selection-dark > a:hover, .wx-selection-dark > .wx-chip-remove:hover {
+    color: var(--wx-danger) !important;
 }
+
+/* a chip filled by a badge color or a user-defined inline color already carries the contrast
+   color of its fill, so the remove glyph takes it over instead of the gray of an unfilled chip */
+.wx-chip[class*="text-bg-"] > .wx-chip-remove, .wx-chip[style] > .wx-chip-remove {
+    color: inherit !important;
+}
+
+.wx-selection > .form-control { position: relative; padding-inline-end: 2rem; cursor: pointer; }
+.wx-selection > .form-control > .wx-selection-trigger {
+    position: absolute; inset: 0; width: 100%; height: 100%;
+    display: flex; align-items: center; justify-content: flex-end;
+    padding: 0.25rem 0.5rem; border: 0; background: transparent;
+}
+.wx-selection > .form-control > ul { position: relative; z-index: 1; pointer-events: none; }
+.wx-selection > .form-control > ul a,
+.wx-selection > .form-control > ul .wx-chip-remove { pointer-events: auto; }
+.wx-selection-clear { border: 0; padding: 0.25rem; background: transparent; }
+.wx-selection-clear:hover, .wx-selection-clear:focus-visible { color: var(--wx-danger); }
+.wx-selection > .dropdown-menu { min-block-size: min(19rem, calc(100dvb - 1rem)); }

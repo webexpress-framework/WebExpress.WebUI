@@ -1,8 +1,11 @@
 /**
  * ViewCtrl - Multi-View Switcher.
- * Supports two layouts:
- * - default:     toolbar with the active view's title/description and a dropdown for switching.
- * - togglegroup: compact toggle bar with all available views as labels/icons. No title/description.
+ * The layout decides how the views are offered:
+ * - default:     the title and description of the active view, with a dropdown
+ *                beside them to switch.
+ * - togglegroup: the shared presentation switch (webexpress.webui.ViewSwitcher)
+ *                alone, so it looks and behaves the same as on every other
+ *                surface that offers several views of one subject.
  *
  * The following events are triggered:
  * - webexpress.webui.Event.CHANGE_VISIBILITY_EVENT
@@ -18,6 +21,9 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     // dropdown control instance and host element (default layout only)
     _viewDropdownCtrl = null;
     _viewDropdownHost = null;
+
+    // the shared presentation switch (togglegroup layout only)
+    _switcher = null;
 
     // mutation observers for header/footer
     _headerObserver = null;
@@ -42,11 +48,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     _elements = {
         title: null,
         desc: null,
-        icon: null,
-        viewDropdownMenu: null,
-        viewDropdownTrigger: null,
-        toggleGroup: null,
-        toggleButtons: []
+        icon: null
     };
 
     /**
@@ -57,8 +59,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         super(element);
 
         // generate storage key based on element id or fallback
-        const baseId = element.id || "wx-view-ctrl";
-        this._storageKey = `wx_view_state_${baseId}`;
+        this._storageKey = element.dataset.persistKey || (element.id ? `wx_view_state_${element.id}` : null);
 
         // resolve layout (default | togglegroup)
         const rawLayout = (element.dataset.layout || "default").trim().toLowerCase();
@@ -70,10 +71,10 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         // determine initial view: saved state > first view
         let initialIndex = 0;
-        const savedIndex = this._getCookie(this._storageKey);
+        const savedIndex = webexpress.webui.LocalStorage.getItem(this._storageKey);
         if (savedIndex !== null) {
-            const idx = parseInt(savedIndex, 10);
-            if (!isNaN(idx) && idx >= 0) {
+            const idx = Number(savedIndex);
+            if (Number.isInteger(idx) && idx >= 0) {
                 initialIndex = idx;
             }
         }
@@ -106,6 +107,9 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             this._viewDropdownCtrl.destroy();
         }
 
+        this._viewDropdownCtrl = null;
+        this._viewDropdownHost = null;
+        this._switcher = null;
         this._viewsConfig = [];
         this._views = {};
         this._ctrls = {};
@@ -210,7 +214,8 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Build the default toolbar with title/description and a dropdown.
+     * Build the default toolbar, which names the active view and offers the
+     * others through a dropdown.
      * @param {HTMLElement} host - The Host element.
      */
     _buildToolbar(host) {
@@ -239,7 +244,9 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         tb.appendChild(titleGroup);
 
         const dropdownHost = document.createElement("div");
-        dropdownHost.dataset.icon = "fa fa-layer-group";
+        dropdownHost.dataset.icon = webexpress.webui.IconSet.resolve("layers");
+        // the switch shows an icon alone, so it says what it opens
+        dropdownHost.title = this._i18n("webexpress.webui:view.switch", "Switch view");
         this._viewDropdownHost = dropdownHost;
         tb.appendChild(dropdownHost);
 
@@ -248,22 +255,17 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Build the toggle bar used by the togglegroup layout.
+     * Build the toggle bar used by the togglegroup layout, which is the switch
+     * alone.
      * @param {HTMLElement} host - The Host element.
      */
     _buildToggleBar(host) {
         const tb = document.createElement("div");
-        tb.className = "wx-view-toolbar wx-view-togglegroup d-flex align-items-center p-2 gap-2";
+        tb.className = "wx-view-toolbar wx-view-togglegroup";
 
-        const group = document.createElement("div");
-        group.className = "btn-group";
-        group.setAttribute("role", "group");
-
-        tb.appendChild(group);
         host.appendChild(tb);
 
         this._views.toolbar = tb;
-        this._elements.toggleGroup = group;
     }
 
     /**
@@ -290,7 +292,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Initialize sub-views and the active switcher (dropdown or toggle bar).
+     * Initialize sub-views and the switch the layout asks for.
      */
     _initSubViews() {
         this._viewsConfig.forEach(cfg => {
@@ -309,7 +311,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         });
 
         if (this._layout === "togglegroup") {
-            this._initToggleButtons();
+            this._initSwitcher();
         } else {
             this._initDropdown();
         }
@@ -318,7 +320,11 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Populate the dropdown for the default layout.
+     * Populates the dropdown of the default layout. The views are addressed by
+     * position, so the item uri carries the index the menu reports back. The
+     * click is taken on the host rather than on the items, because the dropdown
+     * rebuilds them from the parsed data and a listener on an item would not
+     * survive that.
      */
     _initDropdown() {
         const fragment = document.createDocumentFragment();
@@ -327,9 +333,9 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             const itemEl = document.createElement("a");
             itemEl.className = "wx-dropdown-item";
             itemEl.href = "#";
-            itemEl.setAttribute("data-uri", `wx-switch:${cfg.index}`);
+            itemEl.dataset.uri = `wx-switch:${cfg.index}`;
             if (cfg.iconCss) {
-                itemEl.setAttribute("data-icon", cfg.iconCss);
+                itemEl.dataset.icon = cfg.iconCss;
             }
             itemEl.textContent = cfg.title;
             fragment.appendChild(itemEl);
@@ -359,46 +365,26 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Build toggle buttons for the togglegroup layout.
+     * Builds the presentation switch of the togglegroup layout, the same one
+     * every control that offers several views of one subject uses, so a user who
+     * learned it on one surface recognises it on the next.
      */
-    _initToggleButtons() {
-        const group = this._elements.toggleGroup;
-        if (!group) {
-            return;
-        }
-
-        this._elements.toggleButtons = this._viewsConfig.map(cfg => {
-            const btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "btn btn-outline-primary";
-            btn.dataset.index = cfg.index;
-            btn.title = cfg.title;
-
-            if (cfg.iconCss) {
-                const icon = document.createElement("i");
-                icon.className = `${cfg.iconCss} me-1`;
-                btn.appendChild(icon);
-            } else if (cfg.iconImg) {
-                const img = document.createElement("img");
-                img.src = cfg.iconImg;
-                img.style.height = "16px";
-                img.style.width = "auto";
-                img.className = "me-1";
-                btn.appendChild(img);
-            }
-
-            const label = document.createElement("span");
-            label.textContent = cfg.title;
-            btn.appendChild(label);
-
-            btn.addEventListener("click", (ev) => {
-                ev.preventDefault();
-                this.switchView(cfg.index);
-            });
-
-            group.appendChild(btn);
-            return btn;
+    _initSwitcher() {
+        this._switcher = new webexpress.webui.ViewSwitcher({
+            views: this._viewsConfig.map(cfg => ({
+                // the views of this control are addressed by position, so the
+                // index is the name the switch reports back
+                name: String(cfg.index),
+                label: cfg.title,
+                icon: cfg.iconCss,
+                image: cfg.iconImg
+            })),
+            onSelect: (name) => this.switchView(parseInt(name, 10))
         });
+
+        if (this._views.toolbar) {
+            this._views.toolbar.appendChild(this._switcher.element);
+        }
     }
 
     /**
@@ -496,12 +482,11 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
      * @param {number} index - Target view index
      */
     switchView(index) {
-        if (index < 0 || index >= this._viewsConfig.length) {
+        if (!Number.isInteger(index) || index < 0 || index >= this._viewsConfig.length) {
             return;
         }
 
-        // save to cookie
-        this._setCookie(this._storageKey, index.toString(), 30);
+        webexpress.webui.LocalStorage.setItem(this._storageKey, String(index));
 
         if (this._activeViewIndex >= 0) {
             const oldCfg = this._viewsConfig[this._activeViewIndex];
@@ -523,9 +508,11 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         }
         this._ctrls.activeMaster = cfg.controller;
 
-        if (this._layout === "togglegroup") {
-            this._updateToggleButtonStates();
-        } else {
+        if (this._switcher) {
+            this._switcher.active = String(index);
+        }
+
+        if (this._layout !== "togglegroup") {
             this._updateToolbarMetadata(cfg);
         }
 
@@ -570,54 +557,6 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
         }
     }
 
-    /**
-     * Reflect the active view in the toggle bar.
-     */
-    _updateToggleButtonStates() {
-        const buttons = this._elements.toggleButtons || [];
-        buttons.forEach(btn => {
-            const idx = parseInt(btn.dataset.index, 10);
-            const isActive = idx === this._activeViewIndex;
-            btn.classList.toggle("active", isActive);
-            btn.setAttribute("aria-pressed", isActive ? "true" : "false");
-        });
-    }
-
-    /**
-     * Sets a cookie with the given name, value, and expiration days.
-     * @param {string} name - Name of the cookie.
-     * @param {string} value - Value of the cookie.
-     * @param {number} days - Expiration in days.
-     */
-    _setCookie(name, value, days) {
-        let expires = "";
-        if (days) {
-            const date = new Date();
-            date.setTime(date.getTime() + (days * 24 * 60 * 60 * 1000));
-            expires = "; expires=" + date.toUTCString();
-        }
-        document.cookie = name + "=" + (value || "") + expires + "; path=/; SameSite=Lax";
-    }
-
-    /**
-     * Gets the value of a cookie by name.
-     * @param {string} name - Name of the cookie.
-     * @returns {string|null} The cookie value or null if not found.
-     */
-    _getCookie(name) {
-        const nameEQ = name + "=";
-        const ca = document.cookie.split(";");
-        for (let i = 0; i < ca.length; i++) {
-            let c = ca[i];
-            while (c.charAt(0) === " ") {
-                c = c.substring(1, c.length);
-            }
-            if (c.indexOf(nameEQ) === 0) {
-                return c.substring(nameEQ.length, c.length);
-            }
-        }
-        return null;
-    }
 };
 
 // register the class with the controller

@@ -7,7 +7,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a move input form.
+    /// Contract for a single entry in a move/transfer form input.
     /// </summary>
     public interface IControlFormItemInputMoveItem : IWebUIElement<IRenderControlContext, IVisualTreeControl>
     {

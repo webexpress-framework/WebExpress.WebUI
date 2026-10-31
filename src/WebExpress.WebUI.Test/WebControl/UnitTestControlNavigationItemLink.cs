@@ -1,4 +1,4 @@
-﻿using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
@@ -11,7 +11,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the navigation item link control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlNavigationItemLink
     {
         /// <summary>
@@ -144,9 +143,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<a class=""wx-link""></a>")]
-        [InlineData("a", @"<a class=""wx-link"" title=""a"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("b", @"<a class=""wx-link"" title=""b"" data-bs-toggle=""tooltip""></a>")]
-        [InlineData("a<br/>b", @"<a class=""wx-link"" title=""a<br/>b"" data-bs-toggle=""tooltip""></a>")]
+        [InlineData("a", @"<a class=""wx-link"" title=""a""></a>")]
+        [InlineData("b", @"<a class=""wx-link"" title=""b""></a>")]
+        [InlineData("a<br/>b", @"<a class=""wx-link"" title=""a<br/>b""></a>")]
         public void Tooltip(string tooltip, string expected)
         {
             // arrange
@@ -170,7 +169,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<a class=""wx-link""></a>")]
-        [InlineData(typeof(IconStar), @"<a class=""wx-link""><i class=""fas fa-star""></i></a>")]
+        [InlineData(typeof(IconStar), @"<a class=""wx-link""><i class=""wx-icon-light wx-icon-light-star""></i></a>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -233,9 +232,9 @@ namespace WebExpress.WebUI.Test.WebControl
             var html3 = control3.Render(context, visualTree);
 
             // validation
-            Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html1.Trim());
-            Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html2.Trim());
-            Assert.Equal(@"<a class=""wx-link""><i class=""fas fa-star""></i></a>", html3.Trim());
+            Assert.Equal(@"<a class=""wx-link""><i class=""wx-icon-light wx-icon-light-star""></i></a>", html1.Trim());
+            Assert.Equal(@"<a class=""wx-link""><i class=""wx-icon-light wx-icon-light-star""></i></a>", html2.Trim());
+            Assert.Equal(@"<a class=""wx-link""><i class=""wx-icon-light wx-icon-light-star""></i></a>", html3.Trim());
         }
     }
 }

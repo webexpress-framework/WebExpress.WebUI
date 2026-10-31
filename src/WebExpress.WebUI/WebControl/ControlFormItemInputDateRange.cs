@@ -6,7 +6,8 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a date picker input form item control.
+    /// Represents a date picker input for a date range: a text field for a start and an end date,
+    /// with a calendar popover to pick them. For a single date use <see cref="ControlFormItemInputDate"/>.
     /// </summary>
     public class ControlFormItemInputDateRange : ControlFormItemInput<ControlFormInputValueDateRange>
     {
@@ -62,6 +63,7 @@ namespace WebExpress.WebUI.WebControl
                 Class = "wx-webui-input-date"
             }
                 .AddUserAttribute("name", name)
+                .AddUserAttribute("data-required", RequiredMark(renderContext))
                 .AddUserAttribute("placeholder", I18N.Translate(renderContext, placeholder))
                 .AddUserAttribute("data-value", range)
                 .AddUserAttribute("data-range", "true")

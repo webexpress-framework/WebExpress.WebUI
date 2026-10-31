@@ -1,199 +1,106 @@
-// register default slash commands immediately
+/** Registers the default slash commands. */
+(function () {
+    const ui = webexpress.webui;
 
-// --- Text blocks ---
-webexpress.webui.EditorShortcuts.register("block.paragraph", {
-    label: "Paragraph",
-    description: "Plain text paragraph",
-    icon: "fas fa-paragraph",
-    category: "Text",
-    keywords: ["p", "text", "absatz"],
-    tag: "P"
-});
+    /**
+     * Resolves a slash-command text. The texts are fixed while registering, so this
+     * file loads after the language bundles.
+     * @param {string} key The key suffix below editor.slash.
+     * @returns {string} The localized text.
+     */
+    const t = key => ui.I18N.translate("webexpress.webui:editor.slash." + key);
 
-webexpress.webui.EditorShortcuts.register("block.heading1", {
-    label: "Heading 1",
-    description: "Large section heading",
-    icon: "fas fa-heading",
-    category: "Text",
-    keywords: ["h1", "title", "überschrift"],
-    tag: "H1"
-});
+    /**
+     * Registers a command whose label and description are keyed by its id.
+     * @param {string} id The command id.
+     * @param {string} category The category key suffix.
+     * @param {object} definition The remaining command definition.
+     */
+    const register = (id, category, definition) => ui.EditorShortcuts.register(id, Object.assign({
+        label: t(id),
+        description: t(id + ".description"),
+        category: t("cat." + category)
+    }, definition));
 
-webexpress.webui.EditorShortcuts.register("block.heading2", {
-    label: "Heading 2",
-    description: "Medium section heading",
-    icon: "fas fa-heading",
-    category: "Text",
-    keywords: ["h2"],
-    tag: "H2"
-});
+    // --- Text blocks ---
+    register("block.paragraph", "text", { icon: "paragraph", keywords: ["p", "text", "absatz"], tag: "P" });
+    register("block.heading1", "text", { icon: "heading", keywords: ["h1", "title", "überschrift"], tag: "H1" });
+    register("block.heading2", "text", { icon: "heading", keywords: ["h2"], tag: "H2" });
+    register("block.heading3", "text", { icon: "heading", keywords: ["h3"], tag: "H3" });
+    register("block.heading4", "text", { icon: "heading", keywords: ["h4"], tag: "H4" });
+    register("block.heading5", "text", { icon: "heading", keywords: ["h5"], tag: "H5" });
+    register("block.heading6", "text", { icon: "heading", keywords: ["h6"], tag: "H6" });
+    register("block.quote", "text", { icon: "quote-right", keywords: ["zitat", "blockquote", ">"], tag: "BLOCKQUOTE" });
+    register("block.code", "text", { icon: "code", keywords: ["code", "pre", "```"], tag: "PRE" });
 
-webexpress.webui.EditorShortcuts.register("block.heading3", {
-    label: "Heading 3",
-    description: "Small section heading",
-    icon: "fas fa-heading",
-    category: "Text",
-    keywords: ["h3"],
-    tag: "H3"
-});
+    // --- Lists ---
+    register("list.bullet", "list", { icon: "list-ul", keywords: ["ul", "bullet", "liste", "punkt", "-"], cmd: "insertUnorderedList" });
+    register("list.number", "list", { icon: "list-ol", keywords: ["ol", "number", "nummerierung", "1."], cmd: "insertOrderedList" });
 
-webexpress.webui.EditorShortcuts.register("block.heading4", {
-    label: "Heading 4",
-    description: "Sub-heading",
-    icon: "fas fa-heading",
-    category: "Text",
-    keywords: ["h4"],
-    tag: "H4"
-});
-
-webexpress.webui.EditorShortcuts.register("block.heading5", {
-    label: "Heading 5",
-    description: "Minor heading",
-    icon: "fas fa-heading",
-    category: "Text",
-    keywords: ["h5"],
-    tag: "H5"
-});
-
-webexpress.webui.EditorShortcuts.register("block.heading6", {
-    label: "Heading 6",
-    description: "Smallest heading",
-    icon: "fas fa-heading",
-    category: "Text",
-    keywords: ["h6"],
-    tag: "H6"
-});
-
-webexpress.webui.EditorShortcuts.register("block.quote", {
-    label: "Quote",
-    description: "Block quote",
-    icon: "fas fa-quote-right",
-    category: "Text",
-    keywords: ["zitat", "blockquote", ">"],
-    tag: "BLOCKQUOTE"
-});
-
-webexpress.webui.EditorShortcuts.register("block.code", {
-    label: "Code Block",
-    description: "Monospaced code block",
-    icon: "fas fa-code",
-    category: "Text",
-    keywords: ["code", "pre", "```"],
-    tag: "PRE"
-});
-
-// --- Lists ---
-webexpress.webui.EditorShortcuts.register("list.bullet", {
-    label: "Bullet",
-    description: "Unordered list",
-    icon: "fas fa-list-ul",
-    category: "List",
-    keywords: ["ul", "bullet", "liste", "punkt", "-"],
-    cmd: "insertUnorderedList"
-});
-
-webexpress.webui.EditorShortcuts.register("list.number", {
-    label: "Numbered list",
-    description: "Ordered list",
-    icon: "fas fa-list-ol",
-    category: "List",
-    keywords: ["ol", "number", "nummerierung", "1."],
-    cmd: "insertOrderedList"
-});
-
-// --- Insert ---
-webexpress.webui.EditorShortcuts.register("insert.date", {
-    label: "Date",
-    description: "Insert today's date",
-    icon: "fas fa-calendar-day",
-    category: "Insert",
-    keywords: ["date", "today", "heute", "datum"],
-    execute: (editor) => {
-        const lang = webexpress?.webui?.I18N?.language || navigator.language || "en";
-        const text = new Date().toLocaleDateString(lang, { year: "numeric", month: "2-digit", day: "2-digit" });
-        editor.insertHtmlAtCursor(text + "&nbsp;");
-    }
-});
-
-webexpress.webui.EditorShortcuts.register("insert.datetime", {
-    label: "Date & time",
-    description: "Insert current date and time",
-    icon: "fas fa-clock",
-    category: "Insert",
-    keywords: ["now", "jetzt", "zeit", "time"],
-    execute: (editor) => {
-        const lang = webexpress?.webui?.I18N?.language || navigator.language || "en";
-        const text = new Date().toLocaleString(lang, { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
-        editor.insertHtmlAtCursor(text + "&nbsp;");
-    }
-});
-
-webexpress.webui.EditorShortcuts.register("insert.hr", {
-    label: "Horizontal Rule",
-    description: "Horizontal divider line",
-    icon: "fas fa-minus",
-    category: "Insert",
-    keywords: ["hr", "divider", "trennlinie", "linie", "---"],
-    html: "<hr><p><br></p>"
-});
-
-webexpress.webui.EditorShortcuts.register("insert.link", {
-    label: "Insert Link",
-    description: "Add a hyperlink",
-    icon: "fas fa-link",
-    category: "Insert",
-    keywords: ["link", "url", "anchor", "verweis"],
-    execute: (editor) => {
-        const media = (webexpress.webui.EditorPlugins.getAll() || []).find(p => p && p.linkModal !== undefined);
-        if (media && typeof media._openModal === "function") {
-            media._openModal(editor, "linkModal", "editor-link", "webexpress.webui:editor.insert.link.title", { url: "", text: "" }, editor._savedRange?.cloneRange?.() || null);
-            return;
+    // --- Insert ---
+    register("insert.date", "insert", {
+        icon: "calendar-day",
+        keywords: ["date", "today", "heute", "datum"],
+        execute: (editor) => {
+            const text = new Date().toLocaleDateString(ui.I18N.language, { year: "numeric", month: "2-digit", day: "2-digit" });
+            editor.insertHtmlAtCursor(text + "&nbsp;");
         }
-        const url = prompt("URL");
-        if (!url) return;
-        const text = prompt("Text (optional)") || url;
-        editor.insertHtmlAtCursor(`<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>&nbsp;`);
-    }
-});
+    });
 
-webexpress.webui.EditorShortcuts.register("insert.image", {
-    label: "Insert Image",
-    description: "Embed an image by URL",
-    icon: "fas fa-image",
-    category: "Insert",
-    keywords: ["image", "img", "picture", "bild", "foto"],
-    execute: (editor) => {
-        const media = (webexpress.webui.EditorPlugins.getAll() || []).find(p => p && p.imageModal !== undefined);
-        if (media && typeof media._openModal === "function") {
-            media._openModal(editor, "imageModal", "editor-image", "webexpress.webui:editor.insert.image.title", null, editor._savedRange?.cloneRange?.() || null);
-            return;
+    register("insert.datetime", "insert", {
+        icon: "clock",
+        keywords: ["now", "jetzt", "zeit", "time"],
+        execute: (editor) => {
+            const text = new Date().toLocaleString(ui.I18N.language, { year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+            editor.insertHtmlAtCursor(text + "&nbsp;");
         }
-        const url = prompt("Image URL");
-        if (!url) return;
-        editor.insertHtmlAtCursor(`<img src="${url}" alt="">`);
-    }
-});
+    });
 
-webexpress.webui.EditorShortcuts.register("insert.addon", {
-    label: "Insert AddOn",
-    description: "Open the AddOn library",
-    icon: "fas fa-puzzle-piece",
-    category: "Insert",
-    keywords: ["addon", "widget", "embed", "einfügen"],
-    execute: (editor) => {
-        const addons = (webexpress.webui.EditorPlugins.getAll() || []).find(p => p && typeof p._openModal === "function" && p._selectionModal !== undefined);
-        if (addons) {
-            addons._openModal(editor, "_selectionModal", "editor-addon", "webexpress.webui:editor.insert.addon.title", editor._savedRange?.cloneRange?.() || null);
+    register("insert.hr", "insert", { icon: "minus", keywords: ["hr", "divider", "trennlinie", "linie", "---"], html: "<hr><p><br></p>" });
+
+    register("insert.link", "insert", {
+        icon: "link",
+        keywords: ["link", "url", "anchor", "verweis"],
+        execute: (editor) => {
+            const media = editor._plugins.find(p => typeof p?.openLink === "function");
+            if (media) {
+                media.openLink(editor);
+                return;
+            }
+            const url = prompt(ui.I18N.translate("webexpress.webui:editor.link.url.label"));
+            if (!url) return;
+            const text = prompt(ui.I18N.translate("webexpress.webui:editor.link.text.placeholder")) || url;
+            editor.insertHtmlAtCursor(`<a href="${url}" target="_blank" rel="noopener noreferrer">${text}</a>&nbsp;`);
         }
-    }
-});
+    });
 
-// --- Format ---
-webexpress.webui.EditorShortcuts.register("format.clear", {
-    label: "Clear Format",
-    description: "Remove all formatting from selection",
-    icon: "fas fa-eraser",
-    category: "Format",
-    keywords: ["clear", "remove", "format", "entfernen"],
-    cmd: "removeFormat"
-});
+    register("insert.image", "insert", {
+        icon: "image",
+        keywords: ["image", "img", "picture", "bild", "foto"],
+        execute: (editor) => {
+            const media = editor._plugins.find(p => typeof p?.openImage === "function");
+            if (media) {
+                media.openImage(editor);
+                return;
+            }
+            const url = prompt(ui.I18N.translate("webexpress.webui:editor.image.url.label"));
+            if (!url) return;
+            editor.insertHtmlAtCursor(`<img src="${url}" alt="">`);
+        }
+    });
+
+    register("insert.addon", "insert", {
+        icon: "puzzle",
+        keywords: ["addon", "widget", "embed", "einfügen"],
+        execute: (editor) => {
+            // the editor's own plugin copy, because the add-on dialog submits through editor._addonPlugin
+            const addons = editor._addonPlugin;
+            if (addons) {
+                addons._openModal(editor, "_selectionModal", "editor-addon", "webexpress.webui:editor.insert.addon.title");
+            }
+        }
+    });
+
+    // --- Format ---
+    register("format.clear", "format", { icon: "eraser", keywords: ["clear", "remove", "format", "entfernen"], cmd: "removeFormat" });
+})();

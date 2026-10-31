@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the chart control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlChart
     {
         /// <summary>
@@ -192,6 +191,60 @@ namespace WebExpress.WebUI.Test.WebControl
             var control = new ControlChart()
             {
                 TitleY = _ => titleY
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the title of the second value axis, which is translated like the other titles.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-webui-chart"" data-type=""line""></div>")]
+        [InlineData("EUR", @"<div class=""wx-webui-chart"" data-type=""line"" data-scale-y1-title=""EUR""></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""wx-webui-chart"" data-type=""line"" data-scale-y1-title=""WebExpress.WebUI""></div>")]
+        public void TitleY1(string titleY1, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlChart()
+            {
+                TitleY1 = _ => titleY1
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests the range and the zero baseline of the second value axis, which stay off the
+        /// markup until they are set.
+        /// </summary>
+        [Theory]
+        [InlineData(float.MinValue, float.MaxValue, false, @"<div class=""wx-webui-chart"" data-type=""line""></div>")]
+        [InlineData(0f, float.MaxValue, false, @"<div class=""wx-webui-chart"" data-type=""line"" data-scale-y1-min=""0""></div>")]
+        [InlineData(float.MinValue, 2000f, false, @"<div class=""wx-webui-chart"" data-type=""line"" data-scale-y1-max=""2000""></div>")]
+        [InlineData(float.MinValue, float.MaxValue, true, @"<div class=""wx-webui-chart"" data-type=""line"" data-scale-y1-begin-at-zero=""true""></div>")]
+        public void ScaleY1(float minimum, float maximum, bool beginAtZero, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlChart()
+            {
+                MinimumY1 = _ => minimum,
+                MaximumY1 = _ => maximum,
+                Y1BeginAtZero = _ => beginAtZero
             };
 
             // act
@@ -549,6 +602,179 @@ namespace WebExpress.WebUI.Test.WebControl
                 @"data-dataset1-border-width=""2""></div>";
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the fill and the point style of a dataset reach the client, and that the
+        /// defaults stay off the markup.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeFillChart.None, TypePointChart.Circle, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]""></div>")]
+        [InlineData(TypeFillChart.Origin, TypePointChart.Circle, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]"" data-dataset0-fill=""origin""></div>")]
+        [InlineData(TypeFillChart.End, TypePointChart.Rhombus, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]"" data-dataset0-fill=""end"" data-dataset0-point-style=""rectRot""></div>")]
+        [InlineData(TypeFillChart.None, TypePointChart.Triangle, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]"" data-dataset0-point-style=""triangle""></div>")]
+        public void DatasetFillAndPoint(TypeFillChart fill, TypePointChart point, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlChart()
+                .AddDataset(new ControlChartDataset
+                {
+                    Data = new ControlChartDatasetPointCollection(1f),
+                    Fill = fill,
+                    Point = point
+                });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the trendline of a dataset reaches the client, the period only with a
+        /// moving average, and that no trendline stays off the markup.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeTrendlineChart.None, 0, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]""></div>")]
+        [InlineData(TypeTrendlineChart.Linear, 5, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]"" data-dataset0-trendline=""linear""></div>")]
+        [InlineData(TypeTrendlineChart.MovingAverage, 0, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]"" data-dataset0-trendline=""moving-average""></div>")]
+        [InlineData(TypeTrendlineChart.MovingAverage, 4, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]"" data-dataset0-trendline=""moving-average"" data-dataset0-trendline-period=""4""></div>")]
+        public void DatasetTrendline(TypeTrendlineChart trendline, int period, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlChart()
+                .AddDataset(new ControlChartDataset
+                {
+                    Data = new ControlChartDatasetPointCollection(1f),
+                    Trendline = trendline,
+                    TrendlinePeriod = period
+                });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the curve of a line dataset reaches the client, the tension only with a
+        /// Bezier curve, and that straight segments stay off the markup.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeCurveChart.Straight, 0.4f, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]""></div>")]
+        [InlineData(TypeCurveChart.Bezier, 0.4f, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]"" data-dataset0-curve=""bezier"" data-dataset0-tension=""0.4""></div>")]
+        [InlineData(TypeCurveChart.Bezier, 3f, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]"" data-dataset0-curve=""bezier"" data-dataset0-tension=""1""></div>")]
+        [InlineData(TypeCurveChart.Monotone, 0.4f, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]"" data-dataset0-curve=""monotone""></div>")]
+        public void DatasetCurve(TypeCurveChart curve, float tension, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlChart()
+                .AddDataset(new ControlChartDataset
+                {
+                    Data = new ControlChartDatasetPointCollection(1f),
+                    Curve = curve,
+                    Tension = tension
+                });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that a dataset drawn in another form than its chart names that form to the
+        /// client, and that the form of the chart stays off the markup.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeDatasetChart.Default, @"<div class=""wx-webui-chart"" data-type=""bar"" data-dataset-count=""1"" data-dataset0-data=""[1]""></div>")]
+        [InlineData(TypeDatasetChart.Bar, @"<div class=""wx-webui-chart"" data-type=""bar"" data-dataset-count=""1"" data-dataset0-data=""[1]"" data-dataset0-type=""bar""></div>")]
+        [InlineData(TypeDatasetChart.Line, @"<div class=""wx-webui-chart"" data-type=""bar"" data-dataset-count=""1"" data-dataset0-data=""[1]"" data-dataset0-type=""line""></div>")]
+        public void DatasetType(TypeDatasetChart type, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlChart()
+            {
+                Type = _ => TypeChart.Bar
+            }
+                .AddDataset(new ControlChartDataset
+                {
+                    Data = new ControlChartDatasetPointCollection(1f),
+                    Type = type
+                });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that a dataset on a second value axis names that axis to the client, and that
+        /// the default axis stays off the markup.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]""></div>")]
+        [InlineData("y", @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]""></div>")]
+        [InlineData("y1", @"<div class=""wx-webui-chart"" data-type=""line"" data-dataset-count=""1"" data-dataset0-data=""[1]"" data-dataset0-y-axis-id=""y1""></div>")]
+        public void DatasetYAxisId(string yAxisId, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlChart()
+                .AddDataset(new ControlChartDataset
+                {
+                    Data = new ControlChartDatasetPointCollection(1f),
+                    YAxisId = yAxisId
+                });
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that every dataset is rendered, not only the first ten.
+        /// </summary>
+        [Fact]
+        public void DatasetsBeyondTen()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlChart();
+            for (var i = 0; i < 12; i++)
+            {
+                control.AddDataset(new ControlChartDataset { Title = "S" + i });
+            }
+
+            // act
+            var html = control.Render(context, visualTree).ToString();
+
+            // validation
+            Assert.Contains(@"data-dataset-count=""12""", html);
+            Assert.Contains(@"data-dataset11-label=""S11""", html);
         }
     }
 }

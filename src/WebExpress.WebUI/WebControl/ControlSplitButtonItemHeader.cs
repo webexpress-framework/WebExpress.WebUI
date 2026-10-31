@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a header item in a split button control.
+    /// A non-clickable heading within a split button's dropdown menu.
     /// </summary>
     public class ControlSplitButtonItemHeader : Control, IControlSplitButtonItem
     {
@@ -38,8 +38,8 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentLi(new HtmlText(I18N.Translate(renderContext?.Request?.Culture, text)))
             {
                 Id = Id,
-                Class = Css.Concatenate("dropdown-header", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("dropdown-header", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
                 Role = role
             };
         }

@@ -1,22 +1,25 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the horizontal alignment.
+    /// Places a control at the left or right edge of its container. Through <c>ToClass</c> the
+    /// control is floated there, so the following content flows around it; a few controls read the
+    /// value for a part of their own instead, such as a split button aligning its menu to the right
+    /// edge. There is no centered option, since an element cannot float to the middle.
     /// </summary>
     public enum TypeHorizontalAlignment
     {
         /// <summary>
-        /// The default alignment.
+        /// The control keeps its place in the normal flow.
         /// </summary>
         Default,
 
         /// <summary>
-        /// Align to the left.
+        /// The control is placed at the left edge, with the following content flowing around its right side.
         /// </summary>
         Left,
 
         /// <summary>
-        /// Align to the right.
+        /// The control is placed at the right edge, with the following content flowing around its left side.
         /// </summary>
         Right
     }

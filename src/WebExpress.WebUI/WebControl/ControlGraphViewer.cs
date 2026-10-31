@@ -89,9 +89,10 @@ namespace WebExpress.WebUI.WebControl
             return new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-graph-viewer", GetClasses()),
-                Style = GetStyles(),
-                Role = "region"
+                Class = Css.Concatenate("wx-webui-graph-viewer", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
+                // a group rather than a region: a region is a landmark and would need a name of its own
+                Role = "group"
             }
                 .AddUserAttribute("data-node-style", (NodeStyle?.Invoke(renderContext) ?? TypeStyleGraphNode.Default) != TypeStyleGraphNode.Default ? (NodeStyle?.Invoke(renderContext) ?? TypeStyleGraphNode.Default).ToValue() : null)
                 .AddUserAttribute("data-edge-style", (EdgeStyle?.Invoke(renderContext) ?? TypeStyleGraphEdge.Default) != TypeStyleGraphEdge.Default ? (EdgeStyle?.Invoke(renderContext) ?? TypeStyleGraphEdge.Default).ToValue() : null)

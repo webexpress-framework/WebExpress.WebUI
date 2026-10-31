@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form static text control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemStaticText
     {
         /// <summary>

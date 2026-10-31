@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a label item in a toolbar.
+    /// A non-interactive text label placed on a toolbar.
     /// </summary>
     public class ControlToolbarItemLabel : IControlToolbarItem
     {

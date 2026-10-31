@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebIcon;
+﻿using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebIcon;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -9,7 +10,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the tabele column template control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTableColumnTemplate
     {
         /// <summary>
@@ -31,6 +31,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -55,6 +56,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -63,7 +65,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div></div>")]
-        [InlineData(typeof(IconStar), @"<div data-icon=""fas fa-star""></div>")]
+        [InlineData(typeof(IconStar), @"<div data-icon=""wx-icon-light wx-icon-light-star""></div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange
@@ -78,6 +80,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -109,6 +112,55 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the template column renders formatted header content as well, next to
+        /// its template.
+        /// </summary>
+        [Fact]
+        public void TitleContent()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableColumnTemplate()
+            {
+                TitleContent = _ => new HtmlElementTextSemanticsStrong(new HtmlText("b"))
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"<div><span class=""wx-table-column-label""><strong>b</strong></span></div>", html);
+        }
+
+        /// <summary>
+        /// Tests the align property of the template column.
+        /// </summary>
+        [Theory]
+        [InlineData(TypeHorizontalAlignmentTable.Default, @"<div></div>")]
+        [InlineData(TypeHorizontalAlignmentTable.Center, @"<div data-align=""center""></div>")]
+        [InlineData(TypeHorizontalAlignmentTable.Right, @"<div data-align=""right""></div>")]
+        public void Align(TypeHorizontalAlignmentTable align, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlTableColumnTemplate()
+            {
+                Align = _ => align
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 

@@ -1,0 +1,586 @@
+.wx-chart {
+  /* the categorical series colors; the order keeps neighbouring series apart for the common
+     color vision deficiencies, so it is fixed rather than cycled */
+  --wx-chart-1: #2a78d6;
+  --wx-chart-2: #eb6834;
+  --wx-chart-3: #1baf7a;
+  --wx-chart-4: #eda100;
+  --wx-chart-5: #e87ba4;
+  --wx-chart-6: #008300;
+  --wx-chart-7: #6250d6;
+  --wx-chart-8: #e34948;
+  /* the surface separates touching marks and rings the points, so it follows the page */
+  --wx-chart-surface: var(--wx-body-bg);
+  --wx-chart-grid: color-mix(in srgb, var(--wx-border-color) 80%, transparent);
+  --wx-chart-baseline: color-mix(in srgb, var(--wx-secondary-color) 70%, transparent);
+  /* one easing for every entry: fast out of the start, a long soft landing */
+  --wx-chart-ease: cubic-bezier(0.22, 1, 0.36, 1);
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+/* the dark steps are the same hues stepped for the dark surface, not an automatic flip */
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+  .wx-chart {
+    --wx-chart-1: #3987e5;
+    --wx-chart-2: #d95926;
+    --wx-chart-3: #199e70;
+    --wx-chart-4: #c98500;
+    --wx-chart-5: #d55181;
+    --wx-chart-6: #008300;
+    --wx-chart-7: #9085e9;
+    --wx-chart-8: #e66767;
+  }
+}
+
+.wx-chart-color-0 { --wx-chart-color: var(--wx-chart-1); }
+.wx-chart-color-1 { --wx-chart-color: var(--wx-chart-2); }
+.wx-chart-color-2 { --wx-chart-color: var(--wx-chart-3); }
+.wx-chart-color-3 { --wx-chart-color: var(--wx-chart-4); }
+.wx-chart-color-4 { --wx-chart-color: var(--wx-chart-5); }
+.wx-chart-color-5 { --wx-chart-color: var(--wx-chart-6); }
+.wx-chart-color-6 { --wx-chart-color: var(--wx-chart-7); }
+.wx-chart-color-7 { --wx-chart-color: var(--wx-chart-8); }
+
+.wx-chart-title {
+  font-weight: 600;
+  text-align: center;
+  color: var(--wx-body-color);
+}
+
+.wx-chart-title[hidden],
+.wx-chart-legend[hidden] {
+  display: none;
+}
+
+/* legend */
+
+.wx-chart-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.125rem 0.25rem;
+}
+
+.wx-chart-legend-bottom {
+  order: 1;
+}
+
+.wx-chart-legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.15rem 0.6rem;
+  border: 0;
+  border-radius: 999px;
+  background: none;
+  color: var(--wx-body-color);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.wx-chart-legend-item:hover {
+  background-color: var(--wx-tertiary-bg);
+}
+
+.wx-chart-legend-item:focus-visible {
+  outline: 2px solid var(--wx-primary);
+  outline-offset: 1px;
+}
+
+/* a hidden series keeps a readable label; the struck text and the hollow swatch say it is off */
+.wx-chart-legend-item[aria-pressed="false"] {
+  color: var(--wx-secondary-color);
+  text-decoration: line-through;
+}
+
+.wx-chart-legend-item[aria-pressed="false"] .wx-chart-swatch {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--wx-chart-stroke, var(--wx-chart-color));
+}
+
+.wx-chart-swatch {
+  flex: none;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 3px;
+  background: var(--wx-chart-fill, var(--wx-chart-color));
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.wx-chart-swatch-line {
+  width: 1rem;
+  height: 3px;
+  border-radius: 2px;
+  background: var(--wx-chart-stroke, var(--wx-chart-color));
+}
+
+/* plot */
+
+.wx-chart-plot {
+  position: relative;
+  width: 100%;
+  min-width: 0;
+  /* a fixed width (data-width) caps the plot; it then stays centered under the title */
+  margin-inline: auto;
+}
+
+.wx-chart-plot > svg {
+  display: block;
+  width: 100%;
+  overflow: visible;
+  font-family: var(--wx-body-font-family);
+  /* keeps the series colors in forced colors mode; the legend and the table carry the names */
+  forced-color-adjust: none;
+}
+
+.wx-chart-plot > svg:focus {
+  outline: none;
+}
+
+.wx-chart-plot > svg:focus-visible {
+  outline: 2px solid var(--wx-primary);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+.wx-chart-grid line,
+.wx-chart-grid circle,
+.wx-chart-grid polygon {
+  fill: none;
+  stroke: var(--wx-chart-grid);
+  stroke-width: 1px;
+}
+
+.wx-chart-axis-line,
+.wx-chart-zero {
+  stroke: var(--wx-chart-baseline);
+  stroke-width: 1px;
+}
+
+.wx-chart-tick {
+  fill: var(--wx-secondary-color);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.wx-chart-point-label {
+  fill: var(--wx-body-color);
+}
+
+/* tick labels drawn over the marks get a ring of the surface so they stay legible */
+.wx-chart-tick-halo {
+  paint-order: stroke;
+  stroke: var(--wx-chart-surface);
+  stroke-width: 3px;
+  stroke-linejoin: round;
+}
+
+.wx-chart-axis-title {
+  fill: var(--wx-secondary-color);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.wx-chart-empty {
+  fill: var(--wx-secondary-color);
+  font-size: 14px;
+}
+
+/* marks */
+
+.wx-chart-bar {
+  fill: var(--wx-chart-fill, var(--wx-chart-color));
+  stroke: var(--wx-chart-stroke, var(--wx-chart-color));
+  stroke-width: var(--wx-chart-border-width, 0);
+}
+
+.wx-chart-line {
+  fill: none;
+  stroke: var(--wx-chart-stroke, var(--wx-chart-color));
+  stroke-width: var(--wx-chart-border-width, 2px);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.wx-chart-area {
+  fill: var(--wx-chart-fill, color-mix(in srgb, var(--wx-chart-color) 12%, transparent));
+  stroke: none;
+}
+
+/* an area fades out towards its baseline, so the line keeps the emphasis */
+.wx-chart-gradient-strong {
+  stop-color: var(--wx-chart-color);
+  stop-opacity: 0.28;
+}
+
+.wx-chart-gradient-weak {
+  stop-color: var(--wx-chart-color);
+  stop-opacity: 0.02;
+}
+
+.wx-chart-point {
+  fill: var(--wx-chart-stroke, var(--wx-chart-color));
+  stroke: var(--wx-chart-surface);
+  stroke-width: 2px;
+}
+
+/* a scatter point is the mark itself, so it takes the fill like a bar does */
+.wx-chart-dot {
+  fill: var(--wx-chart-fill, var(--wx-chart-color));
+}
+
+.wx-chart-point-stroke {
+  fill: none;
+  stroke: var(--wx-chart-stroke, var(--wx-chart-color));
+  stroke-width: 2px;
+  stroke-linecap: round;
+}
+
+.wx-chart-bubble {
+  fill: var(--wx-chart-fill, color-mix(in srgb, var(--wx-chart-color) 70%, transparent));
+  stroke: var(--wx-chart-stroke, var(--wx-chart-surface));
+  stroke-width: var(--wx-chart-border-width, 2px);
+}
+
+.wx-chart-arc,
+.wx-chart-polar {
+  fill: var(--wx-chart-fill, var(--wx-chart-color));
+  stroke: var(--wx-chart-stroke, var(--wx-chart-surface));
+  stroke-width: var(--wx-chart-border-width, 2px);
+  stroke-linejoin: round;
+}
+
+.wx-chart-polar {
+  fill: var(--wx-chart-fill, color-mix(in srgb, var(--wx-chart-color) 70%, transparent));
+}
+
+.wx-chart-radar {
+  fill: var(--wx-chart-fill, color-mix(in srgb, var(--wx-chart-color) 15%, transparent));
+  stroke: var(--wx-chart-stroke, var(--wx-chart-color));
+  stroke-width: var(--wx-chart-border-width, 2px);
+  stroke-linejoin: round;
+}
+
+/* a trendline is derived, not measured: dashed, thinner and a shade deeper than its series, so
+   it reads as a statement about the data rather than as another series */
+.wx-chart-trend {
+  fill: none;
+  stroke: var(--wx-chart-trend-color, color-mix(in srgb, var(--wx-chart-stroke, var(--wx-chart-color)) 75%, var(--wx-body-color)));
+  stroke-width: 2px;
+  stroke-dasharray: 7 5;
+  stroke-linecap: round;
+  pointer-events: none;
+}
+
+.wx-chart-trend-halo {
+  fill: none;
+  stroke: var(--wx-chart-surface);
+  stroke-width: 5px;
+  stroke-linecap: round;
+  opacity: 0.85;
+  pointer-events: none;
+}
+
+.wx-chart-swatch-trend {
+  background: repeating-linear-gradient(90deg, var(--wx-chart-stroke, var(--wx-chart-color)) 0 4px, transparent 4px 7px);
+}
+
+.wx-chart-center-value {
+  fill: var(--wx-body-color);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.wx-chart-center-label {
+  fill: var(--wx-secondary-color);
+  font-size: 12px;
+}
+
+/* hover */
+
+.wx-chart-mark {
+  transition: opacity 0.2s ease, transform 0.25s var(--wx-chart-ease);
+}
+
+/* the hovered marks stay, their neighbours step back */
+.wx-chart-hovering .wx-chart-mark:not(.wx-chart-active) {
+  opacity: 0.4;
+}
+
+/* a hovered slice steps out of the circle along its middle */
+.wx-chart-arc.wx-chart-active {
+  transform: translate(var(--wx-chart-dx, 0), var(--wx-chart-dy, 0));
+}
+
+.wx-chart-guide {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+
+.wx-chart-guide-visible {
+  opacity: 1;
+}
+
+/* a guide already on screen glides to the next category instead of jumping */
+.wx-chart-guide-follow {
+  transition: opacity 0.15s ease, x 0.2s var(--wx-chart-ease), y 0.2s var(--wx-chart-ease), width 0.2s var(--wx-chart-ease), height 0.2s var(--wx-chart-ease);
+}
+
+.wx-chart-hover-band {
+  fill: color-mix(in srgb, var(--wx-chart-grid) 60%, transparent);
+}
+
+.wx-chart-crosshair-rect {
+  fill: var(--wx-chart-baseline);
+}
+
+.wx-chart-crosshair {
+  stroke: var(--wx-chart-baseline);
+  stroke-width: 1px;
+}
+
+.wx-chart-hover-dot {
+  fill: var(--wx-chart-stroke, var(--wx-chart-color));
+  stroke: var(--wx-chart-surface);
+  stroke-width: 2.5px;
+  pointer-events: none;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: wx-chart-pop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* tooltip */
+
+.wx-chart-tooltip {
+  position: absolute;
+  z-index: 2;
+  padding: 0.45rem 0.65rem;
+  border: 1px solid var(--wx-border-color-translucent);
+  border-radius: 0.5rem;
+  background-color: color-mix(in srgb, var(--wx-body-bg) 94%, transparent);
+  color: var(--wx-body-color);
+  box-shadow: 0 6px 20px rgb(0 0 0 / 0.14), 0 1px 3px rgb(0 0 0 / 0.08);
+  backdrop-filter: blur(6px);
+  font-size: 0.8125rem;
+  line-height: 1.45;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, calc(-100% - 6px));
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s linear 0.15s;
+}
+
+.wx-chart-tooltip-visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, calc(-100% - 12px));
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s;
+}
+
+.wx-chart-tooltip-below {
+  transform: translate(-50%, 6px);
+}
+
+.wx-chart-tooltip-below.wx-chart-tooltip-visible {
+  transform: translate(-50%, 12px);
+}
+
+/* a tooltip already on screen glides from mark to mark */
+.wx-chart-tooltip-follow {
+  transition: opacity 0.15s ease, transform 0.15s ease, visibility 0s, left 0.18s var(--wx-chart-ease), top 0.18s var(--wx-chart-ease);
+}
+
+/* the caret points at the mark; it is a turned square sharing the tooltip's surface and border */
+.wx-chart-tooltip::after {
+  content: "";
+  position: absolute;
+  left: calc(50% + var(--wx-chart-caret, 0px));
+  bottom: -5px;
+  width: 8px;
+  height: 8px;
+  margin-left: -4px;
+  background-color: inherit;
+  border-right: inherit;
+  border-bottom: inherit;
+  transform: rotate(45deg);
+}
+
+.wx-chart-tooltip-below::after {
+  top: -5px;
+  bottom: auto;
+  border-right: 0;
+  border-bottom: 0;
+  border-left: inherit;
+  border-top: inherit;
+}
+
+.wx-chart-tooltip-title {
+  margin-bottom: 0.15rem;
+  font-weight: 600;
+}
+
+.wx-chart-tooltip-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.wx-chart-tooltip-value {
+  margin-left: auto;
+  padding-left: 0.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+/* entry: every mark comes in from where its value starts, staggered by --wx-chart-delay */
+
+.wx-chart-enter-grow-up,
+.wx-chart-enter-grow-down {
+  transform-box: fill-box;
+  animation: wx-chart-grow-y 0.75s var(--wx-chart-ease) var(--wx-chart-delay, 0ms) backwards;
+}
+
+.wx-chart-enter-grow-up {
+  transform-origin: 50% 100%;
+}
+
+.wx-chart-enter-grow-down {
+  transform-origin: 50% 0;
+}
+
+.wx-chart-enter-grow-left,
+.wx-chart-enter-grow-right {
+  transform-box: fill-box;
+  animation: wx-chart-grow-x 0.75s var(--wx-chart-ease) var(--wx-chart-delay, 0ms) backwards;
+}
+
+.wx-chart-enter-grow-right {
+  transform-origin: 0 50%;
+}
+
+.wx-chart-enter-grow-left {
+  transform-origin: 100% 50%;
+}
+
+.wx-chart-enter-draw {
+  stroke-dasharray: 1;
+  animation: wx-chart-draw 0.95s cubic-bezier(0.45, 0.05, 0.25, 1) var(--wx-chart-delay, 0ms) backwards;
+}
+
+.wx-chart-enter-fade {
+  animation: wx-chart-fade 0.6s ease-out var(--wx-chart-delay, 0ms) backwards;
+}
+
+.wx-chart-enter-pop {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: wx-chart-pop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) var(--wx-chart-delay, 0ms) backwards;
+}
+
+/* radial marks turn and grow out of the center of the chart, set inline as transform-origin */
+.wx-chart-enter-radial {
+  animation: wx-chart-radial 0.8s var(--wx-chart-ease) var(--wx-chart-delay, 0ms) backwards;
+}
+
+.wx-chart-enter-scale {
+  animation: wx-chart-scale 0.75s var(--wx-chart-ease) var(--wx-chart-delay, 0ms) backwards;
+}
+
+/* a changed chart eases into its new state rather than snapping */
+.wx-chart-settle {
+  animation: wx-chart-settle 0.35s ease-out;
+}
+
+.wx-chart-center-change {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: wx-chart-center 0.25s var(--wx-chart-ease);
+}
+
+@keyframes wx-chart-grow-y {
+  from {
+    transform: scaleY(0);
+  }
+}
+
+@keyframes wx-chart-grow-x {
+  from {
+    transform: scaleX(0);
+  }
+}
+
+@keyframes wx-chart-draw {
+  from {
+    stroke-dashoffset: 1;
+  }
+
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes wx-chart-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes wx-chart-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+}
+
+@keyframes wx-chart-radial {
+  from {
+    opacity: 0;
+    transform: rotate(-40deg) scale(0.55);
+  }
+}
+
+@keyframes wx-chart-scale {
+  from {
+    opacity: 0;
+    transform: scale(0.2);
+  }
+}
+
+@keyframes wx-chart-settle {
+  from {
+    opacity: 0.55;
+  }
+}
+
+@keyframes wx-chart-center {
+  from {
+    opacity: 0.2;
+    transform: scale(0.9);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wx-chart [class*="wx-chart-enter-"],
+  .wx-chart-settle,
+  .wx-chart-center-change,
+  .wx-chart-hover-dot {
+    animation: none;
+  }
+
+  .wx-chart-mark,
+  .wx-chart-guide-follow,
+  .wx-chart-tooltip,
+  .wx-chart-tooltip-follow {
+    transition: none;
+  }
+
+  .wx-chart-arc.wx-chart-active {
+    transform: none;
+  }
+}

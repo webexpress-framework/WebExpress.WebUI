@@ -70,9 +70,13 @@ webexpress.webui.ColorCtrl = class extends webexpress.webui.Ctrl {
      * @param {string} val - The new color value.
      */
     set value(val) {
+        const changed = val !== this._value;
         this._value = val;
         if (this._swatch) {
             this._swatch.style.backgroundColor = val;
+        }
+        if (changed) {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
         }
     }
 

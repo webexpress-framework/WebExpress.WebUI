@@ -5,44 +5,32 @@ using WebExpress.WebCore.WebPage;
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
-    /// Represents an icon that can be rendered in either the default (FontAwesome) theme
-    /// or the lightweight SVG-based <see cref="TypeIconTheme.Light"/> theme.
+    /// Base class for the stroke icons shipped with the framework. A subclass contributes
+    /// nothing but its symbolic name; turning that name into css classes happens here, so
+    /// the mapping can later move to a registry of icon sets without touching any of the
+    /// icon classes.
     /// </summary>
     public abstract class Icon : IIcon
     {
         /// <summary>
-        /// Gets the theme that was selected for this icon instance. The theme is fixed
-        /// at construction time and chooses between the FontAwesome glyph
-        /// (<see cref="TypeIconTheme.Default"/>) and the lightweight SVG variant
-        /// (<see cref="TypeIconTheme.Light"/>).
+        /// The css class prefix the light set publishes its icons under. The light set is
+        /// currently the only set the framework ships, which is why the prefix is a
+        /// constant here rather than something resolved per render.
         /// </summary>
-        public TypeIconTheme Theme { get; }
+        private const string Prefix = "wx-icon-light";
 
         /// <summary>
-        /// Gets the CSS class associated with the icon for the currently selected theme.
-        /// Subclasses return the FontAwesome class here; classes that ship a dedicated
-        /// light variant override this property to switch on <see cref="Theme"/>.
+        /// Gets the symbolic name of the icon, such as "anchor". It matches the file name
+        /// of the svg under Assets/icons and the css class that masks it, which is what
+        /// keeps a missing drawing detectable instead of silently rendering nothing.
         /// </summary>
-        public abstract string Class { get; }
+        public abstract string Symbol { get; }
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Icon"/> class using the
-        /// <see cref="TypeIconTheme.Default"/> theme.
+        /// Gets the css classes that render the icon: the prefix carries the mask geometry
+        /// and the sizing, the second class selects the drawing.
         /// </summary>
-        protected Icon()
-            : this(TypeIconTheme.Default)
-        {
-        }
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Icon"/> class using the
-        /// specified theme.
-        /// </summary>
-        /// <param name="theme">The theme to use when rendering the icon.</param>
-        protected Icon(TypeIconTheme theme)
-        {
-            Theme = theme;
-        }
+        public virtual string Class => $"{Prefix} {Prefix}-{Symbol}";
 
         /// <summary>
         /// Converts the icon to an HTML representation.

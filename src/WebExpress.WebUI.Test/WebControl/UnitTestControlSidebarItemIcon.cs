@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the sidebar item icon control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlSidebarItemIcon
     {
         /// <summary>
@@ -40,7 +39,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-sidebar-icon""></div>")]
-        [InlineData("fas fa-cog", @"<div class=""wx-sidebar-icon"" data-icon=""fas fa-cog""></div>")]
+        [InlineData("wx-icon-light wx-icon-light-cog", @"<div class=""wx-sidebar-icon"" data-icon=""wx-icon-light wx-icon-light-cog""></div>")]
         public void IconClass(string iconClass, string expected)
         {
             // arrange

@@ -6,7 +6,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a horizontal column group of form items.
+    /// Arranges a group of form items horizontally, with label and field side by side.
     /// </summary>
     public class ControlFormItemGroupColumnHorizontal : ControlFormItemGroupColumn
     {
@@ -51,13 +51,15 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public override IHtmlNode Render(IRenderControlFormContext renderContext, IVisualTreeControl visualTree)
         {
+            EnsureInputIds();
+
             var renderGroupContext = new RenderControlFormGroupContext(renderContext, this);
 
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-form-group-column-horizontal", GetClasses()),
-                Style = GetStyles(),
+                Class = Css.Concatenate("wx-form-group-column-horizontal", GetClasses(renderContext)),
+                Style = GetStyles(renderContext),
             };
 
             var max = 100;
@@ -144,10 +146,10 @@ namespace WebExpress.WebUI.WebControl
                     }
                     else if (icon.Icon is not null)
                     {
-                        icon.Classes = ["me-2", "pt-1"];
+                        icon.Classes = ["me-2"];
                         row.Add(new HtmlElementTextContentDiv(icon.Render(renderContext, visualTree), label)
                         {
-                            Style = "display: flex;"
+                            Class = "wx-form-label-row"
                         });
                     }
                     else if (label is not null)

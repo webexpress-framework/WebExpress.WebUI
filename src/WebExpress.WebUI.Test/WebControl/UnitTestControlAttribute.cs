@@ -10,7 +10,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the attribute control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlAttribute
     {
         /// <summary>
@@ -66,7 +65,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div><span>:</span><span></span></div>")]
-        [InlineData(typeof(IconStar), @"<div><i class=""fas fa-star""></i><span>:</span><span></span></div>")]
+        [InlineData(typeof(IconStar), @"<div><i class=""wx-icon-light wx-icon-light-star""></i><span>:</span><span></span></div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange

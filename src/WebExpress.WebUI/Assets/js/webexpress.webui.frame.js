@@ -1,5 +1,12 @@
 /**
  * An inline page embedding controller (iFrame alternative) that loads HTML into a regular div.
+ *
+ * A load into an empty frame shows a skeleton placeholder while the content is
+ * on its way. A load into a frame that already holds content shows none: the
+ * outgoing content stays until its replacement is ready, so swapping from one
+ * page to the next is a single exchange rather than a flash through an empty
+ * frame.
+ *
  * The following events are triggered:
  * - webexpress.webui.Event.DATA_REQUESTED_EVENT
  * - webexpress.webui.Event.DATA_ARRIVED_EVENT
@@ -109,9 +116,103 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
         // clear host and append fragment
         this._element.innerHTML = "";
         this._element.appendChild(fragment);
+        this._demoteLandmarks(this._element, doc.title || "");
+        this._fitHeadings(this._element);
 
         // execute scripts that were found in the content
         this._executeScripts(scriptsToExecute);
+    }
+
+    /**
+     * Fits the headings of the embedded content into the outline of the host page. The content
+     * starts its own outline at the first level; here it continues the section it is embedded
+     * in, so its headings are read one level below the heading that precedes the frame, with
+     * their own steps kept. The tags stay as they are for the look; the level is spoken.
+     * @param {HTMLElement} root - The host element holding the embedded content.
+     */
+    _fitHeadings(root) {
+        const headings = Array.from(root.querySelectorAll("h1, h2, h3, h4, h5, h6"));
+        if (!headings.length || typeof root.compareDocumentPosition !== "function") {
+            return;
+        }
+
+        // the last heading of the host page before the frame is the section the content continues
+        let hostLevel = 0;
+        for (const h of Array.from(document.querySelectorAll("h1, h2, h3, h4, h5, h6"))) {
+            if (root.contains(h)) {
+                continue;
+            }
+            // 4 is DOCUMENT_POSITION_FOLLOWING: the frame comes after the heading
+            if (h.compareDocumentPosition(root) & 4) {
+                hostLevel = Number(h.tagName.slice(1));
+            }
+        }
+
+        const own = headings.map(h => Number(h.tagName.slice(1)));
+        const top = Math.min(...own);
+        headings.forEach((h, i) => {
+            h.setAttribute("role", "heading");
+            h.setAttribute("aria-level", String(Math.min(6, hostLevel + 1 + own[i] - top)));
+        });
+    }
+
+    /**
+     * Steps the page-level landmarks of the embedded content down. The content came from a
+     * document of its own; inside this page its main, banner and footer are not the page's,
+     * and a second main would be, so they become plain regions, and the named landmarks
+     * carry the title of the document they came from to be told apart from the host page's.
+     * @param {HTMLElement} root - The host element holding the embedded content.
+     * @param {string} title - The title of the embedded document.
+     */
+    _demoteLandmarks(root, title) {
+        const walk = (element, depth) => {
+            const tag = (element.tagName || "").toLowerCase();
+            const role = element.getAttribute("role") || "";
+            const label = element.getAttribute("aria-label");
+
+            if (tag === "main" || role === "main") {
+                // a main element admits no other role, so the element itself is exchanged for a
+                // section that carries its attributes and its content
+                const region = tag === "main" ? this._replaceTag(element, "section") : element;
+                region.setAttribute("role", "region");
+                if (title && !label && !region.hasAttribute("aria-labelledby")) {
+                    region.setAttribute("aria-label", title);
+                }
+                element = region;
+            } else if (role === "banner" || role === "contentinfo" || (depth === 0 && (tag === "header" || tag === "footer"))) {
+                element.setAttribute("role", "group");
+            } else if (title && label && (["nav", "aside", "form"].includes(tag) || ["navigation", "region", "toolbar", "search", "complementary"].includes(role))) {
+                element.setAttribute("aria-label", label + " – " + title);
+            }
+
+            for (const child of Array.from(element.children || [])) {
+                walk(child, depth + 1);
+            }
+        };
+
+        for (const child of Array.from(root.children || [])) {
+            walk(child, 0);
+        }
+    }
+
+    /**
+     * Exchanges an element for one of another tag that keeps its attributes and its content.
+     * @param {HTMLElement} element - The element to exchange.
+     * @param {string} tag - The tag of the replacement.
+     * @returns {HTMLElement} The replacement, in the place of the element.
+     */
+    _replaceTag(element, tag) {
+        const replacement = document.createElement(tag);
+        for (const attribute of Array.from(element.attributes || [])) {
+            replacement.setAttribute(attribute.name, attribute.value);
+        }
+        while (element.firstChild) {
+            replacement.appendChild(element.firstChild);
+        }
+        if (element.parentNode) {
+            element.parentNode.replaceChild(replacement, element);
+        }
+        return replacement;
     }
 
     /**
@@ -146,18 +247,22 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
     _renderError(error) {
         this._element.innerHTML = "";
 
-        // create the expandable error container using ExpandableCtrl
-        const expandableDiv = document.createElement("div");
-        expandableDiv.setAttribute("data-header", this._i18n("webexpress.webui:frame.contentNotLoaded.label", "Content could not be loaded."));
-        expandableDiv.setAttribute("data-headercss", "fw-bold text-danger");
-        expandableDiv.setAttribute("data-icon", "fa-solid fa-triangle-exclamation text-warning me-2");
-        expandableDiv.setAttribute("data-expanded", "false");
-        expandableDiv.className = "mb-2 alert alert-danger";
+        // the error box is a section: a headline that says what failed, over a body with the
+        // detail a reader only wants when they are debugging. the alert supplies the surface,
+        // so the section stays flat and draws no guide line inside it
+        const errorSection = document.createElement("section");
+        errorSection.setAttribute("data-header", this._i18n("webexpress.webui:page.contentNotLoaded.label", "Content could not be loaded."));
+        errorSection.setAttribute("data-label-css", "fw-bold");
+        errorSection.setAttribute("data-header-icon-css", "wx-icon-light wx-icon-light-triangle-exclamation text-warning");
+        errorSection.setAttribute("data-expanded", "false");
+        errorSection.setAttribute("data-guide", "false");
+        errorSection.setAttribute("data-persist", "false");
+        errorSection.className = "mb-2 alert alert-danger wx-section-verbatim";
 
         // prepare error message
         const messageDiv = document.createElement("div");
         messageDiv.className = "mb-2";
-        messageDiv.textContent = this._i18n("webexpress.webui:frame.contentNotLoaded.details", "An error occurred while loading external content.");
+        messageDiv.textContent = this._i18n("webexpress.webui:page.contentNotLoaded.details", "An error occurred while loading external content.");
 
         // prepare stacktrace if available
         const stackDiv = document.createElement("pre");
@@ -168,15 +273,15 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
             stackDiv.textContent = String(error);
         }
 
-        // add message and stacktrace to expandable content
-        expandableDiv.appendChild(messageDiv);
-        expandableDiv.appendChild(stackDiv);
+        // add message and stacktrace to the section content
+        errorSection.appendChild(messageDiv);
+        errorSection.appendChild(stackDiv);
 
-        // initialize the ExpandableCtrl
-        new webexpress.webui.ExpandableCtrl(expandableDiv);
+        // initialize the SectionCtrl
+        new webexpress.webui.SectionCtrl(errorSection);
 
-        // render the expandable error container
-        this._element.appendChild(expandableDiv);
+        // render the error container
+        this._element.appendChild(errorSection);
     }
 
     /**
@@ -184,38 +289,40 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
      * Dispatches DATA_REQUESTED_EVENT before fetching, and DATA_ARRIVED_EVENT after successful update.
      */
     load() {
-        this._element.innerHTML = "";
-
-        // guard against empty uri
+        // an empty uri is a request to show nothing
         if (!this._uri) {
+            this._element.innerHTML = "";
             return;
         }
 
-        // show a simple loading placeholder
-        const placeholder = this._createPlaceholder();
-        this._element.appendChild(placeholder);
+        // the placeholder only earns its place while there is nothing to look
+        // at. Swapping content that is already on screen for a skeleton says
+        // nothing the content does not already say and costs a visible flash on
+        // every reload, so the outgoing content stays until its replacement is
+        // ready and _update() exchanges the two in one step.
+        if (!this._element.firstChild) {
+            this._element.appendChild(this._createPlaceholder());
+        }
 
         // notify that data fetching starts
         this._dispatch(webexpress.webui.Event.DATA_REQUESTED_EVENT, { uri: this._uri });
 
-        // perform fetch and update
-        fetch(this._uri, { credentials: "same-origin" })
-            .then((response) => {
-                // ensure http ok
-                if (!response.ok) {
-                    throw new Error("Failed to load content. HTTP status: " + response.status);
+        // load through the transport, which answers with one result whatever happened
+        webexpress.webui.Transport.request(this._uri, { credentials: "same-origin" }).then((result) => {
+            if (!result.ok) {
+                // a superseded load says nothing about the content; every other failure does
+                if (result.error.kind !== "abort") {
+                    this._renderError("Failed to load content. " + result.error.message);
                 }
-                return response.text();
-            })
-            .then((html) => {
-                this._update(html);
+                return;
+            }
 
-                // notify that data has arrived
-                this._dispatch(webexpress.webui.Event.DATA_ARRIVED_EVENT, { uri: this._uri, response: html });
-            })
-            .catch((error) => {
-                this._renderError(error);
-            });
+            const html = result.data && result.data.text !== undefined ? result.data.text : "";
+            this._update(html);
+
+            // notify that data has arrived
+            this._dispatch(webexpress.webui.Event.DATA_ARRIVED_EVENT, { uri: this._uri, response: html });
+        });
     }
 
     /**

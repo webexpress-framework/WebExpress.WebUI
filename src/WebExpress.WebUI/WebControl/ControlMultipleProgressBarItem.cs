@@ -4,7 +4,7 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents an item in a multiple progress bar control.
+    /// One segment of a multi-segment progress bar, representing a portion of the whole.
     /// </summary>
     public class ControlMultipleProgressBarItem
     {

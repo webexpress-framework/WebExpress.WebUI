@@ -6,7 +6,6 @@ namespace WebExpress.WebUI.Test.WebStemap
     /// <summary>
     /// Test the sitemap manager.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestSitemapManager
     {
         /// <summary>

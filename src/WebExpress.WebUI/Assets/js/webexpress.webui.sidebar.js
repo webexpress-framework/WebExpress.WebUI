@@ -1,7 +1,11 @@
 /**
- * Sidebar controller for responsive sidebars using WX-prefixed classes and Popper.js for overlays.
+ * Sidebar controller for responsive sidebars using WX-prefixed classes and CSS anchors for overlays.
  * Element types: .wx-sidebar-link, .wx-sidebar-separator, .wx-sidebar-header, .wx-sidebar-panel, .wx-sidebar-icon.
  * Compact mode is controlled via data-mode: "hide" or "overlay".
+ *
+ * When collapsed to its rail, hovering the sidebar reveals the full content as
+ * an offcanvas flyout until the pointer leaves. The first active item is scrolled
+ * into view (expanding its ancestor groups) so the current location stays visible.
  *
  * The following events are triggered:
  * - webexpress.webui.Event.REMOVE_EVENT
@@ -10,9 +14,11 @@
  * - webexpress.webui.Event.BREAKPOINT_CHANGE_EVENT
  * - webexpress.webui.Event.ICON_EDIT_EVENT
  */
-webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
+webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
+    static _nextGroupId = 0;
     _items = [];
     _resizeObserver = null;
+    _hoverExpanded = false;
 
     /**
      * Initializes the sidebar control, parses content, and sets up layout.
@@ -27,6 +33,11 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
 
         // set breakpoint to a sensible default if not present
         this._breakpoint = parseInt(element.getAttribute("data-breakpoint"), 10) || 100;
+
+        // both behaviors are opt-out: the server emits the attribute only to
+        // disable them, so an absent attribute keeps the default enabled
+        this._hoverExpandEnabled = element.getAttribute("data-hover-expanded") !== "false";
+        this._scrollActiveEnabled = element.getAttribute("data-scroll-active") !== "false";
 
         // parse structure before clearing html
         this._items = this._parseItems(element.children);
@@ -46,10 +57,12 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         this._buildSidebar();
         this._buildFooter();
         this._setupResizeHandling();
+        this._setupHoverFlyout();
 
         // set initial reduced state depending on window size
         this._isReduced = this._element.offsetWidth < this._breakpoint;
         this._updateView();
+        this._scrollActiveIntoView();
     }
 
     /**
@@ -104,15 +117,39 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                 const isActive = dataset.active === "active";
                 const isDisabled = dataset.active === "disabled";
 
+                // a nested container holds the child links of a hierarchical
+                // group; parsing it recursively turns a subtree of any depth
+                // into nested item descriptors
+                const childrenContainer = Array.from(el.children)
+                    .find(child => child.classList && child.classList.contains("wx-sidebar-children"));
+                const children = childrenContainer ? this._parseItems(childrenContainer.children) : [];
+
+                // an optional container carries the entries of the trailing
+                // "..." menu; it is a sibling of the children container so a
+                // group can own both a subtree and its own options
+                const optionsContainer = Array.from(el.children)
+                    .find(child => child.classList && child.classList.contains("wx-sidebar-options"));
+                const options = optionsContainer ? this._parseOptions(optionsContainer) : [];
+
                 items.push({
                     ...commonProps,
                     type: "item",
                     link: dataset.uri || null,
-                    tooltip: dataset.tooltip || null,
+                    tooltip: dataset.tooltip || dataset.title || null,
                     target: dataset.target || null,
                     isRemoveable: dataset.removeable === "true",
                     active: isActive,
                     disabled: isDisabled,
+                    badge: dataset.badge != null ? dataset.badge : null,
+                    badgeColor: dataset.badgeColor || null,
+                    badgeStyle: dataset.badgeStyle || null,
+                    colorCss: dataset.colorCss || null,
+                    colorStyle: dataset.colorStyle || null,
+                    backgroundColorCss: dataset.backgroundColorCss || null,
+                    backgroundColorStyle: dataset.backgroundColorStyle || null,
+                    expanded: dataset.expanded === "true",
+                    children: children,
+                    options: options,
                     element: null // created in _buildItemElement
                 });
             } else if (el.classList.contains("wx-sidebar-control")) {
@@ -157,6 +194,61 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
+     * Parses a "..." options container into dropdown descriptors, mirroring the
+     * table and list option format so the shared DropdownCtrl can render them.
+     * Both label fields are filled: the menu reads "text", while the sibling
+     * controls use "content", so neither path renders an empty entry.
+     * @param {HTMLElement} optionsContainer - The .wx-sidebar-options element.
+     * @returns {Array} The parsed option descriptors.
+     */
+    _parseOptions(optionsContainer) {
+        const options = [];
+        for (const el of optionsContainer.children) {
+            const cls = el.classList;
+            if (cls.contains("wx-dropdown-divider") || cls.contains("wx-dropdownbutton-divider")) {
+                options.push({ type: "divider" });
+                continue;
+            }
+            if (cls.contains("wx-dropdown-header") || cls.contains("wx-dropdownbutton-header")) {
+                const label = el.textContent.trim();
+                options.push({ type: "header", text: label, content: label, icon: el.dataset.icon || null });
+                continue;
+            }
+
+            const ds = el.dataset;
+            const label = el.textContent.trim() || null;
+            options.push({
+                id: el.id || null,
+                text: label,
+                content: label,
+                icon: ds.icon || null,
+                image: ds.image || null,
+                uri: ds.uri || ds.url || null,
+                target: ds.target || null,
+                tooltip: ds.tooltip || null,
+                color: ds.color || null,
+                disabled: el.hasAttribute("disabled"),
+                primaryAction: Object.fromEntries(Object.entries(ds)
+                    .filter(([k]) => k.startsWith("wxPrimary"))
+                    .map(([k, v]) => [
+                        k.slice(9).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                secondaryAction: Object.fromEntries(Object.entries(ds)
+                    .filter(([k]) => k.startsWith("wxSecondary"))
+                    .map(([k, v]) => [
+                        k.slice(11).replace(/^./, c => c.toLowerCase()),
+                        v === "true" ? true : v === "false" ? false : v
+                    ])
+                ),
+                bind: { source: ds.wxSource || null }
+            });
+        }
+        return options;
+    }
+
+    /**
      * Creates a header DOM element.
      * @param {string} text - The header text.
      * @returns {HTMLElement} The created header element.
@@ -182,17 +274,21 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
      * Builds the main DOM structure for items and panels.
      */
     _buildSidebar() {
-        for (const item of this._items) {
+        // a leaf needs the marker slot only where it has to line up with a
+        // caret, and only against the rows it actually sits among
+        const hierarchical = this._sectionHierarchy(this._items);
+
+        for (let index = 0; index < this._items.length; index++) {
+            const item = this._items[index];
             if (item.type === "toolbar") {
                 continue;
             }
 
-            if (item.type === "item") {
-                item.element = this._buildItemElement(item);
-            } else if (item.type === "panel") {
-                item.element = this._buildPanelElement(item);
-            } else if (item.type === "icon") {
-                item.element = this._buildIconElement(item);
+            // a descriptor without a pre-built element (the REST path, or a
+            // rebuild through setItems) is materialised here; header and divider
+            // elements already parsed from the dom carry their element and stay
+            if (item.type === "item" || item.type === "panel" || item.type === "icon" || !item.element) {
+                item.element = this._buildItem(item, hierarchical[index]);
             }
 
             if (item.element) {
@@ -202,11 +298,105 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     }
 
     /**
+     * Determines whether a run of rows forms a hierarchical structure, which is
+     * the case as soon as a single row of it owns children.
+     * @param {Array<Object>} items - The descriptors of one run.
+     * @returns {boolean} True when the run is a tree rather than a flat list.
+     */
+    _isHierarchical(items) {
+        return (items || []).some(x => x && x.type === "item" && x.children && x.children.length);
+    }
+
+    /**
+     * Decides, for every entry of the top level, whether the structure it
+     * belongs to is hierarchical.
+     * @remarks
+     * The question is asked per <i>section</i> rather than for the sidebar as a
+     * whole, because a section is the structure a row actually belongs to:
+     * headers and dividers separate them, and the block of navigation links
+     * above a document tree must not grow bullets just because the tree below
+     * it has branches. Within a section it is all or nothing - the point of the
+     * marker is that the rows of one structure line up with each other.
+     * @param {Array<Object>} items - The descriptors of the top level.
+     * @returns {Array<boolean>} One flag per entry, in the same order.
+     */
+    _sectionHierarchy(items) {
+        const entries = items || [];
+        const flags = new Array(entries.length).fill(false);
+        let start = 0;
+
+        const close = (end) => {
+            if (this._isHierarchical(entries.slice(start, end))) {
+                for (let i = start; i < end; i++) {
+                    flags[i] = true;
+                }
+            }
+
+            start = end + 1;
+        };
+
+        for (let i = 0; i < entries.length; i++) {
+            const type = entries[i] && entries[i].type;
+
+            if (type === "header" || type === "divider") {
+                close(i);
+            }
+        }
+
+        close(entries.length);
+
+        return flags;
+    }
+
+    /**
+     * Builds the DOM element for an item descriptor by dispatching on its type,
+     * so the constructor path, the setItems path and the nested-children path
+     * all share a single build routine.
+     * @param {Object} item - The item descriptor.
+     * @param {boolean} [hierarchical] - Whether the row belongs to a tree and therefore
+     * carries the marker slot that lines it up with the carets of its group siblings.
+     * @returns {HTMLElement|null} The built element, or null for an unknown type.
+     */
+    _buildItem(item, hierarchical = false) {
+        switch (item.type) {
+            case "header": return this._createHeaderElement(item.label);
+            case "divider": return this._createDividerElement();
+            case "item": return this._buildItemElement(item, hierarchical);
+            case "panel": return this._buildPanelElement(item);
+            case "icon": return this._buildIconElement(item);
+            default: return null;
+        }
+    }
+
+    /**
+     * Replaces the sidebar items with a new set of descriptors and rebuilds the
+     * item area, keeping the footer and the responsive machinery intact. An
+     * async control (for example the REST sidebar) calls this once its data
+     * arrives; the shape of a descriptor matches what _parseItems produces.
+     * @param {Array<Object>} descriptors - The new item descriptors.
+     */
+    setItems(descriptors) {
+        this._items = Array.isArray(descriptors) ? descriptors : [];
+        this._sidebarWrapper.innerHTML = "";
+        this._buildSidebar();
+
+        // an open flyout has widened the element, so its offsetWidth no longer
+        // reflects the collapsed rail; leave the reduced state untouched then
+        if (!this._hoverExpanded) {
+            this._isReduced = this._element.offsetWidth < this._breakpoint;
+        }
+        this._updateView();
+        this._scrollActiveIntoView();
+    }
+
+    /**
      * Constructs the DOM for a navigation item (link).
      * @param {Object} item - The item descriptor.
+     * @param {boolean} [hierarchical] - Whether the row belongs to a tree and therefore
+     * carries the marker slot that lines it up with the carets of its group siblings.
      * @returns {HTMLElement} The constructed item element.
      */
-    _buildItemElement(item) {
+    _buildItemElement(item, hierarchical = false) {
         const wrapper = document.createElement("div");
         if (item.id) {
             wrapper.id = item.id;
@@ -218,6 +408,22 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
 
         if (item.disabled) {
             wrapper.classList.add("disabled");
+        }
+
+        // apply the optional text and background colors; each arrives either as
+        // a framework css class or as an inline style, mirroring the server-side
+        // color pair, so a row can be tinted without extra css
+        const colorClasses = [item.colorCss, item.backgroundColorCss]
+            .filter(Boolean)
+            .flatMap(value => value.split(/\s+/).filter(Boolean));
+        if (colorClasses.length) {
+            wrapper.classList.add(...colorClasses);
+        }
+        // the fill first: it brings a text color of its own, which a text color the author set
+        // must be able to override
+        const colorStyle = [item.backgroundColorStyle, item.colorStyle].filter(Boolean).join(" ");
+        if (colorStyle) {
+            wrapper.style.cssText = colorStyle;
         }
 
         // apply action attributes
@@ -276,12 +482,26 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
 
         wrapper.appendChild(link);
 
+        // badge sits at the trailing edge of the row, ahead of the remove button
+        if (item.badge != null && item.badge !== "") {
+            const badge = document.createElement("span");
+            badge.className = "wx-sidebar-badge badge";
+            if (item.badgeColor) {
+                badge.classList.add(...String(item.badgeColor).split(/\s+/).filter(Boolean));
+            }
+            if (item.badgeStyle) {
+                badge.style.cssText = item.badgeStyle;
+            }
+            badge.textContent = String(item.badge);
+            wrapper.appendChild(badge);
+        }
+
         // remove button
         if (item.isRemoveable) {
             const removeBtn = document.createElement("button");
             removeBtn.className = "btn wx-button-close";
             removeBtn.title = this._i18n ? this._i18n("webexpress.webui:remove", "Remove") : "Remove";
-            removeBtn.innerHTML = `<i class="${this._iconClass("fas fa-times", "wx-icon-light-xmark")}"></i>`;
+            removeBtn.innerHTML = `<i class="${this._iconClass("xmark")}"></i>`;
             removeBtn.addEventListener("click", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
@@ -293,7 +513,94 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             wrapper.appendChild(removeBtn);
         }
 
-        return wrapper;
+        // trailing "..." menu; reuses the shared dropdown control and is
+        // revealed on hover through css, like the removable button. it applies
+        // to leaves and groups alike, so a tree node can expand and still offer
+        // its own actions
+        if (item.options && item.options.length) {
+            const options = document.createElement("div");
+            options.className = "wx-sidebar-options";
+            options.dataset.icon = this._iconClass("more");
+            options.dataset.size = "btn-sm";
+            options.dataset.border = "false";
+            options.title = this._i18n("webexpress.webui:table.options.label", "Options");
+            wrapper.appendChild(options);
+            new webexpress.webui.DropdownCtrl(options).items = item.options;
+        }
+
+        // a leaf that belongs to a hierarchical structure gets a bullet in the
+        // caret's slot: it aligns the row with the group rows beside it and
+        // reads as a terminal node. That is every row inside a group, and also
+        // a root row of a section that holds one - a tree whose roots sat
+        // further left than its branches read as two lists. A flat section owns
+        // no carets to line up with and stays unmarked. A group instead nests
+        // its children under the row so the subtree collapses as a unit
+        if (!item.children || item.children.length === 0) {
+            if (hierarchical) {
+                // the dot of the icon set, the same glyph the tree marks its leaves with, so a
+                // sidebar link and a sidebar tree read alike and follow the set the page carries
+                const bullet = document.createElement("span");
+                bullet.className = "wx-sidebar-bullet";
+                bullet.setAttribute("aria-hidden", "true");
+                const glyph = document.createElement("i");
+                glyph.className = this._iconClass("dot");
+                bullet.appendChild(glyph);
+                wrapper.prepend(bullet);
+            }
+            return wrapper;
+        }
+
+        return this._wrapAsGroup(item, wrapper);
+    }
+
+    /**
+     * Wraps a link row that owns children into a collapsible group: a caret in
+     * the row toggles a children container built recursively from the item's
+     * descriptors. The caret stops the click from following the link, so a
+     * parent can both navigate and expand.
+     * @param {Object} item - The item descriptor carrying the children.
+     * @param {HTMLElement} row - The already built link row.
+     * @returns {HTMLElement} The group element.
+     */
+    _wrapAsGroup(item, row) {
+        const group = document.createElement("div");
+        group.className = "wx-sidebar-group";
+        if (item.expanded) {
+            group.classList.add("wx-expanded");
+        }
+
+        const caret = document.createElement("button");
+        caret.type = "button";
+        caret.className = "wx-sidebar-caret btn";
+        caret.setAttribute("aria-label", this._i18n ? this._i18n("webexpress.webui:sidebar.toggle", "Toggle") : "Toggle");
+        caret.innerHTML = `<i class="${this._iconClass("chevron-right")}"></i>`;
+        // the caret says whether the group it opens is open, and which one that is
+        caret.setAttribute("aria-expanded", item.expanded ? "true" : "false");
+        caret.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const expanded = group.classList.toggle("wx-expanded");
+            caret.setAttribute("aria-expanded", expanded ? "true" : "false");
+        });
+        row.prepend(caret);
+
+        const childrenWrap = document.createElement("div");
+        childrenWrap.className = "wx-sidebar-children";
+        childrenWrap.id = "wx-sidebar-group-" + (++webexpress.webui.SidebarCtrl._nextGroupId);
+        caret.setAttribute("aria-controls", childrenWrap.id);
+        for (const child of item.children) {
+            // every row below a group is inside the tree by construction, so it
+            // is marked whether or not its own level holds a further group
+            const childElement = this._buildItem(child, true);
+            if (childElement) {
+                childrenWrap.appendChild(childElement);
+            }
+        }
+
+        group.appendChild(row);
+        group.appendChild(childrenWrap);
+
+        return group;
     }
 
     /**
@@ -302,9 +609,9 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
      * @returns {HTMLElement} The constructed icon element.
      */
     _buildIconElement(item) {
+        // the wrapper is not a control: the edit button inside it is what takes the focus
         const iconWrapper = document.createElement("div");
         iconWrapper.className = "wx-sidebar-icon";
-        iconWrapper.setAttribute("tabindex", "0");
 
         // icon presentation
         let iconEl = null;
@@ -315,7 +622,8 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             iconEl = document.createElement("img");
             iconEl.className = "wx-sidebar-icon-graphic wx-icon";
             iconEl.src = item.iconImg;
-            iconEl.alt = "";
+            // the picture stands for the entry when no text is shown beside it
+            iconEl.alt = item.iconText ? "" : (item.label || "");
         }
         if (iconEl) {
             iconWrapper.appendChild(iconEl);
@@ -335,7 +643,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             editBtn.type = "button";
             editBtn.className = "wx-sidebar-icon-edit";
             editBtn.title = this._i18n("webexpress.webui:edit", "Edit");
-            editBtn.innerHTML = `<i class="${this._iconClass("fas fa-pen", "wx-icon-light-pen")}"></i>`;
+            editBtn.innerHTML = `<i class="${this._iconClass("pen")}"></i>`;
             if (item.uri) {
                 editBtn.setAttribute("data-wx-uri", item.uri);
             }
@@ -386,6 +694,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             const img = document.createElement("img");
             img.className = "wx-icon";
             img.src = item.iconImg;
+            img.alt = "";
             trigger.appendChild(img);
         }
 
@@ -399,11 +708,22 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
         panel.appendChild(trigger);
         panel.appendChild(contentContainer);
 
-        // bind click for overlay mode
+        // bind click for overlay mode; the trigger is a button to the keyboard as well
         if (item.mode === "overlay") {
-            trigger.addEventListener("click", (e) => {
+            trigger.setAttribute("role", "button");
+            trigger.setAttribute("tabindex", "0");
+            trigger.setAttribute("aria-haspopup", "dialog");
+            if (item.label) { trigger.setAttribute("aria-label", item.label); }
+            const open = () => {
                 if (this._isReduced && item.content) {
                     this._showPanelOverlay(item, trigger);
+                }
+            };
+            trigger.addEventListener("click", open);
+            trigger.addEventListener("keydown", (e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    open();
                 }
             });
         }
@@ -442,8 +762,10 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
     _setupResizeHandling() {
         // resize callback
         const onResize = () => {
-            // only trigger resize logic if no manual override active
-            if (!this._manualOverride) {
+            // only trigger resize logic if no manual override and no open flyout;
+            // a flyout temporarily widens the element and would otherwise be
+            // measured as "expanded" and flip the reduced state
+            if (!this._manualOverride && !this._hoverExpanded) {
                 const reduced = this._element.offsetWidth < this._breakpoint;
                 if (reduced !== this._isReduced) {
                     this._isReduced = reduced;
@@ -485,6 +807,19 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             this._dispatch(webexpress.webui.Event.SHOW_EVENT, { sidebarId: this._element.id });
         }
 
+        // a hover flyout keeps the reduced rail but paints the items expanded,
+        // so per-item visibility follows the flyout state, not the rail state
+        this._applyItemVisibility(this._isReduced && !this._hoverExpanded);
+    }
+
+    /**
+     * Applies the per-item show/hide and sizing rules for either the compact
+     * (rail) layout or the expanded layout. Split out from _updateView so the
+     * hover flyout can render the items expanded while the element itself stays
+     * in its reduced state.
+     * @param {boolean} reduced - Whether to render the compact rail layout.
+     */
+    _applyItemVisibility(reduced) {
         for (const item of this._items) {
             if (item.type === "toolbar") {
                 continue;
@@ -497,21 +832,18 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                 const trigger = el.querySelector(".wx-sidebar-panel-trigger");
                 const content = el.querySelector(".wx-sidebar-panel-content");
 
-                if (this._isReduced) {
-                    // reduced mode logic
+                if (reduced) {
                     if (mode === "hide") {
                         el.style.display = "none";
                     } else {
                         el.style.display = "";
                         if (mode === "overlay") {
                             el.classList.add("wx-mode-overlay");
-                            // show icon, hide content
                             if (trigger) { trigger.style.display = ""; }
                             if (content) { content.style.display = "none"; }
                         }
                     }
                 } else {
-                    // expanded mode logic: always show content, hide icon trigger
                     el.style.display = "";
                     el.classList.remove("wx-mode-overlay");
 
@@ -519,9 +851,8 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     if (content) { content.style.display = ""; }
                 }
             } else if (item.type === "icon") {
-                // icon: adjust size for reduced/expanded mode
                 if (el) {
-                    if (this._isReduced) {
+                    if (reduced) {
                         el.classList.add("wx-sidebar-icon-small");
                         el.classList.remove("wx-sidebar-icon-large");
                     } else {
@@ -531,17 +862,151 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                     el.style.display = "";
                 }
             } else {
-                // standard item logic
-                if (this._isReduced) {
-                    if (mode === "hide") {
-                        el.style.display = "none";
-                    } else {
-                        el.style.display = "";
-                    }
+                if (reduced && mode === "hide") {
+                    el.style.display = "none";
                 } else {
                     el.style.display = "";
                 }
             }
+        }
+    }
+
+    /**
+     * Wires the hover flyout: while the sidebar is reduced to its rail, entering
+     * the item area with the pointer reveals the full content as an overlay, and
+     * leaving the sidebar collapses it back to the rail. Opening is bound to the
+     * item area alone so hovering the footer toolbar (a sibling of the wrapper)
+     * never triggers the flyout; closing stays on the whole element so moving
+     * between the items and the toolbar within an open flyout keeps it open
+     * until the pointer leaves the sidebar entirely. The listeners live for the
+     * controller's whole lifetime and consult the reduced state at event time,
+     * so they stay correct across breakpoint changes. The whole flyout is
+     * opt-out through data-hover-expanded, so no listeners are wired when it is
+     * disabled.
+     */
+    _setupHoverFlyout() {
+        if (!this._hoverExpandEnabled) {
+            return;
+        }
+
+        this._sidebarWrapper.addEventListener("mouseenter", () => {
+            if (this._isReduced) {
+                this._openFlyout();
+            }
+        });
+        this._element.addEventListener("mouseleave", () => {
+            this._closeFlyout();
+        });
+
+        // choosing a navigation entry dismisses the flyout so it does not linger
+        // over the content after the user has picked a destination; the caret,
+        // the "..." menu and the remove button sit outside the link and so keep
+        // the flyout open for continued interaction
+        this._element.addEventListener("click", (e) => {
+            if (this._hoverExpanded && e.target.closest(".wx-link")) {
+                this._closeFlyout();
+            }
+        });
+    }
+
+    /**
+     * Opens the hover flyout: the reduced rail is lifted into a fixed overlay
+     * pinned over its current position and its items are painted expanded. Fixed
+     * positioning keeps the surrounding layout untouched (the rail's slot in the
+     * flow is unchanged) and works regardless of how the sidebar is embedded.
+     */
+    _openFlyout() {
+        if (this._hoverExpanded) {
+            return;
+        }
+        this._hoverExpanded = true;
+
+        // pin to the rail's current viewport box before the class widens it, so
+        // the overlay starts exactly where the rail sits
+        const rect = this._element.getBoundingClientRect();
+        this._element.style.top = `${rect.top}px`;
+        this._element.style.left = `${rect.left}px`;
+        this._element.style.height = `${rect.height}px`;
+
+        this._element.classList.add("wx-sidebar-flyout");
+        this._applyItemVisibility(false);
+    }
+
+    /**
+     * Closes the hover flyout and returns the sidebar to its reduced rail,
+     * clearing the pinned position so it flows back into its layout slot.
+     */
+    _closeFlyout() {
+        if (!this._hoverExpanded) {
+            return;
+        }
+        this._hoverExpanded = false;
+
+        this._element.classList.remove("wx-sidebar-flyout");
+        this._element.style.top = "";
+        this._element.style.left = "";
+        this._element.style.height = "";
+
+        this._applyItemVisibility(this._isReduced);
+    }
+
+    /**
+     * Brings the first active item into view so the current location is visible
+     * without manual scrolling. Ancestor groups of a nested active row are
+     * expanded first, otherwise a collapsed branch would leave it unrendered,
+     * and the scroll is confined to the sidebar's own container so the
+     * surrounding page never moves.
+     */
+    _scrollActiveIntoView() {
+        if (!this._scrollActiveEnabled) {
+            return;
+        }
+
+        const wrapper = this._sidebarWrapper;
+        if (!wrapper) {
+            return;
+        }
+
+        const active = wrapper.querySelector(".wx-sidebar-link.active");
+        if (!active) {
+            return;
+        }
+
+        // expand the ancestor groups synchronously so a nested active row is
+        // rendered right away, independent of the deferred scroll below
+        for (let ancestor = active.parentElement; ancestor && ancestor !== wrapper; ancestor = ancestor.parentElement) {
+            if (ancestor.classList.contains("wx-sidebar-group")) {
+                ancestor.classList.add("wx-expanded");
+            }
+        }
+
+        // defer the scroll to the next frame: on the first pass the sidebar can
+        // still be laid out by an ancestor split whose panes are not sized yet
+        // (controllers initialise depth-first, so this sidebar builds before its
+        // enclosing split), leaving the item area non-scrollable so an immediate
+        // scrollTop write would be lost. running after layout guarantees a
+        // scrollable container.
+        const scroll = () => {
+            // re-query inside the frame: a rebuild (for example a REST setItems)
+            // between scheduling and firing may have replaced the active row
+            const target = wrapper.querySelector(".wx-sidebar-link.active");
+            if (!target) {
+                return;
+            }
+
+            const containerRect = wrapper.getBoundingClientRect();
+            const activeRect = target.getBoundingClientRect();
+            if (activeRect.top < containerRect.top) {
+                wrapper.scrollTop -= containerRect.top - activeRect.top;
+            } else if (activeRect.bottom > containerRect.bottom) {
+                wrapper.scrollTop += activeRect.bottom - containerRect.bottom;
+            }
+        };
+
+        if (typeof requestAnimationFrame === "function") {
+            requestAnimationFrame(scroll);
+        } else {
+            scroll();
         }
     }
 
@@ -564,11 +1029,12 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             content.appendChild(item.content);
         }
         overlayPanel.appendChild(content);
-        document.body.appendChild(overlayPanel);
+        this._element.appendChild(overlayPanel);
 
-        // initialize popper if available
-        if (typeof this._initializePopper === "function") {
-            this._initializePopper(triggerEl, overlayPanel);
+        // retain the sidebar as the theme and dialog owner of the top-layer panel
+        if (typeof this._initializeMenu === "function") {
+            this._initializeMenu(triggerEl, overlayPanel);
+            webexpress.webui.NativeMenu.show(overlayPanel);
         }
 
         // avoid passing DOM element to payload to prevent potential circular reference issues
@@ -583,9 +1049,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
                 }
             }
 
-            overlayPanel.style.display = "none";
-            document.removeEventListener("mousedown", handleClickOutside);
-            document.removeEventListener("keydown", handleEsc);
+            webexpress.webui.NativeMenu.hide(overlayPanel);
 
             if (overlayPanel.parentElement) {
                 overlayPanel.parentElement.removeChild(overlayPanel);
@@ -593,33 +1057,16 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
             this._dispatch(webexpress.webui.Event.HIDE_EVENT, { overlayActive: false });
         };
 
-        // handle click outside
-        const handleClickOutside = (event) => {
-            if (!overlayPanel.contains(event.target) && !triggerEl.contains(event.target)) {
-                closeOverlay();
-            }
-        };
-
-        // handle esc
-        const handleEsc = (event) => {
-            if (event.key === "Escape") {
-                closeOverlay();
-            }
-        };
-
-        // prevent clicks inside overlay from closing it
-        overlayPanel.addEventListener("mousedown", (e) => {
-            e.stopPropagation();
+        overlayPanel.addEventListener("toggle", (event) => {
+            if (event.newState === "closed") { closeOverlay(); }
         });
-
-        document.addEventListener("mousedown", handleClickOutside);
-        document.addEventListener("keydown", handleEsc);
     }
 
     /**
      * Expands sidebar to full view.
      */
     expand() {
+        this._closeFlyout();
         this._isReduced = false;
         this._manualOverride = true;
         this._updateView();
@@ -629,6 +1076,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.PopperCtrl {
      * Reduces sidebar to compact view.
      */
     reduce() {
+        this._closeFlyout();
         this._isReduced = true;
         this._manualOverride = true;
         this._updateView();

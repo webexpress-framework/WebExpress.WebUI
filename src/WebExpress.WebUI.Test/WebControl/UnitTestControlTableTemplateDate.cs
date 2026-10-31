@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the date template control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTableTemplateDate
     {
         /// <summary>
@@ -72,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
         [InlineData(null, @"<template data-type=""date""></template>")]
         [InlineData("", @"<template data-type=""date""></template>")]
         [InlineData(" ", @"<template data-type=""date""></template>")]
-        [InlineData("gold", @"<template data-type=""date"" data-color-style=""background: gold;""></template>")]
+        [InlineData("gold", @"<template data-type=""date"" data-color-style=""background: gold;color: #000;""></template>")]
         public void UserColor(string color, string expected)
         {
             // arrange

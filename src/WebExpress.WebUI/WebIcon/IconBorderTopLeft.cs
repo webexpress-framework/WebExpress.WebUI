@@ -1,4 +1,4 @@
-namespace WebExpress.WebUI.WebIcon
+﻿namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
     /// Represents an icon for a border-top-left.
@@ -6,8 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconBorderTopLeft : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-border-top-left";
+        public override string Symbol => "border-top-left";
     }
 }

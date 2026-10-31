@@ -9,7 +9,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the view item control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlViewItem
     {
         /// <summary>
@@ -90,7 +89,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""wx-view""></div>")]
-        [InlineData(typeof(IconFolder), @"<div class=""wx-view"" data-icon=""fas fa-folder""></div>")]
+        [InlineData(typeof(IconFolder), @"<div class=""wx-view"" data-icon=""wx-icon-light wx-icon-light-folder""></div>")]
         [InlineData(typeof(ImageIconWebExpress), @"<div class=""wx-view"" data-image=""/assets/img/webexpress.svg""></div>")]
         public void Icon(Type iconType, string expected)
         {

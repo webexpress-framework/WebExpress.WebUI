@@ -10,7 +10,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the tree control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTree : IClassFixture<UnitTestControlFixture>
     {
         /// <summary>
@@ -178,7 +177,7 @@ namespace WebExpress.WebUI.Test.WebControl
                             Icon = _ => new IconCog()
                         }
                     ],
-                    @"<div class=""wx-webui-tree""><div id=""1"" class=""wx-tree-node"" data-label=""Node 1"" data-expand=""true"" data-icon=""fas fa-home""><div id=""1.1"" class=""wx-tree-node"" data-label=""Node 1.1"" data-uri=""/home""></div><div id=""1.2"" class=""wx-tree-node"" data-label=""Node 1.2""></div></div><div id=""2"" class=""wx-tree-node"" data-label=""Node 2"" data-icon=""fas fa-cog""><div id=""2.1"" class=""wx-tree-node"" data-label=""Node 2.1"" data-tooltip=""Tooltip"" data-uri=""/info"" data-target=""_blank""></div><div id=""2.2"" class=""wx-tree-node"" data-label=""Node 2.2""></div></div></div>"
+                    @"<div class=""wx-webui-tree""><div id=""1"" class=""wx-tree-node"" data-label=""Node 1"" data-expand=""true"" data-icon=""wx-icon-light wx-icon-light-home""><div id=""1.1"" class=""wx-tree-node"" data-label=""Node 1.1"" data-uri=""/home""></div><div id=""1.2"" class=""wx-tree-node"" data-label=""Node 1.2""></div></div><div id=""2"" class=""wx-tree-node"" data-label=""Node 2"" data-icon=""wx-icon-light wx-icon-light-cog""><div id=""2.1"" class=""wx-tree-node"" data-label=""Node 2.1"" data-tooltip=""Tooltip"" data-uri=""/info"" data-target=""_blank""></div><div id=""2.2"" class=""wx-tree-node"" data-label=""Node 2.2""></div></div></div>"
                 }
             };
         }

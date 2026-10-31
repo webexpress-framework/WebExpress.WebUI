@@ -1,5 +1,3 @@
-using WebExpress.WebCore.WebIcon;
-
 namespace WebExpress.WebUI.WebIcon
 {
     /// <summary>
@@ -8,16 +6,8 @@ namespace WebExpress.WebUI.WebIcon
     public class IconTableSort : Icon
     {
         /// <summary>
-        /// Initializes a new instance of the class.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public IconTableSort()
-            : base(TypeIconTheme.Light)
-        {
-        }
-
-        /// <summary>
-        /// Returns the CSS class associated with the icon.
-        /// </summary>
-        public override string Class => "wx-icon-light wx-icon-light-table-sort";
+        public override string Symbol => "table-sort";
     }
 }

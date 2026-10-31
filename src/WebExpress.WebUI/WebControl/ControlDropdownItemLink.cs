@@ -9,11 +9,16 @@ using WebExpress.WebUI.WebPage;
 namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents a dropdown item link control.
+    /// A clickable link entry inside a dropdown menu.
     /// </summary>
     public class ControlDropdownItemLink : IControlDropdownItem
     {
         private readonly string _id;
+
+        /// <summary>
+        /// Gets or sets a request-local visibility decision. This does not authorize server operations.
+        /// </summary>
+        public Func<IRenderControlContext, bool> Visible { get; set; }
 
         /// <summary>
         /// Returns the unique identifier for the entity.
@@ -94,6 +99,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree)
         {
+            if (Visible?.Invoke(renderContext) == false) return null;
             var text = Text?.Invoke(renderContext);
             var icon = Icon?.Invoke(renderContext);
             var image = Image?.Invoke(renderContext);
@@ -112,7 +118,7 @@ namespace WebExpress.WebUI.WebControl
             }
                 .AddUserAttribute("data-icon", (icon as Icon)?.Class)
                 .AddUserAttribute("data-image", image?.ToString() ?? (icon as ImageIcon)?.Uri?.ToString())
-                .AddUserAttribute("data-tooltip", tooltip)
+                .AddUserAttribute("data-tooltip", I18N.Translate(renderContext, tooltip))
                 .AddUserAttribute("data-color", color?.ToClass())
                 .AddUserAttribute("data-uri", uri?.ToString())
                 .AddUserAttribute("data-target", target?.ToValue());

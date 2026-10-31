@@ -1,7 +1,7 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Specifies the orientation of a split layout.
+    /// Whether a split layout is divided horizontally or vertically.
     /// </summary>
     public enum TypeOrientationSplit
     {

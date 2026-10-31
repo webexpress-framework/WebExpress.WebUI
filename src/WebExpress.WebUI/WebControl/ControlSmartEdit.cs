@@ -75,7 +75,9 @@ namespace WebExpress.WebUI.WebControl
         public ControlSmartEdit(string id, params IControlFormItemInput[] formInputs)
             : base(id)
         {
-            _form = new ControlForm($"smartedit_{id}".GetHashCode().ToString("X"));
+            // the name has to be the same in every process: a string hash code is randomized per
+            // process, so a save sent after a restart or to another cluster node would be dropped
+            _form = new ControlForm($"smartedit_{id}");
             _form.Add(formInputs);
 
             _form.InitializeForm += OnInitialize;
@@ -162,8 +164,8 @@ namespace WebExpress.WebUI.WebControl
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
-                Class = Css.Concatenate("wx-webui-smart-edit", GetClasses()),
-                Style = GetStyles()
+                Class = Css.Concatenate("wx-webui-smart-edit", GetClasses(renderContext)),
+                Style = GetStyles(renderContext)
             }
                 .AddUserAttribute("data-object-id", ObjectId?.Invoke(renderContext))
                 .AddUserAttribute("data-object-name", name)

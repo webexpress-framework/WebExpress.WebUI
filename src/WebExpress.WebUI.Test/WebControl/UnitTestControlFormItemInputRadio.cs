@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form radio control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputRadio
     {
         /// <summary>
@@ -15,7 +14,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div class=""form-check""><input type=""radio"" class=""form-check-input""><label class=""form-check-label""></label></div>")]
-        [InlineData("id", @"<div id=""id"" class=""form-check""><input name=""id"" type=""radio"" class=""form-check-input""><label class=""form-check-label"" for=""id""></label></div>")]
+        [InlineData("id", @"<div class=""form-check""><input id=""id"" name=""id"" type=""radio"" class=""form-check-input""><label class=""form-check-label"" for=""id""></label></div>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -30,6 +29,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -37,7 +37,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the auto id property of the form radio control.
         /// </summary>
         [Theory]
-        [InlineData(@"<div id=""*"" class=""form-check""><input name=""*"" type=""radio"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>")]
+        [InlineData(@"<div class=""form-check""><input id=""*"" name=""*"" type=""radio"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>")]
         public void AutoId(string expected)
         {
             // arrange
@@ -52,6 +52,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -76,6 +77,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -101,6 +103,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -125,6 +128,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -132,9 +136,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form radio control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""form-check""><input type=""radio"" value=""option"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
-        [InlineData(false, @"*<div class=""form-check""><input type=""radio"" value=""option"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
-        [InlineData(true, @"*<div class=""form-check""><input type=""radio"" value=""option"" class=""form-check-input"" checked><label class=""form-check-label""></label></div>*")]
+        [InlineData(null, @"*<div class=""form-check""><input id=""*"" type=""radio"" value=""option"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>*")]
+        [InlineData(false, @"*<div class=""form-check""><input id=""*"" type=""radio"" value=""option"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>*")]
+        [InlineData(true, @"*<div class=""form-check""><input id=""*"" type=""radio"" value=""option"" class=""form-check-input"" checked><label class=""form-check-label"" for=""*""></label></div>*")]
         public void ValueForm(bool? value, string expected)
         {
             // arrange
@@ -155,6 +159,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = form.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -162,9 +167,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value method of the form radio control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""form-check""><input type=""radio"" value=""option"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
-        [InlineData(false, @"*<div class=""form-check""><input type=""radio"" value=""option"" class=""form-check-input""><label class=""form-check-label""></label></div>*")]
-        [InlineData(true, @"*<div class=""form-check""><input type=""radio"" value=""option"" class=""form-check-input"" checked><label class=""form-check-label""></label></div>*")]
+        [InlineData(null, @"*<div class=""form-check""><input id=""*"" type=""radio"" value=""option"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>*")]
+        [InlineData(false, @"*<div class=""form-check""><input id=""*"" type=""radio"" value=""option"" class=""form-check-input""><label class=""form-check-label"" for=""*""></label></div>*")]
+        [InlineData(true, @"*<div class=""form-check""><input id=""*"" type=""radio"" value=""option"" class=""form-check-input"" checked><label class=""form-check-label"" for=""*""></label></div>*")]
         public void ValueItem(bool? value, string expected)
         {
             // arrange
@@ -183,6 +188,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = form.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }

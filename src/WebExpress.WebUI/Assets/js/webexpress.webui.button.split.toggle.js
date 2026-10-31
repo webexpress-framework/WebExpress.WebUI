@@ -12,8 +12,8 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
 
         // read properties from data attributes, fallback to null, use defaults for icons if not set
         this._label = element.dataset.label || null;
-        this._iconCollapse = element.dataset.iconCollapse || "fas fa-angles-left";
-        this._iconExpand = element.dataset.iconExpand || "fas fa-angles-right";
+        this._iconCollapse = element.dataset.iconCollapse || "angles-left";
+        this._iconExpand = element.dataset.iconExpand || "angles-right";
         this._imageCollapse = element.dataset.imageCollapse || null;
         this._imageExpand = element.dataset.imageExpand || null;
 
@@ -55,7 +55,7 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
         // select icon based on collapsed state
         if (this._collapsed ? this._iconExpand : this._iconCollapse) {
             const icon = document.createElement("i");
-            icon.className = this._collapsed ? this._iconExpand : this._iconCollapse;
+            icon.className = this._iconClass(this._collapsed ? this._iconExpand : this._iconCollapse);
             this._element.appendChild(icon);
         }
 
@@ -65,6 +65,13 @@ webexpress.webui.ButtonSplitToggleCtrl = class extends webexpress.webui.ButtonCt
             span.textContent = this._label;
             this._element.appendChild(span);
         }
+
+        // a button that shows an icon alone is named by what it does, and says which way the
+        // pane it toggles is at the moment
+        if (!this._label) {
+            this._element.setAttribute("aria-label", this._i18n("webexpress.webui:split.toggle", "Show or hide the side pane"));
+        }
+        this._element.setAttribute("aria-expanded", this._collapsed ? "false" : "true");
     }
 
     /**

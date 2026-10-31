@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the multiple progress bar control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlMultipleProgressBar
     {
         /// <summary>

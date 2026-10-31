@@ -42,6 +42,7 @@ The form controller manages the complete lifecycle of user interactions, from in
   - The controller uses the native HTML5 validation API (`required`, `pattern`, `min`/`max`, `type="email"`, etc.).
   - In case of errors, submission is prevented, the first invalid field is focused, and an error message is displayed.
   - Specific validations for email patterns are additionally checked to compensate for browser inconsistencies.
+  - A control inside the form adds its own rules; a disabled field is not validated.
 
 - **Submission**
   - The browser's standard submit is prevented.
@@ -96,6 +97,29 @@ if (restForm) {
     restForm.clear();
 }
 ```
+
+### Saving, Unsaved Changes and Reset
+
+Besides the classic `submit()`, the form offers the members of the [control contract](contract.md):
+
+| Member          | Description
+|-----------------|-----------------------------------------------------------------------------------------
+| `save()`        | Validates (when `data-validate-on-submit` is on), dispatches the cancelable `BEFORE_SAVE_EVENT` and submits. Resolves with `{ ok, status, data, error }` for every outcome; an invalid form answers with the kind `validation`, a vetoed save with `abort`.
+| `submit()`      | Submits without validating; resolves with the same result.
+| `dirty`         | True while what the form would send differs from what it was rendered with, last loaded or last saved.
+| `markPristine()`| Takes the current fields as the saved state; called after a load and after a successful save.
+| `reset()`       | Writes the saved state back into the fields and clears the errors.
+
+```javascript
+const result = await restForm.save();
+if (result.ok) {
+    // the form is pristine again
+} else if (result.error.kind === "validation") {
+    // the invalid fields are marked
+}
+```
+
+A control inside the form - a slider, a tag or date input - is validated with its own rules as well (`webexpress.webui.Field.validate`); a disabled control is skipped, as on the server.
 
 ### Manual Instantiation
 
@@ -155,8 +179,14 @@ The form controller communicates its internal lifecycle through a series of disp
 | `TASK_FINISH_EVENT`    | Async end.                        | `{ name: "loading"|"submitting" }`
 | `DATA_ARRIVED_EVENT`   | Data received.                    | `{ data, status, type: "load"|"submit" }`
 | `CHANGE_VALUE_EVENT`   | Form populated (load).            | `{ source: "load", data }`
+| `CHANGE_VALIDITY_EVENT`| Fields turned invalid or valid.   | `{ valid, errors }`
+| `BEFORE_SAVE_EVENT`    | Before the request; cancelable.   | `{ payload, form }` - a listener may replace `payload`
+| `SAVED_EVENT`          | Submit succeeded (2xx).           | `{ data, status, form }`
+| `DATA_ERROR_EVENT`     | Load or submit failed (not abort).| `{ action: "load"|"save", error: { kind, status, message, retriable }, fields? }`
 | `UPLOAD_SUCCESS_EVENT` | Submit succeeded (2xx).           | `{ response, status, form }`
 | `UPLOAD_ERROR_EVENT`   | Error (network, validation, 5xx). | `{ error|response, type: "validation"|undefined }` 
+
+The form is the reference of the saving side of the [control contract](contract.md): `BEFORE_SAVE_EVENT`, `SAVED_EVENT` and `DATA_ERROR_EVENT` are the events every saving control dispatches, so a page reacts to them without knowing which control saved.
 
 ## Examples
 

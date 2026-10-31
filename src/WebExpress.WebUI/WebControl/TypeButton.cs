@@ -1,22 +1,24 @@
 ﻿namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
-    /// Represents the type of a button.
+    /// The value of the button's <c>type</c> attribute, which decides what pressing it does inside a
+    /// form. It does not affect the appearance; the visual style comes from the button's color.
     /// </summary>
     public enum TypeButton
     {
         /// <summary>
-        /// Default button type.
+        /// For buttons that run script; it is the safe choice inside a form, where a button
+        /// without a type would submit the form by accident.
         /// </summary>
-        Default = 0, // Button
+        Default = 0,
 
         /// <summary>
-        /// Submit button type.
+        /// For the button that sends the form, so pressing enter in a field triggers it as well.
         /// </summary>
         Submit = 1,
 
         /// <summary>
-        /// Reset button type.
+        /// For discarding all edits at once; rarely wanted, since a misclick loses the user's input.
         /// </summary>
         Reset = 2
     }

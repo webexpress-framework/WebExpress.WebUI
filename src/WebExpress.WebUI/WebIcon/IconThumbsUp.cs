@@ -6,8 +6,8 @@
     public class IconThumbsUp : Icon
     {
         /// <summary>
-        /// Returns the CSS class associated with the icon.
+        /// Returns the symbolic name the active icon set resolves to a css class.
         /// </summary>
-        public override string Class => "fas fa-thumbs-up";
+        public override string Symbol => "thumbs-up";
     }
 }

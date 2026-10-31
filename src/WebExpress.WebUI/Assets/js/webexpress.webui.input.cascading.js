@@ -22,9 +22,12 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
         // hidden input for form submission
         this._hidden = this._createHiddenInput(id, name);
 
-        // container that will hold per-level inputselection hosts
+        // container that will hold per-level inputselection hosts; the field label names
+        // the group of levels, each level names itself by what it shows
         this._levelsContainer = document.createElement("div");
         this._levelsContainer.classList.add("wx-cascading-levels");
+        this._levelsContainer.setAttribute("role", "group");
+        this._adoptFieldLabel(this._levelsContainer, id, element);
 
         // parse the option tree from the original dom (static read, no observers)
         this._tree = this._parseTree(element);
@@ -311,8 +314,12 @@ webexpress.webui.InputCascadingCtrl = class extends webexpress.webui.Ctrl {
         // clean duplicates if any, though path usually shouldn't have them
         normalized = [...new Set(normalized)];
 
+        const changed = normalized.join(";") !== this._path.join(";");
         this._path = normalized;
         this._renderLevel(0, this._tree);
+        if (changed) {
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: [...this._path] });
+        }
     }
 };
 

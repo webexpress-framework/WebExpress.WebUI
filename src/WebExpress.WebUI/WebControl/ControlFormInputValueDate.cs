@@ -15,6 +15,11 @@ namespace WebExpress.WebUI.WebControl
         public DateTime? Date { get; set; }
 
         /// <summary>
+        /// Gets a value indicating whether no date was given or the given text was no date.
+        /// </summary>
+        public bool IsEmpty => !Date.HasValue;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public ControlFormInputValueDate()

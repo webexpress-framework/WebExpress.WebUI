@@ -21,7 +21,8 @@ webexpress.webui.RatingCtrl = class extends webexpress.webui.Ctrl {
 
         // base classes and attributes
         element.classList.add("wx-rating-view");
-        element.setAttribute("aria-readonly", "true");
+        // the stars are a picture of the value; the label spells the value out
+        element.setAttribute("role", "img");
         if (!element.getAttribute("aria-label")) {
             element.setAttribute("aria-label", `${this._i18n("webexpress.webui:rating")}: ${this._value} / ${this._total}`);
         }
@@ -69,7 +70,7 @@ webexpress.webui.RatingCtrl = class extends webexpress.webui.Ctrl {
 
             const icon = document.createElement("i");
             const active = i <= this._value;
-            icon.className = (active ? "fas fa-star" : "far fa-star") + " wx-rating-icon";
+            icon.className = this._iconClass("star") + " wx-rating-icon";
             star.classList.toggle("active", active);
 
             star.appendChild(icon);
@@ -121,6 +122,7 @@ webexpress.webui.RatingCtrl = class extends webexpress.webui.Ctrl {
             // update aria-label to reflect change
             this._element.setAttribute("aria-label", `${this._i18n("webexpress.webui:rating")}: ${this._value} / ${this._total}`);
             this._renderStars();
+            this._dispatch(webexpress.webui.Event.CHANGE_VALUE_EVENT, { value: this.value });
         }
     }
 

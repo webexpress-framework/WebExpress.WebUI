@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the form calendar control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlFormItemInputCalendar
     {
         /// <summary>
@@ -61,8 +60,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form calendar control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"*<div class=""wx-webui-input-calendar"" *></div>*")]
-        [InlineData("2023-10-10", @"*<div class=""wx-webui-input-calendar"" data-value=""2023-10-10"" *></div>*")]
+        [InlineData(null, @"*<div id=""*"" class=""wx-webui-input-calendar"" *></div>*")]
+        [InlineData("2023-10-10", @"*<div id=""*"" class=""wx-webui-input-calendar"" data-value=""2023-10-10"" *></div>*")]
         public void Value(string value, string expected)
         {
             // arrange

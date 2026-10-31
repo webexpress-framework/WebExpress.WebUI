@@ -28,7 +28,7 @@ The appearance and behavior of the main dropdown button are controlled by the fo
 | Attribute          | Description                                                        | Example
 |--------------------|--------------------------------------------------------------------|-----------------------------------------
 | `data-label`       | The text label displayed on the button.                            | `data-label="Actions"`
-| `data-icon`        | A CSS class for an icon to be displayed on the button.             | `data-icon="fas fa-cog"`
+| `data-icon`        | A CSS class for an icon to be displayed on the button.             | `data-icon="cog"`
 | `data-image`       | The URL of an image to be displayed on the button.                 | `data-image="/path/to/image.png"`
 | `data-color`       | A color class (e.g., from a CSS framework) for styling the button. | `data-color="btn-primary"`
 | `data-buttoncss`   | Additional CSS classes to be applied to the button.                | `data-buttoncss="btn-sm custom-style"`
@@ -46,6 +46,10 @@ The items within the dropdown menu are defined by child elements inside the main
 - **`.wx-dropdown-divider`**: A visual separator between menu items.
 
 Individual items can be configured with their own `data-` attributes, such as `data-icon`, `data-image`, or the `disabled` attribute.
+
+### Scroll Region
+
+A menu is capped at `min(24rem, viewport height)`. By default the whole menu scrolls once its entries exceed that. A menu that carries a direct child `li.wx-dropdown-scroll` (holding a nested `ul role="group"`) scrolls only that region instead: the entries above and below it keep their place. The data dropdowns of WebExpress.WebApp (`wx-webapp-dropdown`, `wx-webapp-avatar-dropdown`) put their loaded items there, so the search field and the static entries - "new ...", "manage ..." - stay reachable however long the list grows. Arrow-key navigation scrolls a focused entry of the region into view.
 
 ## Programmatic Control
 
@@ -93,15 +97,15 @@ The following code demonstrates how to create a `DropdownCtrl` using a declarati
 
 ```html
 <!-- The main container for the dropdown button control -->
-<div id="mainDropdown" class="wx-webui-dropdown" data-label="Actions" data-icon="fas fa-ellipsis-v" data-color="btn-secondary">
+<div id="mainDropdown" class="wx-webui-dropdown" data-label="Actions" data-icon="more" data-color="btn-secondary">
 
     <!-- A header for the first group of items -->
-    <div class="wx-dropdown-header" data-icon="fas fa-cog">
+    <div class="wx-dropdown-header" data-icon="cog">
         Settings
     </div>
 
     <!-- A clickable item with an icon and a text color class -->
-    <a id="home-item" class="wx-dropdown-item text-primary" data-icon="fas fa-home">
+    <a id="home-item" class="wx-dropdown-item text-primary" data-icon="home">
         Home
     </a>
 
@@ -114,7 +118,7 @@ The following code demonstrates how to create a `DropdownCtrl` using a declarati
     <div class="wx-dropdown-divider"></div>
 
     <!-- A disabled item that cannot be clicked -->
-    <a id="logout-item" class="wx-dropdown-item" data-icon="fas fa-sign-out-alt" disabled>
+    <a id="logout-item" class="wx-dropdown-item" data-icon="arrow-right-from-bracket" disabled>
         Logout
     </a>
 </div>

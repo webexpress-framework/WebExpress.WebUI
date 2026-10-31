@@ -7,7 +7,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the progress bar control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlProgress
     {
         /// <summary>
@@ -29,6 +28,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -37,9 +37,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(TypeFormatProgress.Default, @"<progress min=""0"" max=""100"" value=""0"">0%</progress>")]
-        [InlineData(TypeFormatProgress.Colored, @"<div class=""progress""><div role=""progressbar"" class=""progress-bar"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100""></div></div>")]
-        [InlineData(TypeFormatProgress.Striped, @"<div class=""progress""><div role=""progressbar"" class=""progress-bar progress-bar progress-bar-striped"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100""></div></div>")]
-        [InlineData(TypeFormatProgress.Animated, @"<div class=""progress""><div role=""progressbar"" class=""progress-bar progress-bar progress-bar-striped progress-bar-animated"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100""></div></div>")]
+        [InlineData(TypeFormatProgress.Colored, @"<div class=""progress""><div role=""progressbar"" class=""progress-bar"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100"" aria-label=""0%""></div></div>")]
+        [InlineData(TypeFormatProgress.Striped, @"<div class=""progress""><div role=""progressbar"" class=""progress-bar progress-bar progress-bar-striped"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100"" aria-label=""0%""></div></div>")]
+        [InlineData(TypeFormatProgress.Animated, @"<div class=""progress""><div role=""progressbar"" class=""progress-bar progress-bar progress-bar-striped progress-bar-animated"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100"" aria-label=""0%""></div></div>")]
         public void Format(TypeFormatProgress format, string expected)
         {
             // arrange
@@ -54,6 +54,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -81,6 +82,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -88,9 +90,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the text property of the progress bar control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""progress""><div role=""progressbar"" class=""progress-bar"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100""></div></div>")]
-        [InlineData("abc", @"<div class=""progress""><div role=""progressbar"" class=""progress-bar"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100"">abc</div></div>")]
-        [InlineData("webexpress.webui:plugin.name", @"<div class=""progress""><div role=""progressbar"" class=""progress-bar"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100"">WebExpress.WebUI</div></div>")]
+        [InlineData(null, @"<div class=""progress""><div role=""progressbar"" class=""progress-bar"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100"" aria-label=""0%""></div></div>")]
+        [InlineData("abc", @"<div class=""progress""><div role=""progressbar"" class=""progress-bar"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100"" aria-label=""abc"">abc</div></div>")]
+        [InlineData("webexpress.webui:plugin.name", @"<div class=""progress""><div role=""progressbar"" class=""progress-bar"" style=""width: 0%;"" aria-valuenow=""0"" aria-valuemin=""0"" aria-valuemax=""100"" aria-label=""WebExpress.WebUI"">WebExpress.WebUI</div></div>")]
         public void Text(string text, string expected)
         {
             // arrange
@@ -106,6 +108,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -137,6 +140,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -169,6 +173,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -193,6 +198,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -217,6 +223,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
 
@@ -241,6 +248,7 @@ namespace WebExpress.WebUI.Test.WebControl
             // act
             var html = control.Render(context, visualTree);
 
+            // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
     }

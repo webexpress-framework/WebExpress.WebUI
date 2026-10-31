@@ -1,4 +1,4 @@
-﻿namespace WebExpress.WebUI.WebControl
+namespace WebExpress.WebUI.WebControl
 {
     /// <summary>
     /// The possible display types.
@@ -42,7 +42,7 @@
     public static class TypeDisplayExtensions
     {
         /// <summary>
-        /// Converts the display type to a Bootstrap CSS class.
+        /// Converts the display type to a WebExpress CSS class.
         /// </summary>
         /// <param name="display">The display type to be converted.</param>
         /// <returns>The CSS class corresponding to the display type.</returns>

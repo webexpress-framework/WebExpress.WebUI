@@ -25,7 +25,8 @@ The initial state and behavior of the tile container are defined via `data-` att
 |---------------------|---------------------------------------------------------------------|------------------------------------
 | `data-movable`      | Allows reordering of tiles via drag-and-drop.                       | `data-movable="true"`
 | `data-allow-remove` | Allows hiding or removing tiles.                                    | `data-allow-remove="true"`
-| `data-persist-key`  | A unique key to save the order and visibility of tiles in a cookie. | `data-persist-key="dashboard-tiles"`
+| `data-persist-key`  | A unique key to save the order and visibility of tiles in localStorage. | `data-persist-key="dashboard-tiles"`
+| `data-heading-level` | The outline level of the card titles, `5` by default. A page that places the tiles right under a shallower heading sets the level that keeps its outline without a gap; the look stays that of a card title. | `data-heading-level="4"`
 
 ### Tile Attributes
 
@@ -35,11 +36,53 @@ Each tile is defined by an element with the class `.wx-tile-card`.
 | :--- | :--- | :--- |
 | `data-id` | A unique ID for the tile. | `data-id="tile-profile"` |
 | `data-label` | The title of the tile. | `data-label="User Profile"` |
-| `data-icon` | A CSS class for an icon. | `data-icon="fas fa-user"` |
+| `data-icon` | A CSS class for an icon. | `data-icon="user"` |
 | `data-image` | The URL of an image for the tile header. | `data-image="/path/to/icon.png"` |
 | `data-color-css` | A CSS class for color styling. | `data-color-css="bg-primary"` |
 | `data-visible` | Determines if the tile is initially visible. | `data-visible="false"` |
+| `data-badge` | A kicker shown above the title, naming the kind the tile belongs to. `data-badge-color-css` / `data-badge-color-style` colour its marker. | `data-badge="Incident"` |
+| `data-chip` | A short qualifier shown at the trailing end of the kicker row. | `data-chip="Recommended"` |
 | `innerHTML` | The HTML content of the tile body. | `<div>Additional details...</div>` |
+| `.wx-tile-card-footer` | A child element whose content is rendered as a metadata footer below the body instead of inside it. | `<div class="wx-tile-card-footer"><span>9 fields</span></div>` |
+
+A tile card is therefore laid out as kicker, title, body and footer, so the kind a card
+belongs to reads before its name and its metadata after its description. The same anatomy
+is used by the tile picker form control (`wx-webui-input-tile`), which additionally
+supports a search box (`data-searchable`, `data-search-placeholder`), a fixed number of
+tiles per row (`data-columns`), narrowing the visible tiles to the value of another input
+(`data-filter-source` on the picker, `data-filter-value` on the tile), and projecting
+values out of the selected tile (`data-wx-bind-*`, see below).
+
+A tile marked `data-always-visible="true"` is exempt from both the filter and the search.
+Use it for the entry that must never fall away because it is the way on — an "add new" or
+a "none of these" card.
+
+### Selection
+
+The picker marks the chosen tile with the class `wx-tile-card-selected` and with
+`aria-selected`, and adds a check badge (`wx-tile-card-check`) in its corner. The state is
+therefore carried by the frame, the ground and a glyph together rather than by colour
+alone. Because the base rule of a tile card declares `border` and `box-shadow` as
+shorthands from a descendant selector, the stylesheet writes the selected state with a
+selector that outranks it; a single-class rule would be overridden and the frame would
+silently disappear.
+
+A required single-select picker answers a question that has only one answer by itself:
+when the bound filter leaves exactly one tile to choose from and nothing is chosen yet,
+that tile is selected, so a step whose only card is the "none of these" entry does not
+wait for a click that can only land on it. The selection is remembered as automatic and
+is taken back the moment the filter reopens the choice; a choice the user made stays.
+Neither a picker that is not required ("nothing" is a legitimate answer there) nor the
+search box (a term narrowing the list to one card is the user looking, not the form
+deciding) takes part.
+
+### Bound values
+
+A tile of the picker may carry `data-wx-bind-{name}` attributes. When the tile is
+selected, each value is written to the form control of that name, to the text of any
+element carrying `data-wx-bind-text="{name}"`, and toggles the visibility of any element
+carrying `data-wx-bind-visible="{name}"`. This lets a card stand for more than its label —
+the references it selects, or a note about what it implies — without a bespoke script.
 
 ## Programmatic Control
 
@@ -78,9 +121,24 @@ dynamicTileCtrl.insertTile({
     id: 'new-tile',
     label: 'Newly Added Tile',
     html: '<p>This tile was added via code.</p>',
-    icon: 'fas fa-plus'
+    icon: 'plus'
 });
 ```
+
+## Filling the pane
+
+Growing with the number of tiles is right for a set among other blocks on a page. Where the tiles *are* the view, it is wrong: inside an application shell the page does not scroll, the panes do, and anything the control keeps below the tiles — the pager, the info line of the REST-backed variant — then sits at the end of a scroll rather than in reach. `Fill` takes the height from the host instead — on `ControlTile` as on `ControlDataTile`:
+
+```csharp
+new ControlDataTile("catalog")
+{
+    Fill = _ => true
+};
+```
+
+The host is marked `wx-fill`, and a flex column host then drives the control: the tiles scroll above chrome that stays. In a `WebExpress.WebApp` shell the content panel becomes a flex column on its own as soon as a filling control is on the page, so `Fill` is all a page there has to set; elsewhere, make the host a flex column with `min-height: 0`. A host that hands nothing down leaves the control at `--wx-tile-height` (default `70vh`), **never at its content height** — the tiles only scroll while the control is bounded. `max-height: 100%` keeps it inside a host that does have an extent.
+
+Fill mode also turns the wrapping of the host itself off. A wrapping column answers a height it cannot fill by starting a second column beside the first, which would spread the tiles sideways rather than let them overflow downwards; the tile container below keeps wrapping as before.
 
 ## Events
 
@@ -100,17 +158,17 @@ The following example shows the declarative configuration of a tile container.
 <div id="dashboard" class="wx-webui-tile" data-movable="true" data-persist-key="dashboard-state" data-allow-remove="true">
 
     <!-- A tile with an icon and title -->
-    <div class="wx-tile-card" data-id="profile" data-icon="fas fa-user" data-label="Profile">
+    <div class="wx-tile-card" data-id="profile" data-icon="user" data-label="Profile">
         View your user profile.
     </div>
 
     <!-- A tile that is initially hidden -->
-    <div class="wx-tile-card" data-id="settings" data-icon="fas fa-cog" data-label="Settings" data-visible="false">
+    <div class="wx-tile-card" data-id="settings" data-icon="cog" data-label="Settings" data-visible="false">
         Adjust application settings.
     </div>
 
     <!-- Another tile -->
-    <div class="wx-tile-card" data-id="mail" data-icon="fas fa-envelope" data-label="Messages">
+    <div class="wx-tile-card" data-id="mail" data-icon="envelope" data-label="Messages">
         Check your inbox.
     </div>
 </div>

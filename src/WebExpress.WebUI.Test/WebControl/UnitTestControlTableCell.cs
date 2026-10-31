@@ -11,7 +11,6 @@ namespace WebExpress.WebUI.Test.WebControl
     /// <summary>
     /// Tests the table row control.
     /// </summary>
-    [Collection("NonParallelTests")]
     public class UnitTestControlTableCell
     {
         /// <summary>
@@ -110,7 +109,7 @@ namespace WebExpress.WebUI.Test.WebControl
         /// </summary>
         [Theory]
         [InlineData(null, @"<div></div>")]
-        [InlineData(typeof(IconStar), @"<div data-icon=""fas fa-star""></div>")]
+        [InlineData(typeof(IconStar), @"<div data-icon=""wx-icon-light wx-icon-light-star""></div>")]
         public void Icon(Type icon, string expected)
         {
             // arrange

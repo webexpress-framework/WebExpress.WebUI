@@ -3,7 +3,8 @@
 namespace WebExpress.WebUI.WebFragment
 {
     /// <summary>
-    /// Represents an item in the dropdown of a fragment control.
+    /// Contract for an entry that can be contributed as a fragment into a dropdown menu, so plugins
+    /// can add their own items to an existing dropdown.
     /// </summary>
     /// <remarks>This interface defines the contract for dropdown items that can be used within a fragment
     /// control. Implementations of this interface may provide specific functionality or behavior for dropdown
