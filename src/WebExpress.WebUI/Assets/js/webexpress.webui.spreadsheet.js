@@ -423,7 +423,12 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
         if (this._destroyed) return;
         const next = webexpress.webui.SpreadsheetModel.fromJSON(value, { rows: this._options.rows, cols: this._options.cols });
         const stable = model => webexpress.webui.Ot.stable(model.toJSON());
-        if (stable(next) === stable(this._model)) return;
+        // serializing both workbooks costs as much as loading one, so a differing frame decides first
+        const sameFrame = next.sheets.length === this._model.sheets.length && next.sheets.every((sheet, index) => {
+            const other = this._model.sheets[index];
+            return sheet.id === other.id && sheet.name === other.name && sheet.rowCount === other.rowCount && sheet.colCount === other.colCount;
+        });
+        if (sameFrame && stable(next) === stable(this._model)) return;
         if (this._editing) this._cancelEdit();
         if (this._collab) {
             // a program loading a workbook into a shared one replaces it for everyone: the new
