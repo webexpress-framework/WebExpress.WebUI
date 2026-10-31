@@ -263,8 +263,10 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
                 titleEl.className = "wx-dashboard-lane-title";
 
                 // the heading is the name alone: the grip, the count and the menu sit beside it
-                // in the row, so a reader that walks the headings hears the lane, not its tools
-                const heading = document.createElement("h" + this._headingLevel);
+                // in the row, so a reader that walks the headings hears the lane, not its tools;
+                // a lane shown only for its tools has no name, and an empty heading is an empty
+                // entry in the outline
+                const heading = document.createElement(colTitle ? "h" + this._headingLevel : "div");
                 heading.className = "wx-dashboard-lane-heading";
                 const titleText = document.createElement("span");
                 titleText.className = "wx-board-col-title";

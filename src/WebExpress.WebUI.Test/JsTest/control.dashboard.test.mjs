@@ -423,6 +423,25 @@ test("the chart widget leaves its chart to the controller, which would otherwise
     assert.ok(body.querySelector(".wx-webui-chart"), "the host keeps the selector the controller creates the chart from");
 });
 
+test("an avatar widget without an image builds no image, which would request the address 'undefined'", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.dashboard.js", "widgets/default.js"] });
+    const create = rt.document.createElement.bind(rt.document);
+    const images = [];
+    rt.document.createElement = (tag) => {
+        const el = create(tag);
+        if (String(tag).toLowerCase() === "img") { images.push(el); }
+        return el;
+    };
+
+    const body = rt.createElement("div");
+    rt.wx.DashboardWidgets.get("widget_avatar").render(body, { params: { name: "Guybrush" } });
+    rt.wx.DashboardWidgets.get("widget_avatar").render(body, { params: { name: "Elaine", image: "/elaine.png" } });
+
+    assert.equal(images.length, 1, "only the avatar with a picture gets an image");
+    assert.equal(images[0].src, "/elaine.png");
+    assert.match(body.textContent, /Guybrush/, "the name is still shown");
+});
+
 /**
  * Builds a board of columns with the given sizes, the way the server sends them.
  * @param {string} sizes - The comma separated column sizes.

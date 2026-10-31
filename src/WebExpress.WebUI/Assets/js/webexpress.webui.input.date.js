@@ -507,11 +507,16 @@ webexpress.webui.InputDateCtrl = class extends webexpress.webui.MenuCtrl {
      * @param {"month"|"year"} mode
      */
     _changeView(step, mode) {
+        // an empty field shows the current month, so paging starts there; the view is
+        // anchored on the first so that stepping from the 31st does not skip a short month
+        const current = this._viewDate || new Date();
+        const viewDate = new Date(current.getFullYear(), current.getMonth(), 1);
         if (mode === "month") {
-            this._viewDate.setMonth(this._viewDate.getMonth() + step);
+            viewDate.setMonth(viewDate.getMonth() + step);
         } else if (mode === "year") {
-            this._viewDate.setFullYear(this._viewDate.getFullYear() + step);
+            viewDate.setFullYear(viewDate.getFullYear() + step);
         }
+        this._viewDate = viewDate;
         this.render();
     }
 

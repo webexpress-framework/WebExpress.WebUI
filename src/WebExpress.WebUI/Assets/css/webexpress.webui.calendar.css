@@ -86,7 +86,7 @@
 /* Calendar week column */
 .wx-calendar-table th:first-child,
 .wx-calendar-table td:first-child {
-    color: var(--wx-info, #0dcaf0);
+    color: var(--wx-info-text-emphasis, #055160);
     background: none;
     min-width: 2em;
     width: 2.4em;
@@ -226,7 +226,7 @@
 @scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
 :scope .wx-calendar-table td:first-child {
     background: var(--wx-secondary-bg, #23262b);
-    color: var(--wx-info, #0dcaf0);
+    color: var(--wx-info-text-emphasis, #055160);
 }
 }
 

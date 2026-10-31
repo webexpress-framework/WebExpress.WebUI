@@ -68,6 +68,11 @@ webexpress.webui.InputPhoneCtrl = class extends webexpress.webui.MenuCtrl {
         });
         // the number is captioned by the field label, the country button by its own purpose
         this._adoptFieldLabel(this._number, id, element, []);
+        // a field placed outside a form has no label to adopt, and the placeholder is only a
+        // hint that disappears with the first digit
+        if (!this._number.hasAttribute("aria-labelledby") && !this._number.hasAttribute("aria-label")) {
+            this._number.setAttribute("aria-label", this._i18n("webexpress.webui:phone.number", "Phone number"));
+        }
         this._trigger.setAttribute("aria-label", this._i18n("webexpress.webui:phone.country", "Country calling code"));
         menu.setAttribute("aria-label", this._i18n("webexpress.webui:phone.country", "Country calling code"));
 

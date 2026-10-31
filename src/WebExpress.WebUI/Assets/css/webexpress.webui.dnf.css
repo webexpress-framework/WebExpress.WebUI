@@ -136,13 +136,15 @@
     border: 0;
     background: none;
     padding: 0.1em 0.2em;
-    color: var(--wx-link-color);
+    /* the editor sits in form groups on a tinted background, where the link color drops
+       below 4.5:1; the emphasis variant holds on both themes */
+    color: var(--wx-primary-text-emphasis);
     font-size: 0.9em;
     cursor: pointer;
 }
 
 .wx-dnf-add:hover:not(:disabled) {
-    color: var(--wx-link-hover-color);
+    text-decoration: underline;
 }
 
 .wx-dnf-add:disabled {

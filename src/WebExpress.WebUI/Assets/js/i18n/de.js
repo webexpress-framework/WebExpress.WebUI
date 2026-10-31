@@ -619,6 +619,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "phone.country.refused": "Telefonnummern aus diesem Land werden nicht angenommen.",
     "phone.filter": "Land suchen",
     "phone.invalid": "Die Telefonnummer ist ungültig.",
+    "phone.number": "Telefonnummer",
 
     "login.title": "Anmelden",
     "login.username": "Benutzername",

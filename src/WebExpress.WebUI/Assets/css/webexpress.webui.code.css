@@ -183,39 +183,44 @@
 
 .wx-code .bracket,
 .wx-code .blockCode {
-    color: #996515;
+    color: var(--wx-warning-text-emphasis, #664d03);
     font-weight: bold;
 }
 
 .wx-code .variable,
 .wx-code .link {
-    color: #9cdcfe;
+    color: var(--wx-info-text-emphasis, #055160);
 }
 
 .wx-code .builtin,
 .wx-code .command,
-.wx-code .decorator {
-    color: #dcdcaa;
+.wx-code .decorator,
+.wx-code .method {
+    color: var(--wx-warning-text-emphasis, #664d03);
+}
+
+/* the theme has no purple, yet keys and attributes need a hue of their own next to the
+   red of their values; the pair is picked to clear 4.5:1 on the code background of each theme */
+.wx-code {
+    --wx-code-accent: #6f42c1;
+}
+
+@scope ([data-wx-theme="dark"]) to ([data-wx-theme="light"]) {
+:scope .wx-code {
+    --wx-code-accent: #c586c0;
+}
 }
 
 .wx-code .key,
 .wx-code .attribute,
 .wx-code .formatting-bold {
-    color: #c586c0;
+    color: var(--wx-code-accent);
     font-weight: bold;
-}
-
-.wx-code .method {
-    color: gold;
 }
 
 .wx-code .label,
 .wx-code .linenumber {
-    color: #c586c0;
-}
-
-.wx-code .tag {
-    color: #569cd6;
+    color: var(--wx-code-accent);
 }
 
 .wx-code .inlineCode {
@@ -233,14 +238,8 @@
     font-family: inherit;
 }
 
-/* headings */
-.wx-code .heading {
-    font-weight: bold;
-    color: #569cd6;
-}
-
 .wx-code .list {
-    color: #4ec9b0;
+    color: var(--wx-success-text-emphasis, #0a3622);
 }
 
 .wx-code .link {

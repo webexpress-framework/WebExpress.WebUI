@@ -201,12 +201,18 @@ webexpress.webui.DashboardWidgets.register("widget_avatar", {
      */
     render: function (container, data) {
         const params = data.params || {};
-        const img = document.createElement("img");
-        img.className = "rounded-circle mb-2";
-        img.alt = params.name || webexpress.webui.I18N.translate("webexpress.webui:widget.avatar.title");
-        img.style.width = "64px";
-        img.style.height = "64px";
-        img.src = params.image;
+
+        // an image starts loading as soon as it has a source, attached or not, so one is only
+        // built when there is something to show
+        if (params.image) {
+            const img = document.createElement("img");
+            img.className = "rounded-circle mb-2";
+            img.alt = params.name || webexpress.webui.I18N.translate("webexpress.webui:widget.avatar.title");
+            img.style.width = "64px";
+            img.style.height = "64px";
+            img.src = params.image;
+            container.appendChild(img);
+        }
 
         const name = document.createElement("div");
         name.className = "fw-bold text-center";
@@ -215,9 +221,6 @@ webexpress.webui.DashboardWidgets.register("widget_avatar", {
         const subtitle = document.createElement("div");
         subtitle.className = "text-muted small text-center";
         subtitle.textContent = params.caption || "";
-        if (params.image) {
-            container.appendChild(img);
-        }
         container.appendChild(name);
         if (subtitle.textContent) {
             container.appendChild(subtitle);

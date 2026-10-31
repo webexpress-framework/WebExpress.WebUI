@@ -52,13 +52,18 @@ namespace WebExpress.WebUI.WebControl
         {
             var value = renderContext.GetValue<ControlFormInputValueString>(this)?.Text;
             var color = Color?.Invoke(renderContext);
+            var disabled = Disabled?.Invoke(renderContext) ?? false;
 
+            // the client moves name and disabled onto the hidden input it posts through, so both
+            // have to be on the host; without the name the picked color never reaches the server
             var html = new HtmlElementTextContentDiv()
             {
                 Id = Id,
                 Class = Css.Concatenate("wx-webui-input-color", GetClasses(renderContext)),
                 Style = GetStyles(renderContext),
             }
+              .AddUserAttribute("name", Name?.Invoke(renderContext))
+              .AddUserAttribute(disabled ? "disabled" : null)
               .AddUserAttribute("data-value", value ?? color)
               .AddUserAttribute("data-required", RequiredMark(renderContext));
 
