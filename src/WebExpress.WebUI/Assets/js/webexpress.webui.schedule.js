@@ -99,7 +99,7 @@ webexpress.webui.ScheduleCtrl = class extends webexpress.webui.Ctrl {
     _readConfig(element) {
         const data = element.dataset || {};
 
-        this._culture = data.culture || undefined;
+        this._culture = data.culture || webexpress.webui.I18N.language;
         this._views = this._parseViews(data.views);
         this._storageKey = data.persistKey || (element.id ? `wx-schedule-view:${element.id}` : null);
         const storedView = webexpress.webui.LocalStorage.getItem(this._storageKey);

@@ -1198,26 +1198,32 @@ webexpress.webui.DarkMode = new class {
 };
 
 /**
- * Internationalization (i18n) helper class supporting key=value files.
+ * Internationalization (i18n) registry the dictionaries under i18n/ register into.
  */
 webexpress.webui.I18N = new class {
     /**
      * Creates an instance of the I18N class.
-     * The language is automatically determined from the browser, but can be overridden.
+     * The language follows the page, but can be overridden.
      * @param {string} [language] - Optional language code (e.g., "en" or "de").
      */
     constructor(language) {
-        // Determine language from browser if not provided
-        this.language = language || this._detectBrowserLanguage();
+        this.language = language || this._detectLanguage();
         this.translations = {};
     }
 
     /**
-     * Detects the user's preferred language from the browser.
+     * Detects the language the page is rendered in. The server writes the request
+     * culture to the lang attribute of the html element, and that culture may have
+     * been chosen by the user (e.g. ?lang=de) against the browser setting - client
+     * texts must match the server-rendered ones, so the browser is only the fallback.
      * Only the primary language code is used (e.g., "en" from "en-US").
      * @returns {string} The detected language code, defaults to "en" if not available.
      */
-    _detectBrowserLanguage() {
+    _detectLanguage() {
+        const pageLanguage = typeof document !== "undefined" ? document.documentElement?.getAttribute("lang") : null;
+        if (pageLanguage) {
+            return pageLanguage.split("-")[0].toLowerCase();
+        }
         if (navigator.language) {
             return navigator.language.split("-")[0].toLowerCase();
         }
@@ -1253,43 +1259,26 @@ webexpress.webui.I18N = new class {
 
     /**
      * Retrieves the translation for the specified key.
-     * Supports optional module prefix (e.g. 'webexpress.webui:calendar.may').
+     * A key is qualified by its module (e.g. 'webexpress.webui:calendar.may'), because
+     * dictionaries are registered per module; an unqualified value cannot be resolved
+     * and is returned as given, so callers can pass plain text where a key is optional.
      * Falls back to English if the key is not found in the current language.
      * Returns the key itself if no translation is available.
      * @param {string} key - The translation key to look up.
      * @returns {string}
      */
     translate(key) {
-        const lang = this.language;
-        const fallback = "en";
-        let module = null;
-        let localKey = key;
-
-        // extract namespace prefix if present
-        if (key.includes(":")) {
-            const split = key.split(":");
-            module = split[0];
-            localKey = split[1];
+        const separator = key.indexOf(":");
+        if (separator < 0) {
+            return key;
         }
 
-        // attempt module-prefixed lookup
-        if (module && this.translations[lang]?.[module]?.[localKey]) {
-            return this.translations[lang][module][localKey];
-        }
+        const module = key.substring(0, separator);
+        const localKey = key.substring(separator + 1);
 
-        if (this.translations[lang]?.[key]) {
-            return this.translations[lang][key];
-        }
-
-        if (module && this.translations[fallback]?.[module]?.[localKey]) {
-            return this.translations[fallback][module][localKey];
-        }
-
-        if (this.translations[fallback]?.[key]) {
-            return this.translations[fallback][key];
-        }
-
-        return key;
+        return this.translations[this.language]?.[module]?.[localKey]
+            || this.translations.en?.[module]?.[localKey]
+            || key;
     }
 }
 

@@ -5,7 +5,7 @@
 webexpress.webui.DialogPanels.register("table-columns", {
     id: "table-columns-pane",
     parentId: null,
-    title: "Columns",
+    title: webexpress.webui.I18N.translate("webexpress.webui:table.columns.title"),
     iconClass: "columns",
 
     /**

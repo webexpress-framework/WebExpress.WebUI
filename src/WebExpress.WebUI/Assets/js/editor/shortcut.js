@@ -34,7 +34,9 @@ webexpress.webui.EditorPlugins.register("shortcut", 6000, {
      * @returns {string}
      */
     _i18n: function(key, fallback) {
-        return webexpress?.webui?.I18N?.translate?.(key) ?? fallback;
+        const text = webexpress.webui.I18N.translate(key);
+        // translate answers a missing key with the key itself, which would never reach the fallback
+        return text !== key ? text : (fallback ?? text);
     },
 
     /**

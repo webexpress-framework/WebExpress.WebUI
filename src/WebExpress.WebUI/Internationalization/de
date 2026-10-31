@@ -56,6 +56,8 @@ form.inputpassword.validation.max=Das Passwort ist länger als die maximale Län
 
 modal.close.label=Schließen
 
+panel.dismiss=Schließen
+
 pdfviewer.fallback=Das PDF-Dokument kann hier nicht angezeigt werden.
 pdfviewer.open=PDF öffnen
 

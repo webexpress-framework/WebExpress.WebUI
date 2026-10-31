@@ -428,7 +428,10 @@ Each filter object supports the following properties:
 
 ## I18N
 
-The `I18N` singleton provides internationalization support with automatic browser language detection and module-scoped translation keys.
+The `I18N` singleton provides internationalization support with module-scoped translation keys. The language
+follows the `lang` attribute the server renders on `<html>` (the request culture, which the user may have chosen
+with `?lang=`), so client texts match the server-rendered page; the browser language is only the fallback when the
+attribute is missing. Format dates and numbers with `I18N.language` rather than `undefined` for the same reason.
 
 ### Methods
 
@@ -436,7 +439,7 @@ The `I18N` singleton provides internationalization support with automatic browse
 |---------------------------------|--------------------------------------------------------------
 |`register(lang, module, values)` |Registers a key-value map of translations for a language and module.
 |`setLanguage(language)`          |Sets the current language code.
-|`translate(key)`                 |Returns the translated text for a key. Supports `module:key` syntax with English fallback.
+|`translate(key)`                 |Returns the translated text for a `module:key`, falling back to English and then to the key itself. A value without a module is returned unchanged.
 
 ### Usage
 

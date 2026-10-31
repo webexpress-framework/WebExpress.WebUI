@@ -11,7 +11,7 @@ webexpress.webui.EditorAddOns.register("box", {
     label: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.box.label"),
     icon: "control-box",
     type: "block",
-    category: "Layout",
+    category: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.category.layout"),
     isContainer: true,
     contentClass: "wx-webui-box",
     description: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.box.description"),

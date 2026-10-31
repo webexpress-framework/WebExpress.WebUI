@@ -6,7 +6,7 @@ webexpress.webui.EditorAddOns.register("code", {
     label: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.code.label"),
     icon: "code",
     type: "block",
-    category: "Content",
+    category: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.category.content"),
     isContainer: true,
     contentClass: "wx-webui-code",
     description: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.code.description"),

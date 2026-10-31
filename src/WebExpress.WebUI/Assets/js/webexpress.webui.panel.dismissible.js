@@ -40,7 +40,7 @@ webexpress.webui.PanelDismissibleCtrl = class extends webexpress.webui.Ctrl {
 
         const titleText = element.dataset.title || "";
         const initialHidden = element.dataset.initialHidden === "true";
-        const dismissAria = element.dataset.dismissAria || "close";
+        const dismissAria = element.dataset.dismissAria || this._i18n("webexpress.webui:close", "Close");
 
         // preserve user-supplied content - everything below the header becomes the body
         const contentNodes = Array.from(element.childNodes).map((n) => this._detachElement(n));

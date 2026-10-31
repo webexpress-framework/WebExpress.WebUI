@@ -1011,7 +1011,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
                 handle.className = "wx-list-drag-handle user-select-none";
                 handle.textContent = "⠿";
                 handle.title = this._i18n("webexpress.webui:list.handle.title", "Move");
-                handle.setAttribute("aria-label", "Move item");
+                handle.setAttribute("aria-label", this._i18n("webexpress.webui:list.handle.label", "Move item"));
                 handle.setAttribute("tabindex", "0");
                 handle.setAttribute("role", "button");
                 li.appendChild(handle);

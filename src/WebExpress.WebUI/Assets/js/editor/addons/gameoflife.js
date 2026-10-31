@@ -1,12 +1,12 @@
-// register game of life add-on
+// register game of life add-on; its labels are resolved here, so this file loads after the i18n dictionaries
 webexpress.webui.EditorAddOns.register("game-of-life", {
-    label: "Game of Life",
+    label: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.gameoflife.label"),
     icon: "gamepad",
     type: "block",
     isContainer: false, // canvas handles its own interaction
-    description: "Interactive Game of Life simulation.",
+    description: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.gameoflife.description"),
     properties: [
-        { name: "cellSize", label: "Cell Size (px)", type: "number", default: 10 }
+        { name: "cellSize", label: webexpress.webui.I18N.translate("webexpress.webui:editor.addon.gameoflife.cellsize"), type: "number", default: 10 }
     ],
     renderer: (data) => {
         const cellSize = data.cellSize || 10;

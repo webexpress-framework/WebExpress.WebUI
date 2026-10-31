@@ -37,3 +37,40 @@ test("without a fallback a missing key still shows the key, so the gap stays vis
     const { ctrl } = mount();
     assert.equal(ctrl._i18n("webexpress.webui:nowhere.to.be.found"), "webexpress.webui:nowhere.to.be.found");
 });
+
+test("the page language set by the server wins over the browser language", () => {
+    // the harness browser speaks en-US; a user who chose german gets a german page
+    const rt = loadWebUi({ rootAttributes: { lang: "de-DE" }, extraFiles: ["i18n/en.js", "i18n/de.js"] });
+    assert.equal(rt.wx.I18N.language, "de");
+    assert.equal(rt.wx.I18N.translate("webexpress.webui:close"), "Schließen");
+});
+
+test("without a lang attribute the browser language is the fallback", () => {
+    const rt = loadWebUi();
+    assert.equal(rt.wx.I18N.language, "en");
+});
+
+test("a value without a module passes through unchanged, so plain text can stand in for a key", () => {
+    const rt = loadWebUi({ extraFiles: ["i18n/en.js"] });
+    assert.equal(rt.wx.I18N.translate("Columns"), "Columns");
+    assert.equal(rt.wx.I18N.translate("webexpress.webui"), "webexpress.webui", "a module name is not a translation");
+});
+
+test("slash commands and add-ons label themselves in the page language", () => {
+    const rt = loadWebUi({
+        rootAttributes: { lang: "de" },
+        extraFiles: ["i18n/en.js", "i18n/de.js", "editor/shortcuts/default.js", "editor/addons/default.js"]
+    });
+    const heading = rt.wx.EditorShortcuts.getAll().find(def => def.id === "block.heading1");
+    assert.equal(heading.label, "Überschrift 1");
+    assert.equal(heading.category, "Text");
+    assert.equal(rt.wx.EditorAddOns.get("hr-styled").category, "Layout");
+    assert.equal(rt.wx.EditorAddOns.get("badge-primary").label, "Badge (blau)");
+
+    // no command or add-on may fall back to its raw key
+    const texts = [
+        ...rt.wx.EditorShortcuts.getAll().flatMap(def => [def.label, def.description, def.category]),
+        ...rt.wx.EditorAddOns.getAll().flatMap(def => [def.label, def.description, def.category])
+    ];
+    assert.deepEqual(texts.filter(text => /^webexpress\.webui:/.test(text || "")), []);
+});

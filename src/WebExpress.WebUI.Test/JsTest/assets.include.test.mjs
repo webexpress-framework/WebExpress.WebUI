@@ -58,12 +58,12 @@ test("the view layer loads right after the core and before every control", () =>
     assert.ok(core >= 0 && renderer === core + 1 && state === renderer + 1, `core ${core}, renderer ${renderer}, state ${state}`);
 });
 
-test("add-ons and panels that translate while registering load after the language bundles", () => {
+test("add-ons, slash commands and panels that translate while registering load after the language bundles", () => {
     // translate answers with the bare key while no bundle is registered, and the
     // definitions keep that key as their label for good
     const bundles = Math.max(order.indexOf("i18n/en.js"), order.indexOf("i18n/de.js"));
     const early = order
-        .filter((f) => /^(editor\/addons|panels)\//.test(f))
+        .filter((f) => /^(editor\/addons|editor\/shortcuts|panels)\//.test(f))
         .filter((f) => fs.readFileSync(path.join(assetsJs, f), "utf8").includes("I18N.translate("))
         .filter((f) => order.indexOf(f) < bundles);
     assert.deepEqual(early, [], `declared before the language bundles:\n${early.join("\n")}`);

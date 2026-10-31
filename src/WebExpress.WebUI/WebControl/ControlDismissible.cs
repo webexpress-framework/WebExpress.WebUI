@@ -120,7 +120,7 @@ namespace WebExpress.WebUI.WebControl
         {
             var title = Title?.Invoke(renderContext);
             var initialHidden = InitialHidden?.Invoke(renderContext) ?? false;
-            var dismissAria = DismissAriaLabel?.Invoke(renderContext);
+            var dismissAria = DismissAriaLabel?.Invoke(renderContext) ?? "webexpress.webui:panel.dismiss";
             var role = Role?.Invoke(renderContext);
             var binding = Bind?.Invoke(renderContext);
 
