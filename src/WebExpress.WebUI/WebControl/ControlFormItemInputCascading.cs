@@ -15,8 +15,6 @@ namespace WebExpress.WebUI.WebControl
     /// </remarks>
     public class ControlFormItemInputCascading : ControlFormItemInput<ControlFormInputValueStringList>, IControlFormItemInputCascading
     {
-        public new Func<IRenderControlContext, string> Name { get; set; }
-
         private readonly List<IControlFormItemInputCascadingItem> _options = [];
 
         /// <summary>

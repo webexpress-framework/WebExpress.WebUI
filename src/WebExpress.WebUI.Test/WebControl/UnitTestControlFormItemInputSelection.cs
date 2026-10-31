@@ -1,5 +1,6 @@
 ﻿using System.Globalization;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebParameter;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebIcon;
@@ -387,6 +388,36 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(@"<div class=""wx-webui-input-selection""><div class=""wx-selection-item"" data-label=""Speichern""></div></div>", html);
+        }
+
+        /// <summary>
+        /// Tests that a submitted value is read under the field name rather than the id,
+        /// so a field whose name differs from its id keeps what the user sent.
+        /// </summary>
+        [Fact]
+        public void ValueByName()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var control = new ControlFormItemInputSelection("selection") { Name = _ => "picked" };
+            var form = new ControlForm() { Name = _ => "form" }
+                .Add(control);
+            var context = UnitTestControlFixture.CreateRenderContextMock
+            (
+                null,
+                null,
+                new Parameter("form", "", ParameterScope.Parameter)
+            );
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+
+            context.Request.AddParameter(new Parameter(form.Id, context.Request?.Session.Id.ToString(), ParameterScope.Parameter));
+            context.Request.AddParameter(new Parameter("picked", "3", ParameterScope.Parameter));
+
+            // act
+            var html = form.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(@"*<div id=""selection"" class=""wx-webui-input-selection"" name=""picked"" data-value=""3""></div>*", html);
         }
     }
 }

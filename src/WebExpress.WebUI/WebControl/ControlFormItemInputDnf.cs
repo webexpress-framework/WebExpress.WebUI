@@ -21,8 +21,6 @@ namespace WebExpress.WebUI.WebControl
     /// </remarks>
     public class ControlFormItemInputDnf : ControlFormItemInput<ControlFormInputValueDnf>, IControlFormItemInputDnf
     {
-        public new Func<IRenderControlContext, string> Name { get; set; }
-
         private readonly List<IControlFormItemInputSelectionItem> _options = [];
 
         /// <summary>
