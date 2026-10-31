@@ -832,7 +832,7 @@ namespace WebExpress.WebUI.Test.WebFragment
         public void Render_TestSectionFragmentControlDismissible()
         {
             // arrange
-            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroldismissible"" class=""wx-webui-panel-dismissible"" data-title=""FragmentPanel"">"
+            var expected = @"<div id=""webexpress-webui-test-testfragmentcontroldismissible"" class=""wx-webui-panel-dismissible"" data-title=""FragmentPanel"" data-dismiss-aria=""Close"">"
                 + @"<div>fragment-content</div>"
                 + @"<p id=""webexpress-webui-test-testfragmentcontroldismissiblebody"">body-fragment</p>"
                 + @"</div>";

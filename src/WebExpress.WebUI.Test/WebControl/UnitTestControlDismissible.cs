@@ -13,8 +13,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Verifies the host element id and base css class.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<div class=""wx-webui-panel-dismissible""></div>")]
-        [InlineData("my-panel", @"<div id=""my-panel"" class=""wx-webui-panel-dismissible""></div>")]
+        [InlineData(null, @"<div class=""wx-webui-panel-dismissible"" data-dismiss-aria=""Close""></div>")]
+        [InlineData("my-panel", @"<div id=""my-panel"" class=""wx-webui-panel-dismissible"" data-dismiss-aria=""Close""></div>")]
         public void Id(string id, string expected)
         {
             // arrange
