@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using WebExpress.WebCore;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebFragment;
@@ -26,6 +27,11 @@ namespace WebExpress.WebUI.WebControl
         private readonly List<IControlFormItem> _preferencesControls = [];
         private readonly List<IControlFormItem> _primaryControls = [];
         private readonly List<IControlFormItem> _secondaryControls = [];
+
+        // a page may render one form several times in a request - a dark copy, a listing of
+        // its markup - and each render sees the same submission; only the first one processes
+        // it, so its side effects happen once
+        private readonly ConditionalWeakTable<IRequest, object> _processedRequests = new();
 
         /// <summary>
         /// Event is raised when the form's data needs to be determined.
@@ -332,15 +338,18 @@ namespace WebExpress.WebUI.WebControl
                 {
                     state = TypeFormState.Success;
 
-                    foreach (var item in items
-                        .Where(x => x is IControlFormProcess)
-                        .Select(x => x as IControlFormProcess))
+                    if (_processedRequests.TryAdd(renderContext.Request, null))
                     {
-                        item.Process(renderContext);
-                    }
+                        foreach (var item in items
+                            .Where(x => x is IControlFormProcess)
+                            .Select(x => x as IControlFormProcess))
+                        {
+                            item.Process(renderContext);
+                        }
 
-                    // valid form
-                    OnProcess(new ControlFormEventFormProcess() { Context = renderContext });
+                        // valid form
+                        OnProcess(new ControlFormEventFormProcess() { Context = renderContext });
+                    }
 
                     if (redirectUri?.Empty == false)
                     {

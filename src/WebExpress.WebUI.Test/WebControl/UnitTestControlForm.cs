@@ -1,4 +1,5 @@
 ﻿using WebExpress.WebCore.WebMessage;
+using WebExpress.WebCore.WebParameter;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
@@ -305,6 +306,47 @@ namespace WebExpress.WebUI.Test.WebControl
             // validation
             Assert.NotEmpty(id);
             Assert.Contains($@"for=""{id}"">Subscribe:</label>", html);
+        }
+
+        /// <summary>
+        /// Tests that a form rendered several times in one request - as a tutorial page shows a
+        /// dark copy and the markup of its sample - processes the submission only once, while
+        /// the next request is processed again.
+        /// </summary>
+        [Fact]
+        public void ProcessOncePerRequest()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var itemProcessed = 0;
+            var formProcessed = 0;
+            var form = new ControlForm() { Name = _ => "form" }
+                .Add(new ControlFormItemInputText("text-box")
+                    .Process(x => itemProcessed++))
+                .Process(x => formProcessed++);
+
+            IRenderControlContext Submit()
+            {
+                return UnitTestControlFixture.CreateRenderContextMock
+                (
+                    null,
+                    null,
+                    new Parameter("form", "", ParameterScope.Parameter),
+                    new Parameter("text-box", "abc", ParameterScope.Parameter)
+                );
+            }
+
+            var context = Submit();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+
+            // act
+            form.Render(context, visualTree);
+            form.Render(new RenderControlContext(context), visualTree);
+            form.Render(Submit(), visualTree);
+
+            // validation
+            Assert.Equal(2, itemProcessed);
+            Assert.Equal(2, formProcessed);
         }
     }
 }

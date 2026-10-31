@@ -114,7 +114,7 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="link">The address the notification is about, so the reader can go
         /// there instead of having to find it. Null for a notification without a page.</param>
         /// <returns>The created notification.</returns>
-        public INotification AddNotification(IApplicationContext applicationContext, Request request, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, string link = null)
+        public INotification AddNotification(IApplicationContext applicationContext, IRequest request, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, string link = null)
         {
             var notification = new Notification()
             {
@@ -146,11 +146,12 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="applicationContext">The application context.</param>
         /// <param name="request">The request.</param>
         /// <returns>An enumeration of the notifications.</returns>
-        public IEnumerable<INotification> GetNotifications(IApplicationContext applicationContext, Request request)
+        public IEnumerable<INotification> GetNotifications(IApplicationContext applicationContext, IRequest request)
         {
             var list = new List<INotification>(GetGlobal(applicationContext));
 
-            if (request.Session.GetProperty<SessionPropertyNotification>() is { } notificationProperty)
+            // a websocket upgrade without a session cookie still deserves the global notifications
+            if (request?.Session?.GetProperty<SessionPropertyNotification>() is { } notificationProperty)
             {
                 var now = DateTime.UtcNow;
 
@@ -185,7 +186,7 @@ namespace WebExpress.WebUI.WebNotification
         /// they belong to every user of the application and not to the one clearing theirs.
         /// </summary>
         /// <param name="request">The request.</param>
-        public void RemoveNotifications(Request request)
+        public void RemoveNotifications(IRequest request)
         {
             if (request.Session.GetProperty<SessionPropertyNotification>() is not { } notificationProperty)
             {

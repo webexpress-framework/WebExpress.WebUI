@@ -56,7 +56,7 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="link">The address the notification is about, so the reader can go
         /// there instead of having to find it. Null for a notification without a page.</param>
         /// <returns>The created notification.</returns>
-        INotification AddNotification(IApplicationContext applicationContext, Request request, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, string link = null);
+        INotification AddNotification(IApplicationContext applicationContext, IRequest request, string message, int durability = -1, string heading = null, string icon = null, TypeNotification type = TypeNotification.Light, string link = null);
 
         /// <summary>
         /// Returns the global notifications of the application together with the
@@ -65,7 +65,7 @@ namespace WebExpress.WebUI.WebNotification
         /// <param name="applicationContext">The application context.</param>
         /// <param name="request">The request.</param>
         /// <returns>An enumeration of the notifications.</returns>
-        IEnumerable<INotification> GetNotifications(IApplicationContext applicationContext, Request request);
+        IEnumerable<INotification> GetNotifications(IApplicationContext applicationContext, IRequest request);
 
         /// <summary>
         /// Removes all global notifications of an application.
@@ -78,7 +78,7 @@ namespace WebExpress.WebUI.WebNotification
         /// they belong to every user of the application.
         /// </summary>
         /// <param name="request">The request.</param>
-        void RemoveNotifications(Request request);
+        void RemoveNotifications(IRequest request);
 
         /// <summary>
         /// Removes a notification, whether it is a global one or one of the given session.
