@@ -491,6 +491,9 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
                 // cell drop events for completely empty areas
                 cell.addEventListener("dragover", (e) => {
+                    if (!this._acceptDrag(cell, col.id)) {
+                        return;
+                    }
                     e.preventDefault();
                     if (cell.children.length === 0) {
                         cell.classList.add("wx-drag-over-empty");
@@ -504,7 +507,7 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                 });
 
                 cell.addEventListener("dragleave", (e) => {
-                    cell.classList.remove("wx-drag-over-empty");
+                    cell.classList.remove("wx-drag-over-empty", "wx-drag-blocked");
                     const lastCard = cell.lastElementChild;
                     if (lastCard) {
                         lastCard.classList.remove("wx-drag-over-bottom");
@@ -2167,8 +2170,11 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         });
 
         cardEl.addEventListener("dragover", (e) => {
-            e.preventDefault();
             e.stopPropagation();
+            if (!this._acceptDrag(cardEl.parentElement, colId)) {
+                return;
+            }
+            e.preventDefault();
 
             const rect = cardEl.getBoundingClientRect();
             const isTopHalf = (e.clientY - rect.top) < (rect.height / 2);
@@ -2328,8 +2334,32 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     _clearDropTargets() {
         const dropZones = this._element.querySelectorAll(".wx-kanban-cell, .wx-kanban-card");
         dropZones.forEach((el) => {
-            el.classList.remove("wx-drag-over-empty", "wx-drag-over-top", "wx-drag-over-bottom");
+            el.classList.remove("wx-drag-over-empty", "wx-drag-over-top", "wx-drag-over-bottom", "wx-drag-blocked");
         });
+    }
+
+    /**
+     * Tells whether a card may be dropped into a column. The plain board accepts every
+     * column; a board that ties columns to rules refuses the ones the card cannot enter.
+     * @param {object} card - The dragged card.
+     * @param {string} colId - The column under the pointer.
+     * @returns {boolean} Whether the drop is accepted.
+     */
+    _canDrop(card, colId) {
+        return true;
+    }
+
+    /**
+     * Marks a cell the dragged card cannot enter. A refused dragover stays unhandled, so the
+     * browser shows the no-drop cursor and never fires a drop there.
+     * @param {HTMLElement} cell - The cell under the pointer.
+     * @param {string} colId - The column of the cell.
+     * @returns {boolean} Whether the cell accepts the dragged card.
+     */
+    _acceptDrag(cell, colId) {
+        const blocked = this._dragCard != null && !this._canDrop(this._dragCard, colId);
+        cell?.classList.toggle("wx-drag-blocked", blocked);
+        return !blocked;
     }
 
     /**
