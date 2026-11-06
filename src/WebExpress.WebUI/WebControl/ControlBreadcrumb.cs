@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using WebExpress.WebCore;
 using WebExpress.WebCore.Internationalization;
@@ -110,6 +111,24 @@ namespace WebExpress.WebUI.WebControl
                 var href = last?.Uri ?? path;
                 var endpointContext = siteManager.GetEndpoint(href);
 
+                // one segment of the address, several steps of the trail: the ancestors of a page
+                // in a hierarchy each get a crumb of their own, whatever endpoint the address has
+                if (last is IUriPathSegmentTrail trail && !last.IsHidden)
+                {
+                    foreach (var crumb in trail.GetTrail(renderContext) ?? [])
+                    {
+                        if (crumb is null || crumb.Hidden)
+                        {
+                            continue;
+                        }
+
+                        html.Add(RenderCrumb(renderContext, visualTree, crumb.Text, crumb.Icon, crumb.Uri, crumb.Menu));
+                    }
+
+                    lastEndpointContext = endpointContext;
+                    continue;
+                }
+
                 if (endpointContext == lastEndpointContext)
                 {
                     continue;
@@ -177,6 +196,62 @@ namespace WebExpress.WebUI.WebControl
             (html.Elements.LastOrDefault() as HtmlElement)?.Elements.OfType<HtmlElementTextSemanticsA>().LastOrDefault()?.AddUserAttribute("aria-current", "page");
 
             return nav;
+        }
+
+        /// <summary>
+        /// Renders a crumb of a trail segment: its icon, its link and, when it has one, a menu
+        /// that leads sideways - to the siblings of a page, for instance.
+        /// </summary>
+        /// <param name="renderContext">The context in which the control is rendered.</param>
+        /// <param name="visualTree">The visual tree representing the control's structure.</param>
+        /// <param name="text">The text or its internationalization key.</param>
+        /// <param name="icon">The icon, or null.</param>
+        /// <param name="uri">The address, or null for a crumb that is text only.</param>
+        /// <param name="menu">The menu entries, or none.</param>
+        /// <returns>The list item of the crumb.</returns>
+        private static HtmlElementTextContentLi RenderCrumb(IRenderControlContext renderContext, IVisualTreeControl visualTree,
+            string text, WebCore.WebIcon.IIcon icon, IUri uri, IEnumerable<UriTrailCrumb> menu)
+        {
+            var display = I18N.Translate(renderContext.Request?.Culture, text);
+            var entries = menu?.Where(x => x is not null && !x.Hidden).ToArray() ?? [];
+            var li = new HtmlElementTextContentLi();
+
+            li.Add
+            (
+                icon is not null
+                    ? new ControlIcon()
+                    {
+                        Icon = _ => icon
+                    }
+                        .Render(renderContext, visualTree)
+                    : null
+            );
+
+            li.Add
+            (
+                uri is not null
+                    ? new HtmlElementTextSemanticsA(display) { Href = uri.ToString() }
+                    : new HtmlElementTextSemanticsSpan(new HtmlText(display))
+            );
+
+            if (entries.Length > 0)
+            {
+                li.Class = "wx-breadcrumb-menu";
+                li.Add(new ControlDropdown(null, [.. entries.Select(x => new ControlDropdownItemLink()
+                {
+                    Text = _ => x.Text,
+                    Icon = _ => x.Icon,
+                    Uri = _ => x.Uri
+                })])
+                {
+                    Icon = _ => new WebIcon.IconAngleDown(),
+                    Tooltip = _ => display,
+                    Size = _ => TypeSizeButton.Small
+                }
+                    .Render(renderContext, visualTree));
+            }
+
+            return li;
         }
     }
 }
