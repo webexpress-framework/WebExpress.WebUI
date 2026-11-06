@@ -71,13 +71,18 @@ namespace WebExpress.WebUI.WebIcon
         /// </summary>
         /// <param name="uri">
         /// The URI string that identifies the image resource to be used for the 
-        /// icon. Must be a valid URI format.
+        /// icon. A data url is kept as written, because it carries the picture itself.
         /// </param>
         /// <returns>
         /// An ImageIcon representing the image located at the specified URI.
         /// </returns>
         public static ImageIcon FromString(string uri)
         {
+            if (uri?.StartsWith("data:", System.StringComparison.OrdinalIgnoreCase) == true)
+            {
+                return new ImageIcon(new UriData(uri));
+            }
+
             return new ImageIcon(new UriEndpoint(uri));
         }
 
