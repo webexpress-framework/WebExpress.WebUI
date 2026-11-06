@@ -1,5 +1,6 @@
 ﻿using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebParameter;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
@@ -206,6 +207,118 @@ namespace WebExpress.WebUI.Test.WebControl
 
             // validation
             AssertExtensions.EqualWithPlaceholders(expected, html.Trim());
+        }
+
+        /// <summary>
+        /// Tests that a link keeps the query values it was given when the request carries the same
+        /// key, so links to saved searches do not all turn into the search that is running.
+        /// </summary>
+        [Fact]
+        public void UriKeepsItsQueryValues()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(null, null, new Parameter("use", "A", ParameterScope.Url));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebarItemLink()
+            {
+                Uri = _ => new UriEndpoint("/search?use=B"),
+            };
+
+            // act
+            var html = control.Render(context, visualTree).ToString();
+
+            // validation
+            Assert.Contains("use=B", html);
+            Assert.DoesNotContain("use=A", html);
+        }
+
+        /// <summary>
+        /// Tests that the variable path segments of a link are still filled from the request.
+        /// </summary>
+        [Fact]
+        public void UriBindsPathVariables()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(null, null,
+                new Parameter(TestParameterSidebarId.Key, "42", ParameterScope.Url),
+                new Parameter("use", "A", ParameterScope.Url));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebarItemLink()
+            {
+                Uri = _ => new UriEndpoint(new UriEndpoint("/item?use=B"),
+                [
+                    new UriPathSegmentRoot(),
+                    new UriPathSegmentConstant("item"),
+                    new UriPathSegmentVariableInt<TestParameterSidebarId>()
+                ]),
+            };
+
+            // act
+            var html = control.Render(context, visualTree).ToString();
+
+            // validation
+            Assert.Contains("/item/42?use=B", html);
+        }
+
+        /// <summary>
+        /// Tests that a query key named like a path variable keeps the value the link was given,
+        /// while the path variable takes the value of the request.
+        /// </summary>
+        [Fact]
+        public void UriKeepsQueryNamedLikePathVariable()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(null, null,
+                new Parameter(TestParameterSidebarId.Key, "42", ParameterScope.Url));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlSidebarItemLink()
+            {
+                Uri = _ => new UriEndpoint(new UriEndpoint($"/items?{TestParameterSidebarId.Key}=fixed"),
+                [
+                    new UriPathSegmentRoot(),
+                    new UriPathSegmentConstant("items"),
+                    new UriPathSegmentVariableInt<TestParameterSidebarId>()
+                ]),
+            };
+
+            // act
+            var html = control.Render(context, visualTree).ToString();
+
+            // validation
+            Assert.Contains($"/items/42?{TestParameterSidebarId.Key}=fixed", html);
+        }
+
+        /// <summary>
+        /// The path variable of the binding test.
+        /// </summary>
+        private sealed class TestParameterSidebarId : IParameterStatic
+        {
+            /// <summary>
+            /// Gets the key.
+            /// </summary>
+            public static string Key => "sidebarid";
+
+            /// <summary>
+            /// Gets or sets the scope.
+            /// </summary>
+            public ParameterScope Scope { get; set; }
+
+            /// <summary>
+            /// Gets or sets the value.
+            /// </summary>
+            public string Value { get; set; }
+
+            /// <summary>
+            /// Returns the key.
+            /// </summary>
+            /// <returns>The key.</returns>
+            public string GetKey()
+            {
+                return Key;
+            }
         }
 
         /// <summary>

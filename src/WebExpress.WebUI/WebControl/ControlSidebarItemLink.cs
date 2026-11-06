@@ -4,6 +4,8 @@ using System.Linq;
 using WebExpress.WebCore.Internationalization;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
+using WebExpress.WebCore.WebMessage;
+using WebExpress.WebCore.WebParameter;
 using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.WebIcon;
 using WebExpress.WebUI.WebPage;
@@ -195,7 +197,7 @@ namespace WebExpress.WebUI.WebControl
         /// <returns>An HTML node representing the rendered control.</returns>
         public virtual IHtmlNode Render(IRenderControlContext renderContext, IVisualTreeControl visualTree, string text, string tooltip, IUri uri, IIcon icon, IAction primaryAction, IAction secondaryAction)
         {
-            var resultUri = uri?.BindParameters(renderContext.Request);
+            var resultUri = BindPathVariables(uri, renderContext?.Request);
             var mode = Mode?.Invoke(renderContext) ?? TypeSidebarMode.Default;
             var dismissibility = Dismissibility?.Invoke(renderContext) ?? TypeDismissibilitySidebar.None;
             var image = Image?.Invoke(renderContext);
@@ -265,6 +267,39 @@ namespace WebExpress.WebUI.WebControl
             secondaryAction?.ApplyUserAttributes(html, TypeAction.Secondary);
 
             return html;
+        }
+
+        /// <summary>
+        /// Fills the variable path segments of the link from the request. Query values stay as the
+        /// link was given them: binding the request's query would make every link that shares a
+        /// key with the current page point at the current page, such as all links to saved
+        /// searches on a page that runs one of them.
+        /// </summary>
+        /// <param name="uri">The link's address.</param>
+        /// <param name="request">The request that renders the link.</param>
+        /// <returns>The address with its path variables bound.</returns>
+        private static IUri BindPathVariables(IUri uri, IRequest request)
+        {
+            var variables = uri?.PathSegments?
+                .OfType<IUriPathSegmentVariable>()
+                .Select(x => x.VariableName)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            if (variables is null || variables.Count == 0 || request is null)
+            {
+                return uri;
+            }
+
+            var bound = uri.BindParameters(request.Parameters.Where(x => variables.Contains(x switch
+            {
+                IParameterStatic staticParameter => staticParameter.GetKey(),
+                IParameterDynamic dynamicParameter => dynamicParameter.Key,
+                _ => string.Empty
+            })));
+
+            // the binding also fills a query key named like a path variable; only the bound path
+            // is taken, the query is the one the link was given
+            return new UriEndpoint(uri, bound.PathSegments);
         }
     }
 }
