@@ -3211,6 +3211,15 @@ img.wx-icon-large {
     border-radius: var(--wx-border-radius);
 }
 
+/* an item of the drag-and-drop protocol lands between two others: the line on the edge it lands at */
+[data-wx-drop][data-wx-drop-at="above"] {
+    box-shadow: inset 0 var(--wx-drop-line-width) 0 0 var(--wx-drop-line-color);
+}
+
+[data-wx-drop][data-wx-drop-at="below"] {
+    box-shadow: inset 0 calc(-1 * var(--wx-drop-line-width)) 0 0 var(--wx-drop-line-color);
+}
+
 /* Resizable container that activates only on direct hover */
 .wx-resizable {
     padding-right: 0.5em;
