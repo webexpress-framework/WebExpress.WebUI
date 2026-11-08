@@ -13,8 +13,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the id property of the modal control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("id", @"<form id=""id-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""form_id"">*</form>")]
+        [InlineData(null, @"<form action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("id", @"<form id=""id-form"" action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data"" name=""form_id"">*</form>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -35,9 +35,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the header property of the modal control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("abc", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><dialog class=""wx-webui-modal"" *><div class=""wx-modal-header"">abc</div>*</dialog></form>")]
-        [InlineData("webexpress.webui:plugin.name", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><dialog class=""wx-webui-modal"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</dialog></form>")]
+        [InlineData(null, @"<form action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("abc", @"<form action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data""><dialog class=""wx-webui-modal"" *><div class=""wx-modal-header"">abc</div>*</dialog></form>")]
+        [InlineData("webexpress.webui:plugin.name", @"<form action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data""><dialog class=""wx-webui-modal"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</dialog></form>")]
         public void Header(string header, string expected)
         {
             // arrange
@@ -71,7 +71,7 @@ namespace WebExpress.WebUI.Test.WebControl
             form.Add(new ControlFormItemInputText());
             var html = form.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*<input * type=""text"" class=""form-control"">*</form>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<form action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data"">*<input * type=""text"" class=""form-control"">*</form>", html);
         }
     }
 }
