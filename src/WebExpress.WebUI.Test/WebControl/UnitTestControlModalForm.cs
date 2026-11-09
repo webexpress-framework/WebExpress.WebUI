@@ -1,3 +1,5 @@
+using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
@@ -9,6 +11,59 @@ namespace WebExpress.WebUI.Test.WebControl
     /// </summary>
     public class UnitTestControlModalForm
     {
+        /// <summary>
+        /// Ensures modal submissions use the context-dependent target and retain a footer submit button.
+        /// </summary>
+        [Fact]
+        public void RenderEvaluatesUriAndKeepsSubmitButtonInFooter()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlModalForm("vehicle")
+            {
+                Uri = formContext => new UriEndpoint($"http://localhost/{formContext.Form.Id}/save")
+            };
+            control.AddPrimaryButton(new ControlFormItemButtonSubmit("save") { Text = _ => "Save" });
+
+            // act
+            var form = Assert.IsType<HtmlElementFormForm>(control.Render(context, visualTree));
+
+            // validation
+            Assert.Equal("http://localhost/form_vehicle/save", form.Action);
+            var dialog = Assert.IsType<HtmlElementInteractiveDialog>(Assert.Single(form.Elements));
+            var footer = Assert.Single(dialog.Elements.OfType<HtmlElementTextContentDiv>(), element => element.Class == "wx-modal-footer");
+            var submit = Assert.IsType<HtmlElementFieldButton>(Assert.Single(footer.Elements));
+            Assert.Equal("submit", submit.Type);
+            Assert.Contains("Save", submit.ToString());
+        }
+
+        /// <summary>
+        /// Ensures missing targets preserve submission to the current request URI.
+        /// </summary>
+        /// <param name="useDelegate">Whether a delegate returning null supplies the missing target.</param>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void RenderFallsBackToRequestUri(bool useDelegate)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlModalForm("vehicle")
+            {
+                Uri = useDelegate ? _ => null : null
+            };
+
+            // act
+            var form = Assert.IsType<HtmlElementFormForm>(control.Render(context, visualTree));
+
+            // validation
+            Assert.Equal(context.Request.Uri.ToString(), form.Action);
+        }
+
         /// <summary>
         /// Tests the id property of the modal control.
         /// </summary>
