@@ -263,6 +263,37 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests that a path variable the link was given a value for keeps it: on the page of
+        /// record 42 the link to record 7 must not come out as a link to 42.
+        /// </summary>
+        [Fact]
+        public void UriKeepsBoundPathVariable()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock(null, null,
+                new Parameter(TestParameterSidebarId.Key, "42", ParameterScope.Url));
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var uri = new UriEndpoint(new UriEndpoint("/item"),
+            [
+                new UriPathSegmentRoot(),
+                new UriPathSegmentConstant("item"),
+                new UriPathSegmentVariableInt<TestParameterSidebarId>()
+            ])
+                .BindParameters(new Parameter(TestParameterSidebarId.Key, "7", ParameterScope.Url));
+            var control = new ControlSidebarItemLink()
+            {
+                Uri = _ => uri
+            };
+
+            // act
+            var html = control.Render(context, visualTree).ToString();
+
+            // validation
+            Assert.Contains(@"data-uri=""/item/7""", html);
+        }
+
+        /// <summary>
         /// Tests that a query key named like a path variable keeps the value the link was given,
         /// while the path variable takes the value of the request.
         /// </summary>
