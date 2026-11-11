@@ -7,6 +7,12 @@
  * controls do. Selection survives a re-render, because the card element is rebuilt from
  * the retained selected id rather than from the dom.
  *
+ * Cards are dragged through the shared drag-and-drop protocol (webexpress.webui.DragDrop): a card
+ * is a source of the kind "kanban-card" and lands above or below another card, a cell takes it at
+ * its end. Items of another kind - a row of a table, a tree node - may be dropped onto a card or
+ * a cell; the board leaves those drops to the page, which receives the protocol's DROP_EVENT with
+ * the card or cell as target, and can refuse a target through DROP_CHECK_EVENT like any other.
+ *
  * The following events are triggered:
  * - webexpress.webui.Event.MOVE_EVENT
  * - webexpress.webui.Event.CHANGE_VALUE_EVENT
@@ -15,6 +21,10 @@
 webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
 
     static ACTIVE_CLASS = "wx-kanban-card-active";
+
+    // the kinds of the drag-and-drop protocol a card and a cell carry
+    static CARD_KIND = "kanban-card";
+    static CELL_KIND = "kanban-cell";
 
     // the interactive parts of a card and its surroundings. a click on one of them
     // operates that control instead of selecting the card
@@ -31,8 +41,6 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     _columns = [];
     _swimlanes = [];
     _cards = [];
-
-    _dragCard = null;
 
     // card selection
     _selectable = true;
@@ -97,6 +105,8 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         // delegated, because render() rebuilds every card: a listener on the host
         // survives that, per-card listeners would have to be re-bound each time
         element.addEventListener("click", (e) => this._onCardClick(e));
+        element.addEventListener(webexpress.webui.Event.DROP_CHECK_EVENT, (e) => this._onDropCheck(e));
+        element.addEventListener(webexpress.webui.Event.DROP_EVENT, (e) => this._onDrop(e));
 
         this._parseStaticConfig();
         this.render();
@@ -489,33 +499,9 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
                     cell.dataset.swimlaneId = lane.id;
                 }
 
-                // cell drop events for completely empty areas
-                cell.addEventListener("dragover", (e) => {
-                    if (!this._acceptDrag(cell, col.id)) {
-                        return;
-                    }
-                    e.preventDefault();
-                    if (cell.children.length === 0) {
-                        cell.classList.add("wx-drag-over-empty");
-                    } else {
-                        // highlight below the last card if dropping in empty space
-                        const lastCard = cell.lastElementChild;
-                        if (lastCard && !lastCard.classList.contains("wx-drag-over-top")) {
-                            lastCard.classList.add("wx-drag-over-bottom");
-                        }
-                    }
-                });
-
-                cell.addEventListener("dragleave", (e) => {
-                    cell.classList.remove("wx-drag-over-empty", "wx-drag-blocked");
-                    const lastCard = cell.lastElementChild;
-                    if (lastCard) {
-                        lastCard.classList.remove("wx-drag-over-bottom");
-                    }
-                });
-
-                cell.addEventListener("drop", (e) => {
-                    this._onDropCell(e, col.id, lane.id, cell);
+                // the free space of a cell takes a card at the end of the cell
+                webexpress.webui.DragDrop?.decorate(cell, col.id + "|" + (lane.id ?? ""), {
+                    dropKind: webexpress.webui.KanbanCtrl.CELL_KIND
                 });
 
                 // render cards belonging to this cell (from the prebuilt buckets)
@@ -2028,6 +2014,12 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         cardEl.className = "wx-kanban-card";
         cardEl.dataset.cardId = card.id;
         cardEl.setAttribute("draggable", "true");
+        webexpress.webui.DragDrop?.decorate(cardEl, card.id, {
+            dragKind: webexpress.webui.KanbanCtrl.CARD_KIND,
+            dropKind: webexpress.webui.KanbanCtrl.CARD_KIND
+        });
+        cardEl.setAttribute("data-wx-drop-position", "edges");
+        cardEl.setAttribute("data-wx-drop-into", "other");
         // the card is reached by the keyboard: enter and space select it, alt with an arrow
         // key moves it, because a drag is a pointer gesture only
         cardEl.setAttribute("tabindex", "0");
@@ -2149,57 +2141,6 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
             cardEl.appendChild(footer);
         }
 
-        // drag events
-        cardEl.addEventListener("dragstart", (e) => {
-            this._dragCard = card;
-            setTimeout(() => {
-                cardEl.classList.add("wx-dragging");
-            }, 0);
-            try {
-                e.dataTransfer.effectAllowed = "move";
-                e.dataTransfer.setData("text/plain", card.id || "");
-            } catch (err) {
-                // ignore error
-            }
-        });
-
-        cardEl.addEventListener("dragend", (e) => {
-            cardEl.classList.remove("wx-dragging");
-            this._dragCard = null;
-            this._clearDropTargets();
-        });
-
-        cardEl.addEventListener("dragover", (e) => {
-            e.stopPropagation();
-            if (!this._acceptDrag(cardEl.parentElement, colId)) {
-                return;
-            }
-            e.preventDefault();
-
-            const rect = cardEl.getBoundingClientRect();
-            const isTopHalf = (e.clientY - rect.top) < (rect.height / 2);
-
-            if (isTopHalf) {
-                cardEl.classList.add("wx-drag-over-top");
-                cardEl.classList.remove("wx-drag-over-bottom");
-            } else {
-                cardEl.classList.add("wx-drag-over-bottom");
-                cardEl.classList.remove("wx-drag-over-top");
-            }
-        });
-
-        cardEl.addEventListener("dragleave", (e) => {
-            e.stopPropagation();
-            cardEl.classList.remove("wx-drag-over-top", "wx-drag-over-bottom");
-        });
-
-        cardEl.addEventListener("drop", (e) => {
-            e.stopPropagation();
-            const rect = cardEl.getBoundingClientRect();
-            const isTopHalf = (e.clientY - rect.top) < (rect.height / 2);
-            this._onDropWidget(e, card, colId, swimlaneId, isTopHalf);
-        });
-
         return cardEl;
     }
 
@@ -2267,38 +2208,68 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Routes an empty-cell drop through the same move boundary as keyboard moves.
-     * @param {DragEvent} e - The drop event.
-     * @param {string} colId - The destination column identifier.
-     * @param {string|null} swimlaneId - The destination swimlane identifier.
-     * @param {HTMLElement} cell - The destination cell.
+     * Refuses a column the dragged card cannot enter, so the protocol draws the target as
+     * refused and the browser keeps the no-drop cursor instead of offering an empty choice
+     * after the drop.
+     * @param {CustomEvent} e - The check event of the drag-and-drop protocol.
      */
-    _onDropCell(e, colId, swimlaneId, cell) {
-        e.preventDefault();
-        this._clearDropTargets();
-        const card = this._dragCard;
-        this._dragCard = null;
-        if (card) {
-            this._moveCard(card, colId, swimlaneId);
+    _onDropCheck(e) {
+        const move = this._ownMove(e.detail);
+        if (move && !this._canDrop(move.card, move.colId)) {
+            e.preventDefault();
         }
     }
 
     /**
-     * Routes a card-relative drop through the common move boundary.
-     * @param {DragEvent} e - The drop event.
-     * @param {object} targetCard - The card defining the insertion position.
-     * @param {string} colId - The destination column identifier.
-     * @param {string|null} swimlaneId - The destination swimlane identifier.
-     * @param {boolean} isTopHalf - Whether to insert before the target card.
+     * Moves a card of this board that was dropped on one of its cards or cells, through the
+     * same boundary as a keyboard move. Every other drop is left to bubble to the page.
+     * @param {CustomEvent} e - The drop event of the drag-and-drop protocol.
      */
-    _onDropWidget(e, targetCard, colId, swimlaneId, isTopHalf) {
-        e.preventDefault();
-        this._clearDropTargets();
-        const card = this._dragCard;
-        this._dragCard = null;
-        if (card && card.id !== targetCard.id) {
-            this._moveCard(card, colId, swimlaneId, targetCard, isTopHalf);
+    _onDrop(e) {
+        const move = this._ownMove(e.detail);
+        if (!move) {
+            return;
         }
+        e.stopPropagation();
+        this._moveCard(move.card, move.colId, move.swimlaneId, move.anchor, move.before);
+    }
+
+    /**
+     * Reads a drag of the protocol as a move of one of this board's cards. A card of another
+     * board carries the same kind and maybe the same id, so the origin decides whose it is.
+     * @param {object} detail - The detail of a check or drop event.
+     * @returns {object|null} The card, its destination column and lane, the anchor card and
+     * whether it lands before the anchor; null for a drag the board does not own.
+     */
+    _ownMove(detail) {
+        const { sources, origin, target, effect } = detail || {};
+        const kanban = webexpress.webui.KanbanCtrl;
+        if (effect === "copy" || !origin || !this._element.contains(origin) || !target?.element
+            || !this._element.contains(target.element) || !Array.isArray(sources) || sources.length !== 1
+            || sources[0].kind !== kanban.CARD_KIND
+            || (target.kind !== kanban.CARD_KIND && target.kind !== kanban.CELL_KIND)) {
+            return null;
+        }
+
+        const byId = (id) => this._cards.find((item) => String(item.id) === String(id)) || null;
+        const card = byId(sources[0].id);
+        const cell = target.element.closest(".wx-kanban-cell");
+        if (!card || !cell) {
+            return null;
+        }
+
+        const anchor = target.kind === kanban.CARD_KIND ? byId(target.id) : null;
+        if (target.kind === kanban.CARD_KIND && !anchor) {
+            return null;
+        }
+
+        return {
+            card: card,
+            colId: cell.dataset.colId,
+            swimlaneId: cell.dataset.swimlaneId ?? null,
+            anchor: anchor,
+            before: target.position === "above"
+        };
     }
 
     /**
@@ -2329,16 +2300,6 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
-     * Clears visual highlighting from all drop zones.
-     */
-    _clearDropTargets() {
-        const dropZones = this._element.querySelectorAll(".wx-kanban-cell, .wx-kanban-card");
-        dropZones.forEach((el) => {
-            el.classList.remove("wx-drag-over-empty", "wx-drag-over-top", "wx-drag-over-bottom", "wx-drag-blocked");
-        });
-    }
-
-    /**
      * Tells whether a card may be dropped into a column. The plain board accepts every
      * column; a board that ties columns to rules refuses the ones the card cannot enter.
      * @param {object} card - The dragged card.
@@ -2347,19 +2308,6 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
      */
     _canDrop(card, colId) {
         return true;
-    }
-
-    /**
-     * Marks a cell the dragged card cannot enter. A refused dragover stays unhandled, so the
-     * browser shows the no-drop cursor and never fires a drop there.
-     * @param {HTMLElement} cell - The cell under the pointer.
-     * @param {string} colId - The column of the cell.
-     * @returns {boolean} Whether the cell accepts the dragged card.
-     */
-    _acceptDrag(cell, colId) {
-        const blocked = this._dragCard != null && !this._canDrop(this._dragCard, colId);
-        cell?.classList.toggle("wx-drag-blocked", blocked);
-        return !blocked;
     }
 
     /**

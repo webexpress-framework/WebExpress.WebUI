@@ -564,7 +564,10 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
         event.preventDefault();
         if (next) {
             this._setTabStop(next);
+            // the browser's own scroll on focus centers the item and jumps the page; the nearest
+            // scroll only moves as far as it takes to show an item that left the view
             next.focus({ preventScroll: true });
+            next.scrollIntoView?.({ block: "nearest", inline: "nearest" });
         }
     }
 

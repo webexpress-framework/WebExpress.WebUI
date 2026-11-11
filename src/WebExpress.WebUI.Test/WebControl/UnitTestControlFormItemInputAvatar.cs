@@ -308,8 +308,8 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the value property of the form avatar control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form id=""id_*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""id_*""><input name=""id_*"" type=""hidden""><input name=""controlform_id_*_state"" value=""Default"" type=""hidden""><div class=""wx-form-main""><div><fieldset class=""wx-form-group""><span></span><div id=""*"" class=""wx-webui-input-avatar""></div></fieldset></div></div><div></div></form>")]
-        [InlineData("/assets/avatar.png", @"<form id=""id_*"" class=""wx-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""id_*""><input name=""id_*"" type=""hidden""><input name=""controlform_id_*_state"" value=""Default"" type=""hidden""><div class=""wx-form-main""><div><fieldset class=""wx-form-group""><span></span><div id=""*"" class=""wx-webui-input-avatar"" data-value=""/assets/avatar.png""></div></fieldset></div></div><div></div></form>")]
+        [InlineData(null, @"<form id=""id_*"" class=""wx-form"" action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data"" name=""id_*""><input name=""id_*"" type=""hidden""><input name=""controlform_id_*_state"" value=""Default"" type=""hidden""><div class=""wx-form-main""><div><fieldset class=""wx-form-group""><span></span><div id=""*"" class=""wx-webui-input-avatar""></div></fieldset></div></div><div></div></form>")]
+        [InlineData("/assets/avatar.png", @"<form id=""id_*"" class=""wx-form"" action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data"" name=""id_*""><input name=""id_*"" type=""hidden""><input name=""controlform_id_*_state"" value=""Default"" type=""hidden""><div class=""wx-form-main""><div><fieldset class=""wx-form-group""><span></span><div id=""*"" class=""wx-webui-input-avatar"" data-value=""/assets/avatar.png""></div></fieldset></div></div><div></div></form>")]
         public void Value(string value, string expected)
         {
             // arrange

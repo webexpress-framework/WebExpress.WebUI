@@ -1654,7 +1654,10 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             return item.id;
         }
         if (!item._uid) {
-            item._uid = "i_" + crypto.randomUUID();
+            // insecure contexts may omit randomUUID, but item tracking still needs stable keys
+            item._uid = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+                ? `i_${crypto.randomUUID()}`
+                : `i_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
         }
         return item._uid;
     }

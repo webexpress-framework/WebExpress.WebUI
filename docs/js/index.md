@@ -25,6 +25,7 @@ This section documents the JavaScript UI controllers and components of `WebExpre
 - [Date](date.md)
 - [Disjunctive Normal Form](dnf.md)
 - [Dismissible](dismissible.md)
+- [DragDrop](dragdrop.md)
 - [Dropdown](dropdown.md)
 - [Editor](editor.md)
 - [FileList](filelist.md)

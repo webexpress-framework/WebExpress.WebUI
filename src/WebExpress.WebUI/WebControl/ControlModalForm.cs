@@ -364,7 +364,7 @@ namespace WebExpress.WebUI.WebControl
                         ? Css.Concatenate("wx-form-inline", GetClasses(renderContext))
                         : GetClasses(renderContext),
                     Role = _form.Role?.Invoke(formRenderContext),
-                    Action = Uri?.ToString() ?? renderContext.Request.Uri?.ToString(),
+                    Action = Uri?.Invoke(formRenderContext)?.ToString() ?? renderContext.Request.Uri?.ToString(),
                     Method = (method == RequestMethod.NONE
                         ? RequestMethod.POST
                         : method).ToString(),

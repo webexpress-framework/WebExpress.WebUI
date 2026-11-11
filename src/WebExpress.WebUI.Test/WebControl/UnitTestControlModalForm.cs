@@ -1,3 +1,5 @@
+using WebExpress.WebCore.WebHtml;
+using WebExpress.WebCore.WebUri;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebControl;
 using WebExpress.WebUI.WebPage;
@@ -10,11 +12,64 @@ namespace WebExpress.WebUI.Test.WebControl
     public class UnitTestControlModalForm
     {
         /// <summary>
+        /// Ensures modal submissions use the context-dependent target and retain a footer submit button.
+        /// </summary>
+        [Fact]
+        public void RenderEvaluatesUriAndKeepsSubmitButtonInFooter()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlModalForm("vehicle")
+            {
+                Uri = formContext => new UriEndpoint($"http://localhost/{formContext.Form.Id}/save")
+            };
+            control.AddPrimaryButton(new ControlFormItemButtonSubmit("save") { Text = _ => "Save" });
+
+            // act
+            var form = Assert.IsType<HtmlElementFormForm>(control.Render(context, visualTree));
+
+            // validation
+            Assert.Equal("http://localhost/form_vehicle/save", form.Action);
+            var dialog = Assert.IsType<HtmlElementInteractiveDialog>(Assert.Single(form.Elements));
+            var footer = Assert.Single(dialog.Elements.OfType<HtmlElementTextContentDiv>(), element => element.Class == "wx-modal-footer");
+            var submit = Assert.IsType<HtmlElementFieldButton>(Assert.Single(footer.Elements));
+            Assert.Equal("submit", submit.Type);
+            Assert.Contains("Save", submit.ToString());
+        }
+
+        /// <summary>
+        /// Ensures missing targets preserve submission to the current request URI.
+        /// </summary>
+        /// <param name="useDelegate">Whether a delegate returning null supplies the missing target.</param>
+        [Theory]
+        [InlineData(false)]
+        [InlineData(true)]
+        public void RenderFallsBackToRequestUri(bool useDelegate)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlModalForm("vehicle")
+            {
+                Uri = useDelegate ? _ => null : null
+            };
+
+            // act
+            var form = Assert.IsType<HtmlElementFormForm>(control.Render(context, visualTree));
+
+            // validation
+            Assert.Equal(context.Request.Uri.ToString(), form.Action);
+        }
+
+        /// <summary>
         /// Tests the id property of the modal control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("id", @"<form id=""id-form"" action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"" name=""form_id"">*</form>")]
+        [InlineData(null, @"<form action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("id", @"<form id=""id-form"" action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data"" name=""form_id"">*</form>")]
         public void Id(string id, string expected)
         {
             // arrange
@@ -35,9 +90,9 @@ namespace WebExpress.WebUI.Test.WebControl
         /// Tests the header property of the modal control.
         /// </summary>
         [Theory]
-        [InlineData(null, @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
-        [InlineData("abc", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><dialog class=""wx-webui-modal"" *><div class=""wx-modal-header"">abc</div>*</dialog></form>")]
-        [InlineData("webexpress.webui:plugin.name", @"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data""><dialog class=""wx-webui-modal"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</dialog></form>")]
+        [InlineData(null, @"<form action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data"">*</form>")]
+        [InlineData("abc", @"<form action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data""><dialog class=""wx-webui-modal"" *><div class=""wx-modal-header"">abc</div>*</dialog></form>")]
+        [InlineData("webexpress.webui:plugin.name", @"<form action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data""><dialog class=""wx-webui-modal"" *><div class=""wx-modal-header"">WebExpress.WebUI</div>*</dialog></form>")]
         public void Header(string header, string expected)
         {
             // arrange
@@ -71,7 +126,7 @@ namespace WebExpress.WebUI.Test.WebControl
             form.Add(new ControlFormItemInputText());
             var html = form.Render(context, visualTree);
 
-            AssertExtensions.EqualWithPlaceholders(@"<form action=""http://localhost:8080/"" method=""POST"" enctype=""multipart/form-data"">*<input * type=""text"" class=""form-control"">*</form>", html);
+            AssertExtensions.EqualWithPlaceholders(@"<form action=""http://localhost/"" method=""POST"" enctype=""multipart/form-data"">*<input * type=""text"" class=""form-control"">*</form>", html);
         }
     }
 }

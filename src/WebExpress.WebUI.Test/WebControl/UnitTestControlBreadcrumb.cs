@@ -155,5 +155,117 @@ namespace WebExpress.WebUI.Test.WebControl
             // validation
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
+
+        /// <summary>
+        /// Tests that a segment standing for a place in a hierarchy contributes a crumb per
+        /// ancestor, leaves a hidden one out and gives a crumb with a menu its dropdown.
+        /// </summary>
+        [Fact]
+        public void TrailSegment()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+            var uri = new UriEndpoint(new UriEndpoint("http://localhost:80/"), [new UriPathSegmentRoot(), new TestTrailSegment("guide")]);
+            var control = new ControlBreadcrumb()
+            {
+                Uri = _ => uri
+            };
+
+            // act
+            var html = control.Render(renderContext, visualTree).ToString();
+
+            // validation
+            Assert.Contains("<a href=\"/wiki/root\">Root</a>", html);
+            Assert.Contains("<a href=\"/wiki/chapter\">Chapter</a>", html);
+            Assert.DoesNotContain("Hidden", html);
+            Assert.Contains("<li class=\"wx-breadcrumb-menu\">", html);
+            Assert.Contains("/wiki/sibling", html);
+            Assert.Contains("<a href=\"/wiki/guide\" aria-current=\"page\">Guide</a>", html);
+            Assert.True(html.IndexOf("Root") < html.IndexOf("Chapter") && html.IndexOf("Chapter") < html.IndexOf("Guide"));
+        }
+
+        /// <summary>
+        /// A segment that stands for a page with two ancestors in a hierarchy.
+        /// </summary>
+        /// <param name="value">The value of the segment.</param>
+        private sealed class TestTrailSegment(string value) : IUriPathSegmentTrail
+        {
+            /// <summary>
+            /// Gets the id.
+            /// </summary>
+            public string Id => Value;
+
+            /// <summary>
+            /// Gets the value.
+            /// </summary>
+            public string Value { get; } = value;
+
+            /// <summary>
+            /// Gets no tag.
+            /// </summary>
+            public object Tag => null;
+
+            /// <summary>
+            /// Gets that the segment is not empty.
+            /// </summary>
+            public bool IsEmpty => false;
+
+            /// <summary>
+            /// Gets or sets whether the segment is hidden.
+            /// </summary>
+            public bool IsHidden { get; set; }
+
+            /// <summary>
+            /// Gets or sets the address the segment links to.
+            /// </summary>
+            public IUri Uri { get; set; }
+
+            /// <summary>
+            /// Tells whether a value is the segment's value.
+            /// </summary>
+            /// <param name="value">The value.</param>
+            /// <returns>True for the same value.</returns>
+            public bool IsMatched(string value) => value == Value;
+
+            /// <summary>
+            /// Copies the segment with its own type, as a route copies its segments.
+            /// </summary>
+            /// <returns>The copy.</returns>
+            public IUriPathSegment Copy() => new TestTrailSegment(Value) { IsHidden = IsHidden, Uri = Uri };
+
+            /// <summary>
+            /// Compares the values.
+            /// </summary>
+            /// <param name="obj">The other segment.</param>
+            /// <returns>True for the same value.</returns>
+            public bool Equals(IUriPathSegment obj) => obj?.Value == Value;
+
+            /// <summary>
+            /// Returns the value.
+            /// </summary>
+            /// <returns>The value.</returns>
+            public override string ToString() => Value;
+
+            /// <summary>
+            /// Returns the ancestors and the page itself.
+            /// </summary>
+            /// <param name="renderContext">The context of the page.</param>
+            /// <returns>The crumbs.</returns>
+            public IEnumerable<UriTrailCrumb> GetTrail(WebExpress.WebCore.WebPage.IRenderContext renderContext)
+            {
+                yield return new UriTrailCrumb { Text = "Root", Uri = new UriEndpoint("/wiki/root") };
+                yield return new UriTrailCrumb { Text = "Hidden", Uri = new UriEndpoint("/wiki/hidden"), Hidden = true };
+                yield return new UriTrailCrumb
+                {
+                    Text = "Chapter",
+                    Uri = new UriEndpoint("/wiki/chapter"),
+                    Menu = [new UriTrailCrumb { Text = "Sibling", Uri = new UriEndpoint("/wiki/sibling") }]
+                };
+                yield return new UriTrailCrumb { Text = "Guide", Uri = new UriEndpoint("/wiki/guide") };
+            }
+        }
     }
 }
