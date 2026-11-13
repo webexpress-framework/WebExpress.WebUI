@@ -53,6 +53,14 @@ tiles per row (`data-columns`), narrowing the visible tiles to the value of anot
 (`data-filter-source` on the picker, `data-filter-value` on the tile), and projecting
 values out of the selected tile (`data-wx-bind-*`, see below).
 
+The picker keeps the body and footer of a tile as DOM nodes (`content`, `footer`) and draws
+copies of them on every render; it writes no markup strings. While a search term is set, the
+picker keeps the height it had with every tile shown (`min-height` on the picker element,
+measured when the search starts, released when the term is cleared), so a dialog around it
+does not change size when fewer or no tiles match. `data-empty-text` is shown when no tile
+matches. The REST-backed picker (`wx-webapp-input-tile`) renders the `description` of a
+delivered tile as text.
+
 A tile marked `data-always-visible="true"` is exempt from both the filter and the search.
 Use it for the entry that must never fall away because it is the way on — an "add new" or
 a "none of these" card.
