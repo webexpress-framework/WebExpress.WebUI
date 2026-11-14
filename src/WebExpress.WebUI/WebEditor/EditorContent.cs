@@ -196,14 +196,27 @@ namespace WebExpress.WebUI.WebEditor
         {
             var keep = new List<IHtmlNode>();
 
+            // the neighbouring element of every position, gathered in one pass each way; looking
+            // them up per empty paragraph made long documents quadratic
+            var next = new IHtmlNode[nodes.Count];
+            IHtmlNode following = null;
+
+            for (var i = nodes.Count - 1; i >= 0; i--)
+            {
+                next[i] = following;
+                following = nodes[i] is HtmlElement ? nodes[i] : following;
+            }
+
+            IHtmlNode previous = null;
+
             for (var i = 0; i < nodes.Count; i++)
             {
+                var before = previous;
+                previous = nodes[i] is HtmlElement ? nodes[i] : previous;
+
                 if (nodes[i] is HtmlElementTextContentP paragraph && IsEmpty(paragraph))
                 {
-                    var previous = nodes.Take(i).LastOrDefault(x => x is HtmlElement);
-                    var next = nodes.Skip(i + 1).FirstOrDefault(x => x is HtmlElement);
-
-                    if (previous is null || next is null || unwrapped.Contains(previous) || unwrapped.Contains(next))
+                    if (before is null || next[i] is null || unwrapped.Contains(before) || unwrapped.Contains(next[i]))
                     {
                         continue;
                     }

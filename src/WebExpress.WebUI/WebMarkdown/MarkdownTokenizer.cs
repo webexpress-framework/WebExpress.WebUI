@@ -20,31 +20,35 @@ namespace WebExpress.WebUI.WebMarkdown
         private static readonly Regex _pluginBlockRegex = PluginBlockRegex();
         private static readonly Regex _pluginBlockEndRegex = PluginBlockEndRegex();
 
-        [GeneratedRegex(@"(?<url>((https?|ftp|ftps|ldap|ldaps|file):\/\/[^\s\)\]\}]+[^\.\s\)\]\}])|(mailto:[^\s\)\]\}]+[^\.\s\)\]\}]))", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        // every pattern is only asked whether it matches at the current position. Without the \G
+        // anchor a failed attempt searched the whole rest of the input for a later match, once per
+        // character, which made tokenizing quadratic in the length of the text
+
+        [GeneratedRegex(@"\G(?<url>((https?|ftp|ftps|ldap|ldaps|file):\/\/[^\s\)\]\}]+[^\.\s\)\]\}])|(mailto:[^\s\)\]\}]+[^\.\s\)\]\}]))", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex UrlRegex();
 
-        [GeneratedRegex(@"\[\s*(?<text>[^\]]*)\s*\]\(\s*(?<url>[^\s\)\]\}]+)\s*\)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        [GeneratedRegex(@"\G\[\s*(?<text>[^\]]*)\s*\]\(\s*(?<url>[^\s\)\]\}]+)\s*\)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex LinkRegex();
 
-        [GeneratedRegex(@"!\s*(?:\[\s*(?<alt>[^\]]*)\s*\])?\s*\(\s*(?<url>[^\s\)\]\}]+)\s*\)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        [GeneratedRegex(@"\G!\s*(?:\[\s*(?<alt>[^\]]*)\s*\])?\s*\(\s*(?<url>[^\s\)\]\}]+)\s*\)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex ImageRegex();
 
-        [GeneratedRegex(@"<(?<tag>[a-zA-Z][^\s>]*)[^>]*>(.*?)<\/\k<tag>>", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        [GeneratedRegex(@"\G<(?<tag>[a-zA-Z][^\s>]*)[^>]*>(.*?)<\/\k<tag>>", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
         private static partial Regex HtmlRegex();
 
-        [GeneratedRegex(@"\[\s*(?<checkbox>[xX\s]?)\s*\]", RegexOptions.IgnoreCase | RegexOptions.Compiled)] // Regex for checkboxes
+        [GeneratedRegex(@"\G\[\s*(?<checkbox>[xX\s]?)\s*\]", RegexOptions.IgnoreCase | RegexOptions.Compiled)] // Regex for checkboxes
         private static partial Regex CheckboxRegex();
 
-        [GeneratedRegex(@"\[\^\s*(?<footnote>[^\]]+)\s*\]", RegexOptions.IgnoreCase | RegexOptions.Compiled)] // Regex for footnotes
+        [GeneratedRegex(@"\G\[\^\s*(?<footnote>[^\]]+)\s*\]", RegexOptions.IgnoreCase | RegexOptions.Compiled)] // Regex for footnotes
         private static partial Regex FootnoteRegex();
 
-        [GeneratedRegex(@"\{\{(?!%)(?<name>[a-zA-Z_][a-zA-Z0-9_]*)(?<params>(?:\s+[a-zA-Z_][a-zA-Z0-9_]*=""[^""]*"")*)\s*\}\}", RegexOptions.Compiled)]
+        [GeneratedRegex(@"\G\{\{(?!%)(?<name>[a-zA-Z_][a-zA-Z0-9_]*)(?<params>(?:\s+[a-zA-Z_][a-zA-Z0-9_]*=""[^""]*"")*)\s*\}\}", RegexOptions.Compiled)]
         private static partial Regex InlinePluginRegex();
 
-        [GeneratedRegex(@"\{\{%\s*(?<name>[a-zA-Z_][a-zA-Z0-9_]*)(?<params>(?:\s+[a-zA-Z_][a-zA-Z0-9_]*=""[^""]*"")*)\s*%\}\}", RegexOptions.Compiled)]
+        [GeneratedRegex(@"\G\{\{%\s*(?<name>[a-zA-Z_][a-zA-Z0-9_]*)(?<params>(?:\s+[a-zA-Z_][a-zA-Z0-9_]*=""[^""]*"")*)\s*%\}\}", RegexOptions.Compiled)]
         private static partial Regex PluginBlockRegex();
 
-        [GeneratedRegex(@"\{\{%\s*/(?<name>[a-zA-Z_][a-zA-Z0-9_]*)\s*%\}\}", RegexOptions.Compiled)]
+        [GeneratedRegex(@"\G\{\{%\s*/(?<name>[a-zA-Z_][a-zA-Z0-9_]*)\s*%\}\}", RegexOptions.Compiled)]
         private static partial Regex PluginBlockEndRegex();
 
         private readonly string _input;
