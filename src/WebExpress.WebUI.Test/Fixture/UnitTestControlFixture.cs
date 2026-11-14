@@ -140,6 +140,7 @@ namespace WebExpress.WebUI.Test.Fixture
 
             var requestFeature = new HttpRequestFeature
             {
+                Scheme = "http",
                 Headers = new HeaderDictionary
                 {
                     ["Host"] = "localhost",

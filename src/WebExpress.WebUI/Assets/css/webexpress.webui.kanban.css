@@ -346,15 +346,16 @@
 :scope .wx-kanban-cell {
     background: var(--wx-gray-900, #393b40);
     /* keep the resting border transparent (as in light mode); the dashed
-       border is only shown on drag-hover via .wx-drag-over-empty below */
+       border is only shown on drag-hover via .wx-drag-over below */
 }
 }
 
 /* the cell draws the drop area with its own dashed border instead of the shared outline;
    the extra class outranks the scoped dark cell background */
-.wx-kanban .wx-kanban-cell.wx-drag-over-empty {
+.wx-kanban .wx-kanban-cell.wx-drag-over {
     background-color: var(--wx-drop-bg);
     border-color: var(--wx-drop-border-color);
+    outline: none;
 }
 
 /* a cell the dragged card cannot enter, e.g. no status of the column is open to it */
@@ -548,14 +549,18 @@
     transition: opacity 0.15s ease;
 }
 
-/* blue line appears above the card */
-.wx-kanban-card.wx-drag-over-top::before {
+/* a card lands between two others: the line sits in the gap rather than on the card, so the
+   card keeps its own shadow instead of the shared inset line */
+.wx-kanban .wx-kanban-card[data-wx-drop][data-wx-drop-at] {
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.wx-kanban-card[data-wx-drop-at="above"]::before {
     top: -10px;
     opacity: 1;
 }
 
-/* blue line appears below the card */
-.wx-kanban-card.wx-drag-over-bottom::before {
+.wx-kanban-card[data-wx-drop-at="below"]::before {
     bottom: -10px;
     opacity: 1;
 }

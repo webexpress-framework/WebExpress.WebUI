@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Globalization;
 using WebExpress.WebUI.WebMarkdown;
 
@@ -499,6 +500,10 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("<span>Text</span>", "<span>Text</span>", MarkdownTokenType.Html)]
         [InlineData("<p>This is a paragraph.</p>", "<p>This is a paragraph.</p>", MarkdownTokenType.Html)]
         [InlineData("<a href=\"https://example.com\">Link</a>", "<a href=\"https://example.com\">Link</a>", MarkdownTokenType.Html)]
+        [InlineData("press <kbd>Ctrl</kbd> twice", "<kbd>Ctrl</kbd>", MarkdownTokenType.Html)]
+        [InlineData("<B>bold</b>", "<B>bold</b>", MarkdownTokenType.Html)]
+        [InlineData("<b><b>x</b></b>", "<b><b>x</b>", MarkdownTokenType.Html)]
+        [InlineData("<b>one</b>\n<b>two</b>", "<b>two</b>", MarkdownTokenType.Html)]
         public void Html(string input, string expectedValue, MarkdownTokenType expectedType)
         {
             // arrange
@@ -511,6 +516,64 @@ namespace WebExpress.WebUI.Test.WebMarkdown
             Assert.Contains(tokens, token =>
                 token.Type == expectedType &&
                 token.Value == expectedValue);
+        }
+
+        /// <summary>
+        /// Tests that an element is only recognized when it is closed on the line it is opened on.
+        /// </summary>
+        [Theory]
+        [InlineData("<b>never closed")]
+        [InlineData("<b>one\ntwo</b>")]
+        [InlineData("<b>one</i>")]
+        [InlineData("10 <b and c> 2")]
+        public void Html_Invalid(string input)
+        {
+            // arrange
+            var tokenizer = new MarkdownTokenizer(input);
+
+            // act
+            var tokens = tokenizer.Tokenize();
+
+            // validation
+            Assert.DoesNotContain(tokens, token => token.Type == MarkdownTokenType.Html);
+        }
+
+        /// <summary>
+        /// Tests that input built to make the patterns backtrack is tokenized in linear time. Each
+        /// case took seconds to minutes at this size while a pattern could split a run of brackets,
+        /// whitespace or tag characters in many ways, or searched on from every unclosed opener.
+        /// </summary>
+        /// <param name="prefix">The text before the repeated unit.</param>
+        /// <param name="unit">The unit that is repeated.</param>
+        /// <param name="suffix">The text after the repeated unit.</param>
+        [Theory]
+        [InlineData("", "[", "")]
+        [InlineData("[", " ", "")]
+        [InlineData("[", "\n", "")]
+        [InlineData("![", " ", "")]
+        [InlineData("! ", " ", "")]
+        [InlineData("", "[^", "")]
+        [InlineData("[^", " ", "")]
+        [InlineData("", "a<b ", "")]
+        [InlineData("", "<b>", "")]
+        [InlineData("", "</b", "")]
+        [InlineData("<", "a", ">")]
+        [InlineData("{{a", " ", "")]
+        [InlineData("", "http://.", "")]
+        public void Adversarial(string prefix, string unit, string suffix)
+        {
+            // arrange
+            var input = prefix + string.Concat(Enumerable.Repeat(unit, 20000)) + suffix + new string('b', 20000);
+            var tokenizer = new MarkdownTokenizer(input);
+            var watch = Stopwatch.StartNew();
+
+            // act
+            var tokens = tokenizer.Tokenize().ToList();
+
+            // validation
+            watch.Stop();
+            Assert.Equal(MarkdownTokenType.EOF, tokens.Last().Type);
+            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(2), $"tokenizing took {watch.Elapsed}");
         }
 
         /// <summary>

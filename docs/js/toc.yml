@@ -36,6 +36,8 @@
   href: dnf.md
 - name: Domain
   href: domain.md
+- name: DragDrop
+  href: dragdrop.md
 - name: Dropdown
   href: dropdown.md
 - name: Editor

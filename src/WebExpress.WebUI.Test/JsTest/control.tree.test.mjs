@@ -30,3 +30,25 @@ test("the leaf marker is a drawing of the icon set, like the branch angle", () =
     assert.ok(marker, "a leaf carries a marker");
     assert.equal(marker.className, "wx-tree-indicator-dot " + rt.wx.IconSet.resolve("dot"), "the marker resolves through the set rather than painting its own glyph");
 });
+
+test("an item the arrow keys move to is focused and scrolled into view, the nearest way", () => {
+    const rt = loadWebUi({ browser: true, extraFiles: ["webexpress.webui.tree.js"] });
+    const host = rt.document.createElement("div");
+    for (const label of ["One", "Two"]) {
+        const node = rt.document.createElement("div");
+        node.classList.add("wx-tree-node");
+        node.dataset.label = label;
+        host.appendChild(node);
+    }
+    rt.document.body.appendChild(host);
+    const ctrl = new rt.wx.TreeCtrl(host);
+    const items = host.querySelectorAll("[role=\"treeitem\"]");
+    const scrolled = [];
+    for (const item of items) {
+        item.scrollIntoView = (options) => scrolled.push([item.textContent, options.block]);
+    }
+
+    ctrl._onKeyDown({ key: "ArrowDown", target: items[0], defaultPrevented: false, preventDefault() { } });
+
+    assert.deepEqual(scrolled, [["Two", "nearest"]]);
+});

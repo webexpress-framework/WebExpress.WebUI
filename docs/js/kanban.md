@@ -1,6 +1,6 @@
 # KanbanCtrl
 
-`KanbanCtrl` (`wx-webui-kanban`) renders a column-based board for visual workflow management using a dashboard-style CSS grid. Each column represents a process stage, each card one movable work item. Optional swimlanes group related items as horizontal, expandable lanes across all columns. Cards move via pixel-perfect drag & drop. The board carries a `…` menu (settings with a WQL filter, add column, add swimlane); each column carries a `…` menu (rename, color, delete), can be reordered by its ⠿ grip and resized at the divider to its right; each swimlane carries a `…` menu (rename, delete).
+`KanbanCtrl` (`wx-webui-kanban`) renders a column-based board for visual workflow management using a dashboard-style CSS grid. Each column represents a process stage, each card one movable work item. Optional swimlanes group related items as horizontal, expandable lanes across all columns. Cards move by drag and drop through the shared drag-and-drop protocol (see DragDrop), so a card is a source of the kind `kanban-card` and a card or a cell is a target any other control can drop onto. The board carries a `…` menu (settings with a WQL filter, add column, add swimlane); each column carries a `…` menu (rename, color, delete), can be reordered by its ⠿ grip and resized at the divider to its right; each swimlane carries a `…` menu (rename, delete).
 
 ```
    ┌───────────────┬───────────────┬───────────────┐
@@ -76,6 +76,8 @@ The optional footer carries small, application-defined facts — for example the
 | `title`      | Tooltip explaining the chip (e.g. "Story points").
 
 ## Column reordering feedback
+
+A card is a source of the kind `kanban-card`. Dropped on another card, it lands above or below it, by the half of the card under the pointer; dropped on the free space of a cell, it lands at the end of the cell. A column the card may not enter is refused while the card is over it, through the check event of the protocol, so the cell is drawn as refused and no drop happens. The board takes only its own cards: an item of another kind, such as a row of a table, dropped on a card or a cell, and a card of another board are left to the page, which receives the drop event of the protocol with the card (kind `kanban-card`) or the cell (kind `kanban-cell`, id `<column>|<swimlane>`) as target.
 
 While a column is dragged by its grip, the header under the pointer shows an insertion indicator on the edge where the column would land (`wx-board-col-drop-before` / `wx-board-col-drop-after`), and the dragged header dims (`wx-board-col-dragging`). After the drop, the header at the new position briefly flashes (`wx-board-col-moved`); the flash respects `prefers-reduced-motion`.
 

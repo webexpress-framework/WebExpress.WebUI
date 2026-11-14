@@ -32,7 +32,7 @@
 	     published package. Without the split the package copy wins in the test output and
 	     the tests silently run against the released WebCore instead of the local one. -->
 	<ItemGroup Condition="'$(Configuration)' != 'DebugLocal'">
-		<PackageReference Include="WebExpress.WebCore" Version="2.0.0-alpha" />
+		<PackageReference Include="WebExpress.WebCore" Version="2.0.1-alpha" />
 	</ItemGroup>
 
 	<ItemGroup Condition="'$(Configuration)' == 'DebugLocal'">

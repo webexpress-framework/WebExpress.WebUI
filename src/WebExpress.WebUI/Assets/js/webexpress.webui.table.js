@@ -850,6 +850,17 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
     }
 
     /**
+     * Hook for subclasses to add attributes to a row, for example the marks of a
+     * multi-selection or of a drag source.
+     * @param {object} state - The current state.
+     * @param {Object} row - Row data object.
+     * @returns {object|null} The attributes, or null.
+     */
+    _rowAttributes(state, row) {
+        return null;
+    }
+
+    /**
      * Hook for subclasses to describe the cells of no column ahead of the columns of a
      * row, for example a grip.
      * @param {object} state - The current state.
@@ -1130,6 +1141,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
 
         // apply action attributes (primary + secondary)
         Object.assign(props, this._actionProps("primary", row.primaryAction), this._actionProps("secondary", row.secondaryAction));
+        Object.assign(props, this._rowAttributes(state, row));
 
         const cells = [];
         let firstVisible = true;

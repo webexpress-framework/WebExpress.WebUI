@@ -149,3 +149,88 @@ test("the selection can be set and cleared programmatically", () => {
     assert.equal(Array.from(board.cards()).filter((c) => c.classList.contains("wx-kanban-card-active")).length, 0);
     assert.deepEqual(events.map((e) => e.itemId), ["c2", null], "both transitions are announced");
 });
+
+/**
+ * Loads a runtime with the kanban control and the drag-and-drop protocol.
+ * @returns {object} The loaded runtime.
+ */
+function loadWithProtocol() {
+    return loadWebUi({ extraFiles: [webuiAsset("webexpress.webui.dragdrop.js"), webuiAsset("webexpress.webui.kanban.js")] });
+}
+
+/**
+ * Drops on a target of a board through the protocol's drop event. The test DOM does not
+ * bubble, so the event is dispatched on the host, where the board listens.
+ * @param {object} runtime - The runtime.
+ * @param {object} host - The board host.
+ * @param {object} detail - The detail the protocol announces.
+ * @returns {boolean} Whether the board took the drop and stopped it.
+ */
+function dropOn(runtime, host, detail) {
+    let stopped = false;
+    host.dispatchEvent({ type: runtime.wx.Event.DROP_EVENT, detail: detail, stopPropagation() { stopped = true; } });
+    return stopped;
+}
+
+test("cards and cells take part in the shared drag-and-drop protocol", () => {
+    const runtime = loadWithProtocol();
+    const board = build(runtime);
+
+    const card = board.cards()[0];
+    const cell = board.host.querySelector(".wx-kanban-cell");
+
+    assert.equal(card.getAttribute("data-wx-drag"), "c1");
+    assert.equal(card.getAttribute("data-wx-drag-kind"), "kanban-card");
+    assert.equal(card.getAttribute("data-wx-drop-kind"), "kanban-card");
+    assert.equal(card.getAttribute("data-wx-drop-position"), "edges");
+    assert.equal(card.getAttribute("data-wx-drop-into"), "other", "a card lands between cards and takes other items onto itself");
+    assert.equal(cell.getAttribute("data-wx-drop-kind"), "kanban-cell");
+});
+
+test("a card dropped above another moves there and announces the move", () => {
+    const runtime = loadWithProtocol();
+    const board = build(runtime);
+    const moves = [];
+    board.host.addEventListener(runtime.wx.Event.MOVE_EVENT, (e) => moves.push(e.detail));
+    const [first, second] = board.cards();
+
+    const taken = dropOn(runtime, board.host, {
+        sources: [{ id: "c2", kind: "kanban-card" }],
+        origin: second,
+        target: { id: "c1", kind: "kanban-card", position: "above", element: first },
+        effect: "move"
+    });
+
+    assert.equal(taken, true);
+    assert.deepEqual(Array.from(board.cards()).map((x) => x.dataset.cardId), ["c2", "c1"]);
+    assert.equal(moves.length, 1);
+    assert.equal(moves[0].cardId, "c2");
+    assert.equal(moves[0].columnId, "todo");
+});
+
+test("a drop the board does not own is left to the page", () => {
+    const runtime = loadWithProtocol();
+    const board = build(runtime);
+    const other = build(runtime);
+    const moves = [];
+    board.host.addEventListener(runtime.wx.Event.MOVE_EVENT, (e) => moves.push(e.detail));
+    const first = board.cards()[0];
+
+    const foreign = dropOn(runtime, board.host, {
+        sources: [{ id: "7", kind: "issue" }],
+        origin: runtime.document.createElement("tr"),
+        target: { id: "c1", kind: "kanban-card", position: "into", element: first },
+        effect: "move"
+    });
+    const otherBoard = dropOn(runtime, board.host, {
+        sources: [{ id: "c2", kind: "kanban-card" }],
+        origin: other.cards()[1],
+        target: { id: "c1", kind: "kanban-card", position: "above", element: first },
+        effect: "move"
+    });
+
+    assert.equal(foreign, false, "a row of a table dropped onto a card bubbles to the page");
+    assert.equal(otherBoard, false, "a card of another board with the same id is not taken for one of this board");
+    assert.equal(moves.length, 0);
+    assert.deepEqual(Array.from(board.cards()).map((x) => x.dataset.cardId), ["c1", "c2"]);
+});

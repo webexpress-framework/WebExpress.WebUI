@@ -3458,6 +3458,9 @@ webexpress.webui.Event = class {
     static ROW_REORDER_EVENT = "webexpress.webui.table.row.reorder";
     // Event triggered when an row is selected.
     static SELECT_ROW_EVENT = "webexpress.webui.table.select.row";
+    // Event triggered when the set of chosen items of a multi-selection changes; the detail
+    // carries { ids }.
+    static SELECTION_CHANGED_EVENT = "webexpress.webui.selection.changed";
     // Event triggered when a table is sorted.
     static TABLE_SORT_EVENT = "webexpress.webui.table.sorted";
     // Event triggered when the value of an input or control changes.
@@ -3473,6 +3476,11 @@ webexpress.webui.Event = class {
     static COLLABORATION_STEPS_EVENT = "webexpress.webui.collaboration.steps";
     // Event triggered when a item is moved.
     static MOVE_EVENT = "webexpress.webui.move";
+    // Event triggered when items of the drag-and-drop protocol were dropped on a target; the detail
+    // carries { sources, target, effect } (see webexpress.webui.dragdrop.js).
+    static DROP_EVENT = "webexpress.webui.drop";
+    // Cancelable event that asks a target whether it takes the dragged items; preventing it refuses.
+    static DROP_CHECK_EVENT = "webexpress.webui.drop.check";
     // Event triggered when the page changes in a pagination control.
     static CHANGE_PAGE_EVENT = "webexpress.webui.change.page";
     // Event triggered when a modal is shown.

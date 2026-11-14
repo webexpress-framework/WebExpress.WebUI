@@ -27,6 +27,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
     _filterValue = null;
     _emptyText = "";
     _emptyElement = null;
+    _lockedHeight = null;
     _required = false;
     _autoSelected = false;
 
@@ -86,7 +87,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         if (!this._tileList.hasAttribute("aria-labelledby") && !this._tileList.hasAttribute("aria-label")) {
             this._tileList.setAttribute("aria-label", this._searchPlaceholder || this._i18n("webexpress.webui:tile.picker", "Tiles"));
         }
-        element.innerHTML = "";
+        element.replaceChildren();
         element.removeAttribute("id");
         element.removeAttribute("name");
         element.removeAttribute("data-value");
@@ -213,7 +214,9 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         this._searchInput.placeholder = this._searchPlaceholder;
         this._searchInput.setAttribute("aria-label", this._searchPlaceholder);
         this._searchInput.addEventListener("input", () => {
-            this._searchTerm = this._searchInput.value.trim().toLowerCase();
+            const term = this._searchInput.value.trim().toLowerCase();
+            this._lockHeight(term);
+            this._searchTerm = term;
             this.render();
         });
 
@@ -227,6 +230,35 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         wrapper.appendChild(this._searchInput);
 
         return wrapper;
+    }
+
+    /**
+     * Keeps the height the picker has with every tile shown while a search term narrows the
+     * tiles, so the surrounding dialog does not shrink when fewer or no tiles match. The
+     * height is measured when a search starts and released when the term is cleared.
+     * @param {string} term - The search term about to be applied.
+     */
+    _lockHeight(term) {
+        if (term && this._lockedHeight === null) {
+            const height = this._element.getBoundingClientRect().height;
+            if (height > 0) {
+                this._lockedHeight = height;
+                this._element.style.minHeight = height + "px";
+            }
+        } else if (!term && this._lockedHeight !== null) {
+            this._lockedHeight = null;
+            this._element.style.minHeight = "";
+        }
+    }
+
+    /**
+     * Returns copies of the supplied nodes, so a tile can be drawn on every render without
+     * moving its authored content out of the parsed template.
+     * @param {Node[]|null} nodes - The nodes of a tile part.
+     * @returns {Node[]} The copies.
+     */
+    _cloneNodes(nodes) {
+        return (nodes || []).map(node => node.cloneNode(true));
     }
 
     /**
@@ -244,10 +276,10 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
             }
 
             // the footer is authored as a child of the card, but is rendered after
-            // the body, so it is taken out of the markup that becomes the body
+            // the body, so it is taken out of the nodes that become the body
             const source = div.cloneNode(true);
             const footerElement = source.querySelector(".wx-tile-card-footer");
-            const footer = footerElement ? footerElement.innerHTML.trim() : null;
+            const footer = footerElement ? Array.from(footerElement.childNodes) : null;
             if (footerElement) {
                 footerElement.remove();
             }
@@ -259,7 +291,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
                 badgeColorCss: div.dataset.badgeColorCss || null,
                 badgeColorStyle: div.dataset.badgeColorStyle || null,
                 chip: div.dataset.chip || null,
-                html: source.innerHTML.trim(),
+                content: Array.from(source.childNodes),
                 footer: footer,
                 class: div.dataset.class || "",
                 icon: div.dataset.icon || null,
@@ -662,7 +694,9 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
             const check = document.createElement("span");
             check.className = "wx-tile-card-check";
             check.setAttribute("aria-hidden", "true");
-            check.innerHTML = `<i class="${this._iconClass("check")}"></i>`;
+            const checkIcon = document.createElement("i");
+            checkIcon.className = this._iconClass("check");
+            check.appendChild(checkIcon);
             card.appendChild(check);
         }
 
@@ -731,19 +765,17 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
             header.append(document.createTextNode(tile.label ?? ""));
             card.appendChild(header);
         }
-        // add card body (main HTML content)
+        // add card body (the content nodes of the tile)
         const body = document.createElement("div");
         body.className = "card-body";
-        if (tile.html) {
-            body.innerHTML = tile.html;
-        }
+        body.append(...this._cloneNodes(tile.content));
         card.appendChild(body);
 
         // add the metadata footer
-        if (tile.footer) {
+        if (tile.footer && tile.footer.length) {
             const footer = document.createElement("div");
             footer.className = "wx-tile-card-footer";
-            footer.innerHTML = tile.footer;
+            footer.append(...this._cloneNodes(tile.footer));
             card.appendChild(footer);
         }
 

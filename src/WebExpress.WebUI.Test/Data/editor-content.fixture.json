@@ -62,6 +62,20 @@
       "keeps": ["boxed"],
       "drops": [],
       "paragraphs": 0
+    },
+    {
+      "name": "a second guard paragraph after an add-on is not content either",
+      "html": "<div class=\"wx-addon-frame card\" contenteditable=\"false\"><div class=\"card-body wx-addon-body-widget\"><div class=\"alert\">boxed</div></div></div><p><br></p><p><br></p><p>after</p>",
+      "keeps": ["boxed", "after"],
+      "drops": [],
+      "paragraphs": 1
+    },
+    {
+      "name": "a paragraph holding an inline add-on without text is content",
+      "html": "<div class=\"wx-addon-frame card\" contenteditable=\"false\"><div class=\"card-body wx-addon-body-widget\"><div class=\"alert\">boxed</div></div></div><p><span class=\"wx-addon-inline-frame\" contenteditable=\"false\" data-addon-id=\"icon\"><i class=\"icon\"></i></span></p><p>after</p>",
+      "keeps": ["boxed", "after"],
+      "drops": [],
+      "paragraphs": 2
     }
   ]
 }
