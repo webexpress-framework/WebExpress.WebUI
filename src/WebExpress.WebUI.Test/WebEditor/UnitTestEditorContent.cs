@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
@@ -340,6 +341,46 @@ namespace WebExpress.WebUI.Test.WebEditor
             Assert.Equal(string.Empty, EditorContent.ConvertToMarkdown(html));
             Assert.Empty(EditorContent.ReadDocument(html));
             Assert.Empty(EditorContent.ConvertToPdf(html).Elements);
+        }
+
+        /// <summary>
+        /// Tests that a paragraph holding a rule is content although it has no text. The case is
+        /// not in the shared fixture because a browser parser closes the paragraph before the
+        /// rule, while the editor's own rendering and the server's parser keep it inside.
+        /// </summary>
+        [Fact]
+        public void ReadDocumentKeepsParagraphWithRule()
+        {
+            // arrange
+            var html = "<div class=\"wx-addon-frame card\" contenteditable=\"false\">"
+                + "<div class=\"card-body wx-addon-body-widget\"><div class=\"alert\">boxed</div></div></div>"
+                + "<p><hr></p>";
+
+            // act
+            var nodes = EditorContent.ReadDocument(html);
+
+            // validation
+            Assert.Single(nodes.OfType<HtmlElementTextContentP>());
+        }
+
+        /// <summary>
+        /// Tests that a long run of empty paragraphs is read in linear time; looking up the
+        /// neighbours of each paragraph made such a document quadratic.
+        /// </summary>
+        [Fact]
+        public void ReadDocumentWithManyEmptyParagraphs()
+        {
+            // arrange
+            var html = "<p>first</p>" + string.Concat(Enumerable.Repeat("<p><br></p>", 20000)) + "<p>last</p>";
+            var watch = Stopwatch.StartNew();
+
+            // act
+            var nodes = EditorContent.ReadDocument(html);
+
+            // validation
+            watch.Stop();
+            Assert.Equal(20002, nodes.OfType<HtmlElementTextContentP>().Count());
+            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(5), $"reading took {watch.Elapsed}");
         }
 
         /// <summary>

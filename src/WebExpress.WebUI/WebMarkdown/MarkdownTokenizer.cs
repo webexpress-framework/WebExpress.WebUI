@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -13,7 +14,7 @@ namespace WebExpress.WebUI.WebMarkdown
         private static readonly Regex _urlRegex = UrlRegex();
         private static readonly Regex _linkRegex = LinkRegex();
         private static readonly Regex _imageRegex = ImageRegex();
-        private static readonly Regex _htmlRegex = HtmlRegex();
+        private static readonly Regex _htmlOpenRegex = HtmlOpenRegex();
         private static readonly Regex _checkboxRegex = CheckboxRegex();
         private static readonly Regex _footnoteRegex = FootnoteRegex();
         private static readonly Regex _inlinePluginRegex = InlinePluginRegex();
@@ -22,38 +23,45 @@ namespace WebExpress.WebUI.WebMarkdown
 
         // every pattern is only asked whether it matches at the current position. Without the \G
         // anchor a failed attempt searched the whole rest of the input for a later match, once per
-        // character, which made tokenizing quadratic in the length of the text
+        // character. Within a pattern no two quantifiers may compete for the same characters, or a
+        // failed attempt tries every way of splitting them; and a bracketed text stops at the next
+        // '[', so a run of unclosed brackets is scanned once rather than once per bracket. The
+        // captured texts are trimmed where they are used, so they need no whitespace of their own
 
-        [GeneratedRegex(@"\G(?<url>((https?|ftp|ftps|ldap|ldaps|file):\/\/[^\s\)\]\}]+[^\.\s\)\]\}])|(mailto:[^\s\)\]\}]+[^\.\s\)\]\}]))", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        [GeneratedRegex(@"\G(?<url>((https?|ftp|ftps|ldap|ldaps|file):\/\/[^\s\)\]\}]+[^\.\s\)\]\}])|(mailto:[^\s\)\]\}]+[^\.\s\)\]\}]))", RegexOptions.IgnoreCase)]
         private static partial Regex UrlRegex();
 
-        [GeneratedRegex(@"\G\[\s*(?<text>[^\]]*)\s*\]\(\s*(?<url>[^\s\)\]\}]+)\s*\)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        [GeneratedRegex(@"\G\[(?<text>[^\[\]]*)\]\(\s*(?<url>[^\s\)\]\}]+)\s*\)")]
         private static partial Regex LinkRegex();
 
-        [GeneratedRegex(@"\G!\s*(?:\[\s*(?<alt>[^\]]*)\s*\])?\s*\(\s*(?<url>[^\s\)\]\}]+)\s*\)", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
+        [GeneratedRegex(@"\G!\s*(?:\[(?<alt>[^\[\]]*)\]\s*)?\(\s*(?<url>[^\s\)\]\}]+)\s*\)")]
         private static partial Regex ImageRegex();
 
-        [GeneratedRegex(@"\G<(?<tag>[a-zA-Z][^\s>]*)[^>]*>(.*?)<\/\k<tag>>", RegexOptions.IgnoreCase | RegexOptions.Compiled)]
-        private static partial Regex HtmlRegex();
+        // only the opening tag; the closing one is looked up in an index, because searching for it
+        // from every opening tag that is never closed is quadratic
+        [GeneratedRegex(@"\G<(?<tag>(?>[a-zA-Z][^\s<>]*))[^<>]*>")]
+        private static partial Regex HtmlOpenRegex();
 
-        [GeneratedRegex(@"\G\[\s*(?<checkbox>[xX\s]?)\s*\]", RegexOptions.IgnoreCase | RegexOptions.Compiled)] // Regex for checkboxes
+        [GeneratedRegex(@"\G\[\s*(?:(?<checkbox>[xX])\s*)?\]")]
         private static partial Regex CheckboxRegex();
 
-        [GeneratedRegex(@"\G\[\^\s*(?<footnote>[^\]]+)\s*\]", RegexOptions.IgnoreCase | RegexOptions.Compiled)] // Regex for footnotes
+        [GeneratedRegex(@"\G\[\^(?<footnote>[^\[\]]+)\]")]
         private static partial Regex FootnoteRegex();
 
-        [GeneratedRegex(@"\G\{\{(?!%)(?<name>[a-zA-Z_][a-zA-Z0-9_]*)(?<params>(?:\s+[a-zA-Z_][a-zA-Z0-9_]*=""[^""]*"")*)\s*\}\}", RegexOptions.Compiled)]
+        [GeneratedRegex(@"\G\{\{(?!%)(?<name>[a-zA-Z_][a-zA-Z0-9_]*)(?<params>(?:\s+[a-zA-Z_][a-zA-Z0-9_]*=""[^""]*"")*)\s*\}\}")]
         private static partial Regex InlinePluginRegex();
 
-        [GeneratedRegex(@"\G\{\{%\s*(?<name>[a-zA-Z_][a-zA-Z0-9_]*)(?<params>(?:\s+[a-zA-Z_][a-zA-Z0-9_]*=""[^""]*"")*)\s*%\}\}", RegexOptions.Compiled)]
+        [GeneratedRegex(@"\G\{\{%\s*(?<name>[a-zA-Z_][a-zA-Z0-9_]*)(?<params>(?:\s+[a-zA-Z_][a-zA-Z0-9_]*=""[^""]*"")*)\s*%\}\}")]
         private static partial Regex PluginBlockRegex();
 
-        [GeneratedRegex(@"\G\{\{%\s*/(?<name>[a-zA-Z_][a-zA-Z0-9_]*)\s*%\}\}", RegexOptions.Compiled)]
+        [GeneratedRegex(@"\G\{\{%\s*/(?<name>[a-zA-Z_][a-zA-Z0-9_]*)\s*%\}\}")]
         private static partial Regex PluginBlockEndRegex();
 
         private readonly string _input;
         private int _pos;
         private readonly int _length;
+        private Dictionary<string, List<int>> _closingTags;
+        private List<int> _lineBreaks;
 
         /// <summary>
         /// Initializes a new instance of the MarkdownTokenizer class with the specified input string.
@@ -78,7 +86,7 @@ namespace WebExpress.WebUI.WebMarkdown
             {
                 // Check for block plugin end tag {{% /name %}}
                 var pluginBlockEndMatch = _pluginBlockEndRegex.Match(_input, _pos);
-                if (pluginBlockEndMatch.Success && pluginBlockEndMatch.Index == _pos)
+                if (pluginBlockEndMatch.Success)
                 {
                     string pluginName = pluginBlockEndMatch.Groups["name"].Value;
                     tokens.Add(new MarkdownToken(MarkdownTokenType.PluginBlockEnd, pluginName, _pos, pluginBlockEndMatch.Length));
@@ -88,7 +96,7 @@ namespace WebExpress.WebUI.WebMarkdown
 
                 // Check for block plugin opening tag {{% name params %}}
                 var pluginBlockMatch = _pluginBlockRegex.Match(_input, _pos);
-                if (pluginBlockMatch.Success && pluginBlockMatch.Index == _pos)
+                if (pluginBlockMatch.Success)
                 {
                     string pluginName = pluginBlockMatch.Groups["name"].Value;
                     string pluginParams = pluginBlockMatch.Groups["params"].Value.Trim();
@@ -99,7 +107,7 @@ namespace WebExpress.WebUI.WebMarkdown
 
                 // Check for inline plugin {{name params}}
                 var inlinePluginMatch = _inlinePluginRegex.Match(_input, _pos);
-                if (inlinePluginMatch.Success && inlinePluginMatch.Index == _pos)
+                if (inlinePluginMatch.Success)
                 {
                     string pluginName = inlinePluginMatch.Groups["name"].Value;
                     string pluginParams = inlinePluginMatch.Groups["params"].Value.Trim();
@@ -109,18 +117,17 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
 
                 // Check for HTML tags
-                var htmlMatch = _htmlRegex.Match(_input, _pos);
-                if (htmlMatch.Success && htmlMatch.Index == _pos)
+                var htmlLength = MatchHtml();
+                if (htmlLength > 0)
                 {
-                    string htmlContent = htmlMatch.Value;
-                    tokens.Add(new MarkdownToken(MarkdownTokenType.Html, htmlContent, _pos, htmlMatch.Length));
-                    _pos += htmlMatch.Length;
+                    tokens.Add(new MarkdownToken(MarkdownTokenType.Html, _input.Substring(_pos, htmlLength), _pos, htmlLength));
+                    _pos += htmlLength;
                     continue;
                 }
 
                 // Check for images in the format ![alt](URL)
                 var imageMatch = _imageRegex.Match(_input, _pos);
-                if (imageMatch.Success && imageMatch.Index == _pos)
+                if (imageMatch.Success)
                 {
                     string altText = imageMatch.Groups["alt"].Value;
                     string imageUrl = imageMatch.Groups["url"].Value;
@@ -131,7 +138,7 @@ namespace WebExpress.WebUI.WebMarkdown
 
                 // Check for links in the format [text](URL)
                 var linkMatch = _linkRegex.Match(_input, _pos);
-                if (linkMatch.Success && linkMatch.Index == _pos)
+                if (linkMatch.Success)
                 {
                     string linkText = linkMatch.Groups["text"].Value;
                     string linkUrl = linkMatch.Groups["url"].Value;
@@ -142,7 +149,7 @@ namespace WebExpress.WebUI.WebMarkdown
 
                 // Check for URLs using the regex
                 var urlMatch = _urlRegex.Match(_input, _pos);
-                if (urlMatch.Success && urlMatch.Index == _pos)
+                if (urlMatch.Success)
                 {
                     string url = urlMatch.Groups["url"].Value;
                     tokens.Add(new MarkdownToken(MarkdownTokenType.Url, url, _pos, url.Length));
@@ -152,7 +159,7 @@ namespace WebExpress.WebUI.WebMarkdown
 
                 // Check for checkboxes in the format [ ], [x], [X], etc.
                 var checkboxMatch = _checkboxRegex.Match(_input, _pos);
-                if (checkboxMatch.Success && checkboxMatch.Index == _pos)
+                if (checkboxMatch.Success)
                 {
                     string checkboxContent = checkboxMatch.Groups["checkbox"].Value.Trim();
                     MarkdownToken token = checkboxContent switch
@@ -168,7 +175,7 @@ namespace WebExpress.WebUI.WebMarkdown
 
                 // Check for footnotes in the format [^1]
                 var footnoteMatch = _footnoteRegex.Match(_input, _pos);
-                if (footnoteMatch.Success && footnoteMatch.Index == _pos)
+                if (footnoteMatch.Success)
                 {
                     string footnoteContent = footnoteMatch.Groups["footnote"].Value.Trim();
                     tokens.Add(new MarkdownToken(MarkdownTokenType.Footnote, footnoteContent, _pos, footnoteMatch.Length));
@@ -368,6 +375,112 @@ namespace WebExpress.WebUI.WebMarkdown
         }
 
         /// <summary>
+        /// Matches an HTML element that is opened and closed on the same line, as in
+        /// <c>&lt;kbd&gt;Ctrl&lt;/kbd&gt;</c>, at the current position.
+        /// </summary>
+        /// <returns>The length of the element, or 0 when none starts here.</returns>
+        private int MatchHtml()
+        {
+            var open = _htmlOpenRegex.Match(_input, _pos);
+            if (!open.Success)
+            {
+                return 0;
+            }
+
+            if (_closingTags is null)
+            {
+                IndexHtml();
+            }
+
+            var tag = open.Groups["tag"].Value;
+            if (!_closingTags.TryGetValue(tag, out var closings))
+            {
+                return 0;
+            }
+
+            var contentStart = _pos + open.Length;
+            var close = FirstAtOrAfter(closings, contentStart);
+            if (close < 0)
+            {
+                return 0;
+            }
+
+            // the content may not span lines; the closing tag that follows a line break belongs
+            // to an element opened on that later line
+            var lineBreak = FirstAtOrAfter(_lineBreaks, contentStart);
+            if (lineBreak >= 0 && lineBreak < close)
+            {
+                return 0;
+            }
+
+            return close + tag.Length + 3 - _pos;
+        }
+
+        /// <summary>
+        /// Records where each closing tag and each line break is, in one pass over the input,
+        /// so that matching an element costs a lookup instead of a search.
+        /// </summary>
+        private void IndexHtml()
+        {
+            _closingTags = new Dictionary<string, List<int>>(StringComparer.OrdinalIgnoreCase);
+            _lineBreaks = [];
+
+            for (var i = 0; i < _length; i++)
+            {
+                if (_input[i] == '\n')
+                {
+                    _lineBreaks.Add(i);
+                }
+            }
+
+            var at = _input.IndexOf("</", StringComparison.Ordinal);
+            while (at >= 0)
+            {
+                // the name allows the same characters as the name of an opening tag, and stops at
+                // '<' so that the scans of two closing tags never overlap
+                var end = at + 2;
+                if (end < _length && char.IsAsciiLetter(_input[end]))
+                {
+                    while (end < _length && !char.IsWhiteSpace(_input[end]) && _input[end] != '<' && _input[end] != '>')
+                    {
+                        end++;
+                    }
+
+                    if (end < _length && _input[end] == '>')
+                    {
+                        var name = _input.Substring(at + 2, end - at - 2);
+                        if (!_closingTags.TryGetValue(name, out var positions))
+                        {
+                            positions = [];
+                            _closingTags.Add(name, positions);
+                        }
+
+                        positions.Add(at);
+                    }
+                }
+
+                at = _input.IndexOf("</", end, StringComparison.Ordinal);
+            }
+        }
+
+        /// <summary>
+        /// Returns the first of the ascending positions that is not before the given one.
+        /// </summary>
+        /// <param name="positions">The positions, in ascending order.</param>
+        /// <param name="from">The position to start at.</param>
+        /// <returns>The position, or -1 when there is none.</returns>
+        private static int FirstAtOrAfter(List<int> positions, int from)
+        {
+            var index = positions.BinarySearch(from);
+            if (index < 0)
+            {
+                index = ~index;
+            }
+
+            return index < positions.Count ? positions[index] : -1;
+        }
+
+        /// <summary>
         /// Returns true if the character at position pos is a special Markdown character
         /// or the start of a code block marker (three backticks), or a URL.
         /// </summary>
@@ -417,27 +530,27 @@ namespace WebExpress.WebUI.WebMarkdown
             if (input[pos] == '{' && pos + 1 < input.Length && input[pos + 1] == '{')
             {
                 var inlinePluginMatch = _inlinePluginRegex.Match(input, pos);
-                if (inlinePluginMatch.Success && inlinePluginMatch.Index == pos)
+                if (inlinePluginMatch.Success)
                 {
                     return true;
                 }
 
                 var pluginBlockMatch = _pluginBlockRegex.Match(input, pos);
-                if (pluginBlockMatch.Success && pluginBlockMatch.Index == pos)
+                if (pluginBlockMatch.Success)
                 {
                     return true;
                 }
 
                 var pluginBlockEndMatch = _pluginBlockEndRegex.Match(input, pos);
-                if (pluginBlockEndMatch.Success && pluginBlockEndMatch.Index == pos)
+                if (pluginBlockEndMatch.Success)
                 {
                     return true;
                 }
             }
 
             // Check for URLs using regex (if the current position is at the start of a valid URL)
-            var urlMatch = UrlRegex().Match(input, pos);
-            if (urlMatch.Success && urlMatch.Index == pos)
+            var urlMatch = _urlRegex.Match(input, pos);
+            if (urlMatch.Success)
             {
                 return true;
             }

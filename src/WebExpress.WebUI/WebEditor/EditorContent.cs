@@ -112,19 +112,42 @@ namespace WebExpress.WebUI.WebEditor
                 html = EditorState.ToHtml(html);
             }
 
-            var unwrapped = new HashSet<IHtmlNode>();
-            var nodes = Strip(new HtmlParser().Parse(html), unwrapped);
+            var reading = new Reading();
+            var nodes = Strip(new HtmlParser().Parse(html), reading);
 
-            return DropTypingSpace(nodes, unwrapped);
+            return DropTypingSpace(nodes, reading);
+        }
+
+        /// <summary>
+        /// What stripping learns about the add-ons of a document. The frames are gone
+        /// afterwards, but the client keeps a marker element in their place, so deciding
+        /// like the client needs to know where they were.
+        /// </summary>
+        private sealed class Reading
+        {
+            /// <summary>
+            /// Gets the nodes that replaced a block add-on frame.
+            /// </summary>
+            public HashSet<IHtmlNode> Unwrapped { get; } = [];
+
+            /// <summary>
+            /// Gets the elements that held an add-on frame, block or inline, at any depth.
+            /// </summary>
+            public HashSet<IHtmlNode> Carriers { get; } = [];
+
+            /// <summary>
+            /// Gets or sets the number of add-on frames read so far.
+            /// </summary>
+            public int Frames { get; set; }
         }
 
         /// <summary>
         /// Removes the scaffolding from a sequence of nodes, recursively.
         /// </summary>
         /// <param name="nodes">The nodes to read.</param>
-        /// <param name="unwrapped">Collects the nodes that replaced an add-on frame.</param>
+        /// <param name="reading">Collects where the add-ons were.</param>
         /// <returns>The remaining nodes.</returns>
-        private static List<IHtmlNode> Strip(IEnumerable<IHtmlNode> nodes, HashSet<IHtmlNode> unwrapped)
+        private static List<IHtmlNode> Strip(IEnumerable<IHtmlNode> nodes, Reading reading)
         {
             var result = new List<IHtmlNode>();
 
@@ -143,13 +166,15 @@ namespace WebExpress.WebUI.WebEditor
 
                 if (HasClass(element, "wx-addon-frame"))
                 {
+                    reading.Frames++;
+
                     // the card header names the add-on for the author and opens its settings,
                     // which says nothing about the document; what the add-on renders is in
                     // its body
                     var body = Find(element, "wx-addon-body-container", "wx-addon-body-widget");
                     var content = body is not null
-                        ? Strip(body.Elements, unwrapped)
-                        : Strip(element.Elements.Where(x => !(x is HtmlElement h && HasClass(h, "card-header"))), unwrapped);
+                        ? Strip(body.Elements, reading)
+                        : Strip(element.Elements.Where(x => !(x is HtmlElement h && HasClass(h, "card-header"))), reading);
                     var presentation = body is not null ? PresentationClasses(body) : null;
 
                     if (presentation is not null)
@@ -162,7 +187,7 @@ namespace WebExpress.WebUI.WebEditor
 
                     foreach (var child in content)
                     {
-                        unwrapped.Add(child);
+                        reading.Unwrapped.Add(child);
                         result.Add(child);
                     }
 
@@ -171,11 +196,19 @@ namespace WebExpress.WebUI.WebEditor
 
                 if (HasClass(element, "wx-addon-inline-frame"))
                 {
-                    result.AddRange(Strip(element.Elements, unwrapped));
+                    reading.Frames++;
+                    result.AddRange(Strip(element.Elements, reading));
                     continue;
                 }
 
-                var children = Strip(element.Elements, unwrapped);
+                var frames = reading.Frames;
+                var children = Strip(element.Elements, reading);
+
+                if (reading.Frames != frames)
+                {
+                    reading.Carriers.Add(element);
+                }
+
                 element.Clear();
                 element.Add(children.ToArray());
                 result.Add(element);
@@ -190,14 +223,14 @@ namespace WebExpress.WebUI.WebEditor
         /// was typed by the author and stays - the same rule the client applies.
         /// </summary>
         /// <param name="nodes">The stripped nodes.</param>
-        /// <param name="unwrapped">The nodes that replaced an add-on frame.</param>
+        /// <param name="reading">Where the add-ons were.</param>
         /// <returns>The document nodes.</returns>
-        private static IReadOnlyList<IHtmlNode> DropTypingSpace(List<IHtmlNode> nodes, HashSet<IHtmlNode> unwrapped)
+        private static IReadOnlyList<IHtmlNode> DropTypingSpace(List<IHtmlNode> nodes, Reading reading)
         {
             var keep = new List<IHtmlNode>();
 
-            // the neighbouring element of every position, gathered in one pass each way; looking
-            // them up per empty paragraph made long documents quadratic
+            // the following element of every position, gathered in one backward pass; looking
+            // it up per empty paragraph made long documents quadratic
             var next = new IHtmlNode[nodes.Count];
             IHtmlNode following = null;
 
@@ -207,21 +240,22 @@ namespace WebExpress.WebUI.WebEditor
                 following = nodes[i] is HtmlElement ? nodes[i] : following;
             }
 
+            // the client removes the paragraphs in place and then asks for the previous sibling, so
+            // a dropped paragraph is never the neighbour of the next one. The following neighbour
+            // needs no such care: removal runs forward and has not reached it yet
             IHtmlNode previous = null;
 
             for (var i = 0; i < nodes.Count; i++)
             {
-                var before = previous;
-                previous = nodes[i] is HtmlElement ? nodes[i] : previous;
-
-                if (nodes[i] is HtmlElementTextContentP paragraph && IsEmpty(paragraph))
+                if (nodes[i] is HtmlElementTextContentP paragraph && IsEmpty(paragraph, reading))
                 {
-                    if (before is null || next[i] is null || unwrapped.Contains(before) || unwrapped.Contains(next[i]))
+                    if (previous is null || next[i] is null || reading.Unwrapped.Contains(previous) || reading.Unwrapped.Contains(next[i]))
                     {
                         continue;
                     }
                 }
 
+                previous = nodes[i] is HtmlElement ? nodes[i] : previous;
                 keep.Add(nodes[i]);
             }
 
@@ -298,15 +332,23 @@ namespace WebExpress.WebUI.WebEditor
         /// Returns whether a paragraph carries nothing a reader would see.
         /// </summary>
         /// <param name="paragraph">The paragraph to test.</param>
+        /// <param name="reading">Where the add-ons were.</param>
         /// <returns>True when it is empty.</returns>
-        private static bool IsEmpty(HtmlElement paragraph)
+        private static bool IsEmpty(HtmlElement paragraph, Reading reading)
         {
+            // an add-on is content even when it renders no text, as on the client
+            if (reading.Carriers.Contains(paragraph))
+            {
+                return false;
+            }
+
             var builder = new StringBuilder();
             paragraph.ToString(builder, 0);
             var markup = builder.ToString();
 
             return !markup.Contains("<img")
                 && !markup.Contains("<table")
+                && !markup.Contains("<hr")
                 && string.IsNullOrWhiteSpace(Text(paragraph));
         }
 
