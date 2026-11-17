@@ -61,7 +61,10 @@
     overflow-x: auto;
 }
 
-.wx-content img {
+/* icons are left out: the page's content area carries .wx-content as well, and
+   this sheet loads after img.wx-icon, so the same specificity would draw every
+   icon of a control on the page at the size of its drawing */
+.wx-content img:not(.wx-icon) {
     max-width: 100%;
     height: auto;
 }
