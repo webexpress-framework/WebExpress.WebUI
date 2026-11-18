@@ -292,12 +292,17 @@ webexpress.webui.DateCtrl = class extends webexpress.webui.Ctrl {
     /**
      * Parses a date string according to the given format.
      * Supports multiple formats such as "yyyy-MM-dd", "dd.MM.yyyy", "MM/dd/yyyy", "M/d/yyyy", etc.
-     * @param {string} value - Input string.
+     * A Date is taken as it is: the ends of a range arrive as dates from the input controls, and
+     * their string form matches none of the formats.
+     * @param {string|Date} value - Input string or date.
      * @param {string} format - Format string.
      * @returns {Date|null} Parsed Date or null.
      * @private
      */
     _parseDate(value, format) {
+        if (value instanceof Date) {
+            return isNaN(value.getTime()) ? null : value;
+        }
         if (!value && value !== 0) {
             return null;
         }
