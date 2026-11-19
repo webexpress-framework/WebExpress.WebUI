@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using System.Globalization;
+using System.Runtime.InteropServices;
 using WebExpress.WebUI.WebMarkdown;
 
 namespace WebExpress.WebUI.Test.WebMarkdown
@@ -540,8 +541,14 @@ namespace WebExpress.WebUI.Test.WebMarkdown
 
         /// <summary>
         /// Tests that input built to make the patterns backtrack is tokenized in linear time. Each
-        /// case took seconds to minutes at this size while a pattern could split a run of brackets,
-        /// whitespace or tag characters in many ways, or searched on from every unclosed opener.
+        /// case took seconds to minutes at the large size while a pattern could split a run of
+        /// brackets, whitespace or tag characters in many ways, or searched on from every unclosed
+        /// opener.
+        /// The check compares the work of two sizes instead of a fixed duration: eight times the
+        /// input costs about eight times as much in linear time and sixty-four in quadratic. The
+        /// work is the processor time of the test's own thread, because a full test run stretches
+        /// wall-clock time unevenly - a short run fits into one time slice, a long one is preempted
+        /// in favor of every other runnable thread - which alone took the ratio to thirty.
         /// </summary>
         /// <param name="prefix">The text before the repeated unit.</param>
         /// <param name="unit">The unit that is repeated.</param>
@@ -563,18 +570,58 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         public void Adversarial(string prefix, string unit, string suffix)
         {
             // arrange
-            var input = prefix + string.Concat(Enumerable.Repeat(unit, 20000)) + suffix + new string('b', 20000);
-            var tokenizer = new MarkdownTokenizer(input);
-            var watch = Stopwatch.StartNew();
+            string Build(int count) => prefix + string.Concat(Enumerable.Repeat(unit, count)) + suffix + new string('b', count);
+            var small = Build(2500);
+            var large = Build(20000);
+            var smallest = long.MaxValue;
+            var largest = long.MaxValue;
+            List<MarkdownToken> tokens = null;
 
             // act
-            var tokens = tokenizer.Tokenize().ToList();
+            // the fastest of several attempts counts, so a cache or a collection that happens to
+            // hit one attempt does not decide the comparison
+            new MarkdownTokenizer(small).Tokenize();
+            for (var attempt = 0; attempt < 5; attempt++)
+            {
+                smallest = Math.Min(smallest, Work(() => new MarkdownTokenizer(small).Tokenize()));
+                largest = Math.Min(largest, Work(() => tokens = new MarkdownTokenizer(large).Tokenize().ToList()));
+            }
 
             // validation
-            watch.Stop();
             Assert.Equal(MarkdownTokenType.EOF, tokens.Last().Type);
-            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(2), $"tokenizing took {watch.Elapsed}");
+            var ratio = (double)largest / Math.Max(smallest, 1);
+            Assert.True(ratio < 24, $"eight times the input took {ratio:F1} times the work ({smallest} for {small.Length} characters, {largest} for {large.Length})");
         }
+
+        /// <summary>
+        /// Measures the work an action does on the calling thread. On Windows these are the
+        /// processor cycles of the thread, which neither preemption nor a changing clock rate
+        /// affect; elsewhere it falls back to elapsed ticks.
+        /// </summary>
+        /// <param name="action">The action to measure.</param>
+        /// <returns>The work, in cycles or ticks; only comparable within one platform.</returns>
+        private static long Work(Action action)
+        {
+            if (!OperatingSystem.IsWindows())
+            {
+                var watch = Stopwatch.StartNew();
+                action();
+                return watch.ElapsedTicks;
+            }
+
+            QueryThreadCycleTime(GetCurrentThread(), out var before);
+            action();
+            QueryThreadCycleTime(GetCurrentThread(), out var after);
+
+            return (long)(after - before);
+        }
+
+        [DllImport("kernel32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        private static extern bool QueryThreadCycleTime(IntPtr thread, out ulong cycles);
+
+        [DllImport("kernel32.dll")]
+        private static extern IntPtr GetCurrentThread();
 
         /// <summary>
         /// Tests the MarkdownTokenizer for its ability to recognize and tokenize checkboxes in Markdown format.
