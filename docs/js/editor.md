@@ -297,6 +297,12 @@ The clipboard import removes text, paragraph and table background colors togethe
 
 The cleanup applies to clipboard HTML and external HTML drops. Loading a saved document and calling `insertHtmlAtCursor()` retain supported explicit formatting, including highlights. A paste is one undoable transaction, so undo and redo restore the complete content change.
 
+Pasted paragraphs continue the text around the caret: the first joins the text before it and the last takes the text behind it, so no empty paragraph is left over. A single paragraph becomes text in the block it lands in, and a heading pasted at the start of a block keeps its kind. Inside a list, every further paragraph becomes an item of its own, so a later list command affects only the paragraph it is applied to. Content copied as whole paragraphs, selected up to the start of the next one, stays whole and is placed before, behind or between the parts of the target paragraph. List items keep their list, nested lists included, once the selection reaches beyond the text of a single item. The copy starts at the level of the shallowest selected item, and items selected deeper at its start move up to that level instead of leaving an empty bullet. Placed into another list, the items join it as items of their own and bring their sub-lists along. Deleting across list items joins the first and the last item and removes the emptied ones.
+
+### Moving a selection
+
+Dragging selected text within the editor moves it, holding Ctrl (Option on macOS) copies it. The drop follows the rules of pasting, the source closes up as on deletion, and the move is one undoable transaction. A paragraph or list item whose whole text was moved is removed instead of staying behind as an empty line. A drop into the dragged selection changes nothing. A drop into another editor copies the content.
+
 ### Editing tables
 
 The table frame uses the same `⠿` movement handle as block add-ons. Its title remains outside the editable cells. A toolbar inside the frame exposes row and column insertion, headers, merging, splitting, deletion and cell background colors. These actions replace the cell context menu. Tables can be moved between blocks and regions without losing cells, formatting or column widths. Frames and toolbars are recreated after loading or undo and are excluded from the exported table HTML.

@@ -173,6 +173,13 @@ webexpress.webui.EditorHistory = class {
  */
 webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     /**
+     * The payload type that marks copied or dragged content as complete blocks. HTML alone
+     * cannot tell a selection of whole paragraphs from text running across them, and only the
+     * first keeps its paragraphs apart where it lands.
+     */
+    static WHOLE_BLOCKS_TYPE = "application/x-webexpress-editor-blocks";
+
+    /**
      * Initializes a new instance of the class. The host is emptied and rebuilt, and its form
      * name moves to a hidden input, so the posted value is always the serialized model.
      * @param {HTMLElement} element - The host element carrying the initial value as JSON state or HTML.
@@ -833,19 +840,33 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      * @param {DataTransfer} transfer - The clipboard or external drop payload.
      */
     _insertTransfer(transfer) {
-        if (this._codeSelection()) {
-            this.dispatch({ type: "insertText", text: transfer.getData("text/plain").replace(/\r\n?/g, "\n"), marks: {}, source: "paste" });
-            return;
-        }
+        this.dispatch({ type: "insertNodes", nodes: this._transferNodes(transfer), whole: this._transferWhole(transfer), source: "paste" });
+    }
+
+    /**
+     * Returns whether a payload holds complete blocks of an editor.
+     * @param {DataTransfer} transfer - The clipboard or drop payload.
+     * @returns {boolean} True for whole blocks.
+     */
+    _transferWhole(transfer) {
+        return !this._codeSelection() && !!transfer.getData?.(webexpress.webui.EditorCtrl.WHOLE_BLOCKS_TYPE);
+    }
+
+    /**
+     * Reads a clipboard or drop payload as the nodes it inserts at the current selection. Code
+     * takes the plain text only, because a code block holds no formatting.
+     * @param {DataTransfer} transfer - The clipboard or drop payload.
+     * @returns {Array<object>} The nodes to insert.
+     */
+    _transferNodes(transfer) {
+        const Model = webexpress.webui.EditorModel;
+        if (this._codeSelection()) return [{ type: "text", text: transfer.getData("text/plain").replace(/\r\n?/g, "\n"), marks: {} }];
         const html = transfer.getData("text/html");
-        if (html) {
-            const input = webexpress.webui.EditorHtml.read(html, { clipboard: true });
-            this.dispatch({ type: "insertNodes", nodes: input.nodes, source: "paste" });
-        } else {
-            const lines = transfer.getData("text/plain").replace(/\r\n?/g, "\n").split("\n");
-            if (lines.length === 1) this.dispatch({ type: "insertText", text: lines[0] });
-            else this.dispatch({ type: "insertNodes", nodes: lines.map(text => webexpress.webui.EditorModel.node("p", [{ type: "text", text, marks: {} }])) });
-        }
+        if (html) return webexpress.webui.EditorHtml.read(html, { clipboard: true }).nodes;
+        const lines = transfer.getData("text/plain").replace(/\r\n?/g, "\n").split("\n");
+        // a single line continues the formatting at the caret, like typed text
+        if (lines.length === 1) return [{ type: "text", text: lines[0], marks: Model.insertionMarks(this._state) }];
+        return lines.map(text => Model.node("p", [{ type: "text", text, marks: {} }]));
     }
 
     /**
@@ -857,18 +878,71 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
     _onCopy(e, cut) {
         if (!this.ownsInput(e) || e.defaultPrevented || !e.clipboardData) return;
         this._saveCurrentSelection();
-        const Model = webexpress.webui.EditorModel, [from, to] = Model.bounds(this._state);
-        if (from === to) return;
-        const blocks = Model.selectedBlocks(this._state).map(entry => ({ ...entry.node, children: Model.slice(entry.node.children, Math.max(0, from - entry.start), to - entry.start) }));
-        const doc = Model.node("doc", blocks);
-        const root = document.createElement("div"), view = new webexpress.webui.EditorView(this);
-        view.render({ doc }, root, true);
-        e.preventDefault(); e.clipboardData.setData("text/html", root.innerHTML);
-        e.clipboardData.setData("text/plain", blocks.map(b => Model.leaves(b).map(n => n.type === "text" ? n.text : n.type === "br" ? "\n" : n.attrs?.text || "").join("")).join("\n"));
+        if (!this._writeSelection(e.clipboardData)) return;
+        e.preventDefault();
         if (cut) this.dispatch({ type: "delete", source: "cut" });
     }
+
+    /**
+     * Writes the selected content as rendered HTML and as plain text into a payload. Copying and
+     * dragging share it, so a dragged selection carries the same clean content a copied one does.
+     * @param {DataTransfer} transfer - The clipboard or drag payload.
+     * @returns {boolean} False if nothing is selected.
+     */
+    _writeSelection(transfer) {
+        const Model = webexpress.webui.EditorModel, [from, to] = Model.bounds(this._state);
+        if (from === to) return false;
+        const selected = Model.selectedBlocks(this._state);
+        const blocks = selected.map(entry => ({ ...entry.node, children: Model.slice(entry.node.children, Math.max(0, from - entry.start), to - entry.start) }));
+        // a selection ending behind the end of its last block has taken the blocks with their ends
+        const whole = from === selected[0]?.start && to === selected.at(-1)?.end;
+        if (whole) transfer.setData(webexpress.webui.EditorCtrl.WHOLE_BLOCKS_TYPE, "true");
+        // list items keep their lists, nested ones included, once the selection reaches beyond the
+        // text of one item; text taken from within a single item is just text. The levels above
+        // the shallowest selected item stay behind, so the copy starts at the depth it was taken.
+        const keep = whole || blocks.length > 1;
+        const paths = selected.map(entry => keep ? entry.ancestors.filter(n => ["ul", "ol", "li"].includes(n.type)) : []);
+        const levels = Math.min(...paths.map(path => path.length / 2));
+        const content = [];
+        let open = [];
+        blocks.forEach((block, index) => {
+            const path = paths[index].slice(levels > 0 ? 2 * (levels - 1) : 0);
+            let depth = 0;
+            while (depth < open.length && depth < path.length && open[depth].node === path[depth]) depth++;
+            open = open.slice(0, depth);
+            for (const node of path.slice(depth)) {
+                const copy = Model.node(node.type, [], { ...node.attrs });
+                (open.at(-1)?.copy.children ?? content).push(copy);
+                open.push({ node, copy });
+            }
+            (open.at(-1)?.copy.children ?? content).push(block);
+        });
+        // a selection starting deeper than it ends would carry items without text of their own,
+        // shown as an empty bullet; their nested items move up into their place instead
+        const isList = n => n.type === "ul" || n.type === "ol";
+        const lift = list => {
+            while (list.children[0] && isList(list.children[0].children[0] ?? {})) {
+                const [nested, ...rest] = list.children[0].children;
+                list.children.splice(0, 1, ...nested.children, ...(rest.length ? [{ ...list.children[0], children: rest }] : []));
+            }
+            list.children.forEach(item => item.children.filter(isList).forEach(lift));
+        };
+        content.filter(isList).forEach(lift);
+        const doc = Model.node("doc", content);
+        const root = document.createElement("div"), view = new webexpress.webui.EditorView(this);
+        view.render({ doc }, root, true);
+        transfer.setData("text/html", root.innerHTML);
+        transfer.setData("text/plain", blocks.map(b => Model.leaves(b).map(n => n.type === "text" ? n.text : n.type === "br" ? "\n" : n.attrs?.text || "").join("")).join("\n"));
+        return true;
+    }
+
     /**
      * Commits local movement or imports an external payload at its caret position.
+     *
+     * The drop is always taken over from the browser, and with it the deletion the browser would
+     * make at the source of a moved selection. A selection dragged within this editor is
+     * therefore moved here, as one transaction, so a single undo puts it back; holding the copy
+     * modifier keeps the source, as it does natively.
      * @param {DragEvent} e - The browser drop event within this editor.
      */
     _onDrop(e) {
@@ -879,22 +953,37 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
             if (action) this.dispatch(action);
             return;
         }
+        const moved = this._textDrag;
+        this._textDrag = null;
         if (!this.ownsInput(e) || e.defaultPrevented || !e.dataTransfer) return;
         if (e.dataTransfer.types?.includes("application/x-webexpress-editor-node")) { e.preventDefault(); return; }
         const position = document.caretPositionFromPoint?.(e.clientX, e.clientY);
         const range = !position && document.caretRangeFromPoint?.(e.clientX, e.clientY);
         const index = position ? this._view.index(position.offsetNode, position.offset) : range ? this._view.index(range.startContainer, range.startOffset) : null;
         if (index === null) return;
-        e.preventDefault(); this._state.selection = { anchor: index, focus: index }; this._insertTransfer(e.dataTransfer);
+        e.preventDefault();
+        this._state.selection = { anchor: index, focus: index };
+        // ctrl copies on windows and linux, option on macos
+        if (moved && !e.ctrlKey && !e.altKey) this.dispatch({ type: "moveContent", source: moved, position: index, nodes: this._transferNodes(e.dataTransfer), whole: this._transferWhole(e.dataTransfer) });
+        else this._insertTransfer(e.dataTransfer);
     }
 
     /**
-     * Starts structural movement only from a handle, preserving normal text dragging.
+     * Starts structural movement from a handle. A plain selection keeps the native text drag,
+     * with the editor's own payload and the source remembered, so a drop in this editor can
+     * move it.
      * @param {DragEvent} event - The browser drag event from this editor.
      */
     _onDragStart(event) {
+        this._textDrag = null;
         const handle = event.target.closest?.(".wx-editor-region-handle,.wx-addon-drag-handle,.wx-addon-inline-frame");
-        if (!handle || !this._editorElement.contains(handle)) return;
+        if (!handle) {
+            if (this.disabled || this._composing || !event.dataTransfer || !this.ownsInput(event)) return;
+            this._saveCurrentSelection();
+            if (this._writeSelection(event.dataTransfer)) this._textDrag = { ...this._state.selection };
+            return;
+        }
+        if (!this._editorElement.contains(handle)) return;
         if (this.disabled || this._composing || !event.dataTransfer) { event.preventDefault(); return; }
         this._saveCurrentSelection();
         this._draggedId = this.nodeId(handle);
@@ -970,6 +1059,7 @@ webexpress.webui.EditorCtrl = class extends webexpress.webui.Ctrl {
      */
     _clearDrag() {
         this._draggedId = null;
+        this._textDrag = null;
         this._editorElement.querySelectorAll("[data-wx-drop]").forEach(node => node.removeAttribute("data-wx-drop"));
     }
 

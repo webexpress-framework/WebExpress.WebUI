@@ -273,14 +273,26 @@ webexpress.webui.EditorModel = class {
         return result;
     }
 
-    /** Replaces a selection in the model, merging paragraphs only within one text flow. */
-    static replace(state, nodes) {
+    /**
+     * Replaces a selection in the model, merging paragraphs only within one text flow.
+     * @param {object} state - The state whose selection is replaced.
+     * @param {Array<object>} nodes - The nodes to insert.
+     * @param {boolean} [whole=false] - Whether the nodes are complete blocks, such as paragraphs
+     * selected up to and including their end, which are placed between blocks instead of being
+     * merged into the text at the caret.
+     */
+    static replace(state, nodes, whole = false) {
         const [from, to] = this.bounds(state);
-        const all = this.entries(state.doc);
         const first = this.block(state.doc, from), last = this.block(state.doc, to);
-        const firstId = first?.node.id;
+        // a range from the start of a block to the start of a later one covers whole blocks; deleted
+        // or replaced by whole blocks they go entirely, and the block behind them keeps its own
+        // kind rather than taking the first's. Text typed over them still continues the first.
+        const closed = (whole || !nodes.length) && first && last && first.node !== last.node && from === first.start && to === last.start;
+        const firstId = closed ? null : first?.node.id;
         const lastId = last?.node.id;
-        const sameFlow = first && last && first.parent === last.parent;
+        // blocks join across list items and quotes, but never out of a cell or an add-on
+        const flow = e => e.ancestors.findLast(n => ["region", "td", "th", "addon"].includes(n.type));
+        const joined = !closed && first && last && first.node !== last.node && flow(first) === flow(last);
         const prune = (node, start) => {
             if (node.type === "text") {
                 const a = Math.max(0, from - start), b = Math.min(node.text.length, to - start);
@@ -295,9 +307,17 @@ webexpress.webui.EditorModel = class {
             return true;
         };
         if (from < to) prune(state.doc, 0);
-        if (sameFlow && first.node !== last.node && first.parent.children.includes(last.node)) {
+        if (joined) {
             first.node.children.push(...last.node.children);
-            first.parent.children.splice(first.parent.children.indexOf(last.node), 1);
+            // the item, list or quote that held only the joined block goes with it, so no empty
+            // bullet is left where the range ended
+            let holder = this.find(state.doc, last.node.id);
+            while (holder?.parent) {
+                const parent = holder.parent;
+                parent.children.splice(holder.index, 1);
+                if (parent.children.length || !["li", "ul", "ol", "blockquote"].includes(parent.type)) break;
+                holder = this.find(state.doc, parent.id);
+            }
         }
         let entry = firstId && this.find(state.doc, firstId);
         if (!entry) {
@@ -321,13 +341,56 @@ webexpress.webui.EditorModel = class {
             const flush = () => { if (run.length) { blocks.push(this.node("p", run)); run = []; } };
             nodes.forEach(n => { if (this.inline(n)) run.push(n); else { flush(); blocks.push(n); } });
             flush();
-            const replacement = [];
-            if (left.length) replacement.push({ ...entry.node, children: left });
-            replacement.push(...blocks);
-            const tail = this.node("p", right);
-            replacement.push(tail);
-            entry.parent.children.splice(entry.index, 1, ...replacement);
-            caret = this.find(state.doc, tail.id).start;
+            // the inserted blocks are opened at both ends: the first continues the text before the
+            // caret and the last takes the text behind it, so no block is split off or left empty.
+            // A first block at the start of the target keeps its own kind, so a heading placed
+            // before a paragraph stays a heading; a single paragraph is just text in the target.
+            const text = n => this.TEXT_BLOCKS.has(n.type);
+            const head = { ...entry.node, children: left };
+            // the text behind the caret keeps the block's identity when nothing stays before it
+            const tail = () => left.length ? this.node(entry.node.type, [], this.clone(entry.node.attrs)) : { ...entry.node, children: [] };
+            // without text behind the caret the last inserted block ends the insertion, and the
+            // caret goes behind its content; an atomic block still needs a paragraph to stand in
+            let lead, rest, end, offset = null;
+            if (whole) {
+                // whole blocks stay whole: before the block at its start, behind it at its end,
+                // and in the middle they split it
+                end = blocks.at(-1);
+                lead = left.length ? [head] : [];
+                rest = right.length ? [...blocks, { ...tail(), children: right }] : blocks;
+            } else if (!right.length && !text(blocks.at(-1)) && !this.atomic(blocks.at(-1))) {
+                end = blocks.at(-1);
+                lead = left.length ? [head] : [];
+                rest = blocks;
+            } else {
+                const single = blocks.length === 1 && text(blocks[0]);
+                // a blank line takes the structure of a heading or code block placed into it; a
+                // plain paragraph never overrides the block it lands in
+                if (single && !left.length && !right.length && blocks[0].type !== "p") Object.assign(head, { type: blocks[0].type, attrs: blocks[0].attrs });
+                const opened = text(blocks[0]) && (single || left.length > 0);
+                if (opened) head.children = [...left, ...blocks.shift().children];
+                end = !blocks.length ? head : text(blocks.at(-1)) ? blocks.pop() : tail();
+                offset = end.children.reduce((sum, n) => sum + this.size(n), 0);
+                end.children = [...end.children, ...right];
+                lead = opened || left.length ? [head] : [];
+                rest = end === head ? blocks : [...blocks, end];
+            }
+            const item = entry.parent.type === "li" && this.find(state.doc, entry.parent.id);
+            if (item?.parent) {
+                // each block becomes an item of its own, so a later list command reaches only the
+                // paragraph it is given; what followed the caret's paragraph in its item goes with
+                // the text behind the caret, and stays where it is when nothing follows it
+                const trailing = !whole || right.length ? entry.parent.children.splice(entry.index + 1) : [];
+                entry.parent.children.splice(entry.index, 1, ...lead);
+                // the items of a list placed into a list join it rather than nesting in one item
+                const items = rest.flatMap(block => ["ul", "ol"].includes(block.type) ? block.children : [this.node("li", [block])]);
+                if (["ul", "ol"].includes(end.type) && rest.includes(end)) end = end.children.at(-1);
+                (items.at(-1)?.children ?? entry.parent.children).push(...trailing);
+                if (entry.parent.children.length) item.parent.children.splice(item.index + 1, 0, ...items);
+                else item.parent.children.splice(item.index, 1, ...items);
+            } else entry.parent.children.splice(entry.index, 1, ...lead, ...rest);
+            const placed = this.find(state.doc, end.id);
+            caret = placed.start + (offset ?? (this.atomic(end) ? this.size(end) : this.size(end) - 1));
         }
         this.normalize(state.doc);
         state.selection = { anchor: caret, focus: caret };
@@ -577,7 +640,7 @@ webexpress.webui.EditorModel = class {
         }
         switch (action.type) {
             case "insertText": this.replace(state, [{ type: "text", text: String(action.text ?? ""), marks: this.insertionMarks(state) }]); break;
-            case "insertNodes": this.replace(state, this.clone(action.nodes ?? [])); state.storedMarks = null; break;
+            case "insertNodes": this.replace(state, this.clone(action.nodes ?? []), action.whole === true); state.storedMarks = null; break;
             case "delete": this.delete(state, action.direction ?? -1, action.unit); break;
             case "split": this.split(state); break;
             case "format": this.format(state, action.mark, action.value); break;
@@ -625,6 +688,37 @@ webexpress.webui.EditorModel = class {
                     state.selection = { anchor: pos, focus: pos };
                     this.replace(state, [e.node]);
                 }
+                break;
+            }
+            case "moveContent": {
+                const [start, end] = this.bounds({ selection: action.source }), at = action.position;
+                if (start === end || at >= start && at <= end || this.region(state.doc, start)?.node !== this.region(state.doc, end - 1)?.node) return previous;
+                const insert = () => { state.selection = { anchor: at, focus: at }; this.replace(state, this.clone(action.nodes ?? []), action.whole === true); };
+                const remove = () => {
+                    // a paragraph whose whole text moved away goes with it, together with the
+                    // item and list that held only it, rather than staying behind as an empty line
+                    const source = this.block(state.doc, start);
+                    const emptied = source && start === source.start && end === source.end - 1 && this.size(source.node) > 1 && source.node.id;
+                    state.selection = { anchor: start, focus: end };
+                    this.replace(state, []);
+                    let entry = emptied && this.find(state.doc, emptied);
+                    if (!entry || this.leaves(entry.node).length) return;
+                    while (entry.parent?.children.length === 1 && ["li", "ul", "ol", "blockquote"].includes(entry.parent.type)) entry = this.find(state.doc, entry.parent.id);
+                    // the caret is set by the insertion afterwards, so it needs no correction here
+                    if (entry.parent?.children.length > 1) entry.parent.children.splice(entry.index, 1);
+                };
+                if (at < start) { remove(); insert(); }
+                else {
+                    // the source is removed after the insertion so neither changes the other's
+                    // position; merging blocks makes the removed size unknown, but the distance of
+                    // the inserted end to the document end survives the removal before it
+                    insert();
+                    const rest = this.size(state.doc) - state.selection.focus;
+                    remove();
+                    const caret = this.size(state.doc) - rest;
+                    state.selection = { anchor: caret, focus: caret };
+                }
+                state.storedMarks = null;
                 break;
             }
             case "table": this.table(state, action); break;
