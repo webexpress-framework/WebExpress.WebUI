@@ -703,6 +703,13 @@
     color: #fff;
 }
 
+/* the browser centres a popover in the viewport; bubble and flyout are placed at the selection instead */
+.wx-editor-bubble[popover],
+.wx-editor-bubble-menu[popover] {
+    inset: auto;
+    margin: 0;
+}
+
 .wx-editor-bubble-sep {
     width: 1px;
     height: 16px;

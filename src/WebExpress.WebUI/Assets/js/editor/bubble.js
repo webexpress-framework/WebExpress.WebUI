@@ -237,6 +237,10 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         bubble.style.display = "none";
         bubble.style.position = "fixed";
         bubble.style.zIndex = "2150";
+        // a popover is drawn in the top layer, above a modal dialog the editor may sit in
+        if (typeof bubble.showPopover === "function") {
+            bubble.setAttribute("popover", "manual");
+        }
 
         // clicking anywhere in the bubble must not steal the editor selection
         bubble.addEventListener("mousedown", (e) => {
@@ -247,6 +251,25 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
 
         document.body.appendChild(bubble);
         this._bubbleEl = bubble;
+    },
+
+    /**
+     * Moves a floating element next to the editor it serves and brings it to the top layer.
+     * A modal dialog makes everything outside it inert, so a bubble left on the body would
+     * neither show above the dialog nor take a click; the top layer alone draws it, but only
+     * the move into the open dialog makes it usable. The bubble is shared by every editor on
+     * the page, so the host is resolved on each show rather than once.
+     * @param {HTMLElement} el - The bubble or its flyout.
+     * @param {object} editor - The editor the element is shown for.
+     */
+    _mount: function(el, editor) {
+        const host = editor?.getEditorElement().closest("dialog[open]") ?? document.body;
+        if (el.parentNode !== host) {
+            host.appendChild(el);
+        }
+        if (el.getAttribute("popover") && !el.matches(":popover-open")) {
+            try { el.showPopover(); } catch { /* an element outside the document stays an ordinary fixed box */ }
+        }
     },
 
     /**
@@ -420,6 +443,9 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         menu.className = "wx-editor-bubble-menu shadow";
         menu.style.position = "fixed";
         menu.style.zIndex = "2160";
+        if (typeof menu.showPopover === "function") {
+            menu.setAttribute("popover", "manual");
+        }
 
         menu.addEventListener("mousedown", (e) => {
             if (!e.target.closest("input, textarea, select, label")) {
@@ -429,7 +455,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
 
         items.forEach((item) => this._renderFlyoutItem(menu, item, editor));
 
-        document.body.appendChild(menu);
+        this._mount(menu, editor);
         this._flyoutEl = menu;
         this._positionFlyout();
     },
@@ -614,6 +640,9 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         this._closeFlyout();
         if (this._bubbleEl) {
             this._bubbleEl.style.display = "none";
+            if (this._bubbleEl.getAttribute("popover") && this._bubbleEl.matches(":popover-open")) {
+                this._bubbleEl.hidePopover();
+            }
         }
     },
 
@@ -643,6 +672,7 @@ webexpress.webui.EditorPlugins.register("bubble", 5000, {
         if (!this._bubbleEl || !rect) {
             return;
         }
+        this._mount(this._bubbleEl, this._currentEditor);
         this._bubbleEl.style.display = "flex";
         const bRect = this._bubbleEl.getBoundingClientRect();
         const margin = 8;
