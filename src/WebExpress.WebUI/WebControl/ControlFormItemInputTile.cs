@@ -26,6 +26,14 @@ namespace WebExpress.WebUI.WebControl
         public Func<IRenderControlContext, bool> MultiSelect { get; set; }
 
         /// <summary>
+        /// Gets or sets a value indicating whether a plain click toggles a tile in and out of
+        /// a multiple selection, the way a checkbox does. Without it a plain click selects the
+        /// clicked tile alone and Ctrl+click toggles. Shift+click selects a range either way.
+        /// Has no effect unless <see cref="MultiSelect"/> is set.
+        /// </summary>
+        public Func<IRenderControlContext, bool> ToggleOnClick { get; set; }
+
+        /// <summary>
         /// Gets or sets a value indicating whether a large icon is displayed
         /// for the item.
         /// </summary>
@@ -174,6 +182,7 @@ namespace WebExpress.WebUI.WebControl
                 .AddUserAttribute("name", name)
                 .AddUserAttribute("data-value", value)
                 .AddUserAttribute("data-multiselect", MultiSelect?.Invoke(renderContext) == true ? "true" : null)
+                .AddUserAttribute("data-toggle-on-click", ToggleOnClick?.Invoke(renderContext) == true ? "true" : null)
                 .AddUserAttribute("data-large-icon", largeIcon ? "true" : null)
                 .AddUserAttribute("data-required", required ? "true" : null)
                 .AddUserAttribute("data-searchable", searchable ? "true" : null)

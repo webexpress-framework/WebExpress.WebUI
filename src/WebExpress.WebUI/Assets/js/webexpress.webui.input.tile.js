@@ -16,7 +16,8 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
     _hidden = null;
     _tileList = null;
     _multiselect = false;
-    _lastSelectedIdx = null;
+    _toggleOnClick = false;
+    _anchorId = null;
     _largeIcon = false;
     _searchable = false;
     _searchPlaceholder = "";
@@ -42,6 +43,9 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
 
         // check for multiselect option
         this._multiselect = element.dataset.multiselect === "true";
+
+        // a plain click toggles a tile in a multiple selection instead of replacing it
+        this._toggleOnClick = element.dataset.toggleOnClick === "true";
 
         // check for large icon option
         this._largeIcon = element.dataset.largeIcon === "true";
@@ -153,6 +157,23 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
             this._value = next ? [] : null;
             this.render();
         }
+    }
+
+    /**
+     * Returns whether a plain click toggles a tile in a multiple selection.
+     * @returns {boolean} True if a plain click toggles.
+     */
+    get toggleOnClick() {
+        return this._toggleOnClick;
+    }
+
+    /**
+     * Sets whether a plain click toggles a tile in a multiple selection. Without it a
+     * plain click selects the clicked tile alone and Ctrl+click toggles.
+     * @param {boolean} val - Enable or disable toggling on a plain click.
+     */
+    set toggleOnClick(val) {
+        this._toggleOnClick = !!val;
     }
 
     /**
@@ -631,10 +652,9 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
      * The card is laid out as kicker, title, body and footer, so the kind a card
      * belongs to reads before its name and its metadata after its description.
      * @param {Object} tile - The tile data.
-     * @param {number} idx - The tile index in the list.
      * @returns {HTMLDivElement} The complete tile card element.
      */
-    _createTileCard(tile, idx) {
+    _createTileCard(tile) {
         const card = document.createElement("div");
         card.className = "wx-tile-card";
         if (tile.id) {
@@ -783,7 +803,8 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         card.addEventListener("click", (e) => {
             if (this._multiselect) {
                 let arr = Array.isArray(this._value) ? this._value.slice() : [];
-                if (e.ctrlKey || e.metaKey) {
+                const range = e.shiftKey && arr.length > 0;
+                if (e.ctrlKey || e.metaKey || (this._toggleOnClick && !range)) {
                     // toggle current tile
                     const pos = arr.indexOf(tile.id);
                     if (pos === -1) {
@@ -791,18 +812,13 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
                     } else {
                         arr.splice(pos, 1);
                     }
-                    this._lastSelectedIdx = idx;
-                } else if (e.shiftKey && arr.length) {
-                    // select range using last selection
-                    const last = typeof this._lastSelectedIdx === "number" ? this._lastSelectedIdx : idx;
-                    const start = Math.min(last, idx);
-                    const end = Math.max(last, idx);
-                    const rangeIds = this._tiles.slice(start, end + 1).map(t => t.id);
-                    arr = Array.from(new Set([...arr, ...rangeIds]));
+                    this._anchorId = tile.id;
+                } else if (range) {
+                    arr = Array.from(new Set([...arr, ...this._rangeTo(tile)]));
                 } else {
                     // select only this tile
                     arr = [tile.id];
-                    this._lastSelectedIdx = idx;
+                    this._anchorId = tile.id;
                 }
                 this.value = arr;
                 this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: tile, selected: arr.includes(tile.id) });
@@ -826,6 +842,7 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
                     } else {
                         arr.splice(pos, 1);
                     }
+                    this._anchorId = tile.id;
                     this.value = arr;
                     this._dispatch(webexpress.webui.Event.CLICK_EVENT, { item: tile, selected: arr.includes(tile.id) });
                 } else {
@@ -839,6 +856,28 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         });
 
         return card;
+    }
+
+    /**
+     * Returns the ids of the tiles from the anchor up to the given tile. The anchor is kept
+     * as an id rather than a position, so it survives the tiles being replaced or reloaded,
+     * and it stays where it is, so successive Shift+clicks extend from the same tile as in
+     * a file list. Only the tiles on screen count: a range never takes in a tile that a
+     * search or a filter hides, since the user cannot see that it was selected.
+     * @param {Object} tile - The tile clicked with Shift.
+     * @returns {string[]} The ids of the shown tiles in the range.
+     */
+    _rangeTo(tile) {
+        const to = this._tiles.indexOf(tile);
+        let from = this._tiles.findIndex(t => t.id === this._anchorId);
+        if (from === -1) {
+            from = to;
+            this._anchorId = tile.id;
+        }
+        return this._tiles
+            .slice(Math.min(from, to), Math.max(from, to) + 1)
+            .filter(t => this._matchesFilter(t) && this._matchesSearch(t))
+            .map(t => t.id);
     }
 
     /**
@@ -858,11 +897,11 @@ webexpress.webui.InputTileCtrl = class extends webexpress.webui.Ctrl {
         }
 
         let visible = 0;
-        this._tiles.forEach((tile, idx) => {
+        this._tiles.forEach((tile) => {
             if (!this._matchesFilter(tile) || !this._matchesSearch(tile)) {
                 return;
             }
-            container.appendChild(this._createTileCard(tile, idx));
+            container.appendChild(this._createTileCard(tile));
             visible++;
         });
         this._tileList.appendChild(container);

@@ -108,6 +108,32 @@ namespace WebExpress.WebUI.Test.WebControl
         }
 
         /// <summary>
+        /// Tests the toggle on click property of the form tile picker control.
+        /// </summary>
+        [Theory]
+        [InlineData(false, @"<div class=""wx-webui-input-tile"" data-multiselect=""true""></div>")]
+        [InlineData(true, @"<div class=""wx-webui-input-tile"" data-multiselect=""true"" data-toggle-on-click=""true""></div>")]
+        public void ToggleOnClick(bool toggleOnClick, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var form = new ControlForm();
+            var context = new RenderControlFormContext(UnitTestControlFixture.CreateRenderContextMock(), form);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlFormItemInputTile(null)
+            {
+                MultiSelect = _ => true,
+                ToggleOnClick = _ => toggleOnClick
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
         /// Tests the large icon property of the form tile picker control.
         /// </summary>
         [Theory]
