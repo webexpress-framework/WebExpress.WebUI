@@ -15,3 +15,10 @@
     cursor: pointer;
     gap: 0.5em;
 }
+
+/* the server-rendered entries are only the source the controller builds the menu from; the
+   scripts run after the page has been painted, and until then the entries would stand as loose
+   text in the navbar */
+.wx-webui-dropdown:not(.wx-dropdown) > * {
+    display: none;
+}
