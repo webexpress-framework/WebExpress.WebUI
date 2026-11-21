@@ -127,8 +127,11 @@ webexpress.webui.Controller = new class {
             if (actionDef) {
                 element.addEventListener("click", (e) => {
                     // a button or a link inside the element - in a table row, a card - owns
-                    // its click, whether it came from the pointer or from enter on it
-                    const control = e.target && e.target.closest ? e.target.closest("a, button, input, select, textarea, [role='button']") : null;
+                    // its click, whether it came from the pointer or from enter on it. an
+                    // anchor without an address leads nowhere and owns no click: the sidebar
+                    // builds the label of an entry as one, and the click on it belongs to the
+                    // action of the entry
+                    const control = e.target && e.target.closest ? e.target.closest("a[href], button, input, select, textarea, [role='button']") : null;
                     if (control && control !== element && element.contains(control)) {
                         return;
                     }
