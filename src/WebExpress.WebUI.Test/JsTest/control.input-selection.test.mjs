@@ -87,3 +87,37 @@ test("a preset value leaves the arrow, not the remove button of its chip, openin
     assert.equal(host.querySelector(".wx-selection-trigger").getAttribute("popovertarget"), menuId);
     assert.equal(ctrl._selection.querySelector(".wx-chip-remove").getAttribute("popovertarget"), null);
 });
+
+/**
+ * Clicks the menu row of an option the way the delegated listener on the option list sees it.
+ */
+function pick(ctrl, id) {
+    const row = [...ctrl._dropdownoptions.querySelectorAll("li.dropdown-item")].find(li => li.dataset.id === id);
+    ctrl._dropdownoptions.dispatchEvent({ type: "click", target: row.querySelector("button"), stopPropagation() { } });
+}
+
+test("picking in a single choice replaces the value with one announcement and hands focus back to the arrow", () => {
+    const { rt, ctrl } = grouped();
+    ctrl.value = ["apple"];
+    const announced = [];
+    ctrl._element.addEventListener(rt.wx.Event.CHANGE_VALUE_EVENT, e => announced.push(JSON.parse(JSON.stringify(e.detail.value))));
+    const trigger = ctrl._element.querySelector(".wx-selection-trigger");
+    let focused = false;
+    trigger.focus = () => { focused = true; };
+
+    pick(ctrl, "pear");
+
+    assert.deepEqual(JSON.parse(JSON.stringify(ctrl.value)), ["pear"]);
+    assert.deepEqual(announced, [["pear"]], "no empty value is announced on the way");
+    assert.ok(focused, "the arrow takes the focus back once the menu closes");
+});
+
+test("picking in a multiple choice adds to the value", () => {
+    const { ctrl } = grouped();
+    ctrl.multiSelect = true;
+    ctrl.value = ["apple"];
+
+    pick(ctrl, "leek");
+
+    assert.deepEqual(JSON.parse(JSON.stringify(ctrl.value)), ["apple", "leek"]);
+});
