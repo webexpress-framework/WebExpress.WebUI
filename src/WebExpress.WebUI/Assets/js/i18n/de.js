@@ -568,6 +568,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "workflow.editor.transition.source": "Quelle",
     "workflow.editor.transition.target": "Ziel",
     "workflow.editor.transition.form": "Formular",
+    "workflow.editor.transition.form.none": "Kein Formular",
     "workflow.editor.transition.description": "Beschreibung",
     "workflow.editor.transition.color": "Farbe",
     "workflow.editor.transition.dasharray": "Strichmuster",

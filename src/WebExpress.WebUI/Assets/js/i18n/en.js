@@ -568,6 +568,7 @@ webexpress.webui.I18N.register("en", "webexpress.webui", {
     "workflow.editor.transition.source": "Source",
     "workflow.editor.transition.target": "Target",
     "workflow.editor.transition.form": "Form",
+    "workflow.editor.transition.form.none": "No form",
     "workflow.editor.transition.description": "Description",
     "workflow.editor.transition.color": "Colour",
     "workflow.editor.transition.dasharray": "Dash array",
