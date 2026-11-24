@@ -15,6 +15,23 @@ namespace WebExpress.WebUI.WebMarkdown
         private static readonly Regex _tableDelimiterRegex = new Regex(@"^(:-+:?|-+:|-{2,})$", RegexOptions.Compiled);
 
         /// <summary>
+        /// The deepest nesting of blocks (quotes, indents, callouts, lists, plugins) and inline
+        /// elements (emphasis) the parser descends into.
+        /// </summary>
+        /// <remarks>
+        /// Markdown is user input, and every nesting level is a recursive call in the parser and
+        /// again in each renderer. A few kilobytes of "> > > ..." used to exhaust the stack, and a
+        /// stack overflow cannot be caught in .NET: it ended the server process. Deeper content is
+        /// kept as plain text instead of being parsed.
+        /// </remarks>
+        public const int MaxNestingDepth = 32;
+
+        // the parser is static and synchronous, so the depth of the descent on this thread is the
+        // depth of the document being parsed
+        [ThreadStatic]
+        private static int _depth;
+
+        /// <summary>
         /// Initializes a new instance of the class.
         /// </summary>
         public MarkdownParser()
@@ -47,20 +64,55 @@ namespace WebExpress.WebUI.WebMarkdown
         {
             var doc = new MarkdownDocument();
 
-            while (!tokenStream.IsAtEnd())
+            if (_depth >= MaxNestingDepth)
             {
-                var block = ParseBlockElement(tokenStream);
-                if (block is not null)
+                doc.Add(new MarkdownBlockElementParagraph([PlainText(tokenStream)]));
+
+                return doc;
+            }
+
+            _depth++;
+
+            try
+            {
+                while (!tokenStream.IsAtEnd())
                 {
-                    doc.Add(block);
+                    var block = ParseBlockElement(tokenStream);
+                    if (block is not null)
+                    {
+                        doc.Add(block);
+                    }
+                    else
+                    {
+                        tokenStream.Skip(); // fallback: skip
+                    }
                 }
-                else
-                {
-                    tokenStream.Skip(); // fallback: skip
-                }
+            }
+            finally
+            {
+                _depth--;
             }
 
             return doc;
+        }
+
+        /// <summary>
+        /// Consumes the rest of a token stream as plain text, which is what content nested
+        /// deeper than <see cref="MaxNestingDepth"/> is shown as.
+        /// </summary>
+        /// <param name="tokenStream">The stream of markdown tokens.</param>
+        /// <returns>The text element.</returns>
+        private static MarkdownInlineElementPlainText PlainText(MarkdownTokenStream tokenStream)
+        {
+            var text = new System.Text.StringBuilder();
+
+            MarkdownToken token;
+            while ((token = tokenStream.Consume()) is not null)
+            {
+                text.Append(token.Value);
+            }
+
+            return new MarkdownInlineElementPlainText(text.ToString());
         }
 
         /// <summary>
@@ -418,11 +470,17 @@ namespace WebExpress.WebUI.WebMarkdown
         /// <returns>True if a unordered list is detected; otherwise, false.</returns>
         private static bool IsList(MarkdownTokenStream tokenStream)
         {
-            var preview = tokenStream.Preview()
-                .Skip(MarkdownTokenType.Tab, MarkdownTokenType.Space);
+            // asked before every line, so it reads in place: a copy of the rest of the stream per
+            // line made parsing a long list quadratic in its length
+            var head = tokenStream.AsEnumerable()
+                .SkipWhile(token => token.Type == MarkdownTokenType.Tab || token.Type == MarkdownTokenType.Space)
+                .Take(2)
+                .ToList();
 
-            var marker = preview.Peek();
-            var next = preview.PeekNext(MarkdownTokenType.Space, MarkdownTokenType.Tab);
+            var marker = head.Count > 0 && head[0].Type != MarkdownTokenType.EOF ? head[0] : null;
+            var next = head.Count > 1 && (head[1].Type == MarkdownTokenType.Space || head[1].Type == MarkdownTokenType.Tab)
+                ? head[1]
+                : null;
 
             // unordered list check: "*", "-", "+"
             if (marker is not null && next is not null &&
@@ -471,9 +529,11 @@ namespace WebExpress.WebUI.WebMarkdown
             do
             {
                 var currentLine = tokenStream.ConsumeLine();
-                var indent = currentLine.AsEnumerable()
+                // the indent is the nesting of the list tree, which the renderers descend into
+                // recursively, so it is bounded like every other nesting
+                var indent = Math.Min(MaxNestingDepth, currentLine.AsEnumerable()
                     .TakeWhile(token => token.Type == MarkdownTokenType.Tab)
-                    .Count();
+                    .Count());
 
                 currentLine.Skip(MarkdownTokenType.Tab, MarkdownTokenType.Space);
                 var currrentToken = currentLine.Consume(); // Text | Star | Hyphen | Plus
@@ -1011,6 +1071,32 @@ namespace WebExpress.WebUI.WebMarkdown
         /// </param>
         /// <returns>A list of <see cref="MarkdownInlineElement"/> representing the parsed inlines.</returns>
         private static IEnumerable<MarkdownInlineElement> ParseInlineElements(MarkdownTokenStream tokenStream, bool tableCell = false)
+        {
+            if (_depth >= MaxNestingDepth)
+            {
+                return [PlainText(tokenStream)];
+            }
+
+            _depth++;
+
+            try
+            {
+                return ParseInlineElementsAtDepth(tokenStream, tableCell);
+            }
+            finally
+            {
+                _depth--;
+            }
+        }
+
+        /// <summary>
+        /// Parses the inline elements of one nesting level; <see cref="ParseInlineElements"/>
+        /// counts the level.
+        /// </summary>
+        /// <param name="tokenStream">The stream of markdown tokens.</param>
+        /// <param name="tableCell">Whether the text is the content of a table cell.</param>
+        /// <returns>The parsed inlines.</returns>
+        private static IEnumerable<MarkdownInlineElement> ParseInlineElementsAtDepth(MarkdownTokenStream tokenStream, bool tableCell)
         {
             var inlines = new List<MarkdownInlineElement>();
 
