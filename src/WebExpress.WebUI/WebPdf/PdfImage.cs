@@ -22,6 +22,17 @@ namespace WebExpress.WebUI.WebPdf
         private static readonly byte[] PngSignature = [137, 80, 78, 71, 13, 10, 26, 10];
 
         /// <summary>
+        /// The largest picture, in pixels, that is decoded.
+        /// </summary>
+        /// <remarks>
+        /// Pictures come from users. The dimensions are read from the file and every buffer of the
+        /// decoder is sized from them, so a header claiming 60000 by 60000 pixels allocated
+        /// gigabytes - or, multiplied in 32 bits, overflowed into a negative size. A picture larger
+        /// than this is not understood and the layout shows its alternative text.
+        /// </remarks>
+        public const long MaxPixels = 40_000_000;
+
+        /// <summary>
         /// Returns the width in pixels.
         /// </summary>
         public int Width { get; private init; }
@@ -163,11 +174,16 @@ namespace WebExpress.WebUI.WebPdf
                 // every start-of-frame marker except the ones reserved for other purposes
                 if (marker is >= 0xC0 and <= 0xCF && marker is not (0xC4 or 0xC8 or 0xCC))
                 {
+                    if (position + 9 >= data.Length)
+                    {
+                        return null;
+                    }
+
                     var height = (data[position + 5] << 8) | data[position + 6];
                     var width = (data[position + 7] << 8) | data[position + 8];
                     var components = data[position + 9];
 
-                    if (width == 0 || height == 0)
+                    if (width == 0 || height == 0 || (long)width * height > MaxPixels)
                     {
                         return null;
                     }
@@ -222,6 +238,11 @@ namespace WebExpress.WebUI.WebPdf
                 switch (type)
                 {
                     case "IHDR":
+                        if (length < 13)
+                        {
+                            return null;
+                        }
+
                         width = (data[body] << 24) | (data[body + 1] << 16) | (data[body + 2] << 8) | data[body + 3];
                         height = (data[body + 4] << 24) | (data[body + 5] << 16) | (data[body + 6] << 8) | data[body + 7];
                         depth = data[body + 8];
@@ -247,7 +268,8 @@ namespace WebExpress.WebUI.WebPdf
                 position = body + length + 4;
             }
 
-            if (width <= 0 || height <= 0 || interlace != 0 || idat.Length == 0 || (colorType == 3 && palette is null))
+            if (width <= 0 || height <= 0 || (long)width * height > MaxPixels || interlace != 0
+                || idat.Length == 0 || (colorType == 3 && palette is null) || !IsValidDepth(colorType, depth))
             {
                 return null;
             }
@@ -303,8 +325,9 @@ namespace WebExpress.WebUI.WebPdf
         /// <returns>The image.</returns>
         private static PdfImage DecodePng(byte[] compressed, int width, int height, int depth, int colorType, int channels, byte[] palette, byte[] transparency)
         {
-            var raw = Inflate(compressed);
-            var stride = (width * channels * depth + 7) / 8;
+            // the dimensions are bounded by MaxPixels, so the sizes fit an int once computed in 64 bits
+            var stride = (int)(((long)width * channels * depth + 7) / 8);
+            var raw = Inflate(compressed, (long)(stride + 1) * height);
             var bpp = Math.Max(1, channels * depth / 8);
             var pixels = Unfilter(raw, stride, height, bpp);
             var gray = colorType is 0 or 4;
@@ -381,17 +404,53 @@ namespace WebExpress.WebUI.WebPdf
         }
 
         /// <summary>
-        /// Decompresses zlib data.
+        /// Decompresses zlib data, at most as much as the image needs.
         /// </summary>
+        /// <remarks>
+        /// A few kilobytes of compressed zeros inflate to gigabytes; reading everything there is
+        /// ran the server out of memory. The rows of a PNG have a known size, so decompression
+        /// stops there and whatever follows is ignored.
+        /// </remarks>
         /// <param name="data">The compressed data.</param>
+        /// <param name="limit">The number of bytes the image needs.</param>
         /// <returns>The decompressed data.</returns>
-        private static byte[] Inflate(byte[] data)
+        private static byte[] Inflate(byte[] data, long limit)
         {
             using var input = new ZLibStream(new MemoryStream(data), CompressionMode.Decompress);
-            using var output = new MemoryStream();
-            input.CopyTo(output);
+            var output = new byte[limit];
+            var read = 0;
 
-            return output.ToArray();
+            while (read < output.Length)
+            {
+                var count = input.Read(output, read, output.Length - read);
+
+                if (count == 0)
+                {
+                    break;
+                }
+
+                read += count;
+            }
+
+            return read == output.Length ? output : output[..read];
+        }
+
+        /// <summary>
+        /// Tells whether a bit depth is one the PNG specification allows for the color type; the
+        /// sample reader indexes the rows with it.
+        /// </summary>
+        /// <param name="colorType">The PNG color type.</param>
+        /// <param name="depth">The bits per sample.</param>
+        /// <returns>True when the combination is valid.</returns>
+        private static bool IsValidDepth(int colorType, int depth)
+        {
+            return colorType switch
+            {
+                0 => depth is 1 or 2 or 4 or 8 or 16,
+                3 => depth is 1 or 2 or 4 or 8,
+                2 or 4 or 6 => depth is 8 or 16,
+                _ => false
+            };
         }
 
         /// <summary>
