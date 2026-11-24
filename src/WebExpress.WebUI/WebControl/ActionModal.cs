@@ -28,6 +28,19 @@ namespace WebExpress.WebUI.WebControl
         public IUri Uri { get; set; }
 
         /// <summary>
+        /// Gets or sets what a form shown in the dialog does after a successful save, in place of
+        /// the success action it was authored with.
+        /// </summary>
+        /// <remarks>
+        /// A form is written for the page it usually lives on, for example a detail page that
+        /// reloads to show the saved record. Opened from a surface that refreshes itself, the same
+        /// reload throws away the state of that surface, so the opener tells the dialog what to do
+        /// instead. The override lasts for this opening only; null leaves the form to decide.
+        /// It applies to REST forms, which own a success action, and is ignored by other dialogs.
+        /// </remarks>
+        public TypeModalSuccessAction? SuccessAction { get; set; }
+
+        /// <summary>
         /// Initializes a new instance of the class with the specified identifier.
         /// </summary>
         /// <param name="id">
@@ -99,6 +112,11 @@ namespace WebExpress.WebUI.WebControl
                         htmlNode?.AddUserAttribute("data-wx-secondary-size", Size);
                     }
 
+                    if (SuccessAction.HasValue)
+                    {
+                        htmlNode?.AddUserAttribute("data-wx-secondary-success", SuccessAction.Value.ToValue());
+                    }
+
                     break;
                 default:
                     htmlNode?.AddUserAttribute("data-wx-primary-action", "modal");
@@ -107,6 +125,11 @@ namespace WebExpress.WebUI.WebControl
                     if (_size.HasValue)
                     {
                         htmlNode?.AddUserAttribute("data-wx-primary-size", Size);
+                    }
+
+                    if (SuccessAction.HasValue)
+                    {
+                        htmlNode?.AddUserAttribute("data-wx-primary-success", SuccessAction.Value.ToValue());
                     }
 
                     break;
@@ -135,6 +158,11 @@ namespace WebExpress.WebUI.WebControl
             if (_size.HasValue)
             {
                 dict["size"] = Size;
+            }
+
+            if (SuccessAction.HasValue)
+            {
+                dict["success"] = SuccessAction.Value.ToValue();
             }
 
             return dict;

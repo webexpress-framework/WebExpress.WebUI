@@ -10,10 +10,21 @@
  * - webexpress.webui.Event.TASK_START_EVENT, TASK_FINISH_EVENT
  * - webexpress.webui.Event.SAVED_EVENT
  * - webexpress.webui.Event.DATA_ERROR_EVENT
+ *
+ * The dialog can override what a form it shows does after a successful save (see
+ * successAction), because the opener knows whether the page around the dialog still shows the
+ * outcome or has to be loaded again; the served form does not.
  */
 webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
+    /**
+     * The success actions a form in the dialog can be told to run instead of its own.
+     */
+    static SUCCESS_ACTIONS = ["none", "reload", "follow-uri"];
+
     _form = null;
     _submitHandler = null;
+    _authoredSuccessAction = null;
+    _successAction = null;
 
     /**
      * Constructor
@@ -23,6 +34,45 @@ webexpress.webui.ModalFormCtrl = class extends webexpress.webui.ModalPageCtrl {
         super(element);
 
         this._selector = this._selector === "body" ? "form" : this._selector; // set selector for the form area
+
+        this._authoredSuccessAction = webexpress.webui.ModalFormCtrl._normalizeSuccessAction(
+            element.getAttribute("data-wx-success-action"));
+        this._successAction = this._authoredSuccessAction;
+        element.removeAttribute("data-wx-success-action");
+
+        // an override belongs to the opening it was set for: the next opener of the same page
+        // dialog - a plain button, say - must get the form's own action again
+        this._element.addEventListener("close", () => {
+            this._successAction = this._authoredSuccessAction;
+        });
+    }
+
+    /**
+     * Gets the success action that overrides the one of the form shown in the dialog.
+     * @returns {string|null} "none", "reload" or "follow-uri"; null when the form decides.
+     */
+    get successAction() {
+        return this._successAction;
+    }
+
+    /**
+     * Sets the success action for the current opening. It falls back to the one the dialog was
+     * authored with once the dialog closes. An unknown value or null leaves the form to decide.
+     * @param {string|null} value - The success action.
+     */
+    set successAction(value) {
+        this._successAction = webexpress.webui.ModalFormCtrl._normalizeSuccessAction(value);
+    }
+
+    /**
+     * Reads a success action, so that a misspelled value falls back to the form's own action
+     * instead of silently suppressing it.
+     * @param {*} value - The raw value.
+     * @returns {string|null} A known success action, or null.
+     */
+    static _normalizeSuccessAction(value) {
+        const action = typeof value === "string" ? value.trim().toLowerCase() : "";
+        return webexpress.webui.ModalFormCtrl.SUCCESS_ACTIONS.includes(action) ? action : null;
     }
 
     /**
