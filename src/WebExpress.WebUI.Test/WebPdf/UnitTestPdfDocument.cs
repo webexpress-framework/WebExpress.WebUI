@@ -75,6 +75,33 @@ namespace WebExpress.WebUI.Test.WebPdf
         }
 
         /// <summary>
+        /// Tests that the creation date is written in the gregorian calendar whatever the culture
+        /// of the thread: under th-TH the buddhist year 2569 was written.
+        /// </summary>
+        [Fact]
+        public void CreationDateIgnoresTheCulture()
+        {
+            // arrange
+            var previous = System.Globalization.CultureInfo.CurrentCulture;
+            var document = new PdfDocument { CreationDate = new DateTimeOffset(2026, 10, 1, 12, 30, 0, TimeSpan.Zero) };
+
+            try
+            {
+                System.Globalization.CultureInfo.CurrentCulture = System.Globalization.CultureInfo.GetCultureInfo("th-TH");
+
+                // act
+                var info = new PdfInspector(document.ToArray()).Find("/Producer").Single();
+
+                // validation
+                Assert.Contains("/CreationDate (D:20261001123000+00'00')", info);
+            }
+            finally
+            {
+                System.Globalization.CultureInfo.CurrentCulture = previous;
+            }
+        }
+
+        /// <summary>
         /// Tests that a fixed creation date makes the output reproducible byte for byte.
         /// </summary>
         [Fact]
