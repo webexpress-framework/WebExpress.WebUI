@@ -448,7 +448,7 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
         const link = document.createElement("a");
         link.className = "wx-link";
         if (item.link) {
-            link.href = item.link;
+            webexpress.webui.Url.link(link, item.link);
         }
         if (item.target) {
             link.target = item.target;

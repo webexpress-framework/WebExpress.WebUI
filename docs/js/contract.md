@@ -186,3 +186,10 @@ The saving side is implemented in three shapes:
 | a change saved at once        | table, kanban, gantt, schedule, dashboard                   | every change; the gantt sandbox through `saveSandbox()`
 
 The dialog form posts to the server and shows the form the server rendered back; the state field the C# `ControlForm` renders with it tells whether the server's validation refused the values. A control that saves a change at once has nothing to offer as `save()`; it stores each change through `_saveAction(action, payload, send, takeBack)` of the `Ctrl` base, which announces the change before it is sent, takes a vetoed change back without a word of failure and announces a stored one as saved.
+
+## Markup and addresses from data
+
+Data is written by users. A control never assigns markup from data to `innerHTML` and never points a link at an address from data without the two helpers of the core, the client counterparts of `HtmlSanitizer` and `UrlPolicy` in WebExpress.WebCore:
+
+- `webexpress.webui.Html.sanitize(html)` reduces markup to an allowlist of elements and attributes: script, style, iframe, svg and form content go, other unknown elements are unwrapped, event handlers, data attributes and ids are dropped, addresses are checked and inline styles keep colors, alignment and font styling only. The `html` of kanban cards, tiles and dashboard widgets and the content of selection options pass it. `Html.escape(text)` escapes text for markup.
+- `webexpress.webui.Url.link(anchor, url)` sets an address only when its scheme is relative, `http`, `https`, `mailto` or `tel`, read as a browser reads it (`java	script:` is `javascript:`); otherwise the anchor gets `#` with its default action suppressed, so it keeps its look and its action but never navigates. It replaces the `javascript:void(0)` placeholder, which the content security policy blocks. `Url.isSafeLink`, `Url.isSafeImage` and `Url.safeLink` answer the same question without an anchor.

@@ -263,7 +263,8 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
                     color: elem.dataset.color,
                     icon: elem.dataset.icon,
                     image: elem.dataset.image,
-                    content: elem.innerHTML || elem.dataset.label,
+                    // the label attribute is decoded by the browser, so it is text and is escaped
+                    content: elem.innerHTML || webexpress.webui.Html.escape(elem.dataset.label ?? ""),
                     disabled: elem.hasAttribute("disabled"),
                     // an option without the attribute states no condition and is always
                     // offered; one with it belongs to the listed values of the field this
@@ -504,7 +505,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
             } else if (item.type === "header") {
                 const li = document.createElement("li");
                 li.className = "dropdown-header";
-                li.innerHTML = item.content;
+                li.innerHTML = webexpress.webui.Html.sanitize(item.content);
                 fragment.appendChild(li);
             } else {
                 const li = document.createElement("li");
@@ -521,7 +522,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
                 if (item.disabled) {
                     contentWrapper.setAttribute("disabled", "disabled");
                 }
-                contentWrapper.innerHTML = item.content;
+                contentWrapper.innerHTML = webexpress.webui.Html.sanitize(item.content);
 
                 if (item.icon) {
                     const icon = document.createElement("i");

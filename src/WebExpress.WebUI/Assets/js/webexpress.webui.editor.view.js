@@ -293,7 +293,8 @@ webexpress.webui.EditorView = class {
 
     _link(element, data) {
         const link = document.createElement("a");
-        link.setAttribute("href", data.href);
+        // the address is document content a user wrote; only an allowed scheme is followed
+        webexpress.webui.Url.link(link, data.href);
         if (data.target === "_blank") { link.setAttribute("target", "_blank"); link.setAttribute("rel", "noopener noreferrer"); }
         link.appendChild(element);
         return link;

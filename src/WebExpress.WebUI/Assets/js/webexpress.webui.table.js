@@ -1303,7 +1303,7 @@ webexpress.webui.TableCtrl = class extends webexpress.webui.StateCtrl {
         const wrap = source.uri ? document.createElement("a") : document.createElement("span");
         wrap.className = "wx-cell-content";
         if (source.uri) {
-            wrap.href = source.uri;
+            webexpress.webui.Url.link(wrap, source.uri);
             if (source.target) {
                 wrap.target = source.target;
             }

@@ -89,7 +89,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
 
                 items.push({
                     id: elem.id || null,
-                    uri: elem.dataset.uri || "javascript:void(0);",
+                    uri: elem.dataset.uri || null,
                     image: elem.dataset.image || null,
                     icon: elem.dataset.icon || null,
                     text: elem.textContent || null,
@@ -154,7 +154,7 @@ webexpress.webui.DropdownCtrl = class extends webexpress.webui.Ctrl {
 
                 // an entry that only carries an action has no target of its own, but it still
                 // has to look and behave like a menu link, which an anchor without href does not
-                link.href = item.uri || "javascript:void(0);";
+                webexpress.webui.Url.link(link, item.uri);
                 if (item.image) {
                     const img = document.createElement("img");
                     img.src = item.image;

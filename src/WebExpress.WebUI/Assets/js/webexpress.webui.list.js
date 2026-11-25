@@ -1023,7 +1023,7 @@ webexpress.webui.ListCtrl = class extends webexpress.webui.Ctrl {
             if (it.itemType === "link") {
                 actionEl = document.createElement("a");
                 actionEl.className = "wx-list-item-link-el list-group-item list-group-item-action";
-                actionEl.href = it.uri || "#";
+                webexpress.webui.Url.link(actionEl, it.uri);
                 if (it.target) {
                     actionEl.target = it.target;
                 }

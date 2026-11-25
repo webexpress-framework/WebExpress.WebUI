@@ -429,7 +429,7 @@ webexpress.webui.TreeCtrl = class extends webexpress.webui.Ctrl {
 
             // set link attributes if present
             if (node.url) {
-                labelContainer.setAttribute("href", node.url);
+                webexpress.webui.Url.link(labelContainer, node.url);
             }
             if (node.target) {
                 labelContainer.setAttribute("target", node.target);

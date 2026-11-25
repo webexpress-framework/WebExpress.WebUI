@@ -1473,7 +1473,8 @@ webexpress.webui.DashboardCtrl = class extends webexpress.webui.Ctrl {
                 body.appendChild(node);
             }
         } else if (widgetData.html) {
-            body.innerHTML = widgetData.html;
+            // the html arrives as data an application wrote from user input
+            body.innerHTML = webexpress.webui.Html.sanitize(widgetData.html);
         } else {
             body.textContent = this._i18n("webexpress.webui:dashboard.widget.unavailable", "Widget content not available.");
         }

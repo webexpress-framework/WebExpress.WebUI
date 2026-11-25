@@ -2110,7 +2110,8 @@ webexpress.webui.KanbanCtrl = class extends webexpress.webui.Ctrl {
         if (card.html) {
             const content = document.createElement("div");
             content.className = "card-text";
-            content.innerHTML = card.html;
+            // the html arrives as data an application wrote from user input
+            content.innerHTML = webexpress.webui.Html.sanitize(card.html);
             cardEl.appendChild(content);
         }
 
