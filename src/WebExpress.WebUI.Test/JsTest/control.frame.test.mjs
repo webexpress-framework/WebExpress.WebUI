@@ -165,3 +165,19 @@ test("the headings of an embedded page continue the section of the host page", (
     assert.equal(sub.getAttribute("aria-level"), "6", "and its own steps are kept");
     assert.equal(title.getAttribute("role"), "heading", "the level is spoken through the role");
 });
+
+test("a page of another origin is not loaded, so its scripts never run here", async () => {
+    let fetched = 0;
+    const rt = loadWebUi({
+        browser: true,
+        extraFiles: ["webexpress.webui.section.js", "webexpress.webui.frame.js"],
+        fetch: () => { fetched++; return new Promise(() => { }); }
+    });
+
+    makeFrame(rt, "https://evil.example/page");
+    makeFrame(rt, "javascript:alert(1)");
+    makeFrame(rt, "/same/site");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    assert.equal(fetched, 1, "only the address of this site is requested");
+});

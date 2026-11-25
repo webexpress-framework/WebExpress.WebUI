@@ -216,6 +216,19 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Tells whether an address resolves to the origin of the page.
+     * @param {string} uri - The address, absolute or relative.
+     * @returns {boolean} True for an address of this origin.
+     */
+    _isSameOrigin(uri) {
+        try {
+            return new URL(uri, window.location.href).origin === window.location.origin;
+        } catch {
+            return false;
+        }
+    }
+
+    /**
      * Executes script elements by recreating them, as inserted script tags
      * via innerHTML or appendChild are not executed by the browser automatically.
      * @param {Array<HTMLScriptElement>} scripts - List of script elements to execute.
@@ -302,6 +315,13 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
         // ready and _update() exchanges the two in one step.
         if (!this._element.firstChild) {
             this._element.appendChild(this._createPlaceholder());
+        }
+
+        // the frame embeds pages of this application and runs their scripts here, so a page of
+        // another origin - one that answers cross-origin requests - ran its scripts in ours
+        if (!this._isSameOrigin(this._uri)) {
+            this._renderError("Failed to load content. The address is not part of this site.");
+            return;
         }
 
         // notify that data fetching starts
