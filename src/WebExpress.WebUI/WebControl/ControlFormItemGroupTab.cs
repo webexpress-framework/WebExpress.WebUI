@@ -113,7 +113,7 @@ namespace WebExpress.WebUI.WebControl
                 Role = role
             }
                 .AddUserAttribute("data-layout", layout != TypeLayoutTab.Default
-                    ? layout.ToString().ToLower()
+                    ? layout.ToString().ToLowerInvariant()
                     : null)
                 .Add(_views.Select(x => x.Render(renderContext, visualTree)));
 

@@ -57,7 +57,7 @@ namespace WebExpress.WebUI.WebIcon
             var applicationPath = applicationContext?.Route;
             var pluginPath = applicationContext?.PluginContext?.Assembly == assembly
                 ? applicationPath
-                : applicationPath?.Concat(assembly.GetName().Name.ToLower());
+                : applicationPath?.Concat(assembly.GetName().Name.ToLowerInvariant());
 
             Uri = uri.IsRelative
                     ? pluginPath?.Concat(uri.ToString()).ToUri() ?? uri

@@ -194,13 +194,13 @@ namespace WebExpress.WebUI.WebControl
                 {
                     if (v.Scope == ParameterScope.Parameter)
                     {
-                        if (!dict.ContainsKey(v.Key.ToLower()))
+                        if (!dict.ContainsKey(v.Key.ToLowerInvariant()))
                         {
-                            dict.Add(v.Key.ToLower(), v);
+                            dict.Add(v.Key.ToLowerInvariant(), v);
                         }
                         else
                         {
-                            dict[v.Key.ToLower()] = v;
+                            dict[v.Key.ToLowerInvariant()] = v;
                         }
                     }
                 }
