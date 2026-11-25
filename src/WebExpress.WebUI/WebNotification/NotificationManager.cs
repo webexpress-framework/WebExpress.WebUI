@@ -133,6 +133,11 @@ namespace WebExpress.WebUI.WebNotification
                 notificationProperty.Add(notification.Id, notification);
             }
 
+            // added over the message queue socket, no end of a request writes the session back
+            // to the cluster store and the notification was lost; the commit merges with what is
+            // stored and is a no-op without a shared store
+            _componentHub?.SessionManager?.Commit(request.Session);
+
             OnCreateNotification(notification);
             OnDispatchNotification(notification, applicationContext, request.Session);
 
