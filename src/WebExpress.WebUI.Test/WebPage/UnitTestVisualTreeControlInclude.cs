@@ -83,5 +83,61 @@ namespace WebExpress.WebUI.Test.WebPage
             Assert.NotEmpty(links);
             Assert.Equal([], dead);
         }
+
+        /// <summary>
+        /// Tests that the links follow the order the includes declare their files in. A script
+        /// builds on the ones before it and a stylesheet overrides the ones before it, so a
+        /// link moved out of that order breaks the page without any error.
+        /// </summary>
+        [Fact]
+        public void IncludeLinksKeepTheDeclaredOrder()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var context = UnitTestControlFixture.CreateRenderContextMock(application);
+            var expected = componentHub.IncludeManager.GetIncludes(application)
+                .SelectMany(include => include.Files.Select(file => componentHub.AssetManager
+                    .GetVersionedAssetRoute(application, include.PluginContext, file.FileName)
+                    .ToString()))
+                .ToList();
+
+            // act
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var links = visualTree.CssLinks.Concat(visualTree.HeaderScriptLinks).ToList();
+
+            // validation
+            Assert.Equal(expected.Where(x => x.EndsWith(".css")), links.Where(x => x.EndsWith(".css")));
+            Assert.Equal(expected.Where(x => x.EndsWith(".js")), links.Where(x => x.EndsWith(".js")));
+        }
+
+        /// <summary>
+        /// Tests that the includes of a plugin are linked after those of the plugin it builds
+        /// on. The test plugin references the framework assembly, so its scripts and stylesheets
+        /// must follow the framework's on every start, although the plugins are registered in
+        /// hash order.
+        /// </summary>
+        [Theory]
+        [InlineData(".css")]
+        [InlineData(".js")]
+        public void IncludeLinksFollowThePluginsTheyBuildOn(string extension)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var context = UnitTestControlFixture.CreateRenderContextMock(application);
+
+            // act
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var links = visualTree.CssLinks.Concat(visualTree.HeaderScriptLinks)
+                .Where(x => x.EndsWith(extension))
+                .ToList();
+            var lastFramework = links.FindLastIndex(x => x.StartsWith("/server/app/webexpress.webui/"));
+            var firstOwn = links.FindIndex(x => x.StartsWith("/server/app/assets/"));
+
+            // validation
+            Assert.True(lastFramework >= 0 && firstOwn >= 0, "both plugins contribute an include");
+            Assert.True(lastFramework < firstOwn, string.Join(Environment.NewLine, links));
+        }
     }
 }
