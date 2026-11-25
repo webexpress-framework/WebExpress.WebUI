@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using WebExpress.WebCore;
 using WebExpress.WebCore.Internationalization;
+using WebExpress.WebCore.WebAttribute;
 using WebExpress.WebCore.WebComponent;
 using WebExpress.WebCore.WebEndpoint;
 using WebExpress.WebCore.WebHtml;
@@ -438,20 +440,25 @@ namespace WebExpress.WebUI.WebPage
         {
             var content = Render(context);
 
-            return StatusCode switch
-            {
-                200 => new ResponseOK() { Content = content },
-                201 => new ResponseCreated() { Content = content },
-                204 => new ResponseNoContent() { Content = content },
-                301 => new ResponseMovedPermanently() { Content = content },
-                302 => new ResponseMovedTemporarily() { Content = content },
-                400 => new ResponseBadRequest() { Content = content },
-                401 => new ResponseUnauthorized() { Content = content },
-                404 => new ResponseNotFound() { Content = content },
-                422 => new ResponseUnprocessableEntity() { Content = content },
-                500 => new ResponseInternalServerError() { Content = content },
-                _ => new ResponseOK() { Content = content }
-            };
+            // a status without a response class of its own is answered as a failure: the page was
+            // answered 200 before, so a refusal such as 403 read as success - and a private page
+            // it rendered could be cached as one
+            var responseType = _responseTypes.Value.GetValueOrDefault(StatusCode, typeof(ResponseInternalServerError));
+            var response = (Response)Activator.CreateInstance(responseType);
+            response.Content = content;
+
+            return response;
         }
+
+        /// <summary>
+        /// The response classes of WebExpress.WebCore by the status code they answer with.
+        /// </summary>
+        private static readonly Lazy<Dictionary<int, Type>> _responseTypes = new(() => typeof(Response).Assembly
+            .GetTypes()
+            .Where(x => x.IsClass && !x.IsAbstract && typeof(Response).IsAssignableFrom(x) && x.GetConstructor(Type.EmptyTypes) is not null)
+            .Select(x => (Type: x, Attribute: x.GetCustomAttribute<StatusCodeAttribute>()))
+            .Where(x => x.Attribute is not null)
+            .GroupBy(x => x.Attribute.StatusCode)
+            .ToDictionary(x => x.Key, x => x.First().Type));
     }
 }
