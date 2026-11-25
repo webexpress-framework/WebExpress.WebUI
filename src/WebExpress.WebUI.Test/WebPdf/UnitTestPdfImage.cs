@@ -62,7 +62,10 @@ namespace WebExpress.WebUI.Test.WebPdf
             // arrange
             var bomb = new byte[512 * 1024 * 1024];
             var png = Png(16, 16, 6, 8, bomb);
-            var before = GC.GetTotalAllocatedBytes(true);
+
+            // counted for this thread only, because the tests running in parallel allocate in the
+            // same process; the decoder runs synchronously, so everything it allocates is counted
+            var before = GC.GetAllocatedBytesForCurrentThread();
             var watch = Stopwatch.StartNew();
 
             // act
@@ -70,7 +73,7 @@ namespace WebExpress.WebUI.Test.WebPdf
 
             // validation
             Assert.NotNull(image);
-            Assert.True(GC.GetTotalAllocatedBytes(true) - before < 64 * 1024 * 1024, "the decoder read the whole stream");
+            Assert.True(GC.GetAllocatedBytesForCurrentThread() - before < 64 * 1024 * 1024, "the decoder read the whole stream");
             Assert.True(watch.Elapsed < TimeSpan.FromSeconds(10));
         }
 
