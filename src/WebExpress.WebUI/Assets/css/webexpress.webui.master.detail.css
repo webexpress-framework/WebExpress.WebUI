@@ -142,6 +142,24 @@
     background-color: transparent;
 }
 
+/* The loading indicator is the one the table shows: a thin striped bar across
+   the top. It keeps its height while hidden, so the detail below does not jump
+   each time a load starts or ends. */
+.wx-master-detail .wx-detail-progress {
+    flex: 0 0 auto;
+    height: 0.25rem;
+    border-radius: 0;
+    visibility: hidden;
+}
+
+.wx-master-detail .wx-detail-progress .progress-bar {
+    width: 100%;
+}
+
+.wx-master-detail.wx-md-loading .wx-detail-progress {
+    visibility: visible;
+}
+
 /* A detail that may not be closed has nothing to put in the bar outside the
    sequential mode, where the back button takes over; an empty bar would be a
    stray line above the content. */

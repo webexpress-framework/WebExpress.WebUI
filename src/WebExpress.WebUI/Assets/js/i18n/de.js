@@ -225,6 +225,7 @@ webexpress.webui.I18N.register("de", "webexpress.webui", {
     "masterdetail.list": "Einträge",
     "masterdetail.back": "Zurück zur Liste",
     "masterdetail.close": "Detailansicht ausblenden",
+    "masterdetail.loading": "Detailansicht wird geladen",
 
     "overflow.more": "Weitere Werkzeuge",
     "overflow.submenu": "Untermenü",

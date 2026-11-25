@@ -440,7 +440,8 @@ test("both ways out sit in a header that is no part of the scrolling body", () =
     const body = md.detail.querySelector(".wx-detail-body");
 
     assert.ok(header, "the detail side carries a header bar");
-    assert.equal(md.detail.firstElementChild, header, "which sits above the content rather than on top of it");
+    const children = Array.from(md.detail.children);
+    assert.ok(children.indexOf(header) >= 0 && children.indexOf(header) < children.indexOf(body), "which sits above the content rather than on top of it");
     assert.equal(md.detail.querySelector(".wx-detail-close").parentElement, header, "the close button lives in the bar");
     assert.equal(md.detail.querySelector(".wx-detail-back").parentElement, header, "and so does the back button");
 
@@ -841,4 +842,53 @@ test("re-rendered master items are re-bound to the current selection", () => {
 
     assert.equal(rebuilt.classList.contains("wx-md-item-active"), true, "the highlight follows the new element");
     assert.equal(rebuilt.getAttribute("aria-selected"), "true");
+});
+
+test("a progress bar shows while the detail loads, like the table's", () => {
+    const md = makeMasterDetail(loadRuntime());
+    const progress = md.detail.querySelector(".wx-detail-progress");
+    const fire = (type, sender, extra) => md.frame.dispatchEvent({
+        type: type,
+        detail: { sender: sender, ...extra }
+    });
+
+    assert.ok(progress, "the detail carries a progress bar");
+    assert.equal(md.detail.firstChild, progress, "above the header, so it stays in sight while the body scrolls");
+    assert.ok(progress.querySelector(".progress-bar-striped.progress-bar-animated"), "the same animated bar the table shows");
+    assert.equal(md.host.classList.contains("wx-md-loading"), false, "nothing loads before a selection");
+
+    md.click(md.items()[0]);
+    fire(md.rt.wx.Event.DATA_REQUESTED_EVENT, md.frame, { uri: "/apps/details?id=1" });
+    assert.equal(md.host.classList.contains("wx-md-loading"), true, "the request shows the progress");
+    assert.equal(md.detail.getAttribute("aria-busy"), "true", "and tells assistive technology the detail is busy");
+
+    fire(md.rt.wx.Event.DATA_ARRIVED_EVENT, md.frame, { uri: "/apps/details?id=1" });
+    assert.equal(md.host.classList.contains("wx-md-loading"), false, "the arrival hides it");
+
+    fire(md.rt.wx.Event.DATA_REQUESTED_EVENT, md.frame, { uri: "/apps/details?id=2" });
+    fire(md.rt.wx.Event.DATA_ERROR_EVENT, md.frame, { action: "load", error: { kind: "http" } });
+    assert.equal(md.host.classList.contains("wx-md-loading"), false, "and so does a failure, so it never spins on");
+
+    // the progress keeps its height while hidden, so the detail does not jump
+    assert.match(cssRule(".wx-master-detail .wx-detail-progress"), /visibility:\s*hidden/);
+    assert.match(cssRule(".wx-master-detail.wx-md-loading .wx-detail-progress"), /visibility:\s*visible/);
+});
+
+test("a control loading inside the detail content does not show the detail progress", () => {
+    const md = makeMasterDetail(loadRuntime());
+    const nested = md.rt.createElement("div");
+
+    md.frame.dispatchEvent({ type: md.rt.wx.Event.DATA_REQUESTED_EVENT, detail: { sender: nested } });
+
+    assert.equal(md.host.classList.contains("wx-md-loading"), false, "a table in the detail has its own progress");
+});
+
+test("clearing the selection leaves no progress over the placeholder", () => {
+    const md = makeMasterDetail(loadRuntime());
+
+    md.click(md.items()[0]);
+    md.frame.dispatchEvent({ type: md.rt.wx.Event.DATA_REQUESTED_EVENT, detail: { sender: md.frame } });
+    md.ctrl.clearSelection();
+
+    assert.equal(md.host.classList.contains("wx-md-loading"), false);
 });

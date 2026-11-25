@@ -59,6 +59,7 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
     static COMPACT_CLASS = "wx-md-compact";
     static DETAIL_OPEN_CLASS = "wx-md-detail-open";
     static SWAP_CLASS = "wx-detail-swap";
+    static LOADING_CLASS = "wx-md-loading";
 
     // config
     _breakpoint = webexpress.webui.MasterDetailCtrl.DEFAULT_BREAKPOINT;
@@ -75,6 +76,7 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
     _frameElement = null;
     _splitElement = null;
     _headerElement = null;
+    _progressElement = null;
     _backButton = null;
     _closeButton = null;
 
@@ -229,6 +231,9 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
 
         this._applyActiveItem(null);
         this._showEmptyState(true);
+        // the placeholder has nothing to wait for, even while the frame finishes
+        // a request behind it
+        this._setLoading(false);
 
         this._dispatch(webexpress.webui.Event.SELECT_ITEM_EVENT, {
             itemId: null,
@@ -415,6 +420,53 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
         this._detailPane.prepend(header);
         this._headerElement = header;
         this._backButton = back;
+
+        this._progressElement = this._buildProgress();
+        this._detailPane.prepend(this._progressElement);
+    }
+
+    /**
+     * Builds the progress bar that shows while the detail is loading. The frame
+     * keeps the outgoing detail on screen until the next one is ready, so without
+     * it a click on another item would look ignored for as long as the request
+     * takes. It sits above the header rather than in the scrolling body, so it
+     * stays in sight however far the detail was scrolled, and it keeps its height
+     * while hidden, so the detail does not jump when a load starts or ends.
+     * @returns {HTMLElement} The progress element.
+     */
+    _buildProgress() {
+        const progress = document.createElement("div");
+        progress.className = "progress wx-detail-progress";
+        progress.setAttribute("role", "progressbar");
+        progress.setAttribute("aria-label", this._i18n("webexpress.webui:masterdetail.loading", "Loading the detail view"));
+        progress.setAttribute("aria-hidden", "true");
+
+        const bar = document.createElement("div");
+        bar.className = "progress-bar progress-bar-striped progress-bar-animated";
+        progress.appendChild(bar);
+
+        return progress;
+    }
+
+    /**
+     * Shows or hides the loading state of the detail.
+     * @param {boolean} loading - True while the detail is being fetched.
+     */
+    _setLoading(loading) {
+        this._element.classList.toggle(webexpress.webui.MasterDetailCtrl.LOADING_CLASS, loading);
+        this._progressElement?.setAttribute("aria-hidden", loading ? "false" : "true");
+        this._detailPane?.setAttribute("aria-busy", loading ? "true" : "false");
+    }
+
+    /**
+     * Tells whether a data event comes from the detail frame itself. The detail
+     * content may embed frames and data controls of its own, whose events bubble
+     * through the frame but say nothing about the detail.
+     * @param {CustomEvent} e - The data event.
+     * @returns {boolean} True for an event of the detail frame.
+     */
+    _isFrameEvent(e) {
+        return !e?.detail?.sender || e.detail.sender === this._frameElement;
     }
 
     /**
@@ -443,10 +495,27 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
             // the two exchange in one step and only the arrival is worth
             // animating. Animating just the arrival also means a failed load can
             // never leave the detail stuck invisible.
+            this._frameElement.addEventListener(webexpress.webui.Event.DATA_REQUESTED_EVENT, (e) => {
+                if (this._isFrameEvent(e)) {
+                    this._setLoading(true);
+                }
+            });
+            this._frameElement.addEventListener(webexpress.webui.Event.DATA_ERROR_EVENT, (e) => {
+                if (this._isFrameEvent(e)) {
+                    this._setLoading(false);
+                }
+            });
             this._frameElement.addEventListener(webexpress.webui.Event.DATA_ARRIVED_EVENT, (e) => this._animateSwap(e));
             this._frameElement.addEventListener("animationend", () => {
                 this._frameElement.classList.remove(webexpress.webui.MasterDetailCtrl.SWAP_CLASS);
             });
+
+            // the frame is upgraded before the composite and may have started an
+            // autoload whose request event went out before anyone listened
+            const frame = webexpress.webui.Controller.getInstanceByElement(this._frameElement);
+            if (frame?.loading) {
+                this._setLoading(true);
+            }
         }
 
         if (typeof ResizeObserver !== "undefined") {
@@ -461,11 +530,11 @@ webexpress.webui.MasterDetailCtrl = class extends webexpress.webui.Ctrl {
      * @param {CustomEvent} e - The arrival event of the detail frame.
      */
     _animateSwap(e) {
-        // the detail content may embed frames of its own; only the arrival of the
-        // detail frame itself is a swap of the detail
-        if (e?.detail?.sender && e.detail.sender !== this._frameElement) {
+        if (!this._isFrameEvent(e)) {
             return;
         }
+
+        this._setLoading(false);
 
         this._frameElement.classList.remove(webexpress.webui.MasterDetailCtrl.SWAP_CLASS);
         // reading a layout property restarts the animation; without it the class
