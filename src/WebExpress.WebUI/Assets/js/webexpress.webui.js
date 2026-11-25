@@ -1499,7 +1499,13 @@ webexpress.webui.Html = new class {
         template.innerHTML = String(html);
         const root = template.content || template;
         this._clean(root, 0);
-        return template.innerHTML;
+        if (root === template) {
+            return template.innerHTML;
+        }
+        // serialized in the inert document of the template, where an image does not load
+        const holder = (root.ownerDocument || document).createElement("div");
+        holder.appendChild(root);
+        return holder.innerHTML;
     }
 
     /**
