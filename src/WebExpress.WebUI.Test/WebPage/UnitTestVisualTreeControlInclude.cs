@@ -1,4 +1,5 @@
-﻿using WebExpress.WebUI.Test.Fixture;
+﻿using System.Text.RegularExpressions;
+using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebPage;
 
 namespace WebExpress.WebUI.Test.WebPage
@@ -13,12 +14,13 @@ namespace WebExpress.WebUI.Test.WebPage
         /// <summary>
         /// Tests that an include of the plugin owning the application is linked on the
         /// application route. That plugin gets no segment of its own from the asset manager,
-        /// so a link carrying one points at nothing.
+        /// so a link carrying one points at nothing. The link carries the hash of the content
+        /// in the file name, which lets the browser keep the file for good.
         /// </summary>
         [Theory]
-        [InlineData("/server/app/assets/css/testinclude.css")]
-        [InlineData("/server/app/assets/js/testinclude.js")]
-        public void OwnPluginIncludeIsLinkedOnTheApplicationRoute(string expected)
+        [InlineData("/server/app/assets/css/testinclude", "css")]
+        [InlineData("/server/app/assets/js/testinclude", "js")]
+        public void OwnPluginIncludeIsLinkedOnTheApplicationRoute(string expected, string extension)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -30,8 +32,8 @@ namespace WebExpress.WebUI.Test.WebPage
             var links = visualTree.CssLinks.Concat(visualTree.HeaderScriptLinks).ToList();
 
             // validation
-            Assert.Contains(expected, links);
-            Assert.DoesNotContain("/server/app/webexpress.webui.test" + expected["/server/app".Length..], links);
+            Assert.Contains(links, x => Regex.IsMatch(x, $@"^{Regex.Escape(expected)}\.[0-9a-f]{{12}}\.{extension}$"));
+            Assert.DoesNotContain(links, x => x.StartsWith("/server/app/webexpress.webui.test/"));
         }
 
         /// <summary>
@@ -39,9 +41,9 @@ namespace WebExpress.WebUI.Test.WebPage
         /// the segment of its own, which is where the asset manager mounts it.
         /// </summary>
         [Theory]
-        [InlineData("/server/app/webexpress.webui/assets/css/webexpress.webui.css")]
-        [InlineData("/server/app/webexpress.webui/assets/js/webexpress.webui.js")]
-        public void ForeignPluginIncludeKeepsItsPluginSegment(string expected)
+        [InlineData("/server/app/webexpress.webui/assets/css/webexpress.webui", "css")]
+        [InlineData("/server/app/webexpress.webui/assets/js/webexpress.webui", "js")]
+        public void ForeignPluginIncludeKeepsItsPluginSegment(string expected, string extension)
         {
             // arrange
             var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
@@ -53,7 +55,7 @@ namespace WebExpress.WebUI.Test.WebPage
             var links = visualTree.CssLinks.Concat(visualTree.HeaderScriptLinks).ToList();
 
             // validation
-            Assert.Contains(expected, links);
+            Assert.Contains(links, x => Regex.IsMatch(x, $@"^{Regex.Escape(expected)}\.[0-9a-f]{{12}}\.{extension}$"));
         }
 
         /// <summary>
