@@ -111,16 +111,50 @@ namespace WebExpress.WebUI.Test.WebMarkdown
         [InlineData("a ~ ")]
         public void LongDocumentParsesInLinearTime(string unit)
         {
-            // arrange
-            var markdown = string.Concat(Enumerable.Repeat(unit, 1_500_000 / unit.Length));
-            var watch = System.Diagnostics.Stopwatch.StartNew();
+            // arrange: the growth between two sizes is compared instead of an absolute time, which
+            // depends on the load of the machine running the tests
+            const int factor = 4;
+            var small = string.Concat(Enumerable.Repeat(unit, 300_000 / unit.Length));
+            var large = string.Concat(Enumerable.Repeat(unit, factor * 300_000 / unit.Length));
+
+            // warm up, so that the JIT does not distort the first measurement
+            _ = MarkdownParser.Parse(small);
 
             // act
-            var document = MarkdownParser.Parse(markdown);
+            var smallTime = Measure(small);
+            var largeTime = Measure(large, out var document);
 
-            // validation
+            // validation: linear growth is about 4, quadratic growth about 16
             Assert.NotEmpty(document.Elements);
-            Assert.True(watch.Elapsed < TimeSpan.FromSeconds(15), $"took {watch.Elapsed}");
+            Assert.True
+            (
+                largeTime.TotalMilliseconds < Math.Max(smallTime.TotalMilliseconds, 20) * factor * 2.5,
+                $"{small.Length} characters took {smallTime}, {large.Length} characters took {largeTime}"
+            );
+        }
+
+        /// <summary>
+        /// Measures the time needed to parse a document.
+        /// </summary>
+        /// <param name="markdown">The document.</param>
+        /// <returns>The time needed to parse.</returns>
+        private static TimeSpan Measure(string markdown)
+        {
+            return Measure(markdown, out _);
+        }
+
+        /// <summary>
+        /// Measures the time needed to parse a document.
+        /// </summary>
+        /// <param name="markdown">The document.</param>
+        /// <param name="document">The parsed document.</param>
+        /// <returns>The time needed to parse.</returns>
+        private static TimeSpan Measure(string markdown, out MarkdownDocument document)
+        {
+            var watch = System.Diagnostics.Stopwatch.StartNew();
+            document = MarkdownParser.Parse(markdown);
+
+            return watch.Elapsed;
         }
 
         /// <summary>
