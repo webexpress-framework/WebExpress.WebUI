@@ -28,8 +28,14 @@ webexpress.webui.Controller = new class {
         if (this._parsing) {
             document.addEventListener("DOMContentLoaded", () => {
                 this._parsing = false;
-                this.createInstances(document.documentElement);
+                try {
+                    this.createInstances(document.documentElement);
+                } finally {
+                    this._reveal();
+                }
             }, { once: true });
+        } else {
+            this._reveal();
         }
 
         // observe attribute changes
@@ -65,6 +71,13 @@ webexpress.webui.Controller = new class {
         document.addEventListener("MSFullscreenChange", () => {
             this._onFullscreenChange();
         });
+    }
+
+    /**
+     * Shows the page, which the server renders hidden until its controls are built from it.
+     */
+    _reveal() {
+        document.documentElement.removeAttribute("data-wx-pending");
     }
 
     /**

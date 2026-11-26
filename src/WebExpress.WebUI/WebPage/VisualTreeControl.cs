@@ -20,6 +20,16 @@ namespace WebExpress.WebUI.WebPage
     /// </summary>
     public class VisualTreeControl : IVisualTreeControl
     {
+        /// <summary>
+        /// The attribute that keeps a page hidden until the controller has built its controls.
+        /// </summary>
+        /// <remarks>
+        /// The scripts are deferred, so the browser paints the parsed page before any control
+        /// exists - an editor as its encoded value, a menu as a row of bare links. Every visual
+        /// tree that renders its own html element sets it there; the controller removes it.
+        /// </remarks>
+        public const string PendingAttribute = "data-wx-pending";
+
         private int _statusCode = 200;
         private IRoute _base;
         private readonly IComponentHub _componentHub;
@@ -138,7 +148,7 @@ namespace WebExpress.WebUI.WebPage
                 ?? componentHub?.ThemeManager?.Themes
                     ?.FirstOrDefault(t => t.ApplicationContext == applicationContext);
 
-            _favicons.Add(new Favicon(RouteEndpoint.Combine(contextPath, WebEx.Favicon)));
+            _favicons.Add(new Favicon(ResolveLink(RouteEndpoint.Combine(contextPath, WebEx.Favicon))));
 
             // an include names a file of its plugin, not a route - only the asset manager
             // knows where that plugin's assets are mounted for this application, and a
@@ -250,7 +260,7 @@ namespace WebExpress.WebUI.WebPage
         /// <param name="mediatype">The media type of the favicon.</param>
         public virtual void AddFavicon(string url, string mediatype)
         {
-            _favicons.Add(new Favicon(url, mediatype));
+            _favicons.Add(new Favicon(ResolveLink(url), mediatype));
         }
 
         /// <summary>
@@ -259,7 +269,8 @@ namespace WebExpress.WebUI.WebPage
         /// <param name="url">The URL of the favicon to remove.</param>
         public virtual void RemoveFavicon(string url)
         {
-            _favicons.RemoveAll(x => x.Url.Equals(url));
+            var resolved = ResolveLink(url);
+            _favicons.RemoveAll(x => x.Url.Equals(url) || x.Url.Equals(resolved));
         }
 
         /// <summary>
@@ -286,7 +297,7 @@ namespace WebExpress.WebUI.WebPage
         /// <param name="urls">The URLs of the script to add.</param>
         public virtual void AddHeaderScriptLink(params string[] urls)
         {
-            _headerScriptLinks.AddRange(urls);
+            _headerScriptLinks.AddRange(urls.Select(ResolveLink));
         }
 
         /// <summary>
@@ -295,7 +306,8 @@ namespace WebExpress.WebUI.WebPage
         /// <param name="url">The URL of the script to remove.</param>
         public virtual void RemoveHeaderScriptLink(string url)
         {
-            _headerScriptLinks.RemoveAll(x => x.Equals(url));
+            var resolved = ResolveLink(url);
+            _headerScriptLinks.RemoveAll(x => x.Equals(url) || x.Equals(resolved));
         }
 
         /// <summary>
@@ -304,7 +316,7 @@ namespace WebExpress.WebUI.WebPage
         /// <param name="urls">The URLs of the script to add.</param>
         public virtual void AddScriptLink(params string[] urls)
         {
-            _scriptLinks.AddRange(urls);
+            _scriptLinks.AddRange(urls.Select(ResolveLink));
         }
 
         /// <summary>
@@ -313,7 +325,8 @@ namespace WebExpress.WebUI.WebPage
         /// <param name="url">The URL of the script to remove.</param>
         public virtual void RemoveScriptLink(string url)
         {
-            _scriptLinks.RemoveAll(x => x.Equals(url));
+            var resolved = ResolveLink(url);
+            _scriptLinks.RemoveAll(x => x.Equals(url) || x.Equals(resolved));
         }
 
         /// <summary>
@@ -362,7 +375,7 @@ namespace WebExpress.WebUI.WebPage
         /// <param name="urls">The URLs of the CSS file to add.</param>
         public virtual void AddCssLink(params string[] urls)
         {
-            _cssLinks.AddRange(urls);
+            _cssLinks.AddRange(urls.Select(ResolveLink));
         }
 
         /// <summary>
@@ -371,7 +384,24 @@ namespace WebExpress.WebUI.WebPage
         /// <param name="url">The URL of the CSS link to remove.</param>
         public virtual void RemoveCssLink(string url)
         {
-            _cssLinks.RemoveAll(x => x.Equals(url));
+            var resolved = ResolveLink(url);
+            _cssLinks.RemoveAll(x => x.Equals(url) || x.Equals(resolved));
+        }
+
+        /// <summary>
+        /// Returns the address a file is linked by: the one that carries the hash of its content
+        /// when a file with one is mounted on the given address. A page adds the theme stylesheet
+        /// or a script of its own by the plain address, and the browser would ask for that again
+        /// on every page; an address that names anything else, such as an endpoint generating its
+        /// content, is kept as given.
+        /// </summary>
+        /// <param name="url">The address the file is added by.</param>
+        /// <returns>The address to link.</returns>
+        protected string ResolveLink(string url)
+        {
+            return url is null
+                ? null
+                : _componentHub?.AssetManager?.GetVersionedAssetRoute(url)?.ToString() ?? url;
         }
 
         /// <summary>
@@ -421,6 +451,7 @@ namespace WebExpress.WebUI.WebPage
             var html = new HtmlElementRootHtml();
             // assistive technology picks pronunciation rules from the document language
             html.AddUserAttribute("lang", context.Request?.Culture?.Name);
+            html.AddUserAttribute(PendingAttribute);
             html.Head.Title = I18N.Translate(context.Request, Title);
             html.Head.Favicons = Favicons?.Select(x => new Favicon(x.Url, x.Mediatype));
             html.Head.Styles = Styles;

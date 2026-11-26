@@ -30,6 +30,20 @@ body {
     background: var(--wx-body-bg);
 }
 
+/* the scripts are deferred, so the parsed page would be painted before the controls are built
+   from it - an editor as its encoded value, a menu as a row of bare links. the controller lifts
+   the mark once it has built the page; should a script never arrive, the page shows anyway */
+html[data-wx-pending] body {
+    visibility: hidden;
+    animation: wx-pending-timeout 0s linear 5s forwards;
+}
+
+@keyframes wx-pending-timeout {
+    to {
+        visibility: visible;
+    }
+}
+
 [data-wx-theme="dark"] {
     color-scheme: dark;
 }
