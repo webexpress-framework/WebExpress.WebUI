@@ -809,10 +809,15 @@ webexpress.webui.FilterRegistry = new class {
     }
 
     /**
-     * Initializes the state from localStorage and broadcasts the initial state.
+     * Initializes the state from localStorage and broadcasts it when the restore
+     * changed the active filters. Every quick filter bar of a page calls this once
+     * its filters are known, and each broadcast re-queries every bound table and
+     * board; announcing a state nobody has to act on loaded each of them again
+     * per bar.
      */
     init() {
         const savedData = this._readState();
+        const before = Array.from(this._activeFilters).sort().join("\n");
         let changed = false;
 
         if (savedData.length) {
@@ -844,7 +849,9 @@ webexpress.webui.FilterRegistry = new class {
             this._scheduleSave();
         }
 
-        this._notifyListeners();
+        if (Array.from(this._activeFilters).sort().join("\n") !== before) {
+            this._notifyListeners();
+        }
     }
 
     /**

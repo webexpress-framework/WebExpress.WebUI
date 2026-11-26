@@ -488,6 +488,11 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
 
         webexpress.webui.LocalStorage.setItem(this._storageKey, String(index));
 
+        // the views are built before this control wraps them into hidden containers, so the
+        // control of the first view shown has loaded itself already, or waits for the
+        // visibility event below; refreshing it here only queried the same data again
+        const initial = this._activeViewIndex < 0;
+
         if (this._activeViewIndex >= 0) {
             const oldCfg = this._viewsConfig[this._activeViewIndex];
             if (oldCfg.container) {
@@ -516,7 +521,7 @@ webexpress.webui.ViewCtrl = class extends webexpress.webui.Ctrl {
             this._updateToolbarMetadata(cfg);
         }
 
-        if (cfg.contentNode && cfg.contentNode.children.length > 0) {
+        if (!initial && cfg.contentNode && cfg.contentNode.children.length > 0) {
             const element = cfg.contentNode.children[0];
             const obj = webexpress.webui.Controller.getInstanceByElement(element);
             if (obj && typeof obj.update === "function") {

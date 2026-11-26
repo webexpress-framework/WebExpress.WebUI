@@ -79,3 +79,28 @@ test("switching keeps the active view alone visible", () => {
     assert.ok(ctrl._viewsConfig[0].container.classList.contains("d-none"), "the former view is hidden");
     assert.ok(!ctrl._viewsConfig[1].container.classList.contains("d-none"), "the new view is shown");
 });
+
+test("the first view shown is not loaded again, a view switched to later is refreshed", async () => {
+    const rt = loadWebUi({ browser: true, extraFiles: FILES });
+    const element = host(rt, null);
+    const updates = [0, 0];
+
+    const ctrl = new rt.wx.ViewCtrl(element);
+
+    // the control of each view was built, and has loaded, before the view control wraps it
+    ctrl._viewsConfig.forEach((config, index) => {
+        const control = rt.createElement("div");
+        control._wx_controller = { update: () => { updates[index] += 1; } };
+        config.contentNode.insertBefore(control, config.contentNode.firstChild);
+    });
+
+    await new Promise((resolve) => setTimeout(resolve, 10));
+
+    assert.equal(ctrl._activeViewIndex, 0, "the first view is shown");
+    assert.deepEqual(updates, [0, 0], "the view that loaded itself is not queried again");
+
+    ctrl.switchView(1);
+    ctrl.switchView(0);
+
+    assert.deepEqual(updates, [1, 1], "a view the reader switches to is refreshed");
+});
