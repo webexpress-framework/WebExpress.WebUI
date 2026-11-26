@@ -152,8 +152,9 @@ namespace WebExpress.WebUI.WebPage
                     foreach (var file in include.Files)
                     {
                         // the versioned route carries a hash of the content, so the browser
-                        // keeps the file for good and loads it again only when it changed
-                        var route = _componentHub?.AssetManager?.GetVersionedAssetRoute
+                        // keeps the file for good and loads it again only when it changed;
+                        // an include not registered by the include manager is resolved here
+                        var route = file.Route ?? _componentHub?.AssetManager?.GetVersionedAssetRoute
                         (
                             pageContext.ApplicationContext,
                             include.PluginContext,

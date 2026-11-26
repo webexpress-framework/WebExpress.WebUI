@@ -112,6 +112,30 @@ namespace WebExpress.WebUI.Test.WebPage
         }
 
         /// <summary>
+        /// Tests that the include manager resolves the route of every mounted file once at
+        /// registration, to the same versioned route the asset manager answers, so a page links
+        /// it without composing the route again.
+        /// </summary>
+        [Fact]
+        public void IncludeFilesCarryTheirVersionedRoute()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+
+            // act
+            var files = componentHub.IncludeManager.GetIncludes(application)
+                .SelectMany(include => include.Files.Select(file => (Expected: componentHub.AssetManager
+                    .GetVersionedAssetRoute(application, include.PluginContext, file.FileName)
+                    .ToString(), file.Route)))
+                .ToList();
+
+            // validation
+            Assert.NotEmpty(files);
+            Assert.All(files, x => Assert.Equal(x.Expected, x.Route));
+        }
+
+        /// <summary>
         /// Tests that the includes of a plugin are linked after those of the plugin it builds
         /// on. The test plugin references the framework assembly, so its scripts and stylesheets
         /// must follow the framework's on every start, although the plugins are registered in
