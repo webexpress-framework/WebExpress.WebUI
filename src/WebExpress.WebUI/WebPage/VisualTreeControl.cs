@@ -149,7 +149,8 @@ namespace WebExpress.WebUI.WebPage
             {
                 if (!include.Scopes.Any() || pageContext.Scopes.Intersect(include.Scopes).Any())
                 {
-                    foreach (var file in include.Files)
+                    // a bundle stands in for the files it joins, so one link loads them all
+                    foreach (var file in include.LinkedFiles)
                     {
                         // the versioned route carries a hash of the content, so the browser
                         // keeps the file for good and loads it again only when it changed;

@@ -187,8 +187,10 @@ function createBrowserGlobals(document) {
 /**
  * Loads a fresh, isolated WebUI runtime.
  * @param {object} [options] - Optional overrides: fetch, extraFiles, browser, globals,
- *     readyState ("loading" to load the runtime while the page is still being parsed) and
- *     rootAttributes (markers the server renders on the html element before any script runs).
+ *     readyState ("loading" to load the runtime while the page is still being parsed),
+ *     deferred (the runtime runs as a deferred script, which sees the page parsed but runs
+ *     before DOMContentLoaded) and rootAttributes (markers the server renders on the html
+ *     element before any script runs).
  * @returns {object} An object with the webui namespace, the document and helpers.
  */
 export function loadWebUi(options = {}) {
@@ -239,11 +241,16 @@ export function loadWebUi(options = {}) {
     // the view layer loads right after the core, as IncludeJavaScript declares it
     const files = ["webexpress.webui.js", "webexpress.webui.renderer.js", "webexpress.webui.state.js", ...(options.extraFiles || [])];
 
+    // like a browser, the document names the running script only while it runs
+    document.currentScript = options.deferred ? { defer: true } : null;
+
     for (const file of files) {
         const full = path.isAbsolute(file) ? file : path.join(assetsJs, file);
         const code = fs.readFileSync(full, "utf8");
         vm.runInContext(code, sandbox, { filename: full });
     }
+
+    document.currentScript = null;
 
     return {
         wx: sandbox.webexpress.webui,

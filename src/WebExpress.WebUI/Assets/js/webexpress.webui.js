@@ -21,8 +21,10 @@ webexpress.webui.Controller = new class {
         // while the parser builds the page, an element is reported as soon as its start tag
         // is read, before its children exist; a control created then reads half its content
         // (a tab control misses the templates further down), so the parsed page is
-        // instantiated once, when it is complete
-        this._parsing = document.readyState === "loading";
+        // instantiated once, when it is complete. a deferred script already finds the page
+        // parsed ("interactive"), but the scripts after it - which register the classes -
+        // have not run yet; DOMContentLoaded still follows all of them, so it waits as well
+        this._parsing = document.readyState === "loading" || document.currentScript?.defer === true;
         if (this._parsing) {
             document.addEventListener("DOMContentLoaded", () => {
                 this._parsing = false;

@@ -1,4 +1,6 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
+using WebExpress.WebCore.WebSitemap;
 using WebExpress.WebUI.Test.Fixture;
 using WebExpress.WebUI.WebPage;
 
@@ -38,11 +40,12 @@ namespace WebExpress.WebUI.Test.WebPage
 
         /// <summary>
         /// Tests that an include of a plugin that only contributes to the application keeps
-        /// the segment of its own, which is where the asset manager mounts it.
+        /// the segment of its own, which is where the asset manager mounts it - for the bundle
+        /// that joins its files as well.
         /// </summary>
         [Theory]
-        [InlineData("/server/app/webexpress.webui/assets/css/webexpress.webui", "css")]
-        [InlineData("/server/app/webexpress.webui/assets/js/webexpress.webui", "js")]
+        [InlineData("/server/app/webexpress.webui/assets/css/webexpress.webui.webinclude.includestylesheet.bundle", "css")]
+        [InlineData("/server/app/webexpress.webui/assets/js/webexpress.webui.webinclude.includejavascript.bundle", "js")]
         public void ForeignPluginIncludeKeepsItsPluginSegment(string expected, string extension)
         {
             // arrange
@@ -97,7 +100,7 @@ namespace WebExpress.WebUI.Test.WebPage
             var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
             var context = UnitTestControlFixture.CreateRenderContextMock(application);
             var expected = componentHub.IncludeManager.GetIncludes(application)
-                .SelectMany(include => include.Files.Select(file => componentHub.AssetManager
+                .SelectMany(include => include.LinkedFiles.Select(file => file.Route ?? componentHub.AssetManager
                     .GetVersionedAssetRoute(application, include.PluginContext, file.FileName)
                     .ToString()))
                 .ToList();
@@ -109,6 +112,91 @@ namespace WebExpress.WebUI.Test.WebPage
             // validation
             Assert.Equal(expected.Where(x => x.EndsWith(".css")), links.Where(x => x.EndsWith(".css")));
             Assert.Equal(expected.Where(x => x.EndsWith(".js")), links.Where(x => x.EndsWith(".js")));
+        }
+
+        /// <summary>
+        /// Tests that the bundle of the framework holds every file of its include, each one after
+        /// the file declared before it. The bundle replaces several hundred links, so a file left
+        /// out or moved would break the page as silently as a link out of order.
+        /// </summary>
+        [Theory]
+        [InlineData(typeof(WebUI.WebInclude.IncludeJavaScript), ".js")]
+        [InlineData(typeof(WebUI.WebInclude.IncludeStyleSheet), ".css")]
+        public void BundleHoldsTheFilesInDeclaredOrder(Type includeType, string extension)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var include = componentHub.IncludeManager.GetIncludes(application, includeType).Single();
+            var bundle = include.LinkedFiles.Single(x => x.FileName.EndsWith(".bundle" + extension));
+            componentHub.SitemapManager.Refresh();
+
+            // act
+            var content = Encoding.UTF8.GetString((byte[])Send(componentHub, bundle.Route).Content);
+
+            // validation
+            var position = 0;
+
+            foreach (var file in include.Files)
+            {
+                // the bundle holds each file as the file itself is delivered - a stylesheet with
+                // the images it addresses rewritten to their fingerprints - without its byte order mark
+                var text = Encoding.UTF8.GetString((byte[])Send(componentHub, file.Route).Content).TrimStart('﻿');
+                var found = content.IndexOf(text, position, StringComparison.Ordinal);
+
+                Assert.True(found >= position, $"'{file.FileName}' follows the file declared before it");
+                position = found + text.Length;
+            }
+
+            Assert.Single(include.LinkedFiles);
+        }
+
+        /// <summary>
+        /// Tests that every icon, flag and image the stylesheet bundle of the framework addresses
+        /// is addressed by its fingerprint, on a route an asset is mounted on, so the browser
+        /// keeps it for good instead of asking for each one again on every page.
+        /// </summary>
+        [Fact]
+        public void StylesheetBundleAddressesFingerprintedImages()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).FirstOrDefault();
+            var include = componentHub.IncludeManager.GetIncludes(application, typeof(WebUI.WebInclude.IncludeStyleSheet)).Single();
+            var bundle = include.LinkedFiles.Single().Route;
+            var mounted = componentHub.AssetManager.GetAssets(application).Select(x => x.Route.ToString()).ToHashSet();
+            componentHub.SitemapManager.Refresh();
+
+            // act
+            var css = Encoding.UTF8.GetString((byte[])Send(componentHub, bundle).Content);
+            var targets = Regex.Matches(css, @"url\([""']?(\.\.?/[^""')?#]+)")
+                .Select(x => new Uri(new Uri("http://localhost" + bundle), x.Groups[1].Value).AbsolutePath)
+                .ToList();
+
+            // validation
+            Assert.True(targets.Count > 1000, $"the icon set is addressed ({targets.Count})");
+            Assert.All(targets, x => Assert.Matches(@"\.[0-9a-f]{12}\.[a-z0-9]+$", x));
+            Assert.Equal([], targets.Where(x => !mounted.Contains(x)).Distinct().ToList());
+        }
+
+        /// <summary>
+        /// Sends a request for a route of the test application to the endpoint registered there.
+        /// </summary>
+        /// <param name="componentHub">The component hub.</param>
+        /// <param name="route">The route.</param>
+        /// <returns>The response.</returns>
+        private static WebCore.WebMessage.IResponse Send(WebCore.WebComponent.IComponentHub componentHub, string route)
+        {
+            var uri = new Uri("http://localhost:8080" + route);
+            var httpServerContext = UnitTestControlFixture.CreateHttpServerContextMock();
+            var searchContext = Activator.CreateInstance<SearchContext>();
+            typeof(SearchContext).GetProperty("HttpServerContext").SetValue(searchContext, httpServerContext);
+            typeof(SearchContext).GetProperty("Culture").SetValue(searchContext, httpServerContext.Culture);
+            typeof(SearchContext).GetProperty("HttpContext").SetValue(searchContext, UnitTestControlFixture.CreateHttpContextMock());
+
+            var searchResult = componentHub.SitemapManager.SearchResource(uri, searchContext);
+
+            return componentHub.EndpointManager.HandleRequest(UnitTestControlFixture.CreateRequestMock("", uri.ToString()), searchResult.EndpointContext);
         }
 
         /// <summary>
