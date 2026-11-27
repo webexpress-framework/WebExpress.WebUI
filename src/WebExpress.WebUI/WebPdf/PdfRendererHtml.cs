@@ -470,7 +470,7 @@ namespace WebExpress.WebUI.WebPdf
             switch (node)
             {
                 case HtmlText text:
-                    result.Add(new PdfInlineElementText(WebUtility.HtmlDecode(text.Value ?? ""), style));
+                    result.Add(new PdfInlineElementText(text.Value ?? "", style));
                     return;
                 case HtmlElementTextSemanticsBr:
                     result.Add(new PdfInlineElementLineBreak());
@@ -752,7 +752,7 @@ namespace WebExpress.WebUI.WebPdf
         {
             return node switch
             {
-                HtmlText text => WebUtility.HtmlDecode(text.Value ?? ""),
+                HtmlText text => text.Value ?? "",
                 HtmlElementTextSemanticsBr => "\n",
                 HtmlElement element => string.Concat(element.Elements.Select(PlainText)),
                 _ => ""

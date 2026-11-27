@@ -12,7 +12,7 @@ namespace WebExpress.WebUI.WebControl
     public interface IControlSplitButton : IControl
     {
         /// <summary>
-        /// Gets or sets the color. der Schaltfläche
+        /// Gets the background color of the button.
         /// </summary>
         new Func<IRenderControlContext, PropertyColorButton> BackgroundColor { get; }
 

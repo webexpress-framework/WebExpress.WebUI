@@ -67,6 +67,11 @@ export function loadEditor(options = {}) {
     vm.runInContext(core.slice(menuStart, core.indexOf("\n};", menuStart) + 3), sandbox, { filename: "NativeMenu" });
     const fieldMenuStart = core.indexOf("webexpress.webui.MenuCtrl = class");
     vm.runInContext(core.slice(fieldMenuStart, core.indexOf("\n};", fieldMenuStart) + 3), sandbox, { filename: "MenuCtrl" });
+    // the address and markup helpers every control links and sanitizes through
+    for (const name of ["Url", "Html"]) {
+        const start = core.indexOf("webexpress.webui." + name + " = new class");
+        vm.runInContext(core.slice(start, core.indexOf("\n};", start) + 3), sandbox, { filename: name });
+    }
     const contrastStart = core.indexOf("webexpress.webui.ContrastColor = class");
     vm.runInContext(core.slice(contrastStart, core.indexOf("\n};", contrastStart) + 3), sandbox, { filename: "ContrastColor" });
     ["webexpress.webui.input.color.js", "webexpress.webui.ot.js", "webexpress.webui.editor.model.js", "webexpress.webui.editor.view.js", "webexpress.webui.editor.js", ...(options.files || [])].forEach(load);

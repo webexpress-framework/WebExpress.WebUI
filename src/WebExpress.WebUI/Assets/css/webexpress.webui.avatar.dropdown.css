@@ -54,3 +54,9 @@
     width: 100%;
     height: 100%;
 }
+
+/* the server-rendered entries are only the source the controller builds the menu from; until
+   the scripts have run they would stand as loose text in the navbar */
+.wx-webui-avatar-dropdown:not(.wx-avatar-dropdown) > * {
+    display: none;
+}

@@ -189,6 +189,65 @@ test("an element reported while the page is parsed is instantiated once the page
     assert.equal(wx.Controller.instanceMap.has(later), true);
 });
 
+test("a deferred runtime instantiates the parsed page on DOMContentLoaded, after every class is registered", () => {
+    // a deferred script runs once the page is parsed, before the deferred scripts after it
+    const { wx, document, createElement } = loadWebUi({ readyState: "interactive", deferred: true });
+    const host = createElement("div");
+    host.classList.add("wx-probe-deferred");
+    document.body.appendChild(host);
+
+    // the class is registered by a later script of the same page
+    wx.Controller.registerClass("wx-probe-deferred", class extends wx.Ctrl { });
+    assert.equal(wx.Controller.instanceMap.has(host), false, "nothing is built before the page is announced");
+
+    document.dispatchEvent({ type: "DOMContentLoaded" });
+
+    assert.equal(wx.Controller.instanceMap.has(host), true, "the parsed page is instantiated");
+});
+
+test("the page stays hidden until its controls are built from it", () => {
+    const { wx, document, createElement } = loadWebUi({
+        readyState: "interactive",
+        deferred: true,
+        rootAttributes: { "data-wx-pending": "" }
+    });
+    const host = createElement("div");
+    host.classList.add("wx-probe-pending");
+    document.body.appendChild(host);
+    wx.Controller.registerClass("wx-probe-pending", class extends wx.Ctrl { });
+
+    assert.equal(document.documentElement.hasAttribute("data-wx-pending"), true, "the bare markup is not shown");
+
+    document.dispatchEvent({ type: "DOMContentLoaded" });
+
+    assert.equal(wx.Controller.instanceMap.has(host), true);
+    assert.equal(document.documentElement.hasAttribute("data-wx-pending"), false, "the built page is shown");
+});
+
+test("the page is shown even when a control fails to build", () => {
+    const { wx, document } = loadWebUi({
+        readyState: "interactive",
+        deferred: true,
+        rootAttributes: { "data-wx-pending": "" }
+    });
+    wx.Controller.createInstances = () => { throw new Error("broken control"); };
+
+    assert.throws(() => document.dispatchEvent({ type: "DOMContentLoaded" }));
+    assert.equal(document.documentElement.hasAttribute("data-wx-pending"), false, "a broken control hides nothing else");
+});
+
+test("a runtime loaded into a built page shows it at once", () => {
+    const { document } = loadWebUi({ readyState: "interactive", rootAttributes: { "data-wx-pending": "" } });
+
+    assert.equal(document.documentElement.hasAttribute("data-wx-pending"), false);
+});
+
+test("a runtime loaded into a complete page does not wait for DOMContentLoaded", () => {
+    const { wx } = loadWebUi({ readyState: "interactive" });
+
+    assert.equal(wx.Controller._parsing, false, "an event that already fired is not awaited");
+});
+
 test("a template keeps its data-wx-bind for the control that instantiates it", () => {
     const { wx, document, createElement } = loadWebUi();
     const bound = [];

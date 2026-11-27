@@ -21,12 +21,23 @@ webexpress.webui.EditorHtml = class {
      * @returns {DocumentFragment|HTMLElement} The same node, cleaned.
      */
     static clean(fragment) {
-        fragment.querySelectorAll("script,iframe,object,embed,svg,math,style,link,meta,base,form").forEach(el => el.remove());
+        // noscript, xmp, template and the other raw text containers are parsed differently once the
+        // markup is live, which turns their text into elements no check here has seen
+        fragment.querySelectorAll("script,iframe,frame,frameset,object,embed,applet,portal,svg,math,style,link,meta,base,form,"
+            + "noscript,noembed,noframes,xmp,plaintext,template,title").forEach(el => el.remove());
         fragment.querySelectorAll("*").forEach(el => {
             for (const attr of Array.from(el.attributes)) {
                 const name = attr.name.toLowerCase();
-                if (name.startsWith("on") || name === "srcdoc" || name === "formaction" || name === "action" || name.startsWith("data-wx-primary") || name.startsWith("data-wx-secondary")) el.removeAttribute(attr.name);
-                if (["src", "href", "xlink:href"].includes(name) && !webexpress.webui.EditorModel.url(attr.value, name === "src")) el.removeAttribute(attr.name);
+                // every data-wx attribute is an instruction to the framework - an action that opens a
+                // dialog at an address, a bind - which content a user wrote must not give; only the
+                // editor's own markers stay, which the reading view needs to find its scaffolding
+                if (name.startsWith("on") || name === "srcdoc" || name === "formaction" || name === "action"
+                    || (name.startsWith("data-wx-") && name !== "data-wx-caret" && name !== "data-wx-focus-new")
+                    || ["srcset", "ping", "lowsrc", "dynsrc", "background"].includes(name)) {
+                    el.removeAttribute(attr.name);
+                    continue;
+                }
+                if (["src", "href", "xlink:href", "poster"].includes(name) && !webexpress.webui.EditorModel.url(attr.value, name !== "href" && name !== "xlink:href")) el.removeAttribute(attr.name);
                 if (name === "style" && /url\s*\(|expression|@import|\\/i.test(attr.value)) el.removeAttribute(attr.name);
             }
         });
@@ -293,7 +304,8 @@ webexpress.webui.EditorView = class {
 
     _link(element, data) {
         const link = document.createElement("a");
-        link.setAttribute("href", data.href);
+        // the address is document content a user wrote; only an allowed scheme is followed
+        webexpress.webui.Url.link(link, data.href);
         if (data.target === "_blank") { link.setAttribute("target", "_blank"); link.setAttribute("rel", "noopener noreferrer"); }
         link.appendChild(element);
         return link;

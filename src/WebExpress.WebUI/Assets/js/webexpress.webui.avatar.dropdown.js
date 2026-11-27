@@ -78,7 +78,7 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
 
                 items.push({
                     id: elem.id || null,
-                    uri: elem.dataset.uri || "javascript:void(0);",
+                    uri: elem.dataset.uri || null,
                     image: elem.dataset.image || null,
                     icon: elem.dataset.icon || null,
                     text: elem.textContent || null,
@@ -149,7 +149,7 @@ webexpress.webui.AvatarDropdownCtrl = class extends webexpress.webui.Ctrl {
                     }
                 }
 
-                if (item.uri) link.href = item.uri;
+                webexpress.webui.Url.link(link, item.uri);
                 if (item.image) {
                     const img = document.createElement("img");
                     img.src = item.image;

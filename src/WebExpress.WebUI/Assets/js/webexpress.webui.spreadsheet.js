@@ -2160,7 +2160,13 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
 
     /**
      * Exports the used range of a sheet as delimited text with the shown texts.
-     * @param {object} [options] - { sheet, delimiter (default ","), values: raw values instead of shown texts }.
+     *
+     * A spreadsheet program opening the file runs a cell starting with "=", "+", "-", "@", a tab
+     * or a carriage return as a formula - "=HYPERLINK(...)" or a DDE call a user typed into a
+     * shared sheet. Such a cell is written with a leading apostrophe, which shows it as text;
+     * a plain number such as "-5" stays as it is.
+     * @param {object} [options] - { sheet, delimiter (default ","), values: raw values instead of shown texts,
+     * keepFormulas: write such cells unchanged }.
      * @returns {string} The text.
      */
     exportCsv(options = {}) {
@@ -2168,7 +2174,13 @@ webexpress.webui.SpreadsheetCtrl = class extends webexpress.webui.Ctrl {
         const used = sheet.usedRange();
         if (!used) return "";
         const rows = this.getRange({ r1: 0, c1: 0, r2: used.r2, c2: used.c2, sheet: sheet.id }, { display: !options.values });
-        return webexpress.webui.SpreadsheetClipboard.toDelimited(rows.map(r => r.map(v => (v === null ? "" : String(v)))), options.delimiter ?? ",");
+        const text = (v) => {
+            const value = v === null ? "" : String(v);
+            return !options.keepFormulas && /^[=+\-@\t\r]/.test(value) && !/^[+-]?\d+([.,]\d+)?$/.test(value)
+                ? "'" + value
+                : value;
+        };
+        return webexpress.webui.SpreadsheetClipboard.toDelimited(rows.map(r => r.map(text)), options.delimiter ?? ",");
     }
 
     /**

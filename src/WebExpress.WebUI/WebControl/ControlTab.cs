@@ -192,7 +192,7 @@ namespace WebExpress.WebUI.WebControl
 
             var layout = Layout?.Invoke(renderContext) ?? TypeLayoutTab.Default;
 
-            html.AddUserAttribute("data-layout", layout.ToString().ToLower());
+            html.AddUserAttribute("data-layout", layout.ToString().ToLowerInvariant());
             html.AddStyle(GetColorStyles(layout, Color?.Invoke(renderContext), UnderlineColor?.Invoke(renderContext)));
 
             // Get toolbar fragments

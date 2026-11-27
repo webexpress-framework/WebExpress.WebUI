@@ -6,6 +6,12 @@
     position: relative;
 }
 
+/* the server-rendered suggestions and footer are only the source the controller builds the box
+   from; until the scripts have run they would stand as loose text in the navbar */
+.wx-webui-search:not(.wx-search) > * {
+    display: none;
+}
+
 /* Styling for the search box container */
 .wx-search > div:nth-child(1) {
     position: relative;

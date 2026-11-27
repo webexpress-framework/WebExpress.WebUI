@@ -450,7 +450,7 @@ webexpress.webui.SpreadsheetView = class {
         text.textContent = "";
         if (href) {
             const link = document.createElement("a");
-            link.href = href; link.target = "_blank"; link.rel = "noopener noreferrer";
+            webexpress.webui.Url.link(link, href); link.target = "_blank"; link.rel = "noopener noreferrer";
             link.textContent = shown.text;
             link.tabIndex = -1;
             text.appendChild(link);

@@ -202,3 +202,31 @@ test("table preferences restore columns with their cells and survive another vis
     assert.deepEqual(Array.from(build(next)._columns, col => col.id), ["b", "a"]);
     assert.equal(next.document.cookie, "");
 });
+
+test("restoring the quickfilters announces a change only when the restore changed them", () => {
+    const filters = [{ id: "mine" }, { id: "closed" }];
+    const counted = (rt) => {
+        const seen = { count: 0 };
+        rt.document.addEventListener(rt.wx.Event.CHANGE_FILTER_EVENT, () => { seen.count += 1; });
+        return seen;
+    };
+
+    // nothing stored: every bar of a page restores the same empty set, and each
+    // announcement would query every bound table and board again
+    const empty = runtime();
+    const quiet = counted(empty);
+    empty.wx.FilterRegistry.registerFilters(filters);
+    empty.wx.FilterRegistry.init();
+    empty.wx.FilterRegistry.init();
+    assert.equal(quiet.count, 0, "an unchanged state is not announced");
+
+    // a stored selection is applied once, and the next bar finds nothing new
+    const stored = runtime();
+    stored.wx.LocalStorage.setJson("wx_quickfilters", ["mine"]);
+    const announced = counted(stored);
+    stored.wx.FilterRegistry.registerFilters(filters);
+    stored.wx.FilterRegistry.init();
+    stored.wx.FilterRegistry.init();
+    assert.equal(announced.count, 1, "the restored selection is announced once");
+    assert.deepEqual(Array.from(stored.wx.FilterRegistry.getActiveFilters()), ["mine"]);
+});

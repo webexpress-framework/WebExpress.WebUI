@@ -273,5 +273,37 @@ namespace WebExpress.WebUI.Test.WebPage
             Assert.Equal(expected, (response.Content as HtmlElementRootHtml)?.Head.Base);
             Assert.Contains($"<base href=\"{expected}\">", response.Content.ToString());
         }
+
+        /// <summary>
+        /// Tests that every status code is answered with that status, and a code without a
+        /// response class as a failure - never as success. A 403 page was answered 200 before.
+        /// </summary>
+        /// <param name="statusCode">The status code of the page.</param>
+        /// <param name="expected">The status of the response.</param>
+        [Theory]
+        [InlineData(403, 403)]
+        [InlineData(405, 405)]
+        [InlineData(409, 409)]
+        [InlineData(429, 429)]
+        [InlineData(503, 503)]
+        [InlineData(299, 500)]
+        public void GetResponseKeepsTheStatus(int statusCode, int expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTreeContext = new VisualTreeContext(context);
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext)
+            {
+                StatusCode = statusCode
+            };
+
+            // act
+            var response = visualTree.GetResponse(visualTreeContext);
+
+            // validation
+            Assert.Equal(expected, response.Status);
+            Assert.NotNull(response.Content);
+        }
     }
 }

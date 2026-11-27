@@ -1,4 +1,5 @@
-﻿using WebExpress.WebCore.WebApplication;
+﻿using WebExpress.WebCore;
+using WebExpress.WebCore.WebApplication;
 using WebExpress.WebCore.WebHtml;
 using WebExpress.WebCore.WebIcon;
 using WebExpress.WebCore.WebPage;
@@ -17,11 +18,22 @@ namespace WebExpress.WebUI.WebIcon
         /// </summary>
         public PropertySizeIcon Size { get; }
 
+        private readonly IUri _uri;
+
         /// <summary>
-        /// Gets the URI associated with the icon. This property must be 
-        /// implemented by derived classes to provide the specific URI of the icon.
+        /// Gets the URI associated with the icon.
         /// </summary>
-        public IUri Uri { get; }
+        /// <remarks>
+        /// An icon is named by the plain address of its picture, but the same pictures appear on
+        /// every page - in the breadcrumb, the navigation, lists and cards. While the picture is a
+        /// file of a plugin, this is the address that carries the hash of its content, which the
+        /// browser keeps for good; any other address, such as an endpoint that draws the picture
+        /// or a data url, is kept as given. It is resolved on every read, because the icon is
+        /// often created before the file is mounted.
+        /// </remarks>
+        public IUri Uri => _uri is UriEndpoint
+            ? WebEx.ComponentHub?.AssetManager?.GetVersionedAssetRoute(_uri.ToString())?.ToUri() ?? _uri
+            : _uri;
 
         /// <summary>
         /// Initializes a new instance of the class.
@@ -29,7 +41,7 @@ namespace WebExpress.WebUI.WebIcon
         /// <param name="uri">The URI of the icon.</param>
         public ImageIcon(IUri uri)
         {
-            Uri = uri;
+            _uri = uri;
         }
 
         /// <summary>
@@ -39,7 +51,7 @@ namespace WebExpress.WebUI.WebIcon
         /// <param name="size">The size of the icon.</param>
         public ImageIcon(IUri uri, PropertySizeIcon size)
         {
-            Uri = uri;
+            _uri = uri;
             Size = size;
         }
 
@@ -57,9 +69,9 @@ namespace WebExpress.WebUI.WebIcon
             var applicationPath = applicationContext?.Route;
             var pluginPath = applicationContext?.PluginContext?.Assembly == assembly
                 ? applicationPath
-                : applicationPath?.Concat(assembly.GetName().Name.ToLower());
+                : applicationPath?.Concat(assembly.GetName().Name.ToLowerInvariant());
 
-            Uri = uri.IsRelative
+            _uri = uri.IsRelative
                     ? pluginPath?.Concat(uri.ToString()).ToUri() ?? uri
                     : uri;
 

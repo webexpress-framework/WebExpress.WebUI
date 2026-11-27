@@ -13,6 +13,12 @@ namespace WebExpress.WebUI.WebMarkdown
         private readonly List<MarkdownToken> _tokens = [];
         private int _position;
 
+        // the last scan for each set of stop tokens: from where it started and the index of the
+        // stop token it found, or -1. The tokens never change, so a scan from a later position up
+        // to that index finds the same token. An unmatched marker - every "*" of a paragraph
+        // that is never closed - otherwise rescanned the rest of the stream each time.
+        private readonly Dictionary<string, (int From, int Stop)> _scans = [];
+
         /// <summary>
         /// Returns the current position in the stream.
         /// </summary>
@@ -158,29 +164,36 @@ namespace WebExpress.WebUI.WebMarkdown
                 return new MarkdownTokenStream(remaining, _source);
             }
 
-            var stopSet = new HashSet<MarkdownTokenType>(stopTokens);
-            var takeTokenCount = 0;
-            var reachedStopToken = false;
+            var key = string.Join(",", stopTokens);
+            int stop;
 
-            for (int i = _position; i < _tokens.Count; i++)
+            if (_scans.TryGetValue(key, out var scan) && scan.From <= _position && (scan.Stop < 0 || _position <= scan.Stop))
             {
-                var currentToken = _tokens[i];
+                stop = scan.Stop;
+            }
+            else
+            {
+                var stopSet = new HashSet<MarkdownTokenType>(stopTokens);
+                stop = -1;
 
-                if (stopSet.Contains(currentToken.Type))
+                for (int i = _position; i < _tokens.Count; i++)
                 {
-                    reachedStopToken = true;
-                    break;
+                    if (stopSet.Contains(_tokens[i].Type))
+                    {
+                        stop = i;
+                        break;
+                    }
                 }
 
-                takeTokenCount++;
+                _scans[key] = (_position, stop);
             }
 
-            if (!reachedStopToken)
+            if (stop < 0)
             {
                 return null;
             }
 
-            var previewedTokens = _tokens.Skip(_position).Take(takeTokenCount);
+            var previewedTokens = _tokens.Skip(_position).Take(stop - _position);
             return new MarkdownTokenStream(previewedTokens, _source);
         }
 

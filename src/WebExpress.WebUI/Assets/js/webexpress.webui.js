@@ -21,13 +21,21 @@ webexpress.webui.Controller = new class {
         // while the parser builds the page, an element is reported as soon as its start tag
         // is read, before its children exist; a control created then reads half its content
         // (a tab control misses the templates further down), so the parsed page is
-        // instantiated once, when it is complete
-        this._parsing = document.readyState === "loading";
+        // instantiated once, when it is complete. a deferred script already finds the page
+        // parsed ("interactive"), but the scripts after it - which register the classes -
+        // have not run yet; DOMContentLoaded still follows all of them, so it waits as well
+        this._parsing = document.readyState === "loading" || document.currentScript?.defer === true;
         if (this._parsing) {
             document.addEventListener("DOMContentLoaded", () => {
                 this._parsing = false;
-                this.createInstances(document.documentElement);
+                try {
+                    this.createInstances(document.documentElement);
+                } finally {
+                    this._reveal();
+                }
             }, { once: true });
+        } else {
+            this._reveal();
         }
 
         // observe attribute changes
@@ -63,6 +71,13 @@ webexpress.webui.Controller = new class {
         document.addEventListener("MSFullscreenChange", () => {
             this._onFullscreenChange();
         });
+    }
+
+    /**
+     * Shows the page, which the server renders hidden until its controls are built from it.
+     */
+    _reveal() {
+        document.documentElement.removeAttribute("data-wx-pending");
     }
 
     /**
@@ -127,8 +142,11 @@ webexpress.webui.Controller = new class {
             if (actionDef) {
                 element.addEventListener("click", (e) => {
                     // a button or a link inside the element - in a table row, a card - owns
-                    // its click, whether it came from the pointer or from enter on it
-                    const control = e.target && e.target.closest ? e.target.closest("a, button, input, select, textarea, [role='button']") : null;
+                    // its click, whether it came from the pointer or from enter on it. an
+                    // anchor without an address leads nowhere and owns no click: the sidebar
+                    // builds the label of an entry as one, and the click on it belongs to the
+                    // action of the entry
+                    const control = e.target && e.target.closest ? e.target.closest("a[href], button, input, select, textarea, [role='button']") : null;
                     if (control && control !== element && element.contains(control)) {
                         return;
                     }
@@ -791,10 +809,15 @@ webexpress.webui.FilterRegistry = new class {
     }
 
     /**
-     * Initializes the state from localStorage and broadcasts the initial state.
+     * Initializes the state from localStorage and broadcasts it when the restore
+     * changed the active filters. Every quick filter bar of a page calls this once
+     * its filters are known, and each broadcast re-queries every bound table and
+     * board; announcing a state nobody has to act on loaded each of them again
+     * per bar.
      */
     init() {
         const savedData = this._readState();
+        const before = Array.from(this._activeFilters).sort().join("\n");
         let changed = false;
 
         if (savedData.length) {
@@ -826,7 +849,9 @@ webexpress.webui.FilterRegistry = new class {
             this._scheduleSave();
         }
 
-        this._notifyListeners();
+        if (Array.from(this._activeFilters).sort().join("\n") !== before) {
+            this._notifyListeners();
+        }
     }
 
     /**
@@ -1339,6 +1364,253 @@ webexpress.webui.Syntax = new class {
 
         // return the syntax configuration for the given language or null if not found
         return this.syntax[language] || null;
+    }
+};
+
+/**
+ * Decides whether an address from data may become the target of a link or the source of an
+ * image. Mirrors UrlPolicy of WebExpress.WebCore.
+ *
+ * A link built from data runs whatever its address says when it is followed, so addresses are
+ * allowed by an allowlist of schemes - relative, http, https, mailto, tel - and never by a list of
+ * bad ones. The scheme is read as a browser reads it: whitespace and control characters inside
+ * it are ignored ("java\tscript:" is "javascript:") and its case does not matter.
+ */
+webexpress.webui.Url = new class {
+    /**
+     * Tells whether an address may be followed as a link.
+     * @param {string} url - The address.
+     * @returns {boolean} True for a relative address or one with an allowed scheme.
+     */
+    isSafeLink(url) {
+        const scheme = this._scheme(url);
+        return scheme !== null && ["", "http", "https", "mailto", "tel"].includes(scheme);
+    }
+
+    /**
+     * Tells whether an address may be loaded as an image; a data address only for raster formats,
+     * since an svg can carry script.
+     * @param {string} url - The address.
+     * @returns {boolean} True when the image may be loaded.
+     */
+    isSafeImage(url) {
+        const scheme = this._scheme(url);
+        if (scheme === "" || scheme === "http" || scheme === "https") {
+            return true;
+        }
+        return scheme === "data" && /^data:image\/(png|jpeg|gif|webp)[;,]/i.test(this._normalize(url));
+    }
+
+    /**
+     * Points an anchor at an address from data. Without an address that may be followed the
+     * anchor keeps "#" with its default action suppressed: it still looks and behaves like a link
+     * and runs the action it carries, but never navigates - neither to an unsafe address nor to
+     * the top of the page. This replaces the "javascript:void(0)" placeholder, which the content
+     * security policy blocks.
+     * @param {HTMLAnchorElement} anchor - The anchor.
+     * @param {string} url - The address, or nothing.
+     */
+    link(anchor, url) {
+        const safe = this.safeLink(url);
+        anchor.setAttribute("href", safe ?? "#");
+        anchor.href = safe ?? "#";
+        if (safe === null && !anchor._wxNoTarget) {
+            anchor._wxNoTarget = true;
+            anchor.addEventListener("click", (e) => {
+                if (anchor.getAttribute("href") === "#") {
+                    e.preventDefault();
+                }
+            });
+        }
+    }
+
+    /**
+     * Returns the address when it may be followed, otherwise null.
+     * @param {string} url - The address.
+     * @returns {string|null} The address, or null.
+     */
+    safeLink(url) {
+        return typeof url === "string" && url.length > 0 && this.isSafeLink(url) ? url : null;
+    }
+
+    /**
+     * Reads the scheme of an address.
+     * @param {string} url - The address.
+     * @returns {string|null} The scheme in lower case, "" for a relative address, null for none.
+     */
+    _scheme(url) {
+        if (typeof url !== "string") {
+            return null;
+        }
+        const normalized = this._normalize(url);
+        for (let i = 0; i < normalized.length; i++) {
+            const c = normalized[i];
+            if (c === ":") {
+                return i === 0 ? null : normalized.slice(0, i).toLowerCase();
+            }
+            // a path, query or fragment before any colon makes the address relative
+            if (!/[A-Za-z0-9+.\-]/.test(c)) {
+                return "";
+            }
+        }
+        return "";
+    }
+
+    /**
+     * Removes what a browser ignores when it reads a scheme.
+     * @param {string} url - The address.
+     * @returns {string} The address without whitespace and control characters.
+     */
+    _normalize(url) {
+        return Array.from(url).filter((c) => {
+            const code = c.codePointAt(0);
+            return code > 0x20 && !(code >= 0x7f && code <= 0xa0) && !(code >= 0x2000 && code <= 0x200b)
+                && code !== 0x2028 && code !== 0x2029 && code !== 0x3000 && code !== 0xfeff;
+        }).join("");
+    }
+};
+
+/**
+ * Turns data into markup that cannot run script. Mirrors HtmlSanitizer of WebExpress.WebCore.
+ *
+ * The html fields of tables, boards, tiles and dashboards are written by applications from their
+ * data, which users wrote, and are put into the page with innerHTML. They are reduced to an
+ * allowlist of elements and attributes first: elements that run or load content are removed with
+ * their content, other unknown elements are unwrapped, every event handler, data attribute and id
+ * is dropped, addresses are checked by webexpress.webui.Url and inline styles keep harmless
+ * declarations only. The markup is parsed into an inert template, where nothing loads or runs.
+ */
+webexpress.webui.Html = new class {
+    static ALLOWED = new Set(["a", "abbr", "b", "bdi", "bdo", "blockquote", "br", "caption", "cite", "code", "col",
+        "colgroup", "dd", "del", "details", "dfn", "div", "dl", "dt", "em", "figcaption", "figure", "h1", "h2", "h3",
+        "h4", "h5", "h6", "hr", "i", "img", "ins", "kbd", "li", "mark", "ol", "p", "pre", "q", "s", "samp", "small",
+        "span", "strong", "sub", "summary", "sup", "table", "tbody", "td", "tfoot", "th", "thead", "time", "tr", "u",
+        "ul", "var", "wbr"]);
+    static REMOVED = new Set(["script", "style", "iframe", "frame", "frameset", "object", "embed", "applet",
+        "template", "noscript", "noembed", "noframes", "xmp", "plaintext", "title", "textarea", "select", "option",
+        "button", "form", "input", "svg", "math", "link", "meta", "base", "head", "audio", "video", "source",
+        "track", "canvas", "portal", "dialog"]);
+    static GLOBAL_ATTRIBUTES = new Set(["class", "title", "lang", "dir", "role", "style"]);
+    static ELEMENT_ATTRIBUTES = {
+        a: ["href"], img: ["src", "alt", "width", "height"], td: ["colspan", "rowspan"], th: ["colspan", "rowspan", "scope"],
+        col: ["span"], colgroup: ["span"], ol: ["start", "type", "reversed"], li: ["value"], time: ["datetime"],
+        q: ["cite"], blockquote: ["cite"], details: ["open"]
+    };
+    static STYLE_PROPERTIES = new Set(["color", "background-color", "text-align", "font-weight", "font-style",
+        "text-decoration", "vertical-align", "white-space"]);
+
+    /**
+     * Escapes text for the content of an element or an attribute value.
+     * @param {*} text - The text.
+     * @returns {string} The escaped text.
+     */
+    escape(text) {
+        return String(text ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[c]);
+    }
+
+    /**
+     * Sanitizes markup from data.
+     * @param {*} html - The markup.
+     * @returns {string} The markup that remains, safe to assign to innerHTML.
+     */
+    sanitize(html) {
+        if (html === null || html === undefined || html === "") {
+            return "";
+        }
+        const template = document.createElement("template");
+        template.innerHTML = String(html);
+        const root = template.content || template;
+        this._clean(root, 0);
+        if (root === template) {
+            return template.innerHTML;
+        }
+        // serialized in the inert document of the template, where an image does not load
+        const holder = (root.ownerDocument || document).createElement("div");
+        holder.appendChild(root);
+        return holder.innerHTML;
+    }
+
+    /**
+     * Cleans the children of a node.
+     * @param {Node} node - The node.
+     * @param {number} depth - The nesting depth.
+     */
+    _clean(node, depth) {
+        const Html = webexpress.webui.Html.constructor;
+        for (const child of Array.from(node.childNodes || [])) {
+            if (child.nodeType === 3) {
+                continue;
+            }
+            if (child.nodeType !== 1) {
+                child.remove();
+                continue;
+            }
+            const name = String(child.tagName || "").toLowerCase();
+            if (Html.REMOVED.has(name)) {
+                child.remove();
+                continue;
+            }
+            this._clean(child, depth + 1);
+            if (!Html.ALLOWED.has(name) || depth >= 64) {
+                // unwrapped: the tag goes, its content stays
+                child.replaceWith(...Array.from(child.childNodes));
+                continue;
+            }
+            this._cleanAttributes(child, name);
+        }
+    }
+
+    /**
+     * Keeps the attributes that are allowed for the element.
+     * @param {Element} element - The element.
+     * @param {string} name - Its name in lower case.
+     */
+    _cleanAttributes(element, name) {
+        const Html = webexpress.webui.Html.constructor;
+        const own = Html.ELEMENT_ATTRIBUTES[name] || [];
+        for (const attribute of Array.from(element.attributes || [])) {
+            const attributeName = String(attribute.name).toLowerCase();
+            const allowed = Html.GLOBAL_ATTRIBUTES.has(attributeName) || own.includes(attributeName)
+                || (attributeName.startsWith("aria-") && attributeName.length > 5);
+            let value = attribute.value;
+            if (allowed && (attributeName === "href" || attributeName === "cite")) {
+                value = webexpress.webui.Url.isSafeLink(value) ? value : null;
+            } else if (allowed && attributeName === "src") {
+                value = webexpress.webui.Url.isSafeImage(value) ? value : null;
+            } else if (allowed && attributeName === "style") {
+                value = this._cleanStyle(value);
+            }
+            if (!allowed || value === null) {
+                element.removeAttribute(attribute.name);
+            } else if (value !== attribute.value) {
+                element.setAttribute(attribute.name, value);
+            }
+        }
+        if (name === "a" && element.hasAttribute("href")) {
+            element.setAttribute("rel", "nofollow noopener noreferrer");
+        }
+    }
+
+    /**
+     * Keeps the declarations of an inline style that can neither load anything nor break out.
+     * @param {string} style - The style.
+     * @returns {string|null} The remaining declarations, or null.
+     */
+    _cleanStyle(style) {
+        const Html = webexpress.webui.Html.constructor;
+        const kept = String(style || "").split(";").map((declaration) => {
+            const colon = declaration.indexOf(":");
+            if (colon <= 0) {
+                return null;
+            }
+            const property = declaration.slice(0, colon).trim().toLowerCase();
+            const value = declaration.slice(colon + 1).trim();
+            return Html.STYLE_PROPERTIES.has(property) && value.length > 0 && value.length <= 64
+                && /^[A-Za-z0-9 #%.,()\-]+$/.test(value) && !/url|expression/i.test(value)
+                ? property + ": " + value + ";"
+                : null;
+        }).filter(Boolean);
+        return kept.length > 0 ? kept.join(" ") : null;
     }
 };
 

@@ -7,11 +7,22 @@
  * page to the next is a single exchange rather than a flash through an empty
  * frame.
  *
+ * Every DATA_REQUESTED_EVENT is answered by exactly one DATA_ARRIVED_EVENT or
+ * DATA_ERROR_EVENT, so a host can show a loading state without a timeout of its
+ * own. A load that a newer one supersedes is never answered on its own: its
+ * result is dropped, the newer load answers for both, and a slow response can
+ * never overwrite the page that was asked for last.
+ *
  * The following events are triggered:
  * - webexpress.webui.Event.DATA_REQUESTED_EVENT
  * - webexpress.webui.Event.DATA_ARRIVED_EVENT
+ * - webexpress.webui.Event.DATA_ERROR_EVENT { action: "load", error }; an error of
+ *   kind "abort" only ends the loading state and is no failure to report
  */
 webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
+    _loadSequence = 0;
+    _loading = false;
+
     /**
      * Creates a new controller instance bound to the given element.
      * @param {HTMLElement} element - The host element that will receive the embedded content.
@@ -216,6 +227,19 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
     }
 
     /**
+     * Tells whether an address resolves to the origin of the page.
+     * @param {string} uri - The address, absolute or relative.
+     * @returns {boolean} True for an address of this origin.
+     */
+    _isSameOrigin(uri) {
+        try {
+            return new URL(uri, window.location.href).origin === window.location.origin;
+        } catch {
+            return false;
+        }
+    }
+
+    /**
      * Executes script elements by recreating them, as inserted script tags
      * via innerHTML or appendChild are not executed by the browser automatically.
      * @param {Array<HTMLScriptElement>} scripts - List of script elements to execute.
@@ -289,9 +313,13 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
      * Dispatches DATA_REQUESTED_EVENT before fetching, and DATA_ARRIVED_EVENT after successful update.
      */
     load() {
+        const sequence = ++this._loadSequence;
+
         // an empty uri is a request to show nothing
         if (!this._uri) {
             this._element.innerHTML = "";
+            // the load still in flight was given up, and nothing else will answer it
+            this._finishLoad({ ok: false, error: { kind: "abort", status: 0, message: "superseded by an empty uri", retriable: false } });
             return;
         }
 
@@ -304,25 +332,65 @@ webexpress.webui.FrameCtrl = class extends webexpress.webui.Ctrl {
             this._element.appendChild(this._createPlaceholder());
         }
 
-        // notify that data fetching starts
+        // the frame embeds pages of this application and runs their scripts here, so a page of
+        // another origin - one that answers cross-origin requests - ran its scripts in ours
+        if (!this._isSameOrigin(this._uri)) {
+            const message = "Failed to load content. The address is not part of this site.";
+            this._renderError(message);
+            this._finishLoad({ ok: false, error: { kind: "http", status: 0, message: message, retriable: false } });
+            return;
+        }
+
+        this._loading = true;
         this._dispatch(webexpress.webui.Event.DATA_REQUESTED_EVENT, { uri: this._uri });
 
         // load through the transport, which answers with one result whatever happened
         webexpress.webui.Transport.request(this._uri, { credentials: "same-origin" }).then((result) => {
+            if (sequence !== this._loadSequence) {
+                return;
+            }
+
             if (!result.ok) {
-                // a superseded load says nothing about the content; every other failure does
+                // an aborted load says nothing about the content; every other failure does
                 if (result.error.kind !== "abort") {
                     this._renderError("Failed to load content. " + result.error.message);
                 }
+                this._finishLoad(result);
                 return;
             }
 
             const html = result.data && result.data.text !== undefined ? result.data.text : "";
             this._update(html);
-
-            // notify that data has arrived
-            this._dispatch(webexpress.webui.Event.DATA_ARRIVED_EVENT, { uri: this._uri, response: html });
+            this._finishLoad(result, html);
         });
+    }
+
+    /**
+     * Ends the loading state with the event that answers the request. Nothing is
+     * announced when no load was in flight, so a host never sees an answer
+     * without the request that belongs to it.
+     * @param {object} result - The transport result.
+     * @param {string} [html] - The arrived page, for a successful result.
+     */
+    _finishLoad(result, html) {
+        if (!this._loading) {
+            return;
+        }
+        this._loading = false;
+
+        if (result.ok) {
+            this._dispatch(webexpress.webui.Event.DATA_ARRIVED_EVENT, { uri: this._uri, response: html });
+        } else {
+            this._dispatch(webexpress.webui.Event.DATA_ERROR_EVENT, { action: "load", uri: this._uri, error: result.error });
+        }
+    }
+
+    /**
+     * Returns whether a load is in flight.
+     * @returns {boolean} True between the request and its answer.
+     */
+    get loading() {
+        return this._loading;
     }
 
     /**

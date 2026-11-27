@@ -144,7 +144,9 @@ namespace WebExpress.WebUI.WebPdf
             var offset = date.Offset;
             var sign = offset < TimeSpan.Zero ? "-" : "+";
 
-            entries.Add($"/CreationDate (D:{date:yyyyMMddHHmmss}{sign}{Math.Abs(offset.Hours):00}'{Math.Abs(offset.Minutes):00}')");
+            // the gregorian digits the format requires; the culture of the request wrote the
+            // year of its own calendar - 2569 under th-TH, 1448 under ar-SA
+            entries.Add(string.Create(CultureInfo.InvariantCulture, $"/CreationDate (D:{date:yyyyMMddHHmmss}{sign}{Math.Abs(offset.Hours):00}'{Math.Abs(offset.Minutes):00}')"));
 
             return $"<< {string.Join(" ", entries)} >>";
         }

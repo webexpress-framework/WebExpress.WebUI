@@ -943,7 +943,7 @@ webexpress.webui.ToolbarCtrl = class extends webexpress.webui.Ctrl {
                 } else if (child.classList.contains("wx-dropdown-item")) {
                     items.push({
                         id: child.id || null,
-                        uri: child.dataset.uri || "javascript:void(0);",
+                        uri: child.dataset.uri || null,
                         image: child.dataset.image || null,
                         icon: child.dataset.icon || null,
                         text: child.textContent || null,

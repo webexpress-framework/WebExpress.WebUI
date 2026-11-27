@@ -165,3 +165,106 @@ test("the headings of an embedded page continue the section of the host page", (
     assert.equal(sub.getAttribute("aria-level"), "6", "and its own steps are kept");
     assert.equal(title.getAttribute("role"), "heading", "the level is spoken through the role");
 });
+
+test("a page of another origin is not loaded, so its scripts never run here", async () => {
+    let fetched = 0;
+    const rt = loadWebUi({
+        browser: true,
+        extraFiles: ["webexpress.webui.section.js", "webexpress.webui.frame.js"],
+        fetch: () => { fetched++; return new Promise(() => { }); }
+    });
+
+    makeFrame(rt, "https://evil.example/page");
+    makeFrame(rt, "javascript:alert(1)");
+    makeFrame(rt, "/same/site");
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    assert.equal(fetched, 1, "only the address of this site is requested");
+});
+
+/**
+ * Loads a runtime that keeps every request pending until the test answers it,
+ * so the order in which responses arrive can be chosen.
+ * @returns {object} The runtime, the pending answers by uri, and the events the frame announced.
+ */
+function loadRacingRuntime() {
+    const pending = {};
+    const rt = loadWebUi({
+        browser: true,
+        extraFiles: ["webexpress.webui.section.js", "webexpress.webui.frame.js"],
+        fetch: (url) => new Promise((resolve) => { pending[url] = resolve; }),
+        globals: {
+            DOMParser: class {
+                parseFromString(html) {
+                    const body = rt.document.createElement("body");
+                    const p = rt.document.createElement("p");
+                    p.textContent = html;
+                    body.appendChild(p);
+                    return { querySelector: () => null, body: body, title: "" };
+                }
+            }
+        }
+    });
+
+    const answer = async (url, response) => {
+        pending[url](response || { ok: true, status: 200, headers: { get: () => "text/html" }, text: async () => url });
+        await new Promise((resolve) => setTimeout(resolve, 0));
+    };
+
+    return { rt, answer };
+}
+
+/**
+ * Records the load events a frame announces.
+ * @param {object} rt - The loaded runtime.
+ * @param {HTMLElement} element - The frame element.
+ * @returns {Array<string>} The recorded event kinds, filled as they arrive.
+ */
+function recordLoadEvents(rt, element) {
+    const events = [];
+    element.addEventListener(rt.wx.Event.DATA_REQUESTED_EVENT, () => events.push("requested"));
+    element.addEventListener(rt.wx.Event.DATA_ARRIVED_EVENT, () => events.push("arrived"));
+    element.addEventListener(rt.wx.Event.DATA_ERROR_EVENT, (e) => events.push("error:" + e.detail.error.kind));
+    return events;
+}
+
+test("a slow answer never overwrites the page that was asked for last", async () => {
+    const { rt, answer } = loadRacingRuntime();
+    const frame = makeFrame(rt, "/first");
+    const events = recordLoadEvents(rt, frame.element);
+
+    frame.ctrl.uri = "/second";
+    assert.equal(frame.ctrl.loading, true, "the frame is loading");
+
+    await answer("/second");
+    assert.equal(frame.element.textContent, "/second", "the page asked for last is shown");
+    assert.equal(frame.ctrl.loading, false, "and the loading state ended with it");
+
+    await answer("/first");
+    assert.equal(frame.element.textContent, "/second", "the superseded answer is dropped");
+    assert.deepEqual(events, ["requested", "arrived"], "and answers no request of its own");
+});
+
+test("a failed load ends the loading state with an error", async () => {
+    const { rt, answer } = loadRacingRuntime();
+    const frame = makeFrame(rt, "/broken");
+    const events = recordLoadEvents(rt, frame.element);
+
+    frame.ctrl.uri = "/broken";
+    await answer("/broken", { ok: false, status: 500, statusText: "Server Error", headers: { get: () => "text/plain" }, text: async () => "" });
+
+    assert.equal(frame.ctrl.loading, false, "nothing is loading any more");
+    assert.deepEqual(events, ["requested", "error:http"], "the request is answered with the failure");
+});
+
+test("an empty uri gives up the load in flight and says so", () => {
+    const { rt } = loadRacingRuntime();
+    const frame = makeFrame(rt, "/first");
+    const events = recordLoadEvents(rt, frame.element);
+
+    frame.ctrl.uri = "/second";
+    frame.ctrl.uri = "";
+
+    assert.equal(frame.ctrl.loading, false);
+    assert.deepEqual(events, ["requested", "error:abort"], "the abandoned request is answered, as an abort");
+});

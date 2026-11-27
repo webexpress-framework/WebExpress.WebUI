@@ -341,15 +341,14 @@ namespace WebExpress.WebUI.WebMarkdown
         }
 
         /// <summary>
-        /// Returns the source text of a code element. The parser keeps entities as written,
-        /// while markdown code holds the characters themselves - a code span is shown
-        /// verbatim, so an undecoded <c>&amp;lt;</c> would come back as four visible characters.
+        /// Returns the source text of a code element. The parser stores text decoded, which is
+        /// what markdown code holds: the characters themselves, shown verbatim.
         /// </summary>
         /// <param name="node">The code or preformatted element.</param>
-        /// <returns>The decoded text.</returns>
+        /// <returns>The text.</returns>
         private static string CodeText(IHtmlNode node)
         {
-            return WebUtility.HtmlDecode(PlainText(node));
+            return PlainText(node);
         }
 
         /// <summary>

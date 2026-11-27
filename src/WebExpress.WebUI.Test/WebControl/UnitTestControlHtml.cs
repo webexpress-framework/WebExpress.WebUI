@@ -53,5 +53,29 @@ namespace WebExpress.WebUI.Test.WebControl
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
+
+        /// <summary>
+        /// Tests that markup is sanitized unless it is declared trusted: a value from data put
+        /// into the markup ran as script in every visitor's browser.
+        /// </summary>
+        [Fact]
+        public void HtmlIsSanitizedUnlessTrusted()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            const string markup = "<b onclick=\"steal()\">name</b><script>steal()</script>";
+
+            // act
+            var sanitized = new ControlHtml { Html = _ => markup }.Render(context, visualTree).ToString();
+            var trusted = new ControlHtml { Html = _ => markup, Trusted = true }.Render(context, visualTree).ToString();
+
+            // validation
+            Assert.Contains("<b>name</b>", sanitized);
+            Assert.DoesNotContain("script", sanitized);
+            Assert.DoesNotContain("onclick", sanitized);
+            Assert.Equal(markup, trusted);
+        }
     }
 }

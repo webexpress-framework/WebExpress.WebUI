@@ -63,6 +63,25 @@ namespace WebExpress.WebUI.Test.WebNotification
         }
 
         /// <summary>
+        /// Tests that a notification added where no end of a request commits the session - over
+        /// the message queue socket - still reaches the cluster store.
+        /// </summary>
+        [Fact]
+        public void SessionNotificationIsStoredWithoutARequestEnd()
+        {
+            var a = CreateInstance();
+            var applicationA = a.ApplicationManager.GetApplications(typeof(TestApplication)).First();
+            var requestA = (Request)UnitTestControlFixture.CreateRequestMock("GET / HTTP/1.1\r\nCookie: session=\r\n\r\n");
+            var created = a.GetComponentManager<NotificationManager>().AddNotification(applicationA, requestA, "saved");
+
+            var b = CreateInstance();
+            var applicationB = b.ApplicationManager.GetApplications(typeof(TestApplication)).First();
+            var requestB = (Request)UnitTestControlFixture.CreateRequestMock($"GET / HTTP/1.1\r\nCookie: session={requestA.Session.Id}\r\n\r\n");
+
+            Assert.Equal(created.Id, Assert.Single(b.GetComponentManager<NotificationManager>().GetNotifications(applicationB, requestB)).Id);
+        }
+
+        /// <summary>
         /// Tests that a notification for one user travels with the session to the instance that
         /// serves the user's next request.
         /// </summary>

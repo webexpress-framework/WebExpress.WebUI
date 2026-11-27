@@ -56,9 +56,12 @@
     cursor: pointer;
 }
 
-/* a row is a pointer target: it keeps the 24px the target size criterion asks for */
+/* a row is a pointer target: it keeps the 24px the target size criterion asks for, and it
+   runs to the end of the row, so a click beside a short label still reaches the node */
 .wx-tree-label-container {
-    display: inline-flex;
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
     align-items: center;
     gap: 0.5em;
     padding-left: 0.4em;
@@ -78,6 +81,12 @@
 .wx-tree-label-container:focus-visible {
     outline: 2px solid var(--wx-primary);
     outline-offset: -2px;
+    border-radius: var(--wx-border-radius);
+}
+
+/* the surface shows how far the target reaches, now that it is wider than its label */
+.wx-tree-label-container:hover:not(.active) {
+    background-color: var(--wx-secondary-bg);
     border-radius: var(--wx-border-radius);
 }
 

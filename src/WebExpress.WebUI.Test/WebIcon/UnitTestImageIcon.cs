@@ -34,5 +34,49 @@ namespace WebExpress.WebUI.Test.WebIcon
 
             AssertExtensions.EqualWithPlaceholders(expected, html);
         }
+
+        /// <summary>
+        /// Tests that an image icon whose picture is a file of a plugin is drawn from the address
+        /// that carries the hash of its content - in the breadcrumb, the navigation and every list
+        /// the picture appears in on each page - so the browser keeps it for good.
+        /// </summary>
+        [Fact]
+        public void EmbeddedPictureIsAddressedByItsFingerprint()
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var application = componentHub.ApplicationManager.GetApplications(typeof(TestApplication)).First();
+            var renderContext = UnitTestControlFixture.CreateRenderContextMock(application);
+            var visualTree = new VisualTreeControl(componentHub, renderContext.PageContext);
+            var mounted = componentHub.AssetManager.GetAssets(application).Select(x => x.Route.ToString()).ToHashSet();
+            var icon = new ImageIconWebExpress(application);
+
+            // act
+            var html = icon.Render(renderContext, visualTree).ToString();
+
+            // validation
+            Assert.Matches(@"^/server/app/webexpress\.webui/assets/img/webexpress\.[0-9a-f]{12}\.svg$", icon.Uri.ToString());
+            Assert.Contains(icon.Uri.ToString(), mounted);
+            Assert.Contains($"src=\"{icon.Uri}\"", html);
+        }
+
+        /// <summary>
+        /// Tests that a picture that is no file of a plugin - drawn by an endpoint, or carried in a
+        /// data url - keeps the address it is given.
+        /// </summary>
+        [Theory]
+        [InlineData("/server/app/api/workspaces/HELP/icon")]
+        [InlineData("data:image/svg+xml;base64,PHN2Zy8+")]
+        public void OtherPictureKeepsItsAddress(string uri)
+        {
+            // arrange
+            UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+
+            // act
+            var icon = ImageIcon.FromString(uri);
+
+            // validation
+            Assert.Equal(uri, icon.Uri.ToString());
+        }
     }
 }

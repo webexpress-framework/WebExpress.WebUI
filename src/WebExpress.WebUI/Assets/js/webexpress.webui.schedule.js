@@ -1384,7 +1384,7 @@ webexpress.webui.ScheduleCtrl = class extends webexpress.webui.Ctrl {
         if (!entry) {
             entry = this._create(item.uri ? "a" : "div", "wx-schedule-entry");
             if (item.uri) {
-                entry.setAttribute("href", item.uri);
+                webexpress.webui.Url.link(entry, item.uri);
             }
 
             if (item.icon) {

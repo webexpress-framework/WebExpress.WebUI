@@ -277,3 +277,11 @@ test("csv and html export and import the used range", () => {
     assert.equal(ctrl.getValue("D4"), "z");
     assert.equal(ctrl.getValue("A1"), "x", "an import at a start cell keeps the rest");
 });
+
+test("a csv export neutralizes cells a spreadsheet program would run as a formula", () => {
+    const rt = loadSpreadsheet();
+    const { ctrl } = createSpreadsheet(rt, { sheets: [{ name: "S", data: [["@SUM(1+1)", "+cmd|' /C calc'!A0", -5, "-x"]] }] });
+
+    assert.equal(ctrl.exportCsv(), "'@SUM(1+1),'+cmd|' /C calc'!A0,-5,'-x");
+    assert.equal(ctrl.exportCsv({ keepFormulas: true }), "@SUM(1+1),+cmd|' /C calc'!A0,-5,-x");
+});

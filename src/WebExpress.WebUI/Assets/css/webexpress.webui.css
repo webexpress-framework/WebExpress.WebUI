@@ -30,6 +30,20 @@ body {
     background: var(--wx-body-bg);
 }
 
+/* the scripts are deferred, so the parsed page would be painted before the controls are built
+   from it - an editor as its encoded value, a menu as a row of bare links. the controller lifts
+   the mark once it has built the page; should a script never arrive, the page shows anyway */
+html[data-wx-pending] body {
+    visibility: hidden;
+    animation: wx-pending-timeout 0s linear 5s forwards;
+}
+
+@keyframes wx-pending-timeout {
+    to {
+        visibility: visible;
+    }
+}
+
 [data-wx-theme="dark"] {
     color-scheme: dark;
 }
@@ -2923,6 +2937,12 @@ pre {
     display: inline-flex;
     align-items: center;
     gap: clamp(0.2em, 0.5vw, 0.5em);
+}
+
+/* a menu entry is a row of the menu, not a word in a line: the inline box of .wx-link would
+   leave the strip below the baseline outside the link */
+.wx-link.dropdown-item {
+    display: flex;
 }
 
 /* a rule is drawn as the top border of the element, so how it is drawn is the

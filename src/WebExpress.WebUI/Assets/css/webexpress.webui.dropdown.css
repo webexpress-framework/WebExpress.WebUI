@@ -8,10 +8,19 @@
     vertical-align: middle;
 }
 
+/* block-level, so the entry fills its list item: an inline box sits on the text baseline and
+   leaves a strip under every entry where a click lands on the list item instead of the link */
 .wx-dropdown > ul > li > span,
 .wx-dropdown > ul > li > a {
-    display: inline-flex;
+    display: flex;
     align-items: center;
     cursor: pointer;
     gap: 0.5em;
+}
+
+/* the server-rendered entries are only the source the controller builds the menu from; the
+   scripts run after the page has been painted, and until then the entries would stand as loose
+   text in the navbar */
+.wx-webui-dropdown:not(.wx-dropdown) > * {
+    display: none;
 }

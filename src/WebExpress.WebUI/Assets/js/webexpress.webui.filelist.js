@@ -266,7 +266,7 @@ webexpress.webui.FileListCtrl = class extends webexpress.webui.Ctrl {
         }
 
         const link = document.createElement("a");
-        link.href = file.uri;
+        webexpress.webui.Url.link(link, file.uri);
         // a file without a name is still a link that must say where it leads
         link.textContent = file.name || this._fileNameFromUri(file.uri) || this._i18n("webexpress.webui:filelist.file", "File");
         link.target = "_blank";

@@ -291,3 +291,169 @@ test("clipboard cleanup leaves saved highlights and explicit HTML imports intact
     assert.doesNotMatch(r.editor.exportHtml(), /background-color: blue/);
     assert.match(r.editor.exportHtml(), /background-color: yellow/);
 });
+
+/**
+ * Drags the selected text to a model position the way the browser does: the gesture starts on
+ * the region, and the drop point comes from the caret lookup under the pointer.
+ * @param {object} r - The editor test runtime.
+ * @param {number} from - The selection start.
+ * @param {number} to - The selection end.
+ * @param {number} at - The drop position.
+ * @param {object} [keys] - Modifier keys held during the drop.
+ * @returns {object} The drop event.
+ */
+function dragText(r, from, to, at, keys = {}) {
+    r.select(from, to);
+    const data = new Map();
+    const dataTransfer = { types: [], setData(type, value) { data.set(type, value); this.types.push(type); }, getData(type) { return data.get(type) || ""; } };
+    const region = r.root.querySelector(".wx-editor-region");
+    const event = type => ({ type, target: region, dataTransfer, clientX: 1, clientY: 1, ...keys,
+        preventDefault() { this.defaultPrevented = true; }, stopPropagation() {}, stopImmediatePropagation() {} });
+    r.root.dispatchEvent(event("dragstart"));
+    const point = r.editor._view.point(at);
+    r.document.caretPositionFromPoint = () => ({ offsetNode: point.node, offset: point.offset });
+    const drop = event("drop"); r.root.dispatchEvent(drop);
+    r.root.dispatchEvent(event("dragend"));
+    return drop;
+}
+
+const paragraphs = r => Array.from(r.root.querySelectorAll("p"), p => p.textContent);
+
+test("dragging a selection moves it within the paragraph and one undo puts it back", () => {
+    const r = loadEditor({ html: "<p>alpha beta gamma</p>" });
+    const before = r.editor.value;
+    assert.equal(dragText(r, 0, 6, 16).defaultPrevented, true);
+    assert.deepEqual(paragraphs(r), ["beta gammaalpha "], "the source is gone and no paragraph is split off");
+    assert.deepEqual({ ...r.editor.selection }, { anchor: 16, focus: 16 }, "the caret follows the moved text");
+    r.editor.execCommand("undo");
+    assert.equal(r.editor.value, before);
+});
+
+test("dragging a selection backwards keeps the formatting it carries", () => {
+    const r = loadEditor({ html: "<p>alpha <b>beta</b></p>" });
+    dragText(r, 6, 10, 0);
+    assert.deepEqual(paragraphs(r), ["betaalpha "]);
+    assert.match(r.editor.exportHtml(), /<p><strong>beta<\/strong>alpha <\/p>/);
+    assert.deepEqual({ ...r.editor.selection }, { anchor: 4, focus: 4 });
+});
+
+test("dragging with the copy modifier or onto the selection itself leaves the source in place", () => {
+    const r = loadEditor({ html: "<p>alpha beta gamma</p>" });
+    dragText(r, 0, 6, 16, { ctrlKey: true });
+    assert.deepEqual(paragraphs(r), ["alpha beta gammaalpha "]);
+    const copied = r.editor.value;
+    dragText(r, 0, 6, 3);
+    assert.equal(r.editor.value, copied, "a drop inside the dragged range changes nothing");
+});
+
+test("text running across paragraphs is opened at both ends where it lands", () => {
+    const r = loadEditor({ html: "<p>one</p><p>two</p><p>three</p>" });
+    dragText(r, 2, 5, 13);
+    assert.deepEqual(paragraphs(r), ["onwo", "threee", "t"], "the source closes up, the first part continues three");
+    assert.deepEqual({ ...r.editor.selection }, { anchor: 13, focus: 13 });
+});
+
+test("whole paragraphs keep apart before, behind and inside the paragraph they are dropped on", () => {
+    const html = "<p>one</p><p>two</p><p>three</p>";
+    // 0..8 covers one and two up to the start of three, so it carries both paragraph ends
+    let r = loadEditor({ html }); dragText(r, 0, 4, 8);
+    assert.deepEqual(paragraphs(r), ["two", "one", "three"], "at the start it goes before");
+    r = loadEditor({ html }); dragText(r, 0, 4, 13);
+    assert.deepEqual(paragraphs(r), ["two", "three", "one"], "at the end it goes behind, without an empty paragraph");
+    r = loadEditor({ html }); dragText(r, 0, 8, 10);
+    assert.deepEqual(paragraphs(r), ["th", "one", "two", "ree"], "in the middle it splits the paragraph");
+    r = loadEditor({ html }); dragText(r, 0, 8, 8);
+    assert.deepEqual(paragraphs(r), ["one", "two", "three"], "back onto its own end it stays");
+});
+
+test("a whole heading moved away leaves the paragraph behind it as it was", () => {
+    const r = loadEditor({ html: "<h2>head</h2><p>two</p><p>three</p>" });
+    const before = r.editor.value;
+    dragText(r, 0, 5, 14);
+    assert.match(r.editor.exportHtml(), /<p>two<\/p><p>three<\/p><h2>head<\/h2>/);
+    r.editor.execCommand("undo");
+    assert.equal(r.editor.value, before);
+});
+
+test("moving the whole text of a paragraph or list item leaves no empty line behind", () => {
+    let r = loadEditor({ html: "<p>one</p><p>two</p><p>three</p>" });
+    dragText(r, 8, 13, 0);
+    assert.deepEqual(paragraphs(r), ["threeone", "two"]);
+    r = loadEditor({ html: "<ul><li><p>a</p></li></ul><p>q</p>" });
+    dragText(r, 0, 1, 3);
+    assert.match(r.editor.exportHtml(), /<p>qa<\/p><\/div>/, "the emptied item takes its list along");
+    assert.equal(r.root.querySelector("ul"), null);
+});
+
+test("list items keep their list when copied or moved, and join a list they land in", () => {
+    const html = "<ul><li><p>a</p></li><li><p>b</p></li></ul><p>one</p><p>two</p>";
+    let r = loadEditor({ html });
+    const payload = dragText(r, 0, 2, 11).dataTransfer;
+    assert.match(payload.getData("text/html"), /^<ul><li><p>a<\/p><\/li><\/ul>$/);
+    assert.match(r.editor.exportHtml(), /<ul><li><p>b<\/p><\/li><\/ul><p>one<\/p><p>two<\/p><ul><li><p>a<\/p><\/li><\/ul>/);
+    r = loadEditor({ html });
+    dragText(r, 0, 3, 7);
+    assert.match(r.editor.exportHtml(), /<p>one<\/p><ul><li><p>a<\/p><\/li><li><p>b<\/p><\/li><\/ul><p>two<\/p>/, "the source items go, no empty bullet or line is left");
+    r = loadEditor({ html: "<ul><li><p>a</p></li><li><p>b</p></li></ul><ol><li><p>x</p></li><li><p>y</p></li></ol>" });
+    dragText(r, 0, 4, 5);
+    assert.match(r.editor.exportHtml(), /<ol[^>]*><li><p>x<\/p><\/li><li><p>a<\/p><\/li><li><p>b<\/p><\/li><li><p>y<\/p><\/li><\/ol>/);
+    assert.deepEqual({ ...r.editor.selection }, { anchor: 5, focus: 5 });
+    r = loadEditor({ html });
+    dragText(r, 2, 3, 7);
+    assert.match(r.editor.exportHtml(), /<ul><li><p>a<\/p><\/li><\/ul><p>oneb<\/p>/, "text from within one item is just text");
+});
+
+test("nested lists keep their levels when copied or moved", () => {
+    // a(0..1) > [a1(2..4) > [a1x(5..8)], a2(9..11)], b(12..13), end(14..17)
+    const html = "<ul><li><p>a</p><ul><li><p>a1</p><ol><li><p>a1x</p></li></ol></li><li><p>a2</p></li></ul></li><li><p>b</p></li></ul><p>end</p>";
+    const nested = '<ul><li><p>a</p><ul><li><p>a1</p><ol start="1"><li><p>a1x</p></li></ol></li><li><p>a2</p></li></ul></li><li><p>b</p></li></ul>';
+    let r = loadEditor({ html });
+    assert.equal(dragText(r, 0, 14, 17).dataTransfer.getData("text/html"), nested);
+    assert.ok(r.editor.exportHtml().includes("<p>end</p>" + nested), "the whole tree lands behind end");
+    r = loadEditor({ html });
+    assert.equal(dragText(r, 2, 12, 17).dataTransfer.getData("text/html"), '<ul><li><p>a1</p><ol start="1"><li><p>a1x</p></li></ol></li><li><p>a2</p></li></ul>',
+        "the copy starts at the level it was taken from");
+    assert.match(r.editor.exportHtml(), /^<div[^>]*><div[^>]*><ul><li><p>a<\/p><\/li><li><p>b<\/p><\/li><\/ul>/, "the source keeps its outer items");
+    r = loadEditor({ html });
+    dragText(r, 2, 9, 13);
+    assert.match(r.editor.exportHtml(), /<li><p>b<\/p><\/li><li><p>a1<\/p><ol start="1"><li><p>a1x<\/p><\/li><\/ol><\/li><\/ul><p>end<\/p>/, "moved into a list, the item brings its sub-list");
+});
+
+test("a selection starting deeper than it ends carries no item without text", () => {
+    // x(0..1) > y(2..3) > z(4..5); w(6..7); end(8..11)
+    const r = loadEditor({ html: "<ul><li><p>x</p><ul><li><p>y</p><ul><li><p>z</p></li></ul></li></ul></li><li><p>w</p></li></ul><p>end</p>" });
+    assert.equal(dragText(r, 4, 8, 11).dataTransfer.getData("text/html"), "<ul><li><p>z</p></li><li><p>w</p></li></ul>");
+    assert.match(r.editor.exportHtml(), /<ul><li><p>x<\/p><ul><li><p>y<\/p><\/li><\/ul><\/li><\/ul><p>end<\/p><ul><li><p>z<\/p><\/li><li><p>w<\/p><\/li><\/ul>/);
+});
+
+test("deleting across list items joins them instead of leaving an empty bullet", () => {
+    const r = loadEditor({ html: "<ul><li><p>alpha</p></li><li><p>beta</p></li><li><p>gamma</p></li></ul>" });
+    r.select(2, 8);
+    r.editor.dispatch({ type: "delete" });
+    assert.match(r.editor.exportHtml(), /<ul><li><p>alta<\/p><\/li><li><p>gamma<\/p><\/li><\/ul>/);
+});
+
+test("pasted paragraphs continue the text around the caret instead of splitting off empty ones", () => {
+    const paste = (r, html) => r.editor._insertTransfer({ getData: type => type === "text/html" ? html : "" });
+    let r = loadEditor({ html: "<p>alpha beta</p>" }); r.select(5); paste(r, "<p>x1</p><p>x2</p>");
+    assert.deepEqual(paragraphs(r), ["alphax1", "x2 beta"]);
+    assert.deepEqual({ ...r.editor.selection }, { anchor: 10, focus: 10 }, "the caret stands behind the pasted text");
+    r = loadEditor({ html: "<p>alpha</p>" }); r.select(5); paste(r, "<p>x1</p><p>x2</p>");
+    assert.deepEqual(paragraphs(r), ["alphax1", "x2"]);
+    r = loadEditor({ html: "<p>alpha</p>" }); r.select(0); paste(r, "<h2>T</h2><p>x</p>");
+    assert.match(r.editor.exportHtml(), /<h2>T<\/h2><p>xalpha<\/p>/, "a heading at the start keeps its kind");
+    r = loadEditor({ html: "<h2></h2>" }); r.select(0); paste(r, "<p>x</p>");
+    assert.match(r.editor.exportHtml(), /<h2>x<\/h2>/, "a single paragraph is text in the block it lands in");
+});
+
+test("paragraphs placed into a list become items of their own, so a list command reaches one", () => {
+    const paste = (r, html) => r.editor._insertTransfer({ getData: type => type === "text/html" ? html : "" });
+    const r = loadEditor({ html: "<ul><li><p>item</p></li><li><p>next</p></li></ul>" });
+    r.select(2); paste(r, "<p>x1</p><p>x2</p>");
+    assert.match(r.editor.exportHtml(), /<ul><li><p>itx1<\/p><\/li><li><p>x2em<\/p><\/li><li><p>next<\/p><\/li><\/ul>/);
+    r.select(1); r.editor.execCommand("insertUnorderedList");
+    assert.match(r.editor.exportHtml(), /<p>itx1<\/p><ul><li><p>x2em<\/p><\/li><li><p>next<\/p><\/li><\/ul>/, "only the first item leaves the list");
+    const d = loadEditor({ html: "<ul><li><p>a</p></li><li><p>b</p></li></ul><p>one</p><p>two</p><p>three</p>" });
+    dragText(d, 4, 12, 2);
+    assert.match(d.editor.exportHtml(), /<ul><li><p>a<\/p><\/li><li><p>one<\/p><\/li><li><p>two<\/p><\/li><li><p>b<\/p><\/li><\/ul><p>three<\/p>/);
+});

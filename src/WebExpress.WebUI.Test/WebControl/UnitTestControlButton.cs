@@ -268,5 +268,48 @@ namespace WebExpress.WebUI.Test.WebControl
             Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html5.Trim());
             Assert.Equal(@"<button type=""button"" class=""wx-button btn""><i class=""wx-icon-light wx-icon-light-star""></i></button>", html6.Trim());
         }
+
+        /// <summary>
+        /// Tests that a modal action names the success action a form in the dialog is told to
+        /// run, and that None is written out, since an absent option leaves the form to decide.
+        /// </summary>
+        [Theory]
+        [InlineData(null, @"<button type=""button"" class=""wx-button btn"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modal""></button>")]
+        [InlineData(TypeModalSuccessAction.None, @"<button type=""button"" class=""wx-button btn"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modal"" data-wx-primary-success=""none""></button>")]
+        [InlineData(TypeModalSuccessAction.Reload, @"<button type=""button"" class=""wx-button btn"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modal"" data-wx-primary-success=""reload""></button>")]
+        [InlineData(TypeModalSuccessAction.FollowUri, @"<button type=""button"" class=""wx-button btn"" data-wx-primary-action=""modal"" data-wx-primary-target=""#modal"" data-wx-primary-success=""follow-uri""></button>")]
+        public void PrimaryActionSuccess(TypeModalSuccessAction? success, string expected)
+        {
+            // arrange
+            var componentHub = UnitTestControlFixture.CreateAndRegisterComponentHubMock();
+            var context = UnitTestControlFixture.CreateRenderContextMock();
+            var visualTree = new VisualTreeControl(componentHub, context.PageContext);
+            var control = new ControlButton()
+            {
+                PrimaryAction = _ => new ActionModal("modal") { SuccessAction = success }
+            };
+
+            // act
+            var html = control.Render(context, visualTree);
+
+            // validation
+            AssertExtensions.EqualWithPlaceholders(expected, html);
+        }
+
+        /// <summary>
+        /// Tests that the json form of a modal action carries the success option, which the
+        /// client writes onto the element of a card or a row like every other option.
+        /// </summary>
+        [Fact]
+        public void ActionModalSuccessToJson()
+        {
+            // act
+            var plain = new ActionModal("modal").ToJson();
+            var none = new ActionModal("modal") { SuccessAction = TypeModalSuccessAction.None }.ToJson();
+
+            // validation
+            Assert.False(plain.ContainsKey("success"));
+            Assert.Equal("none", none["success"]);
+        }
     }
 }

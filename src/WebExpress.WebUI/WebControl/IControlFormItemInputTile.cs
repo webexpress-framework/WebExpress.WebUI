@@ -20,6 +20,12 @@ namespace WebExpress.WebUI.WebControl
         Func<IRenderControlContext, bool> MultiSelect { get; }
 
         /// <summary>
+        /// Gets a value indicating whether a plain click toggles a tile in and out of a
+        /// multiple selection.
+        /// </summary>
+        Func<IRenderControlContext, bool> ToggleOnClick { get; }
+
+        /// <summary>
         /// Gets a value indicating whether a search box is shown above the tiles.
         /// </summary>
         Func<IRenderControlContext, bool> Searchable { get; }

@@ -268,7 +268,7 @@ webexpress.webui.InputDnfCtrl = class extends webexpress.webui.Ctrl {
     _createCloseButton(container, group) {
         const close = document.createElement("a");
         close.className = this._iconClass("xmark");
-        close.href = "javascript:void(0);";
+        close.href = "#";
         close.setAttribute("role", "button");
 
         close.addEventListener("click", (e) => {

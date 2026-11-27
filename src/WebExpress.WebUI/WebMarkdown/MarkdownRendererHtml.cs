@@ -120,7 +120,7 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownBlockElementCode code)
                 {
-                    list.Add(new HtmlElementTextContentPre(new HtmlText(EscapeCode(code.Content)))
+                    list.Add(new HtmlElementTextContentPre(new HtmlText(code.Content))
                     {
                         Class = "wx-webui-code"
                     }
@@ -270,19 +270,27 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownInlineElementCode inlineCode)
                 {
-                    list.Add(new HtmlElementTextSemanticsCode(new HtmlText(EscapeCode(inlineCode.Code))) { Inline = true });
+                    list.Add(new HtmlElementTextSemanticsCode(new HtmlText(inlineCode.Code)) { Inline = true });
                 }
+                // markdown is user input: an address whose scheme is not on the allowlist
+                // (javascript:, vbscript:, data: documents) is shown as text, never followed
                 else if (element is MarkdownInlineElementUrl url)
                 {
-                    list.Add(new HtmlElementTextSemanticsA(new HtmlText(url.Url)) { Href = url.Url, Inline = true });
+                    list.Add(UrlPolicy.IsSafeLink(url.Url)
+                        ? new HtmlElementTextSemanticsA(new HtmlText(url.Url)) { Href = url.Url, Inline = true }
+                        : new HtmlText(url.Url));
                 }
                 else if (element is MarkdownInlineElementImage img)
                 {
-                    list.Add(new HtmlElementMultimediaImg() { Src = img.Url, Alt = img.AltText, Style = "max-width: 100%;", Inline = true });
+                    list.Add(UrlPolicy.IsSafeImage(img.Url)
+                        ? new HtmlElementMultimediaImg() { Src = img.Url, Alt = img.AltText, Style = "max-width: 100%;", Inline = true }
+                        : new HtmlText(img.AltText));
                 }
                 else if (element is MarkdownInlineElementLink link)
                 {
-                    list.Add(new HtmlElementTextSemanticsA(new HtmlText(link.Text)) { Href = link.Url, Inline = true });
+                    list.Add(UrlPolicy.IsSafeLink(link.Url)
+                        ? new HtmlElementTextSemanticsA(new HtmlText(link.Text)) { Href = link.Url, Inline = true }
+                        : new HtmlText(link.Text));
                 }
                 else if (element is MarkdownInlineElementCheckbox checkbox)
                 {
@@ -311,7 +319,9 @@ namespace WebExpress.WebUI.WebMarkdown
                 }
                 else if (element is MarkdownInlineElementHtml html)
                 {
-                    list.Add(new HtmlRaw(html.Html));
+                    // inline html written by a user reaches other users, so only what the
+                    // sanitizer keeps - no script, no event handler, no foreign address - is written
+                    list.Add(new HtmlRaw(HtmlSanitizer.Sanitize(html.Html)));
                 }
                 else if (element is MarkdownInlineElementPlainText text)
                 {
@@ -425,23 +435,6 @@ namespace WebExpress.WebUI.WebMarkdown
             return cell.Content
                 .SelectMany(x => x is MarkdownBlockElementParagraph paragraph ? paragraph.Content : [x])
                 .ToList();
-        }
-
-        /// <summary>
-        /// Escapes the content of a code span or code block. Code is shown as written, so a
-        /// tag in it must stay text - unescaped, an <c>&lt;object&gt;</c> in backticks becomes a
-        /// live element that swallows the rest of the paragraph. Entities are not decoded
-        /// inside code either, which is why the ampersand is escaped as well. Plain text is
-        /// deliberately left alone: markdown passes inline HTML and entities through there.
-        /// </summary>
-        /// <param name="code">The code as written, may be null.</param>
-        /// <returns>The code as HTML text.</returns>
-        private static string EscapeCode(string code)
-        {
-            return code?
-                .Replace("&", "&amp;")
-                .Replace("<", "&lt;")
-                .Replace(">", "&gt;");
         }
     }
 }

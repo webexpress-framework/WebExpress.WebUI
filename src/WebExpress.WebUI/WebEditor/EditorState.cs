@@ -182,9 +182,11 @@ namespace WebExpress.WebUI.WebEditor
             {
                 var text = new StringBuilder();
                 AppendPlainText(heading, text);
-                var caption = WebUtility.HtmlEncode(text.ToString().Trim());
+                // kept as text, since the entry renders it through HtmlText; the limit counts the
+                // encoded length, which is what the page grows by
+                var caption = text.ToString().Trim();
                 headings.Add(caption);
-                textLength += caption.Length + 9L;
+                textLength += WebUtility.HtmlEncode(caption).Length + 9L;
                 // repeated entries must not bypass the input document's resource limits
                 if (copies * (headings.Count * 2L + 2) > 50000 || copies * textLength > 8000000)
                 {
@@ -248,7 +250,7 @@ namespace WebExpress.WebUI.WebEditor
             var attrs = Child(node, "attrs");
             if (type == "text")
             {
-                IHtmlNode text = new HtmlText(WebUtility.HtmlEncode(Text(node, "text")));
+                IHtmlNode text = new HtmlText(Text(node, "text"));
                 var marks = Child(node, "marks");
                 foreach (var (mark, tag) in new[] { ("code", "code"), ("superscript", "sup"), ("subscript", "sub"), ("strikethrough", "s"), ("underline", "u"), ("italic", "em"), ("bold", "strong") })
                 {
@@ -272,7 +274,7 @@ namespace WebExpress.WebUI.WebEditor
                 }
                 return [AddComment(text, marks)];
             }
-            if (type == "atom") return Text(attrs, "kind") == "instruction" ? [] : [new HtmlText(WebUtility.HtmlEncode(Text(attrs, "text")))];
+            if (type == "atom") return Text(attrs, "kind") == "instruction" ? [] : [new HtmlText(Text(attrs, "text"))];
             if (type == "image")
             {
                 var source = Url(Text(attrs, "src"), true);
@@ -302,7 +304,7 @@ namespace WebExpress.WebUI.WebEditor
                 }
                 if (name == "status")
                 {
-                    var status = Element("span", [new HtmlText(WebUtility.HtmlEncode(Text(data, "text")))]);
+                    var status = Element("span", [new HtmlText(Text(data, "text"))]);
                     status.Class = "badge bg-" + tone;
                     return [status];
                 }
@@ -315,7 +317,7 @@ namespace WebExpress.WebUI.WebEditor
                 }
                 if (Flag(attrs, "container")) return children;
                 var label = Text(Child(attrs, "data"), "text");
-                return label.Length > 0 ? [new HtmlText(WebUtility.HtmlEncode(label))] : [];
+                return label.Length > 0 ? [new HtmlText(label)] : [];
             }
             var element = Element(type, children);
             var align = Text(attrs, "align");

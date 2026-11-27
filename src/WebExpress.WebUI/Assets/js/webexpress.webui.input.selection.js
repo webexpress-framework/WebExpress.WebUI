@@ -75,9 +75,10 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
         element.appendChild(dropdown);
         element.appendChild(dropdownMenu);
 
-        // attach native popover behavior for the dropdown menu
-        // by class: a preset value has already put the chips with their remove buttons in front of it
-        const trigger = dropdown.querySelector(".wx-selection-trigger");
+        // attach native popover behavior for the dropdown menu; the arrow, not the first button
+        // of the field, opens it: a preset value has already put the chips with their remove
+        // buttons in front of it
+        const trigger = this._trigger;
         this._initializeMenu(dropdown, dropdownMenu, trigger);
         dropdownMenu.addEventListener("toggle", (event) => {
             if (event.newState === "open") { this._filterInput.focus({ preventScroll: true }); }
@@ -140,6 +141,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
         dropdown.appendChild(selection);
         dropdown.appendChild(expandIcon);
         this._selection = selection;
+        this._trigger = expandIcon;
 
         return dropdown;
     }
@@ -168,20 +170,13 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
             const item = this._items.find((i) => { return i.id == itemId; });
 
             if (item) {
+                // one assignment, so a single choice that replaces its value never announces
+                // the empty value in between
+                this.value = this._multiselect ? [...this._values, item.id] : [item.id];
+
                 if (!this._multiselect) {
-                    this.value = [];
-                }
-
-                // toggle selection or add unique
-                if (!this._values.includes(item.id)) {
-                    this.value = [...this.value, item.id];
-                }
-
-                // close the dropdown after selection (optional logic for single select)
-                if (!this._multiselect) {
-
                     webexpress.webui.NativeMenu.hide(this._dropdownmenu);
-                    this._dropdown.querySelector(".wx-selection-trigger").focus({ preventScroll: true });
+                    this._trigger.focus({ preventScroll: true });
                 }
             }
         });
@@ -268,7 +263,8 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
                     color: elem.dataset.color,
                     icon: elem.dataset.icon,
                     image: elem.dataset.image,
-                    content: elem.innerHTML || elem.dataset.label,
+                    // the label attribute is decoded by the browser, so it is text and is escaped
+                    content: elem.innerHTML || webexpress.webui.Html.escape(elem.dataset.label ?? ""),
                     disabled: elem.hasAttribute("disabled"),
                     // an option without the attribute states no condition and is always
                     // offered; one with it belongs to the listed values of the field this
@@ -509,7 +505,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
             } else if (item.type === "header") {
                 const li = document.createElement("li");
                 li.className = "dropdown-header";
-                li.innerHTML = item.content;
+                li.innerHTML = webexpress.webui.Html.sanitize(item.content);
                 fragment.appendChild(li);
             } else {
                 const li = document.createElement("li");
@@ -526,7 +522,7 @@ webexpress.webui.InputSelectionCtrl = class extends webexpress.webui.MenuCtrl {
                 if (item.disabled) {
                     contentWrapper.setAttribute("disabled", "disabled");
                 }
-                contentWrapper.innerHTML = item.content;
+                contentWrapper.innerHTML = webexpress.webui.Html.sanitize(item.content);
 
                 if (item.icon) {
                     const icon = document.createElement("i");

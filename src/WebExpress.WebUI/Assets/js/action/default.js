@@ -21,6 +21,7 @@
             const target = getActionAttribute(element, prefix, "target");
             const uri = getActionAttribute(element, prefix, "uri");
             const size = getActionAttribute(element, prefix, "size");
+            const success = getActionAttribute(element, prefix, "success");
             const instance = controller.getInstance(target);
 
             if (!instance) {
@@ -31,6 +32,10 @@
                 }
                 if (uri) {
                     instance.uri = uri;
+                }
+                // only a form dialog knows success actions; any other dialog ignores the option
+                if (success && "successAction" in instance) {
+                    instance.successAction = success;
                 }
                 instance.show();
             }

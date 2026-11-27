@@ -84,6 +84,23 @@ Neither a picker that is not required ("nothing" is a legitimate answer there) n
 search box (a term narrowing the list to one card is the user looking, not the form
 deciding) takes part.
 
+### Multiple selection
+
+`data-multiselect="true"` (`ControlFormItemInputTile.MultiSelect`) lets several tiles be
+chosen; the value is their ids separated by semicolons. A plain click selects the clicked
+tile alone, Ctrl+click (Cmd+click) adds or removes it, Shift+click adds the range from the
+tile clicked last. With `data-toggle-on-click="true"` (`ToggleOnClick`) a plain click adds or
+removes the tile, the way a checkbox does; Ctrl+click and Shift+click keep their meaning.
+Space and Enter on a focused tile toggle it in both modes. The controller exposes the
+option as `toggleOnClick`.
+
+The tile a range starts from is the one clicked or toggled last, whether by mouse or
+keyboard; a Shift+click leaves it in place, so successive Shift+clicks extend from the
+same tile, as in a file list. The picker remembers that tile by its id, so the anchor
+survives the tiles being reloaded or reordered. A range takes in only the tiles on screen:
+tiles a search or the bound filter hides stay unselected, because the user could not see
+that they were chosen.
+
 ### Bound values
 
 A tile of the picker may carry `data-wx-bind-{name}` attributes. When the tile is

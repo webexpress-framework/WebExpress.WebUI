@@ -279,6 +279,12 @@ The parser supports bidirectional conversion between Markdown and its internal A
 
 This enables a complete round-trip: Markdown can be parsed, transformed, and then serialized back to Markdown while preserving all structural elements including plugin syntax.
 
+### Security
+Markdown is written by users and read by others, so the HTML conversion never writes script. Text is encoded, inline HTML passes the allowlist `HtmlSanitizer` of WebExpress.WebCore (no script, style, iframe, svg or form content, no event handlers or data attributes, inline styles reduced to colors, alignment and font styling), and a link, image or bare address whose scheme is not `http`, `https`, `mailto`, `tel` or relative (`data:` raster images for images) is shown as text instead of being followed. A `javascript:` link therefore renders as its caption.
+
+### Limits
+Markdown is user input, and every nesting level - a quote, an indent, a callout, a list level, a block plugin, an emphasis - is a recursive call in the parser and in each renderer. A stack overflow cannot be caught in .NET and ends the server process, so the parser descends at most `MarkdownParser.MaxNestingDepth` (32) levels. Content nested deeper is kept as plain text of the innermost element instead of being parsed, and a list item indented deeper than the limit is placed at the deepest level. The parser runs in linear time in the length of the text, including long lists and paragraphs full of unclosed markers.
+
 ### HTML to Markdown
 
 The way back from HTML is `MarkdownRendererHtmlToMarkdown`. The HTML itself is read by `HtmlParser`, which maps every known tag to its own node class; the renderer matches on those classes and builds the AST, so all decisions about escaping, list indentation, numbering and table alignment stay in the Markdown renderer that already makes them.

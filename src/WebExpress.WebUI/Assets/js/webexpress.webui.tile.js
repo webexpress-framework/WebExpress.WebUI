@@ -459,7 +459,8 @@ webexpress.webui.TileCtrl = class extends webexpress.webui.Ctrl {
         const body = document.createElement("div");
         body.className = "card-body";
         if (tile.html) {
-            body.innerHTML = tile.html;
+            // the html arrives as data an application wrote from user input
+            body.innerHTML = webexpress.webui.Html.sanitize(tile.html);
         }
         card.appendChild(body);
 
