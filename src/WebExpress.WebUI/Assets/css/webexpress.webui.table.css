@@ -564,7 +564,7 @@ a.wx-cell-content:hover { text-decoration: underline; color: var(--wx-link-hover
     border-right: 1px solid var(--wx-table-border-color);
 }
 
-/* Letztes Element in Zeilen und Headern (Entfernen des rechten Randes) */
+/* last cell in rows and headers drops its right border */
 .wx-table.table-bordered .wx-table-row .wx-table-cell:last-child,
 .wx-table.table-bordered .wx-table-row .wx-grid-cell:last-child,
 .wx-table.table-bordered .wx-grid-row .wx-table-cell:last-child,

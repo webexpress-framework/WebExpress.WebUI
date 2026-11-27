@@ -64,8 +64,8 @@
         /// <summary>
         /// Conversion to a CSS class.
         /// </summary>
-        /// <param name="color">Die Farbe, welches umgewandelt werden soll</param>
-        /// <param name="outline">Die Outline-Eigenschaft</param>
+        /// <param name="color">The color to convert.</param>
+        /// <param name="outline">True to use the outline variant of the color.</param>
         /// <returns>The CSS class belonging to the layout</returns>
         public static string ToClass(this TypeColorButton color, bool outline = false)
         {

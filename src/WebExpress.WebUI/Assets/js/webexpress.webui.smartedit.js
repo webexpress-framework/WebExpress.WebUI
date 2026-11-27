@@ -172,7 +172,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             return;
         }
 
-        // wert vor beginn zwischenspeichern
+        // kept so that a cancel can restore it
         this._previousValue = this.value;
 
         this._activeEdit = element;
@@ -305,14 +305,13 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
 
         btnCancel.addEventListener("click", (e) => {
             e.preventDefault();
-            // bei abbrechen alten wert wiederherstellen
             this._finishEditing(false, element, this._previousValue);
         });
 
         this._outsideClickHandler = (e) => {
             if (!element.contains(e.target)) {
                 e.stopPropagation();
-                // bei klick außerhalb abbrechen und alten wert wiederherstellen
+                // a click outside counts as cancel
                 this._finishEditing(false, element, this._previousValue);
             }
         };
@@ -356,7 +355,7 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             this.onCancel(element, value);
         }
 
-        // editor zurücksetzen (falls kontrollinstanz vorhanden)
+        // the editor is reused by the next edit, so it has to start from the settled value
         if (this._editor) {
             const ctrl = webexpress.webui.Controller.getInstanceByElement(this._editor);
             if (ctrl && typeof ctrl.value !== "undefined") {
@@ -374,11 +373,9 @@ webexpress.webui.SmartEditCtrl = class extends webexpress.webui.Ctrl {
             }
         }
 
-        // anzeige aktualisieren mit entsprechendem wert (neu oder wiederhergestellt)
         const view = this._getView(value);
         element.appendChild(view);
 
-        // edit modus beenden und cache löschen
         this._activeEdit = null;
         this._previousValue = null;
 
