@@ -170,6 +170,35 @@ test("wx-webui-sidebar marks the root rows of a section that holds a group", () 
     assert.equal(host.querySelectorAll(".wx-sidebar-bullet").length, 2, "the root leaf and the nested child are both marked");
 });
 
+test("wx-webui-sidebar opens a group without a target of its own from its whole row", () => {
+    const rt = loadSidebar();
+    const host = rt.document.createElement("div");
+    host.appendChild(group(rt, "branch", [link(rt, "child", null)]));
+    rt.document.body.appendChild(host);
+
+    new rt.wx.SidebarCtrl(host);
+
+    const node = host.querySelector(".wx-sidebar-group");
+    node.querySelector(".wx-sidebar-link > a.wx-link").click();
+    assert.ok(node.classList.contains("wx-expanded"), "a click on the label opens the group");
+    assert.equal(node.querySelector(".wx-sidebar-caret").getAttribute("aria-expanded"), "true", "the caret reports the open group");
+});
+
+test("wx-webui-sidebar leaves a group with a target of its own to navigate on a row click", () => {
+    const rt = loadSidebar();
+    const branch = group(rt, "branch", [link(rt, "child", null)]);
+    branch.dataset.uri = "/branch";
+    const host = rt.document.createElement("div");
+    host.appendChild(branch);
+    rt.document.body.appendChild(host);
+
+    new rt.wx.SidebarCtrl(host);
+
+    const node = host.querySelector(".wx-sidebar-group");
+    node.querySelector(".wx-sidebar-link > a.wx-link").click();
+    assert.ok(!node.classList.contains("wx-expanded"), "only the caret opens a group that is a destination itself");
+});
+
 test("wx-webui-sidebar keeps the marker inside the section that owns the tree", () => {
     const rt = loadSidebar();
     const host = rt.document.createElement("div");

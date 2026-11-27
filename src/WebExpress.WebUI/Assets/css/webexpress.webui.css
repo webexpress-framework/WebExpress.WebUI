@@ -2939,6 +2939,12 @@ pre {
     gap: clamp(0.2em, 0.5vw, 0.5em);
 }
 
+/* a menu entry is a row of the menu, not a word in a line: the inline box of .wx-link would
+   leave the strip below the baseline outside the link */
+.wx-link.dropdown-item {
+    display: flex;
+}
+
 /* a rule is drawn as the top border of the element, so how it is drawn is the
    style of that border; the opacity of the theme is deliberately left alone, so
    a dashed rule sits at the same weight as a solid one */

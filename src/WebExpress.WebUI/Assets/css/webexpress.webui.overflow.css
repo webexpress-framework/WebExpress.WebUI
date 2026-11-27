@@ -43,6 +43,20 @@
     background: var(--wx-light);
 }
 
+/* the row lights up as a whole, so it has to answer a click as a whole: the entry moved into
+   it keeps its toolbar size and the row padding and the fallback label lie outside it. A row
+   that hosts a field holds more than one target and keeps the targets it has */
+.wx-overflow-menu-item:not(:has(input, select, textarea)) {
+    position: relative;
+}
+
+.wx-overflow-menu-item:not(:has(input, select, textarea)) > :is(a, button, .btn):first-child::after,
+.wx-overflow-menu-item:not(:has(input, select, textarea)) > .wx-overflow-submenu > button::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+}
+
 .wx-overflow-menu-item button:hover {
     background: unset;
 }

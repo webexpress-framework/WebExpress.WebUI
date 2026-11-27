@@ -584,6 +584,17 @@ webexpress.webui.SidebarCtrl = class extends webexpress.webui.MenuCtrl {
         });
         row.prepend(caret);
 
+        // a group that leads nowhere of its own opens with its whole row, not only with the caret
+        const leadsSomewhere = item.link || Object.values(item.primaryAction || {}).some(Boolean);
+        if (!leadsSomewhere) {
+            row.querySelector(":scope > .wx-link")?.addEventListener("click", (e) => {
+                // like the caret: opening a group is no choice of destination, the flyout stays
+                e.preventDefault();
+                e.stopPropagation();
+                caret.click();
+            });
+        }
+
         const childrenWrap = document.createElement("div");
         childrenWrap.className = "wx-sidebar-children";
         childrenWrap.id = "wx-sidebar-group-" + (++webexpress.webui.SidebarCtrl._nextGroupId);
